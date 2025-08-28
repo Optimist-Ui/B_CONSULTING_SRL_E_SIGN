@@ -1,14 +1,20 @@
-# amplify.yml  ─  Build & deploy the React SPA for E-Sign
 version: 1
 frontend:
   phases:
     preBuild:
       commands:
+        - echo "Current directory:" && pwd
+        - echo "Listing files:" && ls -la
+        - echo "Checking web directory:" && ls -la web/
         - cd web
         - npm ci
     build:
       commands:
         - npm run build
+    postBuild:
+      commands:
+        - echo "Build completed, checking dist directory:"
+        - ls -la dist/
   artifacts:
     baseDirectory: web/dist
     files:
@@ -16,4 +22,3 @@ frontend:
   cache:
     paths:
       - web/node_modules/**/*
-  buildPath: web
