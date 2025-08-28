@@ -1,0 +1,27 @@
+# ---------- Dockerfile.api ----------
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Install dumb-init for graceful signal handling
+RUN apk add --no-cache dumb-init
+
+# Copy dependency descriptors
+COPY api/package*.json ./
+
+# Install production dependencies only
+RUN npm ci --omit=dev
+
+# Copy application source
+COPY api ./
+
+# Create non-root user and own the app
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nodejs -u 1001
+USER nodejs
+
+EXPOSE 3001
+
+# Use dumb-init to handle signals properly
+ENTRYPOINT ["dumb-init", "--"]
+CMD ["node", "server.js"]

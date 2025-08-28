@@ -1,0 +1,2037 @@
+const fs = require("fs").promises;
+const path = require("path");
+
+class PackageService {
+  constructor({
+    Package,
+    Contact,
+    Template,
+    User,
+    OTP,
+    emailService,
+    smsService,
+    pdfModificationService,
+    packageEventEmitter,
+  }) {
+    this.Package = Package;
+    this.Contact = Contact;
+    this.Template = Template;
+    this.User = User;
+    this.OTP = OTP;
+    this.EmailService = emailService;
+    this.SmsService = smsService;
+    this.pdfModifier = pdfModificationService;
+    this.packageEventEmitter = packageEventEmitter;
+  }
+
+  async uploadPackage(userId, { attachment_uuid, fileUrl }) {
+    const existingPackage = await this.Package.findOne({
+      ownerId: userId,
+      attachment_uuid,
+    });
+    if (existingPackage) {
+      throw new Error("A package with this attachment UUID already exists.");
+    }
+    return { attachment_uuid, fileUrl };
+  }
+
+  async createPackage(userId, packageData) {
+    const {
+      attachment_uuid,
+      name,
+      fileUrl,
+      fields,
+      receivers,
+      options,
+      templateId,
+      status,
+    } = packageData;
+
+    if (templateId) {
+      const template = await this.Template.findOne({
+        _id: templateId,
+        ownerId: userId,
+      });
+      if (!template) {
+        throw new Error(
+          "Template not found or you do not have permission to use it."
+        );
+      }
+      if (
+        template.attachment_uuid !== attachment_uuid ||
+        template.fileUrl !== fileUrl
+      ) {
+        throw new Error(
+          "Attachment UUID and file URL must match the selected template."
+        );
+      }
+    }
+
+    const allContactIds = [
+      ...new Set([
+        ...fields.flatMap((field) =>
+          (field.assignedUsers || []).map((au) => au.contactId)
+        ),
+        ...receivers.map((rec) => rec.contactId),
+      ]),
+    ];
+    const contacts = await this.Contact.find({
+      _id: { $in: allContactIds },
+      ownerId: userId,
+    });
+    if (contacts.length !== allContactIds.length) {
+      throw new Error(
+        "One or more contact IDs are invalid or not owned by the user."
+      );
+    }
+
+    const newPackage = await this.Package.create({
+      ownerId: userId,
+      templateId,
+      attachment_uuid,
+      name,
+      fileUrl,
+      fields,
+      receivers,
+      options,
+      status: status || "Draft",
+    });
+
+    // If the package was successfully created with a 'Sent' status, send the notifications.
+    if (newPackage && newPackage.status === "Sent") {
+      const packageCreator = await this.User.findById(userId);
+      const senderName = `${packageCreator.firstName} ${packageCreator.lastName}`;
+
+      // This is a private helper function to avoid code duplication
+      await this._sendInitialNotifications(newPackage, senderName);
+    }
+
+    return newPackage;
+  }
+
+  async getPackages(userId, filters, pagination, sort) {
+    const { name, status } = filters;
+    const { page, limit } = pagination;
+    const { sortKey, sortDirection } = sort;
+
+    // 1. Build the dynamic Mongoose query
+    const query = { ownerId: userId };
+    if (name) {
+      query.name = { $regex: name, $options: "i" }; // Case-insensitive regex search
+    }
+
+    // Map frontend statuses to the backend schema's statuses
+    if (status && status !== "All") {
+      const statusMap = {
+        Pending: "Sent",
+        Finished: "Completed",
+        Draft: "Draft",
+        Rejected: "Rejected",
+        Expired: "Expired",
+        // 'Revoked' status does not exist in your schema, so we ignore it.
+      };
+      if (statusMap[status]) {
+        query.status = statusMap[status];
+      }
+    }
+
+    // Map frontend sort keys to backend schema fields
+    const sortFieldMap = {
+      name: "name",
+      status: "status",
+      addedOn: "createdAt",
+    };
+
+    const sortQuery = {};
+    if (sortKey && sortFieldMap[sortKey]) {
+      sortQuery[sortFieldMap[sortKey]] = sortDirection === "asc" ? 1 : -1;
+    } else {
+      sortQuery.createdAt = -1; // Default sort
+    }
+
+    try {
+      // 2. Fetch documents and total count in parallel for efficiency
+      const [packages, totalDocuments] = await Promise.all([
+        this.Package.find(query)
+          .populate("ownerId", "firstName lastName email phone")
+          .sort(sortQuery)
+          .skip((page - 1) * limit)
+          .limit(limit)
+          .lean(),
+        this.Package.countDocuments(query),
+      ]);
+
+      // 3. Transform the raw DB data into the exact format the frontend expects
+      const transformedDocuments = await this._transformPackagesForFrontend(
+        packages
+      );
+
+      // 4. Return the complete, structured response object
+      return {
+        documents: transformedDocuments,
+        pagination: {
+          currentPage: page,
+          totalPages: Math.ceil(totalDocuments / limit),
+          totalDocuments,
+          limit,
+        },
+      };
+    } catch (error) {
+      console.error("Error during getPackages service execution:", error);
+      throw new Error("Failed to retrieve and process packages.");
+    }
+  }
+  async getPackageById(userId, packageId) {
+    const packageData = await this.Package.findOne({
+      _id: packageId,
+      ownerId: userId,
+    }).populate("templateId", "name attachment_uuid fileUrl");
+    if (!packageData) {
+      throw new Error(
+        "Package not found or you do not have permission to view it."
+      );
+    }
+    return packageData;
+  }
+
+  async updatePackage(userId, packageId, updateData) {
+    // Fetch the package first to see its status before the update.
+    const packageBeforeUpdate = await this.Package.findOne({
+      _id: packageId,
+      ownerId: userId,
+    });
+    if (!packageBeforeUpdate) {
+      throw new Error(
+        "Package not found or you do not have permission to edit it."
+      );
+    }
+
+    const safeUpdateData = { ...updateData };
+    delete safeUpdateData.attachment_uuid;
+    delete safeUpdateData.ownerId;
+    delete safeUpdateData._id;
+    delete safeUpdateData.templateId;
+
+    if (safeUpdateData.fields || safeUpdateData.receivers) {
+      const allContactIds = [
+        ...new Set([
+          ...(safeUpdateData.fields || []).flatMap((field) =>
+            (field.assignedUsers || []).map((au) => au.contactId)
+          ),
+          ...(safeUpdateData.receivers || []).map((rec) => rec.contactId),
+        ]),
+      ];
+      const contacts = await this.Contact.find({
+        _id: { $in: allContactIds },
+        ownerId: userId,
+      });
+      if (contacts.length !== allContactIds.length) {
+        throw new Error(
+          "One or more contact IDs are invalid or not owned by the user."
+        );
+      }
+    }
+
+    const packageData = await this.Package.findOneAndUpdate(
+      { _id: packageId, ownerId: userId },
+      { $set: safeUpdateData },
+      { new: true, runValidators: true }
+    );
+
+    if (!packageData) {
+      throw new Error(
+        "Package not found or you do not have permission to edit it."
+      );
+    }
+
+    if (
+      packageBeforeUpdate.status !== "Sent" &&
+      packageData.status === "Sent"
+    ) {
+      const packageCreator = await this.User.findById(userId);
+      const senderName = `${packageCreator.firstName} ${packageCreator.lastName}`;
+
+      // Call the same helper function
+      await this._sendInitialNotifications(packageData, senderName);
+    }
+
+    return packageData;
+  }
+
+  async deletePackage(userId, packageId) {
+    const packageData = await this.Package.findOne({
+      _id: packageId,
+      ownerId: userId,
+    });
+    if (!packageData) {
+      throw new Error(
+        "Package not found or you do not have permission to delete it."
+      );
+    }
+
+    if (!packageData.templateId) {
+      const cleanRelativePath = packageData.fileUrl
+        .replace("/Uploads/", "/uploads/")
+        .replace("/public/uploads/", "/uploads/")
+        .replace(/^\/uploads\//, "uploads/");
+
+      const filePath = path.join(__dirname, "../..", cleanRelativePath);
+      try {
+        await fs.unlink(filePath);
+      } catch (err) {
+        console.error("Failed to delete file:", err);
+      }
+    }
+
+    await this.Package.deleteOne({ _id: packageId, ownerId: userId });
+    return { message: "Package deleted successfully.", packageId };
+  }
+
+  async getPackageForParticipant(packageId, participantId) {
+    const pkg = await this.Package.findById(packageId);
+
+    if (!pkg) {
+      throw new Error("Package not found.");
+    }
+
+    if (
+      pkg.status !== "Sent" &&
+      pkg.status !== "Completed" &&
+      pkg.status !== "Rejected" &&
+      pkg.status !== "Expired"
+    ) {
+      throw new Error("This package is not currently active or available.");
+    }
+
+    // --- NEW: Step 1 - Efficiently Fetch All Contact Data ---
+    // Get all unique participant Contact IDs from the entire package
+    const allParticipantEntries = [
+      ...pkg.fields.flatMap((f) =>
+        f.assignedUsers.map((user) => user.toObject())
+      ),
+      ...pkg.receivers.map((rec) => ({ ...rec.toObject(), role: "Receiver" })), // Ensure receivers are also plain objects
+    ];
+
+    const allContactIds = [
+      ...new Set(allParticipantEntries.map((p) => p.contactId.toString())),
+    ];
+
+    // Fetch the corresponding contacts from the database in one query, selecting only the phone
+    const contacts = await this.Contact.find({
+      _id: { $in: allContactIds },
+    }).select("_id phone");
+
+    // Create a lookup map for fast access: { 'contactId': 'phone_number' }
+    const contactPhoneMap = new Map();
+    contacts.forEach((contact) => {
+      contactPhoneMap.set(contact._id.toString(), contact.phone);
+    });
+    // --- END of NEW SECTION ---
+
+    // Step 2. Find the current participant's specific assignment from the pre-computed entries
+    const initialParticipantAssignment = allParticipantEntries.find(
+      (p) => p.id === participantId
+    );
+
+    if (!initialParticipantAssignment) {
+      throw new Error("You are not a valid participant for this package.");
+    }
+    const participantContactId =
+      initialParticipantAssignment.contactId.toString();
+
+    // Step 3. Fetch ancillary data
+    const packageOwner = await this.User.findById(pkg.ownerId).select(
+      "firstName lastName email"
+    );
+    const packageForParticipant = pkg.toObject();
+
+    // Step 4. Process fields to add necessary frontend data
+    packageForParticipant.fields = pkg.fields.map((field) => {
+      const fieldObj = field.toObject();
+
+      const isAssigned = (fieldObj.assignedUsers || []).some(
+        (user) => user.contactId.toString() === participantContactId
+      );
+
+      if (fieldObj.type === "signature") {
+        const signer = fieldObj.assignedUsers.find((u) => u.signed === true);
+        if (signer) {
+          const signedMethod = signer.signedMethod || "Email OTP";
+
+          // Base value object
+          const signatureValue = {
+            signedBy: signer.contactName,
+            date: signer.signedAt.toISOString(),
+            method: signedMethod,
+          };
+
+          // Conditionally add email or phone based on the method used
+          if (signedMethod === "SMS OTP") {
+            signatureValue.phone =
+              contactPhoneMap.get(signer.contactId.toString()) ||
+              "Phone not found";
+          } else {
+            signatureValue.email = signer.contactEmail;
+          }
+
+          fieldObj.value = signatureValue;
+        }
+      }
+
+      if (!isAssigned) {
+        delete fieldObj.value; // Security: User can't see values for fields they aren't assigned to
+      }
+
+      // --- MODIFICATION: Inject phone number into the assignedUsers array ---
+      const processedAssignedUsers = (fieldObj.assignedUsers || []).map(
+        (user) => ({
+          ...user,
+          contactPhone: contactPhoneMap.get(user.contactId.toString()) || null,
+        })
+      );
+
+      return {
+        ...fieldObj,
+        isAssignedToCurrentUser: isAssigned,
+        // Security: Only return detailed assignment info if the current user is assigned to this field
+        assignedUsers: isAssigned ? processedAssignedUsers : [],
+      };
+    });
+
+    // Step 5. Build the comprehensive list of all participants for the UI
+    const participantsMap = new Map();
+
+    for (const assignment of allParticipantEntries) {
+      const contactId = assignment.contactId.toString();
+      if (!participantsMap.has(contactId)) {
+        // --- MODIFICATION: Inject phone number when creating the participant entry ---
+        participantsMap.set(contactId, {
+          contactId: contactId,
+          contactName: assignment.contactName,
+          contactEmail: assignment.contactEmail,
+          contactPhone: contactPhoneMap.get(contactId) || null,
+          roles: new Set(),
+        });
+      }
+      if (assignment.role) {
+        participantsMap.get(contactId).roles.add(assignment.role);
+      }
+    }
+
+    const allParticipantsList = [];
+    for (const participant of participantsMap.values()) {
+      const theirRequiredFields = pkg.fields.filter(
+        (field) =>
+          field.required &&
+          field.assignedUsers.some(
+            (user) => user.contactId.toString() === participant.contactId
+          )
+      );
+
+      let status = "Pending";
+      if (
+        participant.roles.has("Receiver") &&
+        theirRequiredFields.length === 0
+      ) {
+        status = "Not Applicable";
+      } else if (theirRequiredFields.length === 0) {
+        status = "Completed";
+      } else {
+        const areAllTasksDone = theirRequiredFields.every((field) => {
+          if (field.type === "signature") {
+            const userAssignment = field.assignedUsers.find(
+              (u) => u.contactId.toString() === participant.contactId
+            );
+            return userAssignment && userAssignment.signed;
+          }
+          return (
+            field.value !== undefined &&
+            field.value !== null &&
+            field.value !== "" &&
+            field.value !== false
+          );
+        });
+        status = areAllTasksDone ? "Completed" : "Pending";
+      }
+
+      allParticipantsList.push({
+        ...participant,
+        roles: Array.from(participant.roles),
+        status: status,
+      });
+    }
+
+    // Step 6. Assemble and return the final payload
+    // --- MODIFICATION: Inject phone into `currentUser` object ---
+    packageForParticipant.currentUser = {
+      ...initialParticipantAssignment,
+      contactPhone: contactPhoneMap.get(participantContactId) || null,
+    };
+
+    packageForParticipant.owner = packageOwner;
+    packageForParticipant.allParticipants = allParticipantsList;
+    delete packageForParticipant.receivers;
+
+    return packageForParticipant;
+  }
+
+  async sendOTP(packageId, participantId, fieldId, email) {
+    const pkg = await this.Package.findById(packageId);
+    if (!pkg || pkg.status !== "Sent") {
+      throw new Error("Package not found or not active.");
+    }
+    this.checkPackageExpiry(pkg);
+
+    const field = pkg.fields.find(
+      (f) => f.id === fieldId && f.type === "signature"
+    );
+    if (!field) {
+      throw new Error("Signature field not found.");
+    }
+
+    const assignedUser = field.assignedUsers.find(
+      (au) => au.id === participantId
+    );
+    if (
+      !assignedUser ||
+      assignedUser.role !== "Signer" ||
+      assignedUser.signatureMethod !== "Email OTP" ||
+      assignedUser.signed
+    ) {
+      throw new Error("Invalid participant or signature already completed.");
+    }
+
+    if (assignedUser.contactEmail !== email) {
+      throw new Error("Email does not match assigned participant.");
+    }
+
+    // Generate 6-digit OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiresAt = new Date(Date.now() + 60 * 1000); // 60 seconds
+
+    // Overwrite if exists
+    await this.OTP.deleteMany({ packageId, fieldId, participantId });
+    await this.OTP.create({
+      packageId,
+      fieldId,
+      participantId,
+      otp,
+      method: "Email OTP",
+      expiresAt,
+    });
+
+    // Send email using provided method
+    await this.EmailService.sendSignatureOtp(
+      assignedUser.contactEmail,
+      assignedUser.contactName,
+      pkg.name,
+      otp
+    );
+
+    return { message: "OTP sent to your email." };
+  }
+
+  async verifyOTP(packageId, participantId, fieldId, otp, ip) {
+    const otpDoc = await this.OTP.findOne({
+      packageId,
+      fieldId,
+      participantId,
+    });
+
+    if (!otpDoc || otpDoc.expiresAt < new Date()) {
+      throw new Error("Invalid or expired OTP.");
+    }
+    if (otpDoc.attempts >= 4) {
+      await this.OTP.deleteOne({ _id: otpDoc._id });
+      throw new Error("Maximum OTP attempts exceeded.");
+    }
+    if (otpDoc.otp !== otp) {
+      otpDoc.attempts += 1;
+      await otpDoc.save();
+      throw new Error("Incorrect OTP.");
+    }
+
+    // --- All checks passed ---
+    await this.OTP.deleteOne({ _id: otpDoc._id });
+
+    // Use .populate() to get owner email for notifications later
+    const pkg = await this.Package.findById(packageId).populate(
+      "ownerId",
+      "email"
+    );
+    if (!pkg) {
+      throw new Error("Package not found after OTP verification.");
+    }
+    this.checkPackageExpiry(pkg);
+
+    const field = pkg.fields.find((f) => f.id === fieldId);
+    const assignedUser = field.assignedUsers.find(
+      (au) => au.id === participantId
+    );
+
+    const signDate = new Date();
+
+    // 1. Update the audit trail properties
+    assignedUser.signed = true;
+    assignedUser.signedAt = signDate;
+    assignedUser.signedMethod = "Email OTP";
+    assignedUser.signedIP = ip;
+
+    // --- THIS IS THE FIX ---
+    // 2. Store the signature details in the `value` property for the UI
+    field.value = {
+      signedBy: assignedUser.contactName,
+      email: assignedUser.contactEmail,
+      date: signDate.toISOString(),
+      method: "Email OTP",
+    };
+    // ----------------------
+
+    // Check if the whole package is now completed
+    if (this.isPackageCompleted(pkg)) {
+      pkg.status = "Completed";
+      const packageCreator = await this.User.findById(pkg.ownerId);
+      const initiatorName = `${packageCreator.firstName} ${packageCreator.lastName}`;
+      await this._sendCompletionNotifications(pkg, initiatorName);
+    }
+
+    // Save all changes to the package
+    const updatedPackage = await pkg.save();
+
+    // Emit real-time update to initiator
+    await this.emitPackageUpdate(pkg);
+
+    // --- THIS IS THE FIX ---
+    // 3. Return the entire updated package object in the correct structure
+    return {
+      message: "Signature completed.",
+      package: updatedPackage, // The Redux thunk is expecting this structure
+    };
+    // ----------------------
+  }
+
+  // SMS OTP METHODS
+  async sendSmsOTP(packageId, participantId, fieldId, phone) {
+    const pkg = await this.Package.findById(packageId);
+    if (!pkg || pkg.status !== "Sent") {
+      throw new Error("Package not found or not active.");
+    }
+    this.checkPackageExpiry(pkg);
+
+    const field = pkg.fields.find(
+      (f) => f.id === fieldId && f.type === "signature"
+    );
+    if (!field) {
+      throw new Error("Signature field not found.");
+    }
+
+    const assignedUser = field.assignedUsers.find(
+      (au) => au.id === participantId
+    );
+    if (
+      !assignedUser ||
+      assignedUser.role !== "Signer" ||
+      assignedUser.signatureMethod !== "SMS OTP" ||
+      assignedUser.signed
+    ) {
+      throw new Error(
+        "Invalid participant, wrong signature method, or signature already completed."
+      );
+    }
+
+    // Get and validate contact phone number
+    const contact = await this.Contact.findById(assignedUser.contactId);
+    if (!contact || !contact.phone) {
+      throw new Error("Contact phone number not found.");
+    }
+
+    // Normalize phone numbers for comparison
+    const normalizePhone = (phoneNum) => phoneNum.replace(/[^\d+]/g, "");
+    if (normalizePhone(contact.phone) !== normalizePhone(phone)) {
+      throw new Error("Phone number does not match assigned participant.");
+    }
+
+    // Generate 6-digit OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiresAt = new Date(Date.now() + 60 * 1000); // 60 seconds
+
+    // Store OTP with method identifier
+    await this.OTP.deleteMany({ packageId, fieldId, participantId });
+    await this.OTP.create({
+      packageId,
+      fieldId,
+      participantId,
+      otp,
+      method: "SMS OTP",
+      expiresAt,
+    });
+
+    // Send SMS OTP
+    await this.SmsService.sendSignatureOtp(
+      contact.phone,
+      assignedUser.contactName,
+      pkg.name,
+      otp
+    );
+
+    return {
+      message: "OTP sent to your phone.",
+      method: "SMS OTP",
+      expiresIn: 60,
+      phoneNumber: this._maskPhoneNumber(contact.phone),
+    };
+  }
+
+  async verifySmsOTP(packageId, participantId, fieldId, otp, ip) {
+    const otpDoc = await this.OTP.findOne({
+      packageId,
+      fieldId,
+      participantId,
+      method: "SMS OTP",
+    });
+
+    if (!otpDoc || otpDoc.expiresAt < new Date()) {
+      throw new Error("Invalid or expired SMS OTP.");
+    }
+    if (otpDoc.attempts >= 4) {
+      await this.OTP.deleteOne({ _id: otpDoc._id });
+      throw new Error("Maximum SMS OTP attempts exceeded.");
+    }
+    if (otpDoc.otp !== otp) {
+      otpDoc.attempts += 1;
+      await otpDoc.save();
+      throw new Error("Incorrect SMS OTP.");
+    }
+
+    return await this._completeSignature(
+      packageId,
+      participantId,
+      fieldId,
+      ip,
+      "SMS OTP",
+      otpDoc._id
+    );
+  }
+
+  async submitFields(packageId, participantId, fieldValues, ip) {
+    const pkg = await this.Package.findById(packageId);
+    if (!pkg || pkg.status !== "Sent") {
+      throw new Error("This package is not currently active for submissions.");
+    }
+    this.checkPackageExpiry(pkg);
+
+    // Find the participant's stable contactId based on the unique assignment ID (participantId)
+    const participantContactId = pkg.fields
+      .flatMap((f) => f.assignedUsers)
+      .find((u) => u.id === participantId)
+      ?.contactId.toString();
+
+    if (!participantContactId) {
+      // This is a critical security check
+      throw new Error("You are not a valid participant for this package.");
+    }
+
+    const submissionDate = new Date();
+
+    // Iterate over the field values submitted from the frontend
+    for (const fieldId in fieldValues) {
+      const field = pkg.fields.find((f) => f.id === fieldId);
+
+      // Security Check: Only update the field if it actually exists and is assigned to this user
+      if (
+        field &&
+        field.assignedUsers.some(
+          (u) => u.contactId.toString() === participantContactId
+        )
+      ) {
+        // --- THIS IS THE CRITICAL FIX ---
+        // Make sure we're actually setting the value on the field
+        field.value = fieldValues[fieldId];
+        // --- END OF FIX ---
+
+        // For "Approver" checkboxes, we also set the audit trail, just like for signatures
+        const approverAssignment = field.assignedUsers.find(
+          (u) =>
+            u.contactId.toString() === participantContactId &&
+            u.role === "Approver"
+        );
+        if (field.type === "checkbox" && approverAssignment) {
+          approverAssignment.signed = true;
+          approverAssignment.signedAt = submissionDate;
+          approverAssignment.signedMethod = "Form Submission";
+          approverAssignment.signedIP = ip;
+        }
+      } else {
+        console.log(`Field ${fieldId} not found or not assigned to user`);
+      }
+    }
+
+    // After updating values, check if the whole document is now complete
+    if (this.isPackageCompleted(pkg)) {
+      pkg.status = "Completed";
+      const packageCreator = await this.User.findById(pkg.ownerId);
+      const initiatorName = `${packageCreator.firstName} ${packageCreator.lastName}`;
+      await this._sendCompletionNotifications(pkg, initiatorName);
+    }
+
+    // Save the package with the updated field values
+    await pkg.save();
+
+    // Emit real-time update to initiator
+    await this.emitPackageUpdate(pkg);
+
+    // Get the fully processed package to send back (this should include the saved values)
+    const updatedPackageForParticipant = await this.getPackageForParticipant(
+      packageId,
+      participantId
+    );
+
+    return {
+      message: "Your changes have been saved.",
+      package: updatedPackageForParticipant,
+    };
+  }
+
+  async rejectPackage(packageId, participantId, reason, ip) {
+    const pkg = await this.Package.findById(packageId).populate(
+      "ownerId",
+      "email firstName lastName"
+    );
+    if (!pkg) {
+      throw new Error("Package not found.");
+    }
+    this.checkPackageExpiry(pkg);
+    if (pkg.status !== "Sent") {
+      throw new Error("This package is not currently active for rejection.");
+    }
+
+    const allAssignments = pkg.fields.flatMap((f) => f.assignedUsers || []);
+    const participant = allAssignments.find((p) => p.id === participantId);
+
+    if (!participant) {
+      throw new Error("You are not a valid participant for this package.");
+    }
+
+    const rejectionDate = new Date();
+    pkg.status = "Rejected";
+    pkg.rejectionDetails = {
+      rejectedBy: {
+        contactId: participant.contactId,
+        contactName: participant.contactName,
+        contactEmail: participant.contactEmail,
+      },
+      reason: reason,
+      rejectedAt: rejectionDate,
+      rejectedIP: ip,
+    };
+
+    const updatedPackage = await pkg.save();
+
+    // Emit real-time update to initiator
+    await this.emitPackageUpdate(pkg);
+
+    const packageCreator = await this.User.findById(pkg.ownerId);
+    const initiatorName = `${packageCreator.firstName} ${packageCreator.lastName}`;
+    await this._sendRejectionNotifications(
+      pkg,
+      initiatorName,
+      participant.contactName,
+      reason
+    );
+
+    const updatedPackageForParticipant = await this.getPackageForParticipant(
+      packageId,
+      participantId
+    );
+
+    return {
+      message: "Package rejected successfully.",
+      package: updatedPackageForParticipant,
+    };
+  }
+
+  /**
+   * Register a new contact for reassignment purposes
+   * This contact will belong to the package owner and can be used for reassignment
+   */
+  async registerReassignmentContact(packageId, participantId, contactData, ip) {
+    // 1. Find the package and validate reassignment is allowed
+    const pkg = await this.Package.findById(packageId);
+    if (!pkg) {
+      throw new Error("Package not found.");
+    }
+    if (!pkg.options.allowReassign) {
+      throw new Error("Reassignment is not allowed for this package.");
+    }
+    if (pkg.status !== "Sent") {
+      throw new Error("Reassignment is only available for sent packages.");
+    }
+
+    // 2. Validate the current participant has permission to reassign
+    const participant = this._findParticipant(pkg, participantId);
+    if (!participant) {
+      throw new Error("You are not a valid participant for this package.");
+    }
+
+    // 3. Create the new contact under the package owner's account
+    const { firstName, lastName, email, title, phone } = contactData;
+    const lowerCaseEmail = email.toLowerCase();
+
+    // 4. PREVENT CONFLICT: Check if the email belongs to ANY registered user in the system.
+    // This is the critical check to prevent creating a contact that conflicts with a user account.
+    const existingUser = await this.User.findOne({ email: lowerCaseEmail });
+    if (existingUser) {
+      throw new Error(
+        "This email address belongs to a registered user and cannot be used to create a contact."
+      );
+    }
+
+    // Check if contact already exists for this owner
+    const existingContact = await this.Contact.findOne({
+      ownerId: pkg.ownerId,
+      email: email.toLowerCase(),
+    });
+
+    if (existingContact) {
+      throw new Error("A contact with this email already exists.");
+    }
+
+    // Create new contact
+    const newContact = await this.Contact.create({
+      ownerId: pkg.ownerId,
+      firstName,
+      lastName,
+      email: email.toLowerCase(),
+      title,
+      phone,
+    });
+
+    return {
+      contact: newContact,
+      message: "Contact registered successfully for reassignment.",
+    };
+  }
+
+  /**
+   * List all available contacts for reassignment
+   * Returns contacts owned by the package owner, excluding current participants
+   */
+  async listReassignmentContacts(packageId, participantId) {
+    // 1. Find the package and validate
+    const pkg = await this.Package.findById(packageId);
+    if (!pkg) {
+      throw new Error("Package not found.");
+    }
+    if (!pkg.options.allowReassign) {
+      throw new Error("Reassignment is not allowed for this package.");
+    }
+
+    // 2. Find the current participant
+    const participant = this._findParticipant(pkg, participantId);
+    if (!participant) {
+      throw new Error("You are not a valid participant for this package.");
+    }
+
+    // 3. Get all contacts owned by the package owner
+    const contacts = await this.Contact.find({
+      ownerId: pkg.ownerId,
+    }).select("firstName lastName email title phone");
+
+    // 4. Exclude contacts that are already participants in this package
+    const allParticipantContactIds = new Set([
+      ...pkg.fields.flatMap((f) =>
+        f.assignedUsers.map((u) => u.contactId.toString())
+      ),
+      ...pkg.receivers.map((r) => r.contactId.toString()),
+    ]);
+
+    const availableContacts = contacts.filter(
+      (contact) => !allParticipantContactIds.has(contact._id.toString())
+    );
+
+    return availableContacts;
+  }
+
+  /**
+   * Perform the actual reassignment from one participant to another
+   */
+  async performReassignment(
+    packageId,
+    participantId,
+    newContactId,
+    reason,
+    ip
+  ) {
+    // 1. Find and validate the package
+    const pkg = await this.Package.findById(packageId);
+    if (!pkg) {
+      throw new Error("Package not found.");
+    }
+    this.checkPackageExpiry(pkg);
+    if (!pkg.options.allowReassign) {
+      throw new Error("Reassignment is not allowed for this package.");
+    }
+    if (pkg.status !== "Sent") {
+      throw new Error("Reassignment is only available for sent packages.");
+    }
+
+    // 2. Find the current participant
+    const currentParticipant = this._findParticipant(pkg, participantId);
+    if (!currentParticipant) {
+      throw new Error("You are not a valid participant for this package.");
+    }
+
+    // 3. Validate the new contact belongs to the package owner
+    const newContact = await this.Contact.findOne({
+      _id: newContactId,
+      ownerId: pkg.ownerId,
+    });
+    if (!newContact) {
+      throw new Error("New contact not found or invalid.");
+    }
+
+    // 4. Check if new contact is already a participant
+    const allParticipantContactIds = new Set([
+      ...pkg.fields.flatMap((f) =>
+        f.assignedUsers.map((u) => u.contactId.toString())
+      ),
+      ...pkg.receivers.map((r) => r.contactId.toString()),
+    ]);
+
+    if (allParticipantContactIds.has(newContactId)) {
+      throw new Error(
+        "The selected contact is already a participant in this package."
+      );
+    }
+
+    // 5. Check for signed/completed fields
+    const participantFields = pkg.fields.filter((field) =>
+      field.assignedUsers.some((user) => user.id === participantId)
+    );
+
+    const completedFields = participantFields.filter((field) =>
+      field.assignedUsers.some(
+        (user) => user.id === participantId && user.signed
+      )
+    );
+
+    if (completedFields.length > 0) {
+      const completedFieldNames = completedFields
+        .map((f) => f.label)
+        .join(", ");
+      throw new Error(
+        `Cannot reassign because these fields have already been completed: ${completedFieldNames}`
+      );
+    }
+
+    // 6. Generate new participant ID for the new contact
+    const { v4: uuidv4 } = require("uuid");
+    const newParticipantId = uuidv4();
+
+    // 7. Perform the reassignment for fields
+    let fieldsReassigned = 0;
+    for (const field of pkg.fields) {
+      const userIndex = field.assignedUsers.findIndex(
+        (u) => u.id === participantId
+      );
+
+      if (userIndex !== -1) {
+        const originalUser = field.assignedUsers[userIndex];
+
+        // Create new assignment with same role and properties
+        const newAssignment = {
+          id: newParticipantId,
+          contactId: newContact._id,
+          contactName: `${newContact.firstName} ${newContact.lastName}`,
+          contactEmail: newContact.email,
+          role: originalUser.role,
+          signatureMethod: originalUser.signatureMethod,
+          signed: false,
+        };
+
+        // Replace the old assignment
+        field.assignedUsers[userIndex] = newAssignment;
+        fieldsReassigned++;
+      }
+    }
+
+    // 8. Update receivers if current participant is a receiver
+    let receiverReassigned = false;
+    const receiverIndex = pkg.receivers.findIndex(
+      (r) => r.id === participantId
+    );
+    if (receiverIndex !== -1) {
+      pkg.receivers[receiverIndex] = {
+        id: newParticipantId,
+        contactId: newContact._id,
+        contactName: `${newContact.firstName} ${newContact.lastName}`,
+        contactEmail: newContact.email,
+      };
+      receiverReassigned = true;
+    }
+
+    // 9. Add to reassignment history
+    pkg.reassignmentHistory.push({
+      reassignedFrom: {
+        contactId: currentParticipant.contactId,
+        contactName: currentParticipant.contactName,
+        contactEmail: currentParticipant.contactEmail,
+      },
+      reassignedTo: {
+        contactId: newContact._id,
+        contactName: `${newContact.firstName} ${newContact.lastName}`,
+        contactEmail: newContact.email,
+      },
+      reassignedBy: {
+        participantId: participantId,
+        contactName: currentParticipant.contactName,
+        contactEmail: currentParticipant.contactEmail,
+      },
+      reason: reason || "No reason provided",
+      reassignedAt: new Date(),
+      reassignedIP: ip,
+    });
+
+    // 10. Save the package
+    await pkg.save();
+
+    // Emit real-time update to initiator
+    await this.emitPackageUpdate(pkg);
+
+    // 11. Send notifications
+    await this._sendReassignmentNotifications(
+      pkg,
+      currentParticipant,
+      newContact,
+      newParticipantId,
+      reason
+    );
+
+    return {
+      message: "Reassignment completed successfully.",
+      newParticipantId: newParticipantId,
+      fieldsReassigned: fieldsReassigned,
+      receiverReassigned: receiverReassigned,
+    };
+  }
+
+  /**
+   * Get reassignment history for a package (for owner/admin view)
+   */
+  async getReassignmentHistory(userId, packageId) {
+    const pkg = await this.Package.findOne({
+      _id: packageId,
+      ownerId: userId,
+    }).select("reassignmentHistory name");
+
+    if (!pkg) {
+      throw new Error(
+        "Package not found or you do not have permission to view it."
+      );
+    }
+
+    return {
+      packageName: pkg.name,
+      reassignmentHistory: pkg.reassignmentHistory.map((history) => ({
+        id: history._id,
+        reassignedFrom: history.reassignedFrom,
+        reassignedTo: history.reassignedTo,
+        reassignedBy: history.reassignedBy,
+        reason: history.reason,
+        reassignedAt: history.reassignedAt,
+      })),
+    };
+  }
+
+  /**
+   * Enhanced getPackageForParticipant that includes reassignment info
+   */
+  async getPackageForParticipantWithReassignmentInfo(packageId, participantId) {
+    const packageData = await this.getPackageForParticipant(
+      packageId,
+      participantId
+    );
+
+    // Add reassignment capability check
+    const reassignmentCheck = this.canParticipantReassign(
+      packageData,
+      participantId
+    );
+    packageData.reassignmentInfo = reassignmentCheck;
+
+    // Add reassignment history related to this participant
+    const participantReassignments =
+      packageData.reassignmentHistory?.filter(
+        (history) =>
+          history.reassignedBy.participantId === participantId ||
+          history.reassignedFrom.contactId.toString() ===
+            packageData.currentUser.contactId.toString() ||
+          history.reassignedTo.contactId.toString() ===
+            packageData.currentUser.contactId.toString()
+      ) || [];
+
+    packageData.participantReassignmentHistory = participantReassignments;
+
+    return packageData;
+  }
+
+  async downloadPackageForParticipant(packageId, participantId) {
+    // 1. Fetch the package and its related data, just like in getPackageForParticipant
+    const pkg = await this.Package.findById(packageId).populate(
+      "ownerId",
+      "firstName lastName"
+    );
+    if (!pkg) {
+      throw new Error("Package not found.");
+    }
+
+    const allAssignments = [
+      ...pkg.fields.flatMap((f) => f.assignedUsers || []),
+      ...pkg.receivers,
+    ];
+    const participant = allAssignments.find((p) => p.id === participantId);
+    if (!participant) {
+      // Allow initiator to download their own packages. A full-fledged admin/initiator download
+      // would have different logic, but this is a simple permission check.
+      const isOwner = pkg.ownerId._id.toString() === participantId; // Special case for owner download
+      if (!isOwner)
+        throw new Error("You are not a valid participant for this package.");
+    }
+
+    // 2. Permission check based on status
+    const isDocumentFinalized =
+      pkg.status === "Completed" || pkg.status === "Rejected";
+    if (!isDocumentFinalized && !pkg.options.allowDownloadUnsigned) {
+      throw new Error(
+        "This document cannot be downloaded until it is completed or rejected."
+      );
+    }
+
+    // 3. Delegate to the PDF Modification service to generate the file
+    const pdfBuffer = await this.pdfModifier.generatePdf(pkg, participantId);
+
+    // 4. Prepare the file name
+    const sanitizedName = pkg.name.replace(/[^a-z0-9]/gi, "_").toLowerCase();
+    const fileName = `${sanitizedName}_${pkg.status.toLowerCase()}.pdf`;
+
+    return { pdfBuffer, fileName };
+  }
+
+  async revokePackage(packageId, userId, reason, ip) {
+    const pkg = await this.Package.findOne({
+      _id: packageId,
+      ownerId: userId, // CRITICAL: Only the owner can revoke.
+    }).populate("ownerId", "firstName lastName email");
+
+    if (!pkg) {
+      throw new Error(
+        "Package not found or you do not have permission to revoke it."
+      );
+    }
+
+    // You can't revoke a document that is already finished or in a terminal state
+    const terminalStates = ["Completed", "Revoked", "Expired", "Rejected"];
+    if (terminalStates.includes(pkg.status)) {
+      throw new Error(
+        `Cannot revoke this package as it is already in a '${pkg.status}' state.`
+      );
+    }
+
+    // 1. Update package status and audit trail
+    pkg.status = "Revoked";
+    pkg.revocationDetails = {
+      revokedBy: {
+        userId: pkg.ownerId._id,
+        name: `${pkg.ownerId.firstName} ${pkg.ownerId.lastName}`,
+        email: pkg.ownerId.email,
+      },
+      reason: reason, // This will be optional
+      revokedAt: new Date(),
+      revokedIP: ip,
+    };
+
+    const updatedPackage = await pkg.save();
+
+    // 2. Send email notifications to everyone
+    await this._sendRevocationNotifications(updatedPackage);
+
+    // 3. Emit real-time update to the initiator's dashboard
+    await this.emitPackageUpdate(updatedPackage);
+
+    // Return the updated document data
+    return updatedPackage;
+  }
+
+  /**
+   * Allows the package owner (initiator) to send a manual reminder email
+   * to all participants who have not yet completed their required actions.
+   */
+  async sendManualReminder(packageId, userId) {
+    const pkg = await this.Package.findOne({
+      _id: packageId,
+      ownerId: userId, // CRITICAL: Only the owner can send reminders.
+    }).populate("ownerId", "firstName lastName");
+
+    if (!pkg) {
+      throw new Error(
+        "Package not found or you do not have permission to send reminders."
+      );
+    }
+
+    // Can only send reminders for active packages
+    if (pkg.status !== "Sent") {
+      throw new Error(
+        `Reminders can only be sent for packages with 'Sent' status. Current status: '${pkg.status}'.`
+      );
+    }
+
+    const initiatorName = `${pkg.ownerId.firstName} ${pkg.ownerId.lastName}`;
+    const participantsToRemind = [];
+
+    // Find all participants with fields assigned to them
+    const allParticipants = new Map();
+    (pkg.fields || []).forEach((field) => {
+      (field.assignedUsers || []).forEach((user) => {
+        if (!allParticipants.has(user.contactId.toString())) {
+          allParticipants.set(user.contactId.toString(), {
+            ...user.toObject(),
+            isComplete: true, // Assume complete until a pending task is found
+          });
+        }
+      });
+    });
+
+    // Determine which participants are NOT yet complete
+    allParticipants.forEach((participant) => {
+      const theirRequiredFields = pkg.fields.filter(
+        (field) =>
+          field.required &&
+          field.assignedUsers.some(
+            (u) => u.contactId.toString() === participant.contactId.toString()
+          )
+      );
+
+      // If a participant has no required fields, they are considered complete.
+      if (theirRequiredFields.length === 0) return;
+
+      const areAllTasksDone = theirRequiredFields.every((field) => {
+        const assignment = field.assignedUsers.find(
+          (u) => u.contactId.toString() === participant.contactId.toString()
+        );
+        return assignment && assignment.signed; // `signed` is our 'task complete' flag
+      });
+
+      if (!areAllTasksDone) {
+        participant.isComplete = false;
+      }
+    });
+
+    // Filter down to only those who are incomplete
+    const pendingParticipants = Array.from(allParticipants.values()).filter(
+      (p) => !p.isComplete
+    );
+
+    if (pendingParticipants.length === 0) {
+      throw new Error(
+        "All participants have already completed their actions. No reminders sent."
+      );
+    }
+
+    // Send the email to each pending participant
+    for (const participant of pendingParticipants) {
+      const actionLink = `${process.env.CLIENT_URL}/package/${pkg._id}/participant/${participant.id}`;
+
+      await this.EmailService.sendManualReminderNotification(
+        participant.contactEmail,
+        participant.contactName,
+        initiatorName,
+        pkg.name,
+        actionLink
+      );
+    }
+
+    return {
+      success: true,
+      message: `Reminders sent to ${pendingParticipants.length} pending participant(s).`,
+    };
+  }
+
+  //Helpers
+
+  async _completeSignature(
+    packageId,
+    participantId,
+    fieldId,
+    ip,
+    method,
+    otpDocId
+  ) {
+    // Clean up OTP
+    await this.OTP.deleteOne({ _id: otpDocId });
+
+    // Get package with owner info
+    const pkg = await this.Package.findById(packageId).populate(
+      "ownerId",
+      "email"
+    );
+    if (!pkg) {
+      throw new Error("Package not found after OTP verification.");
+    }
+    this.checkPackageExpiry(pkg);
+
+    const field = pkg.fields.find((f) => f.id === fieldId);
+    const assignedUser = field.assignedUsers.find(
+      (au) => au.id === participantId
+    );
+
+    const signDate = new Date();
+
+    // Update audit trail properties
+    assignedUser.signed = true;
+    assignedUser.signedAt = signDate;
+    assignedUser.signedMethod = method;
+    assignedUser.signedIP = ip;
+
+    // Store signature details in field value for UI
+    field.value = {
+      signedBy: assignedUser.contactName,
+      email: assignedUser.contactEmail,
+      date: signDate.toISOString(),
+      method: method,
+      ip: ip, // Additional audit info
+    };
+
+    // Check if package is completed
+    if (this.isPackageCompleted(pkg)) {
+      pkg.status = "Completed";
+      const packageCreator = await this.User.findById(pkg.ownerId);
+      const initiatorName = `${packageCreator.firstName} ${packageCreator.lastName}`;
+      await this._sendCompletionNotifications(pkg, initiatorName);
+    }
+
+    // Save changes
+    const updatedPackage = await pkg.save();
+
+    // Emit real-time update
+    await this.emitPackageUpdate(pkg);
+
+    return {
+      message: `Signature completed via ${method}.`,
+      package: updatedPackage,
+      signatureDetails: {
+        method: method,
+        signedAt: signDate.toISOString(),
+        signedBy: assignedUser.contactName,
+      },
+    };
+  }
+
+  _maskPhoneNumber(phoneNumber) {
+    if (!phoneNumber || phoneNumber.length < 4) return phoneNumber;
+    const visible = phoneNumber.slice(-4);
+    const masked = "*".repeat(phoneNumber.length - 4);
+    return masked + visible;
+  }
+
+  /**
+   * Check if all required fields in the package are completed
+   * This method validates ALL field types, not just signatures
+   */
+  isPackageCompleted(pkg) {
+    return pkg.fields.every((field) => {
+      // Skip non-required fields
+      if (!field.required) {
+        return true;
+      }
+
+      // Handle signature fields - check if all assigned users have signed
+      if (field.type === "signature") {
+        return field.assignedUsers.every((au) => au.signed === true);
+      }
+
+      // Handle checkbox fields with Approver role - check if signed
+      if (field.type === "checkbox") {
+        const approvers = field.assignedUsers.filter(
+          (au) => au.role === "Approver"
+        );
+        if (approvers.length > 0) {
+          // If there are approvers, they must have signed
+          return approvers.every((au) => au.signed === true);
+        }
+        // If no approvers, just check if checkbox has a valid value
+        return field.value === true;
+      }
+
+      // Handle all other field types (text, textarea, date, dropdown, radio)
+      // These fields are complete if they have a valid, non-empty value
+      if (
+        field.type === "text" ||
+        field.type === "textarea" ||
+        field.type === "date" ||
+        field.type === "dropdown" ||
+        field.type === "radio"
+      ) {
+        return (
+          field.value !== undefined &&
+          field.value !== null &&
+          field.value !== "" &&
+          field.value.toString().trim() !== ""
+        );
+      }
+
+      // For any other field types, check if they have a value
+      return (
+        field.value !== undefined &&
+        field.value !== null &&
+        field.value !== "" &&
+        field.value !== false
+      );
+    });
+  }
+
+  async _sendCompletionNotifications(pkg, initiatorName) {
+    const packageOwner = await this.User.findById(pkg.ownerId);
+
+    // Create a map of all unique participants and receivers to easily access their details.
+    // We use email as the key to ensure each person is only processed once.
+    const allRecipients = new Map();
+
+    // Add all action-takers (Signers, Approvers, etc.)
+    pkg.fields.forEach((field) => {
+      field.assignedUsers.forEach((user) => {
+        if (!allRecipients.has(user.contactEmail)) {
+          allRecipients.set(user.contactEmail, {
+            // Store the unique ID for this person's role in the package
+            participantId: user.id,
+            email: user.contactEmail,
+          });
+        }
+      });
+    });
+
+    // Add notification-only receivers
+    pkg.receivers.forEach((receiver) => {
+      if (!allRecipients.has(receiver.contactEmail)) {
+        allRecipients.set(receiver.contactEmail, {
+          participantId: receiver.id,
+          email: receiver.contactEmail,
+        });
+      }
+    });
+
+    // Ensure the package owner also gets a notification with a valid link
+    // The owner's unique ID for access purposes is simply their own userId.
+    if (packageOwner && !allRecipients.has(packageOwner.email)) {
+      allRecipients.set(packageOwner.email, {
+        participantId: packageOwner._id.toString(), // The owner can use their own ID
+        email: packageOwner.email,
+      });
+    }
+
+    // Now, loop through the unique recipients and send each one a personalized email
+    for (const recipient of allRecipients.values()) {
+      // ✅ CORRECT: Generate the specific participant access link for each person.
+      const universalAccessLink = `${process.env.CLIENT_URL}/package/${pkg._id}/participant/${recipient.participantId}`;
+
+      await this.EmailService.sendDocumentCompletedNotification(
+        recipient.email,
+        initiatorName,
+        pkg.name,
+        universalAccessLink // Pass the correct, personalized link
+      );
+    }
+  }
+
+  /**
+   * @private
+   * A helper method that groups all participants and sends a single consolidated
+   * notification to action-takers and a separate notification to receivers.
+   * @param {object} pkg - The full package document.
+   * @param {string} senderName - The name of the package initiator.
+   */
+  async _sendInitialNotifications(pkg, senderName) {
+    const actionTakers = new Map();
+    const notificationReceivers = new Map();
+
+    // 1. Separate all participants into two groups: those who take action and those who only receive.
+    for (const field of pkg.fields) {
+      if (field.assignedUsers) {
+        for (const user of field.assignedUsers) {
+          // Use the user's email as the key to ensure each person is only in the map once.
+          if (!actionTakers.has(user.contactEmail)) {
+            actionTakers.set(user.contactEmail, user);
+          }
+        }
+      }
+    }
+
+    if (pkg.receivers) {
+      for (const receiver of pkg.receivers) {
+        // If a receiver is ALSO an action-taker, they should not get a separate "read-only" email.
+        if (!actionTakers.has(receiver.contactEmail)) {
+          notificationReceivers.set(receiver.contactEmail, receiver);
+        }
+      }
+    }
+
+    // 2. Send the consolidated "Action Required" email to all unique action-takers.
+    for (const user of actionTakers.values()) {
+      // The URL needs a unique ID for the participant to identify them later.
+      // We can use the 'id' field which is unique per user assignment in the package.
+      const actionUrl = `${process.env.CLIENT_URL}/package/${pkg._id}/participant/${user.id}`;
+      await this.EmailService.sendActionRequiredNotification(
+        user,
+        pkg,
+        senderName,
+        actionUrl
+      );
+    }
+
+    // 3. Send the separate "For Your Records" email to all unique notification-only receivers.
+    for (const receiver of notificationReceivers.values()) {
+      const actionUrl = `${process.env.CLIENT_URL}/package/${pkg._id}/participant/${receiver.id}`;
+      await this.EmailService.sendReceiverNotification(
+        receiver,
+        pkg,
+        senderName,
+        actionUrl
+      );
+    }
+  }
+  /**
+   * @private
+   * Sends rejection notifications to the owner and all participants.
+   * This version generates a unique, correct access link for each recipient.
+   */
+  async _sendRejectionNotifications(
+    pkg,
+    initiatorName,
+    rejectorName,
+    rejectionReason
+  ) {
+    const packageOwner = pkg.ownerId; // Already populated from the calling method
+
+    // Create a map of all unique participants and receivers to gather their details.
+    const allRecipients = new Map();
+
+    // Add all action-takers (Signers, Approvers, etc.)
+    pkg.fields.forEach((field) => {
+      (field.assignedUsers || []).forEach((user) => {
+        if (!allRecipients.has(user.contactEmail)) {
+          allRecipients.set(user.contactEmail, {
+            participantId: user.id, // The unique assignment ID for the URL
+            name: user.contactName,
+            email: user.contactEmail,
+          });
+        }
+      });
+    });
+
+    // Add notification-only receivers
+    pkg.receivers.forEach((receiver) => {
+      if (!allRecipients.has(receiver.contactEmail)) {
+        allRecipients.set(receiver.contactEmail, {
+          participantId: receiver.id,
+          name: receiver.contactName,
+          email: receiver.contactEmail,
+        });
+      }
+    });
+
+    // Ensure the package owner is on the list to receive the notification
+    if (packageOwner && !allRecipients.has(packageOwner.email)) {
+      allRecipients.set(packageOwner.email, {
+        participantId: packageOwner._id.toString(), // The owner can use their own userId to view
+        name: initiatorName,
+        email: packageOwner.email,
+      });
+    }
+
+    // Loop through the unique recipients and send each a personalized notification
+    for (const recipient of allRecipients.values()) {
+      // ✅ CORRECT: Generate the specific participant access link for each person.
+      const universalAccessLink = `${process.env.CLIENT_URL}/package/${pkg._id}/participant/${recipient.participantId}`;
+
+      await this.EmailService.sendRejectionNotification(
+        recipient.email,
+        recipient.name,
+        initiatorName,
+        pkg.name,
+        rejectorName,
+        rejectionReason,
+        universalAccessLink // Pass the correct, personalized link
+      );
+    }
+  }
+
+  /**
+   * Helper method to find a participant in the package
+   */
+  _findParticipant(pkg, participantId) {
+    // Check in field assignments
+    for (const field of pkg.fields) {
+      const user = field.assignedUsers.find((u) => u.id === participantId);
+      if (user) return user;
+    }
+
+    // Check in receivers
+    const receiver = pkg.receivers.find((r) => r.id === participantId);
+    return receiver;
+  }
+
+  /**
+   * Check if a participant can reassign their assignments
+   */
+  canParticipantReassign(pkg, participantId) {
+    // Check package-level settings
+    if (!pkg.options.allowReassign) {
+      return {
+        canReassign: false,
+        reason: "Reassignment is disabled for this package",
+      };
+    }
+
+    if (pkg.status !== "Sent") {
+      return {
+        canReassign: false,
+        reason: "Package must be in 'Sent' status for reassignment",
+      };
+    }
+
+    // Find participant's assignments
+    const participantFields = pkg.fields.filter((field) =>
+      field.assignedUsers.some((user) => user.id === participantId)
+    );
+
+    if (participantFields.length === 0) {
+      // Check if they're a receiver
+      const isReceiver = pkg.receivers.some((r) => r.id === participantId);
+      if (!isReceiver) {
+        return {
+          canReassign: false,
+          reason: "No assignments found for this participant",
+        };
+      }
+    }
+
+    // Check if any assigned fields are already completed
+    const completedFields = participantFields.filter((field) =>
+      field.assignedUsers.some(
+        (user) => user.id === participantId && user.signed
+      )
+    );
+
+    if (completedFields.length > 0) {
+      return {
+        canReassign: false,
+        reason: `Cannot reassign because ${completedFields.length} field(s) have been completed`,
+      };
+    }
+
+    return {
+      canReassign: true,
+      assignedFields: participantFields.length,
+      pendingFields: participantFields.length,
+    };
+  }
+
+  /**
+   * Send notifications about the reassignment
+   */
+  async _sendReassignmentNotifications(
+    pkg,
+    originalParticipant,
+    newContact,
+    newParticipantId,
+    reason
+  ) {
+    try {
+      // Get package owner details
+      const packageOwner = await this.User.findById(pkg.ownerId);
+      const ownerName = `${packageOwner.firstName} ${packageOwner.lastName}`;
+
+      // 1. Notify the original participant (confirmation)
+      await this.EmailService.sendReassignmentConfirmation(
+        originalParticipant.contactEmail,
+        originalParticipant.contactName,
+        ownerName,
+        pkg.name,
+        `${newContact.firstName} ${newContact.lastName}`,
+        reason
+      );
+
+      // 2. Notify the new assignee
+      const actionUrl = `${process.env.CLIENT_URL}/package/${pkg._id}/participant/${newParticipantId}`;
+
+      await this.EmailService.sendReassignmentNotification(
+        newContact.email,
+        `${newContact.firstName} ${newContact.lastName}`,
+        ownerName,
+        pkg.name,
+        originalParticipant.contactName,
+        actionUrl
+      );
+
+      // 3. Notify the package owner
+      await this.EmailService.sendReassignmentOwnerNotification(
+        packageOwner.email,
+        ownerName,
+        pkg.name,
+        originalParticipant.contactName,
+        `${newContact.firstName} ${newContact.lastName}`,
+        reason
+      );
+    } catch (error) {
+      console.error("Error sending reassignment notifications:", error);
+      // Don't throw error here as reassignment was successful
+    }
+  }
+  /**
+   * Check if package is expired before any action
+   */
+  checkPackageExpiry(pkg) {
+    if (pkg.status === "Expired") {
+      throw new Error(
+        "This document has expired and cannot be modified or completed."
+      );
+    }
+
+    if (pkg.options.expiresAt && new Date() > pkg.options.expiresAt) {
+      throw new Error(
+        "This document has expired and cannot be modified or completed."
+      );
+    }
+  }
+
+  /**
+   * @private
+   * A helper method to transform a list of database packages into the required frontend 'Document' structure.
+   */
+  async _transformPackagesForFrontend(packages) {
+    // Collect all unique contact IDs from all packages to fetch their phone numbers in one go
+    const allContactIds = new Set();
+    packages.forEach((pkg) => {
+      pkg.fields.forEach((f) =>
+        f.assignedUsers.forEach((u) =>
+          allContactIds.add(u.contactId.toString())
+        )
+      );
+      pkg.receivers.forEach((r) => allContactIds.add(r.contactId.toString()));
+    });
+
+    // Fetch contacts in a single query and map them for quick lookup
+    const contacts = await this.Contact.find({
+      _id: { $in: Array.from(allContactIds) },
+    })
+      .select("phone")
+      .lean();
+    const contactPhoneMap = new Map(
+      contacts.map((c) => [c._id.toString(), c.phone || ""])
+    );
+
+    // Helper function to determine participant status
+    const getParticipantStatus = (participant, pkg) => {
+      const contactId = participant.contactId;
+
+      // Check if this participant has completed all their assigned tasks
+      const assignedFields = pkg.fields.filter((field) =>
+        field.assignedUsers.some(
+          (user) => user.contactId.toString() === contactId.toString()
+        )
+      );
+
+      if (assignedFields.length === 0) {
+        // No assigned fields, just a receiver
+        return pkg.status === "Sent" ? "In Progress" : "Not Sent";
+      }
+
+      const completedFields = assignedFields.filter((field) => {
+        const userAssignment = field.assignedUsers.find(
+          (user) => user.contactId.toString() === contactId.toString()
+        );
+
+        if (!userAssignment) return false;
+
+        // For signature fields, check if signed
+        if (field.type === "signature") {
+          return userAssignment.signed === true;
+        }
+
+        // For checkbox fields with Approver role, check if signed
+        if (field.type === "checkbox" && userAssignment.role === "Approver") {
+          return userAssignment.signed === true;
+        }
+
+        // For other field types (text, textarea, date, etc.), check if value exists
+        return (
+          field.value !== undefined &&
+          field.value !== null &&
+          field.value !== "" &&
+          field.value !== false
+        );
+      });
+
+      // Determine status based on completion
+      if (completedFields.length === assignedFields.length) {
+        return "Completed";
+      } else if (pkg.status === "Sent") {
+        return "In Progress";
+      } else {
+        return "Not Sent";
+      }
+    };
+
+    return packages.map((pkg) => {
+      const participants = new Map(); // Use a Map to easily group participants
+
+      // Iterate through fields to group all assigned users
+      (pkg.fields || []).forEach((field) => {
+        (field.assignedUsers || []).forEach((user) => {
+          if (!participants.has(user.contactId.toString())) {
+            participants.set(user.contactId.toString(), {
+              contactId: user.contactId.toString(),
+              contactName: user.contactName,
+              contactEmail: user.contactEmail,
+              roles: new Set(),
+              signed: false,
+              signedAt: null,
+            });
+          }
+          const p = participants.get(user.contactId.toString());
+          p.roles.add(user.role);
+          if (user.signed) p.signed = true;
+          if (
+            user.signedAt &&
+            (!p.signedAt || new Date(user.signedAt) > new Date(p.signedAt))
+          ) {
+            p.signedAt = user.signedAt;
+          }
+        });
+      });
+
+      // Transform the grouped participant data into the final 'RoleDetail' structure
+      const roleDetails = { formFillers: [], approvers: [], signers: [] };
+      participants.forEach((p) => {
+        const roleDetail = {
+          user: {
+            id: p.contactId,
+            name: p.contactName,
+            email: p.contactEmail,
+            phone: contactPhoneMap.get(p.contactId) || "",
+          },
+          // Use the improved status determination logic
+          status: getParticipantStatus(p, pkg),
+          lastUpdated: p.signedAt ? new Date(p.signedAt).toISOString() : "",
+        };
+
+        if (p.roles.has("FormFiller")) roleDetails.formFillers.push(roleDetail);
+        if (p.roles.has("Approver")) roleDetails.approvers.push(roleDetail);
+        if (p.roles.has("Signer")) roleDetails.signers.push(roleDetail);
+      });
+
+      // Handle notification-only receivers
+      const receiverDetails = (pkg.receivers || []).map((rec) => ({
+        user: {
+          id: rec.contactId.toString(),
+          name: rec.contactName,
+          email: rec.contactEmail,
+          phone: contactPhoneMap.get(rec.contactId.toString()) || "",
+        },
+        status: "Not Sent",
+        lastUpdated: "",
+      }));
+
+      // Map backend package status to frontend status
+      const statusMap = {
+        Sent: "Pending",
+        Completed: "Finished",
+        Draft: "Draft",
+        Rejected: "Rejected",
+        Expired: "Expired",
+        Archived: "Finished",
+        Revoked: "Revoked",
+      };
+
+      const initiator = pkg.ownerId;
+
+      // Construct the final object
+      return {
+        id: pkg._id.toString(),
+        name: pkg.name,
+        status: statusMap[pkg.status] || "Draft",
+        addedOn: new Date(pkg.createdAt).toISOString(),
+        initiator: {
+          id: initiator._id.toString(),
+          name: `${initiator.firstName} ${initiator.lastName}`,
+          email: initiator.email,
+          phone: initiator.phone || "",
+        },
+        formFillers: roleDetails.formFillers,
+        approvers: roleDetails.approvers,
+        signers: roleDetails.signers,
+        receivers: receiverDetails,
+        participantsSummary: Array.from(participants.values())
+          .map((p) => p.contactName)
+          .concat(receiverDetails.map((r) => r.user.name)),
+      };
+    });
+  }
+
+  /**
+   * @private
+   * A helper to send revocation notifications to all participants.
+   */
+  async _sendRevocationNotifications(pkg) {
+    const owner = pkg.ownerId; // Already populated
+    const initiatorName = `${owner.firstName} ${owner.lastName}`;
+
+    const allEmails = new Set();
+    // Add the owner's email to get a confirmation
+    allEmails.add(owner.email);
+    // Add all participants' emails
+    (pkg.fields || []).forEach((f) => {
+      (f.assignedUsers || []).forEach((u) => allEmails.add(u.contactEmail));
+    });
+    // Add all receivers' emails
+    (pkg.receivers || []).forEach((r) => allEmails.add(r.contactEmail));
+
+    for (const email of allEmails) {
+      await this.EmailService.sendDocumentRevokedNotification(
+        email,
+        initiatorName,
+        pkg.name
+      );
+    }
+  }
+
+  // New helper method to emit package update
+  async emitPackageUpdate(pkg) {
+    try {
+      // Find the document again with all necessary data populated, ensuring it's the freshest state.
+      const populatedPkg = await this.Package.findById(pkg._id)
+        .populate("ownerId", "firstName lastName email phone")
+        .lean();
+
+      if (!populatedPkg) {
+        console.error(
+          `emitPackageUpdate: Could not find package ${pkg._id} after update.`
+        );
+        return;
+      }
+
+      // Reuse your existing, powerful transformation logic.
+      const transformedDocument = (
+        await this._transformPackagesForFrontend([populatedPkg])
+      )[0];
+      // Pass the complete, transformed document to the event emitter.
+      this.packageEventEmitter.emitPackageUpdated(
+        pkg.ownerId._id.toString(),
+        transformedDocument
+      );
+    } catch (error) {
+      console.error(`Failed to emit package update for ${pkg._id}:`, error);
+    }
+  }
+}
+
+module.exports = PackageService;

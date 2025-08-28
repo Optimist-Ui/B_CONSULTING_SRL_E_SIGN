@@ -1,0 +1,167 @@
+name: E-Sign API – Build, Push & Deploy
+
+on:
+  push:
+    branches:
+      - dev
+      - uat
+      - main
+
+env:
+  AWS_REGION: ${{ secrets.AWS_REGION }}
+
+jobs:
+  build-push-deploy:
+    runs-on: ubuntu-latest
+
+    environment:
+      name: ${{ github.ref_name == 'main' && 'production' || (github.ref_name == 'dev' && 'development' || github.ref_name) }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Set environment variables
+        run: |
+          echo "ECR_REPO=${{ secrets.ECR_REPO_API }}" >> $GITHUB_ENV
+          case "${{ github.ref_name }}" in
+            dev)
+              echo "ENVIRONMENT=development" >> $GITHUB_ENV
+              echo "CONTAINER_NAME=esign-api-dev" >> $GITHUB_ENV
+              echo "HOST_PORT=3002" >> $GITHUB_ENV
+              ;;
+            uat)
+              echo "ENVIRONMENT=uat" >> $GITHUB_ENV
+              echo "CONTAINER_NAME=esign-api-uat" >> $GITHUB_ENV
+              echo "HOST_PORT=3003" >> $GITHUB_ENV
+              ;;
+            main)
+              echo "ENVIRONMENT=production" >> $GITHUB_ENV
+              echo "CONTAINER_NAME=esign-api-prod" >> $GITHUB_ENV
+              echo "HOST_PORT=3001" >> $GITHUB_ENV
+              ;;
+            *)
+              echo "ENVIRONMENT=development" >> $GITHUB_ENV
+              echo "CONTAINER_NAME=esign-api-dev" >> $GITHUB_ENV
+              echo "HOST_PORT=3002" >> $GITHUB_ENV
+              ;;
+          esac
+
+      - name: Debug environment and secrets
+        run: |
+          echo "Branch: ${{ github.ref_name }}"
+          echo "Environment: ${{ env.ENVIRONMENT }}"
+          echo "ECR Repository: ${{ env.ECR_REPO }}"
+          echo "AWS Region: ${{ env.AWS_REGION }}"
+          echo "Container Name: ${{ env.CONTAINER_NAME }}"
+          echo "Host Port: ${{ env.HOST_PORT }}"
+          echo "AWS Account ID length: ${#AWS_ACCOUNT_ID}"
+          echo "AWS Account ID (first 3 digits): ${AWS_ACCOUNT_ID:0:3}"
+        env:
+          AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+
+      - name: Test AWS credentials and ECR access
+        run: |
+          echo "Testing AWS credentials..."
+          aws sts get-caller-identity
+          echo "Testing ECR repository access..."
+          aws ecr describe-repositories --repository-names ${{ env.ECR_REPO }} --region ${{ env.AWS_REGION }}
+          echo "Testing ECR login token generation..."
+          aws ecr get-login-password --region ${{ env.AWS_REGION }} > /dev/null && echo "ECR token generated successfully" || echo "ECR token generation failed"
+
+      - name: Build & Push image
+        run: |
+          AWS_ACCOUNT_ID="${{ secrets.AWS_ACCOUNT_ID }}"
+          AWS_REGION="${{ env.AWS_REGION }}"
+          ECR_REPO="${{ env.ECR_REPO }}"
+          COMMIT_SHA="${{ github.sha }}"
+
+          IMAGE_URI="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO}:${COMMIT_SHA}"
+          ECR_REGISTRY="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
+
+          echo "AWS Account ID: $AWS_ACCOUNT_ID"
+          echo "AWS Region: $AWS_REGION" 
+          echo "ECR Repository: $ECR_REPO"
+          echo "ECR Registry: $ECR_REGISTRY"
+          echo "Full IMAGE_URI: $IMAGE_URI"
+
+          # Build the image
+          echo "Building Docker image..."
+          docker build -f infra/docker/Dockerfile.api -t $IMAGE_URI .
+
+          # Login to ECR using the standard method
+          echo "Logging into ECR..."
+          aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY
+
+          if [ $? -eq 0 ]; then
+            echo "ECR login successful"
+            
+            # Push the image
+            echo "Pushing image to ECR..."
+            docker push $IMAGE_URI
+            
+            if [ $? -eq 0 ]; then
+              echo "Image push successful"
+              echo "IMAGE_URI=$IMAGE_URI" >> $GITHUB_ENV
+            else
+              echo "Image push failed"
+              exit 1
+            fi
+          else
+            echo "ECR login failed"
+            exit 1
+          fi
+
+      - name: Deploy to EC2 via SSH
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ec2-user
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            # Set variables for clarity
+            AWS_ACCOUNT_ID="${{ secrets.AWS_ACCOUNT_ID }}"
+            AWS_REGION="${{ env.AWS_REGION }}"
+            ECR_REGISTRY="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
+
+            echo "Logging into ECR on EC2..."
+            aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY
+
+            echo "Pulling image: ${{ env.IMAGE_URI }}"
+            docker pull ${{ env.IMAGE_URI }}
+
+            # Stop and remove existing container
+            docker stop ${{ env.CONTAINER_NAME }} || true
+            docker rm -f ${{ env.CONTAINER_NAME }} || true
+
+            # Create temporary env file for SendGrid templates (same as Pet and Go pattern)
+            echo "${{ secrets.SENDGRID_TEMPLATES }}" > /tmp/sendgrid_templates.env
+
+            # Run new container with environment-specific variables
+            docker run -d \
+              --env-file /tmp/sendgrid_templates.env \
+              --name ${{ env.CONTAINER_NAME }} \
+              --restart unless-stopped \
+              -p ${{ env.HOST_PORT }}:${{ secrets.PORT }} \
+              -e PORT=${{ secrets.PORT }} \
+              -e MONGO_URI="${{ secrets.MONGO_URI }}" \
+              -e JWT_SECRET="${{ secrets.JWT_SECRET }}" \
+              -e CLIENT_URL="${{ secrets.CLIENT_URL }}" \
+              -e SPRYNG_API_TOKEN="${{ secrets.SPRYNG_API_TOKEN }}" \
+              -e BCRYPT_ROUNDS="${{ secrets.BCRYPT_ROUNDS }}" \
+              -e REMINDER_CRON="${{ secrets.REMINDER_CRON }}" \
+              -e ADMIN_EMAIL="${{ secrets.ADMIN_EMAIL }}" \
+              -e SENDGRID_FROM_EMAIL="${{ secrets.SENDGRID_FROM_EMAIL }}" \
+              -e SENDGRID_API_KEY="${{ secrets.SENDGRID_API_KEY }}" \
+              ${{ env.IMAGE_URI }}
+
+            echo "Deployment completed for ${{ env.CONTAINER_NAME }} on port ${{ env.HOST_PORT }}"
+            # Clean up temporary file
+            rm -f /tmp/sendgrid_templates.env
