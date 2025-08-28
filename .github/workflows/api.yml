@@ -77,20 +77,33 @@ jobs:
 
       - name: Deploy to EC2 via SSH
         uses: appleboy/ssh-action@v1.0.0
+        env:
+          AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+          AWS_REGION: ${{ env.AWS_REGION }}
+          IMAGE_URI: ${{ env.IMAGE_URI }}
+          CONTAINER_NAME: ${{ env.CONTAINER_NAME }}
+          HOST_PORT: ${{ env.HOST_PORT }}
+          SENDGRID_TEMPLATES: ${{ secrets.SENDGRID_TEMPLATES }}
+          PORT: ${{ secrets.PORT }}
+          MONGO_URI: ${{ secrets.MONGO_URI }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          CLIENT_URL: ${{ secrets.CLIENT_URL }}
+          SPRYNG_API_TOKEN: ${{ secrets.SPRYNG_API_TOKEN }}
+          BCRYPT_ROUNDS: ${{ secrets.BCRYPT_ROUNDS }}
+          REMINDER_CRON: ${{ secrets.REMINDER_CRON }}
+          ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
+          SENDGRID_FROM_EMAIL: ${{ secrets.SENDGRID_FROM_EMAIL }}
+          SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ec2-user
           key: ${{ secrets.EC2_SSH_KEY }}
+          envs: AWS_ACCOUNT_ID,AWS_REGION,IMAGE_URI,CONTAINER_NAME,HOST_PORT,SENDGRID_TEMPLATES,PORT,MONGO_URI,JWT_SECRET,CLIENT_URL,SPRYNG_API_TOKEN,BCRYPT_ROUNDS,REMINDER_CRON,ADMIN_EMAIL,SENDGRID_FROM_EMAIL,SENDGRID_API_KEY
           script: |
             set -e  # Exit on any error
 
-            # Set variables for clarity
-            AWS_ACCOUNT_ID="${{ secrets.AWS_ACCOUNT_ID }}"
-            AWS_REGION="${{ env.AWS_REGION }}"
+            # Set variables for clarity - these come from envs now
             ECR_REGISTRY="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
-            IMAGE_URI="${{ env.IMAGE_URI }}"
-            CONTAINER_NAME="${{ env.CONTAINER_NAME }}"
-            HOST_PORT="${{ env.HOST_PORT }}"
 
             echo "=== Pre-deployment Cleanup ==="
             # Clean up Docker system to free space
@@ -117,33 +130,32 @@ jobs:
 
             echo "=== Environment Setup ==="
             # Create temporary env file for SendGrid templates
-            cat > /tmp/sendgrid_templates.env << 'EOF'
-            ${{ secrets.SENDGRID_TEMPLATES }}
-            EOF
+            echo "$SENDGRID_TEMPLATES" > /tmp/sendgrid_templates.env
 
             echo "=== Container Deployment ==="
+            echo "Running container with IMAGE_URI: $IMAGE_URI"
             # Run new container with environment-specific variables
             docker run -d \
               --env-file /tmp/sendgrid_templates.env \
-              --name $CONTAINER_NAME \
+              --name "$CONTAINER_NAME" \
               --restart unless-stopped \
-              -p $HOST_PORT:${{ secrets.PORT }} \
-              -e PORT=${{ secrets.PORT }} \
-              -e MONGO_URI="${{ secrets.MONGO_URI }}" \
-              -e JWT_SECRET="${{ secrets.JWT_SECRET }}" \
-              -e CLIENT_URL="${{ secrets.CLIENT_URL }}" \
-              -e SPRYNG_API_TOKEN="${{ secrets.SPRYNG_API_TOKEN }}" \
-              -e BCRYPT_ROUNDS="${{ secrets.BCRYPT_ROUNDS }}" \
-              -e REMINDER_CRON="${{ secrets.REMINDER_CRON }}" \
-              -e ADMIN_EMAIL="${{ secrets.ADMIN_EMAIL }}" \
-              -e SENDGRID_FROM_EMAIL="${{ secrets.SENDGRID_FROM_EMAIL }}" \
-              -e SENDGRID_API_KEY="${{ secrets.SENDGRID_API_KEY }}" \
-              $IMAGE_URI
+              -p "$HOST_PORT:$PORT" \
+              -e "PORT=$PORT" \
+              -e "MONGO_URI=$MONGO_URI" \
+              -e "JWT_SECRET=$JWT_SECRET" \
+              -e "CLIENT_URL=$CLIENT_URL" \
+              -e "SPRYNG_API_TOKEN=$SPRYNG_API_TOKEN" \
+              -e "BCRYPT_ROUNDS=$BCRYPT_ROUNDS" \
+              -e "REMINDER_CRON=$REMINDER_CRON" \
+              -e "ADMIN_EMAIL=$ADMIN_EMAIL" \
+              -e "SENDGRID_FROM_EMAIL=$SENDGRID_FROM_EMAIL" \
+              -e "SENDGRID_API_KEY=$SENDGRID_API_KEY" \
+              "$IMAGE_URI"
 
             echo "=== Verification ==="
             # Verify container is running
             sleep 5
-            docker ps | grep $CONTAINER_NAME
+            docker ps | grep "$CONTAINER_NAME"
 
             echo "=== Cleanup ==="
             # Clean up temporary file
