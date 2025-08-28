@@ -14,7 +14,9 @@ const templateRoutes = require("./routes/TemplateRoutes")(container);
 
 const app = express();
 
-app.use(cors({ origin: "http://localhost:5173", credentials: true }));
+const clientURL = process.env.CLIENT_URL || "http://localhost:5173";
+
+app.use(cors({ origin: clientURL, credentials: true }));
 app.use(helmet({ crossOriginResourcePolicy: false }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
