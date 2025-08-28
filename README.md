@@ -30,7 +30,6 @@ B_CONSULTING_E-SIGN/
 ├── web/                   # React SPA (Vite)
 │   ├── public/
 │   ├── src/
-│   ├── amplify.yml
 │   └── …
 ├── infra/
 │   ├── docker/
