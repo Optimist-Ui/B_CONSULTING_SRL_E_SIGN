@@ -65,7 +65,7 @@ export const loginUser = createAsyncThunk('auth/loginUser', async (credentials: 
         return { token, user };
     } catch (error: any) {
         if (error.response && error.response.data.message) {
-            return rejectWithValue(error.response.data.message);
+            return rejectWithValue(error.response.data.error);
         } else {
             return rejectWithValue(error.error);
         }
@@ -92,7 +92,7 @@ export const requestPasswordReset = createAsyncThunk('auth/requestPasswordReset'
     } catch (error: any) {
         // Use rejectWithValue to pass the API error message to the rejected action
         if (error.response && error.response.data.message) {
-            return rejectWithValue(error.response.data.message);
+            return rejectWithValue(error.response.data.error);
         }
         return rejectWithValue(error.error);
     }
