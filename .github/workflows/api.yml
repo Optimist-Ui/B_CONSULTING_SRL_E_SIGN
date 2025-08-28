@@ -30,7 +30,10 @@ jobs:
 
       - name: Set environment variables
         run: |
-          echo "ECR_REPO=${{ secrets.ECR_REPO_API }}" >> $GITHUB_ENV
+          # Strip any whitespace/newlines from ECR_REPO
+          ECR_REPO_CLEAN=$(echo "${{ secrets.ECR_REPO_API }}" | tr -d '\n\r' | xargs)
+          echo "ECR_REPO=$ECR_REPO_CLEAN" >> $GITHUB_ENV
+
           case "${{ github.ref_name }}" in
             dev)
               echo "ENVIRONMENT=development" >> $GITHUB_ENV
@@ -127,32 +130,50 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             # Set all variables INSIDE the script for reliability
-            AWS_ACCOUNT_ID="${{ secrets.AWS_ACCOUNT_ID }}"
-            AWS_REGION="${{ env.AWS_REGION }}"
-            ECR_REPO="${{ secrets.ECR_REPO_API }}" # Use secret directly
-            COMMIT_SHA="${{ github.sha }}"
-            CONTAINER_NAME="${{ env.CONTAINER_NAME }}"
-            HOST_PORT="${{ env.HOST_PORT }}"
-            CONTAINER_PORT="${{ secrets.PORT }}"
+            # Clean the variables to remove any whitespace/newlines
+            AWS_ACCOUNT_ID=$(echo "${{ secrets.AWS_ACCOUNT_ID }}" | tr -d '\n\r' | xargs)
+            AWS_REGION=$(echo "${{ env.AWS_REGION }}" | tr -d '\n\r' | xargs)
+            ECR_REPO=$(echo "${{ secrets.ECR_REPO_API }}" | tr -d '\n\r' | xargs)
+            COMMIT_SHA=$(echo "${{ github.sha }}" | tr -d '\n\r' | xargs)
+            CONTAINER_NAME=$(echo "${{ env.CONTAINER_NAME }}" | tr -d '\n\r' | xargs)
+            HOST_PORT=$(echo "${{ env.HOST_PORT }}" | tr -d '\n\r' | xargs)
+            CONTAINER_PORT=$(echo "${{ secrets.PORT }}" | tr -d '\n\r' | xargs)
 
             # Construct the full image URI right here on the server
             IMAGE_URI="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO}:${COMMIT_SHA}"
             ECR_REGISTRY="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
 
+            # Debug output to verify variables
+            echo "Debug: AWS_ACCOUNT_ID=[${AWS_ACCOUNT_ID}]"
+            echo "Debug: ECR_REPO=[${ECR_REPO}]"
+            echo "Debug: IMAGE_URI=[${IMAGE_URI}]"
+
             echo "Logging into ECR on EC2..."
             aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY
+
+            if [ $? -ne 0 ]; then
+              echo "ECR login failed"
+              exit 1
+            fi
 
             echo "Pulling image: $IMAGE_URI"
             docker pull $IMAGE_URI
 
-            # Stop and remove existing container
-            docker stop $CONTAINER_NAME || true
-            docker rm -f $CONTAINER_NAME || true
+            if [ $? -ne 0 ]; then
+              echo "Docker pull failed"
+              exit 1
+            fi
+
+            # Stop and remove existing container (ignore errors if container doesn't exist)
+            echo "Stopping existing container..."
+            docker stop $CONTAINER_NAME || echo "Container $CONTAINER_NAME was not running"
+            docker rm -f $CONTAINER_NAME || echo "Container $CONTAINER_NAME did not exist"
 
             # Create temporary env file
             echo "${{ secrets.SENDGRID_TEMPLATES }}" > /tmp/sendgrid_templates.env
 
             # Run new container with environment-specific variables
+            echo "Starting new container..."
             docker run -d \
               --env-file /tmp/sendgrid_templates.env \
               --name $CONTAINER_NAME \
@@ -168,8 +189,16 @@ jobs:
               -e ADMIN_EMAIL="${{ secrets.ADMIN_EMAIL }}" \
               -e SENDGRID_FROM_EMAIL="${{ secrets.SENDGRID_FROM_EMAIL }}" \
               -e SENDGRID_API_KEY="${{ secrets.SENDGRID_API_KEY }}" \
-              $IMAGE_URI # Use the reliable, locally-created variable
+              $IMAGE_URI
 
-            echo "Deployment completed for $CONTAINER_NAME on port $HOST_PORT"
+            if [ $? -eq 0 ]; then
+              echo "Deployment completed successfully for $CONTAINER_NAME on port $HOST_PORT"
+              # Verify container is running
+              docker ps | grep $CONTAINER_NAME && echo "Container is running" || echo "Container failed to start"
+            else
+              echo "Container deployment failed"
+              exit 1
+            fi
+
             # Clean up temporary file
             rm -f /tmp/sendgrid_templates.env
