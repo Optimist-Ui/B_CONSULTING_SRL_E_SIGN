@@ -126,31 +126,39 @@ jobs:
           username: ec2-user
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            # Set variables for clarity
+            # Set all variables INSIDE the script for reliability
             AWS_ACCOUNT_ID="${{ secrets.AWS_ACCOUNT_ID }}"
             AWS_REGION="${{ env.AWS_REGION }}"
+            ECR_REPO="${{ secrets.ECR_REPO_API }}" # Use secret directly
+            COMMIT_SHA="${{ github.sha }}"
+            CONTAINER_NAME="${{ env.CONTAINER_NAME }}"
+            HOST_PORT="${{ env.HOST_PORT }}"
+            CONTAINER_PORT="${{ secrets.PORT }}"
+
+            # Construct the full image URI right here on the server
+            IMAGE_URI="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO}:${COMMIT_SHA}"
             ECR_REGISTRY="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
 
             echo "Logging into ECR on EC2..."
             aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY
 
-            echo "Pulling image: ${{ env.IMAGE_URI }}"
-            docker pull ${{ env.IMAGE_URI }}
+            echo "Pulling image: $IMAGE_URI"
+            docker pull $IMAGE_URI
 
             # Stop and remove existing container
-            docker stop ${{ env.CONTAINER_NAME }} || true
-            docker rm -f ${{ env.CONTAINER_NAME }} || true
+            docker stop $CONTAINER_NAME || true
+            docker rm -f $CONTAINER_NAME || true
 
-            # Create temporary env file for SendGrid templates (same as Pet and Go pattern)
+            # Create temporary env file
             echo "${{ secrets.SENDGRID_TEMPLATES }}" > /tmp/sendgrid_templates.env
 
             # Run new container with environment-specific variables
             docker run -d \
               --env-file /tmp/sendgrid_templates.env \
-              --name ${{ env.CONTAINER_NAME }} \
+              --name $CONTAINER_NAME \
               --restart unless-stopped \
-              -p ${{ env.HOST_PORT }}:${{ secrets.PORT }} \
-              -e PORT=${{ secrets.PORT }} \
+              -p ${HOST_PORT}:${CONTAINER_PORT} \
+              -e PORT=${CONTAINER_PORT} \
               -e MONGO_URI="${{ secrets.MONGO_URI }}" \
               -e JWT_SECRET="${{ secrets.JWT_SECRET }}" \
               -e CLIENT_URL="${{ secrets.CLIENT_URL }}" \
@@ -160,8 +168,8 @@ jobs:
               -e ADMIN_EMAIL="${{ secrets.ADMIN_EMAIL }}" \
               -e SENDGRID_FROM_EMAIL="${{ secrets.SENDGRID_FROM_EMAIL }}" \
               -e SENDGRID_API_KEY="${{ secrets.SENDGRID_API_KEY }}" \
-              ${{ env.IMAGE_URI }}
+              $IMAGE_URI # Use the reliable, locally-created variable
 
-            echo "Deployment completed for ${{ env.CONTAINER_NAME }} on port ${{ env.HOST_PORT }}"
+            echo "Deployment completed for $CONTAINER_NAME on port $HOST_PORT"
             # Clean up temporary file
             rm -f /tmp/sendgrid_templates.env
