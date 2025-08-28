@@ -37,7 +37,7 @@ export const uploadPackageDocument = createAsyncThunk<{ attachment_uuid: string;
         });
         return response.data.data; // { attachment_uuid, fileUrl }
     } catch (error: any) {
-        return rejectWithValue(error.response?.data?.message || 'Failed to upload package document.');
+        return rejectWithValue(error.response?.data?.error || 'Failed to upload package document.');
     }
 });
 
@@ -79,7 +79,7 @@ export const savePackage = createAsyncThunk<DocumentPackage, SavePackagePayload>
             return response.data.data;
         }
     } catch (error: any) {
-        return rejectWithValue(error.response?.data?.message || 'Failed to save package.');
+        return rejectWithValue(error.response?.data?.error || 'Failed to save package.');
     }
 });
 
@@ -89,7 +89,7 @@ export const fetchPackages = createAsyncThunk<DocumentPackage[], void>('packages
         const response = await api.get('api/packages');
         return response.data.data;
     } catch (error: any) {
-        return rejectWithValue(error.response?.data?.message || 'Failed to fetch packages.');
+        return rejectWithValue(error.response?.data?.error || 'Failed to fetch packages.');
     }
 });
 
@@ -109,7 +109,7 @@ export const updatePackage = createAsyncThunk<DocumentPackage, UpdatePackagePayl
         const response = await api.patch(`/api/packages/${packageId}`, payload);
         return response.data.data;
     } catch (error: any) {
-        return rejectWithValue(error.response?.data?.message || 'Failed to update package.');
+        return rejectWithValue(error.response?.data?.error || 'Failed to update package.');
     }
 });
 // Delete package
@@ -118,6 +118,6 @@ export const deletePackage = createAsyncThunk<{ message: string; packageId: stri
         const response = await api.delete(`api/packages/${packageId}`);
         return { message: response.data.message, packageId };
     } catch (error: any) {
-        return rejectWithValue(error.response?.data?.message || 'Failed to delete package.');
+        return rejectWithValue(error.response?.data?.error || 'Failed to delete package.');
     }
 });

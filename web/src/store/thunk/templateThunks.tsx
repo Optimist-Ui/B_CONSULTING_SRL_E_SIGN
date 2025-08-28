@@ -55,7 +55,7 @@ export const uploadDocument = createAsyncThunk<UploadDocumentResponse, File>('te
             fileUrl: data.fileUrl,
         };
     } catch (error: any) {
-        return rejectWithValue(error.response?.data?.message || 'Failed to upload document.');
+        return rejectWithValue(error.response?.data?.error || 'Failed to upload document.');
     }
 });
 
@@ -64,7 +64,7 @@ export const saveTemplate = createAsyncThunk<DocumentTemplate, SaveTemplatePaylo
         const response = await api.post('/api/templates', templateData);
         return response.data.data;
     } catch (error: any) {
-        return rejectWithValue(error.response?.data?.message || 'Failed to save template.');
+        return rejectWithValue(error.response?.data?.error || 'Failed to save template.');
     }
 });
 
@@ -73,7 +73,7 @@ export const fetchTemplates = createAsyncThunk<DocumentTemplate[], void>('templa
         const response = await api.get('/api/templates');
         return response.data.data;
     } catch (error: any) {
-        return rejectWithValue(error.response?.data?.message || 'Failed to fetch templates.');
+        return rejectWithValue(error.response?.data?.error || 'Failed to fetch templates.');
     }
 });
 
@@ -82,7 +82,7 @@ export const updateTemplate = createAsyncThunk<DocumentTemplate, UpdateTemplateP
         const response = await api.patch(`/api/templates/${templateId}`, { name, fields });
         return response.data.data;
     } catch (error: any) {
-        return rejectWithValue(error.response?.data?.message || 'Failed to update template.');
+        return rejectWithValue(error.response?.data?.error || 'Failed to update template.');
     }
 });
 
@@ -91,7 +91,7 @@ export const deleteTemplate = createAsyncThunk<{ message: string; templateId: st
         const response = await api.delete(`/api/templates/${templateId}`);
         return { message: response.data.message, templateId };
     } catch (error: any) {
-        return rejectWithValue(error.response?.data?.message || 'Failed to delete template.');
+        return rejectWithValue(error.response?.data?.error || 'Failed to delete template.');
     }
 });
 
@@ -108,7 +108,7 @@ export const getTemplateById = createAsyncThunk<DocumentTemplate, string>('templ
         );
         return template;
     } catch (error: any) {
-        return rejectWithValue(error.response?.data?.message || 'Failed to fetch template.');
+        return rejectWithValue(error.response?.data?.error || 'Failed to fetch template.');
     }
 });
 
@@ -142,6 +142,6 @@ export const saveOrUpdateTemplateFromPackage = createAsyncThunk<DocumentTemplate
             return response.data.data;
         }
     } catch (error: any) {
-        return rejectWithValue(error.response?.data?.message || 'Failed to save template.');
+        return rejectWithValue(error.response?.data?.error || 'Failed to save template.');
     }
 });

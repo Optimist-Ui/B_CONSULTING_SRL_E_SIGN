@@ -35,7 +35,7 @@ export const fetchContacts = createAsyncThunk<Contact[], FetchContactsArgs>('con
         });
         return response.data.data;
     } catch (error: any) {
-        return rejectWithValue(error.response?.data?.message || 'Failed to fetch contacts.');
+        return rejectWithValue(error.response?.data?.error || 'Failed to fetch contacts.');
     }
 });
 
@@ -44,7 +44,7 @@ export const createContact = createAsyncThunk<Contact, CreateContactArgs>('conta
         const response = await api.post('/api/contacts', contactData);
         return response.data.data;
     } catch (error: any) {
-        return rejectWithValue(error.response?.data?.message || 'Failed to create contact.');
+        return rejectWithValue(error.response?.data?.error || 'Failed to create contact.');
     }
 });
 
@@ -53,7 +53,7 @@ export const updateContact = createAsyncThunk<Contact, UpdateContactArgs>('conta
         const response = await api.patch(`/api/contacts/${contactId}`, contactData);
         return response.data.data;
     } catch (error: any) {
-        return rejectWithValue(error.response?.data?.message || 'Failed to update contact.');
+        return rejectWithValue(error.response?.data?.error || 'Failed to update contact.');
     }
 });
 
@@ -66,6 +66,6 @@ export const deleteContact = createAsyncThunk<
         // This line now correctly matches the new return type above
         return { ...response.data, contactId };
     } catch (error: any) {
-        return rejectWithValue(error.response?.data?.message || 'Failed to delete contact.');
+        return rejectWithValue(error.response?.data?.error || 'Failed to delete contact.');
     }
 });
