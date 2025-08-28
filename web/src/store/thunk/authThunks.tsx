@@ -49,7 +49,7 @@ export const signupUser = createAsyncThunk<
         const response = await api.post('/api/users/signup', userData);
         return response.data;
     } catch (error: any) {
-        return rejectWithValue(error.response?.data?.message || 'Registration failed.');
+        return rejectWithValue(error.response?.data?.error || 'Registration failed.');
     }
 });
 
@@ -67,7 +67,7 @@ export const loginUser = createAsyncThunk('auth/loginUser', async (credentials: 
         if (error.response && error.response.data.message) {
             return rejectWithValue(error.response.data.message);
         } else {
-            return rejectWithValue(error.message);
+            return rejectWithValue(error.error);
         }
     }
 });
@@ -78,7 +78,7 @@ export const verifyEmail = createAsyncThunk<{ message: string }, string>('auth/v
         const response = await api.get(`/api/users/verify-email/${token}`);
         return response.data; // Should return { message: 'Email verified successfully...' }
     } catch (error: any) {
-        return rejectWithValue(error.response?.data?.message || 'Email verification failed.');
+        return rejectWithValue(error.response?.data?.error || 'Email verification failed.');
     }
 });
 
@@ -94,7 +94,7 @@ export const requestPasswordReset = createAsyncThunk('auth/requestPasswordReset'
         if (error.response && error.response.data.message) {
             return rejectWithValue(error.response.data.message);
         }
-        return rejectWithValue(error.message);
+        return rejectWithValue(error.error);
     }
 });
 
@@ -109,7 +109,7 @@ export const verifyResetToken = createAsyncThunk('auth/verifyResetToken', async 
         }
         return response.data; // This will return { found: true, user: {...} }
     } catch (error: any) {
-        return rejectWithValue(error.response?.data?.message || 'Token verification failed.');
+        return rejectWithValue(error.response?.data?.error || 'Token verification failed.');
     }
 });
 
@@ -122,7 +122,7 @@ export const resetPassword = createAsyncThunk('auth/resetPassword', async ({ tok
         });
         return response.data;
     } catch (error: any) {
-        return rejectWithValue(error.response?.data?.message || 'Failed to reset password.');
+        return rejectWithValue(error.response?.data?.error || 'Failed to reset password.');
     }
 });
 
@@ -145,7 +145,7 @@ export const updateUserProfile = createAsyncThunk('auth/updateProfile', async (p
 
         return { user: response.data.data };
     } catch (error: any) {
-        return rejectWithValue(error.response?.data?.message || 'Failed to update profile.');
+        return rejectWithValue(error.response?.data?.error || 'Failed to update profile.');
     }
 });
 
@@ -176,6 +176,6 @@ export const checkAuthStatus = createAsyncThunk('auth/checkAuthStatus', async (_
         return { user: response.data.data };
     } catch (error: any) {
         // If the request fails (e.g., 401 Unauthorized), the token is invalid.
-        return rejectWithValue(error.response?.data?.message || 'Invalid session.');
+        return rejectWithValue(error.response?.data?.error || 'Invalid session.');
     }
 });

@@ -65,7 +65,7 @@ export const fetchDocuments = createAsyncThunk<
 
         return response.data.data;
     } catch (error: any) {
-        return rejectWithValue(error.response?.data?.message || error.message || 'Failed to fetch documents');
+        return rejectWithValue(error.response?.data?.error || error.message || 'Failed to fetch documents');
     }
 });
 
@@ -80,7 +80,7 @@ export const getDocumentById = createAsyncThunk<Document, string>('documents/get
 
         return response.data.data;
     } catch (error: any) {
-        return rejectWithValue(error.response?.data?.message || error.message || 'Failed to fetch document');
+        return rejectWithValue(error.response?.data?.error || error.message || 'Failed to fetch document');
     }
 });
 
@@ -97,7 +97,7 @@ export const downloadDocument = createAsyncThunk<string, string>('documents/down
 
         return url;
     } catch (error: any) {
-        return rejectWithValue(error.response?.data?.message || error.message || 'Failed to download document');
+        return rejectWithValue(error.response?.data?.error || error.message || 'Failed to download document');
     }
 });
 
@@ -111,7 +111,7 @@ export const sendReminder = createAsyncThunk<string, string>('documents/sendRemi
 
         return response.data.message || 'Reminder sent successfully';
     } catch (error: any) {
-        return rejectWithValue(error.response?.data?.message || error.message || 'Failed to send reminder');
+        return rejectWithValue(error.response?.data?.error || error.message || 'Failed to send reminder');
     }
 });
 
@@ -125,7 +125,7 @@ export const viewDocumentHistory = createAsyncThunk<any[], string>('documents/vi
 
         return response.data.data || [];
     } catch (error: any) {
-        return rejectWithValue(error.response?.data?.message || error.message || 'Failed to fetch document history');
+        return rejectWithValue(error.response?.data?.error || error.message || 'Failed to fetch document history');
     }
 });
 
@@ -141,7 +141,7 @@ export const reassignDocument = createAsyncThunk<Document, { documentId: string;
 
             return response.data.data;
         } catch (error: any) {
-            return rejectWithValue(error.response?.data?.message || error.message || 'Failed to reassign document');
+            return rejectWithValue(error.response?.data?.error || error.message || 'Failed to reassign document');
         }
     }
 );
@@ -156,7 +156,7 @@ export const skipDocumentStep = createAsyncThunk<Document, string>('documents/sk
 
         return response.data.data;
     } catch (error: any) {
-        return rejectWithValue(error.response?.data?.message || error.message || 'Failed to skip document step');
+        return rejectWithValue(error.response?.data?.error || error.message || 'Failed to skip document step');
     }
 });
 
@@ -193,7 +193,7 @@ export const bulkUpdateDocuments = createAsyncThunk<Document[], { documentIds: s
 
             return response.data.data || [];
         } catch (error: any) {
-            return rejectWithValue(error.response?.data?.message || error.message || 'Failed to update documents');
+            return rejectWithValue(error.response?.data?.error || error.message || 'Failed to update documents');
         }
     }
 );
