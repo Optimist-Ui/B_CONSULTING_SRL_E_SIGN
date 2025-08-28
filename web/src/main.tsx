@@ -1,6 +1,5 @@
 import React, { Suspense } from 'react';
 import ReactDOM from 'react-dom/client';
-import { ToastContainer } from 'react-toastify';
 
 // Perfect Scrollbar
 import 'react-perfect-scrollbar/dist/css/styles.css';

@@ -3,6 +3,8 @@ frontend:
   phases:
     preBuild:
       commands:
+        - nvm use 20
+        - echo "Node version:" && node --version
         - echo "Current directory:" && pwd
         - echo "Listing files:" && ls -la
         - echo "Checking web directory:" && ls -la web/
