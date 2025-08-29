@@ -15,9 +15,16 @@ RUN npm ci --omit=dev
 # Copy application source
 COPY api ./
 
+# Create upload directories BEFORE switching to non-root user
+RUN mkdir -p /app/src/public/uploads/avatars && \
+    mkdir -p /app/src/public/uploads/templates && \
+    mkdir -p /app/src/public/uploads/packages
+
 # Create non-root user and own the app
 RUN addgroup -g 1001 -S nodejs && \
-    adduser -S nodejs -u 1001
+    adduser -S nodejs -u 1001 && \
+    chown -R nodejs:nodejs /app
+    
 USER nodejs
 
 EXPOSE 3001
