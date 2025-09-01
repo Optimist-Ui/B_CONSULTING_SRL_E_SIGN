@@ -125,7 +125,7 @@ Copy
 ## 🧪 Local Dev Quick-Start
 
 ```bash
-# 1. Backend environment
+# 1. Backend environments
 cp api/.env.example api/.env
 # 2. Start everything
 docker compose up --build
