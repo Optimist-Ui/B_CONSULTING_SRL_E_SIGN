@@ -94,6 +94,12 @@ jobs:
           ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
           SENDGRID_FROM_EMAIL: ${{ secrets.SENDGRID_FROM_EMAIL }}
           SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
+          STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
+          STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_WEBHOOK_SECRET }}
+          STARTER_YEARLY_PRICE_ID: ${{ secrets.STARTER_YEARLY_PRICE_ID }}
+          STARTER_MONTHLY_PRICE_ID: ${{ secrets.STARTER_MONTHLY_PRICE_ID }}
+          PRO_YEARLY_PRICE_ID: ${{ secrets.PRO_YEARLY_PRICE_ID }}
+          PRO_MONTHLY_PRICE_ID: ${{ secrets.PRO_MONTHLY_PRICE_ID }}
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ec2-user
