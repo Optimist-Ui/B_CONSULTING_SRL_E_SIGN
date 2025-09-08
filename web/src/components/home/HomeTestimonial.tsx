@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import type { Swiper as SwiperType } from 'swiper';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, Navigation, EffectCoverflow } from 'swiper/modules';
 import { AppDispatch, IRootState } from '../../store'; // Adjust import path
@@ -169,7 +170,7 @@ const HomeTestimonial = () => {
                             nextEl: '.swiper-button-next-custom',
                             prevEl: '.swiper-button-prev-custom',
                         }}
-                        onSlideChange={(swiper) => setActiveSlide(swiper.activeIndex)}
+                        onSlideChange={(swiper: SwiperType) => setActiveSlide(swiper.activeIndex)}
                         loop={reviews.length > 2}
                         breakpoints={{
                             640: { slidesPerView: 1.2, spaceBetween: 20 },

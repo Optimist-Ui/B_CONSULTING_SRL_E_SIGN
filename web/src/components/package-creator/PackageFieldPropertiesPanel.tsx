@@ -139,7 +139,7 @@ const PackageFieldPropertiesPanel: React.FC<PackageFieldPropertiesPanelProps> = 
     // --- NEW: Handler for the checkboxes for a NEW assignment ---
     const handleNewSignerMethodChange = (method: ConcreteSignatureMethod) => {
         setSignatureMethodsForNewSigner((prev) => {
-            let newMethods;
+            let newMethods: ConcreteSignatureMethod[]; // This is the fix for the error on line 189
             if (prev.includes(method)) {
                 newMethods = prev.filter((m) => m !== method); // Remove method
             } else {
@@ -186,7 +186,7 @@ const PackageFieldPropertiesPanel: React.FC<PackageFieldPropertiesPanelProps> = 
         if (!userToUpdate) return;
 
         const currentMethods = userToUpdate.signatureMethods || [];
-        let newMethods;
+        let newMethods: ConcreteSignatureMethod[]; // This is the fix
 
         if (currentMethods.includes(method)) {
             newMethods = currentMethods.filter((m) => m !== method);
