@@ -1,9 +1,9 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { ComponentType } from 'react';
-import { FiXCircle, FiCheckCircle, FiShare2, FiAlertTriangle, FiClock, FiUser, FiSave } from 'react-icons/fi';
+import { FiXCircle, FiCheckCircle, FiShare2, FiAlertTriangle, FiClock, FiUser, FiSave, FiUserPlus } from 'react-icons/fi';
 import { AppDispatch, IRootState } from '../../store';
-import { setRejectModalOpen, setSigningDrawerOpen, setReassignDrawerOpen, setActiveSigningFieldId, setActiveParticipantId } from '../../store/slices/participantSlice';
+import { setRejectModalOpen, setSigningDrawerOpen, setReassignDrawerOpen, setActiveSigningFieldId, setActiveParticipantId, setAddReceiverDrawerOpen } from '../../store/slices/participantSlice';
 import { submitParticipantFields } from '../../store/thunk/participantThunks';
 import { toast } from 'react-toastify';
 
@@ -15,20 +15,22 @@ const FiAlertTriangleTyped = FiAlertTriangle as ComponentType<{ className?: stri
 const FiClockTyped = FiClock as ComponentType<{ className?: string }>;
 const FiUserTyped = FiUser as ComponentType<{ className?: string }>;
 const FiSaveTyped = FiSave as ComponentType<{ className?: string }>;
+const FiUserPlusTyped = FiUserPlus as ComponentType<{ className?: string }>;
 
 interface ActionSidebarProps {
     allowReassign: boolean;
+    allowReceiversToAdd: boolean;
     currentUserTasksCompleted: boolean;
 }
 
-const ActionSidebar: React.FC<ActionSidebarProps> = ({ allowReassign, currentUserTasksCompleted }) => {
+const ActionSidebar: React.FC<ActionSidebarProps> = ({ allowReassign, allowReceiversToAdd, currentUserTasksCompleted }) => {
     const dispatch = useDispatch<AppDispatch>();
     const { packageData, fieldValues, uiState, loading } = useSelector((state: IRootState) => state.participant);
     const { hasAgreedToTerms } = uiState;
 
     // Check if package is in a final state
-    const isFinalized = packageData?.status === 'Completed' || packageData?.status === 'Rejected';
-
+    const isFinalized = packageData?.status === 'Completed' || packageData?.status === 'Rejected' || packageData?.status === 'Revoked';
+    const isCurrentUserReceiver = packageData?.currentUser?.role === 'Receiver';
     // Check if there are any unsaved field changes
     const hasUnsavedChanges = React.useMemo(() => {
         if (!packageData || isFinalized) return false;
@@ -149,6 +151,11 @@ const ActionSidebar: React.FC<ActionSidebarProps> = ({ allowReassign, currentUse
         dispatch(setReassignDrawerOpen(true));
     };
 
+    const handleAddReceiverClick = () => {
+        if (isFinalized) return;
+        dispatch(setAddReceiverDrawerOpen(true));
+    };
+
     const getSignButtonTooltip = () => {
         if (isFinalized) return `Document is ${packageData?.status.toLowerCase()}`;
         if (hasUnsavedChanges) return 'Save your changes first';
@@ -224,9 +231,9 @@ const ActionSidebar: React.FC<ActionSidebarProps> = ({ allowReassign, currentUse
                     <div className="group relative">
                         <button
                             onClick={handleRejectClick}
-                            disabled={currentUserTasksCompleted || isFinalized}
+                            disabled={currentUserTasksCompleted || isFinalized || isCurrentUserReceiver}
                             className={`flex flex-col items-center justify-center w-16 h-16 xl:w-18 xl:h-18 rounded-2xl transition-all duration-300 hover:scale-105 active:scale-95 ${
-                                isFinalized
+                                isFinalized || isCurrentUserReceiver
                                     ? 'bg-gray-400 border-2 border-gray-300 cursor-not-allowed opacity-60 text-white'
                                     : 'text-red-600 bg-red-50 border-2 border-red-100 hover:border-red-300 hover:bg-red-100 hover:shadow-lg'
                             }`}
@@ -267,7 +274,7 @@ const ActionSidebar: React.FC<ActionSidebarProps> = ({ allowReassign, currentUse
                     </div>
 
                     {/* Reassign Button */}
-                    {allowReassign && (
+                    {allowReassign && !isCurrentUserReceiver && (
                         <div className="group relative">
                             <button
                                 onClick={handleReassignClick}
@@ -284,6 +291,29 @@ const ActionSidebar: React.FC<ActionSidebarProps> = ({ allowReassign, currentUse
                             </button>
                             <div className="absolute right-full mr-3 top-1/2 -translate-y-1/2 bg-gray-900 text-white text-xs py-2 px-3 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10 shadow-lg">
                                 {getReassignButtonTooltip()}
+                                <div className="absolute left-full top-1/2 -translate-y-1/2 border-4 border-transparent border-l-gray-900"></div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* --- NEW DESKTOP: Add Receiver Button --- */}
+                    {allowReceiversToAdd && isCurrentUserReceiver && (
+                        <div className="group relative">
+                            <button
+                                onClick={handleAddReceiverClick}
+                                disabled={isFinalized}
+                                className={`flex flex-col items-center justify-center w-16 h-16 xl:w-18 xl:h-18 rounded-2xl transition-all duration-300 hover:scale-105 active:scale-95 ${
+                                    isFinalized
+                                        ? 'bg-gray-400 border-2 border-gray-300 cursor-not-allowed opacity-60 text-white'
+                                        : 'text-teal-600 bg-teal-50 border-2 border-teal-100 hover:border-teal-300 hover:bg-teal-100 hover:shadow-lg'
+                                }`}
+                                title={isFinalized ? `Document is ${packageData?.status?.toLowerCase()}` : 'Add another receiver'}
+                            >
+                                <FiUserPlusTyped className="w-6 h-6 xl:w-7 xl:h-7 mb-1" />
+                                <span className="text-xs font-semibold">Add Recipient</span>
+                            </button>
+                            <div className="absolute right-full mr-3 top-1/2 -translate-y-1/2 bg-gray-900 text-white text-xs py-2 px-3 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10 shadow-lg">
+                                Add another receiver
                                 <div className="absolute left-full top-1/2 -translate-y-1/2 border-4 border-transparent border-l-gray-900"></div>
                             </div>
                         </div>
@@ -337,11 +367,12 @@ const ActionSidebar: React.FC<ActionSidebarProps> = ({ allowReassign, currentUse
                         <button
                             onClick={handleSaveFields}
                             disabled={loading || isFinalized}
-                            className={`w-14 h-14 rounded-full shadow-lg transition-all duration-300 relative overflow-hidden ${
+                            className={`w-14 h-14 rounded-full shadow-lg transition-all duration-300 flex items-center justify-center relative overflow-hidden ${
                                 loading || isFinalized
                                     ? 'bg-gray-400 text-white cursor-not-allowed opacity-60'
                                     : 'bg-gradient-to-br from-orange-500 to-orange-600 text-white hover:shadow-xl hover:scale-110 active:scale-95'
                             }`}
+                            title={getSaveButtonTooltip()}
                         >
                             <FiSaveTyped className="w-6 h-6 relative z-10" />
                         </button>
@@ -357,11 +388,12 @@ const ActionSidebar: React.FC<ActionSidebarProps> = ({ allowReassign, currentUse
                     <button
                         onClick={handleSignClick}
                         disabled={!canSign}
-                        className={`w-14 h-14 rounded-full shadow-lg transition-all duration-300 relative overflow-hidden ${
+                        className={`w-14 h-14 rounded-full shadow-lg transition-all duration-300 flex items-center justify-center relative overflow-hidden ${
                             canSign
                                 ? 'bg-gradient-to-br from-green-500 to-green-600 text-white hover:shadow-xl hover:scale-110 active:scale-95'
                                 : 'bg-gray-400 text-white cursor-not-allowed opacity-60'
                         }`}
+                        title={getSignButtonTooltip()}
                     >
                         {canSign && <div className="absolute inset-0 bg-green-300 rounded-full animate-pulse opacity-30"></div>}
                         <FiCheckCircleTyped className="w-6 h-6 relative z-10" />
@@ -376,10 +408,13 @@ const ActionSidebar: React.FC<ActionSidebarProps> = ({ allowReassign, currentUse
                 <div className="group relative">
                     <button
                         onClick={handleRejectClick}
-                        disabled={isFinalized || currentUserTasksCompleted}
-                        className={`w-14 h-14 rounded-full shadow-lg transition-all duration-300 relative overflow-hidden ${
-                            isFinalized ? 'bg-gray-400 text-white cursor-not-allowed opacity-60' : 'bg-red-500 text-white hover:bg-red-600 hover:shadow-xl hover:scale-110 active:scale-95'
+                        disabled={isFinalized || currentUserTasksCompleted || isCurrentUserReceiver}
+                        className={`w-14 h-14 rounded-full shadow-lg transition-all duration-300 flex items-center justify-center relative overflow-hidden ${
+                            isFinalized || isCurrentUserReceiver
+                                ? 'bg-gray-400 text-white cursor-not-allowed opacity-60'
+                                : 'bg-red-500 text-white hover:bg-red-600 hover:shadow-xl hover:scale-110 active:scale-95'
                         }`}
+                        title={getRejectButtonTooltip()}
                     >
                         <FiXCircleTyped className="w-6 h-6" />
                     </button>
@@ -390,20 +425,40 @@ const ActionSidebar: React.FC<ActionSidebarProps> = ({ allowReassign, currentUse
                 </div>
 
                 {/* Reassign Button */}
-                {allowReassign && (
+                {allowReassign && !isCurrentUserReceiver && (
                     <div className="group relative">
                         <button
                             onClick={handleReassignClick}
                             disabled={isFinalized}
-                            className={`w-14 h-14 rounded-full shadow-lg transition-all duration-300 relative overflow-hidden ${
+                            className={`w-14 h-14 rounded-full shadow-lg transition-all duration-300 flex items-center justify-center relative overflow-hidden ${
                                 isFinalized ? 'bg-gray-400 text-white cursor-not-allowed opacity-60' : 'bg-[#1e293b] text-white hover:bg-opacity-90 hover:shadow-xl hover:scale-110 active:scale-95'
                             }`}
+                            title={getReassignButtonTooltip()}
                         >
                             <FiShare2Typed className="w-6 h-6" />
                         </button>
 
                         <div className="absolute right-full mr-3 top-1/2 -translate-y-1/2 bg-gray-900 text-white text-xs py-2 px-3 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap shadow-lg">
                             {getReassignButtonTooltip()}
+                        </div>
+                    </div>
+                )}
+
+                {/* --- NEW TABLET: Add Receiver Button --- */}
+                {allowReceiversToAdd && isCurrentUserReceiver && (
+                    <div className="group relative">
+                        <button
+                            onClick={handleAddReceiverClick}
+                            disabled={isFinalized}
+                            className={`w-14 h-14 rounded-full shadow-lg transition-all duration-300 flex items-center justify-center relative overflow-hidden ${
+                                isFinalized ? 'bg-gray-400 text-white cursor-not-allowed opacity-60' : 'bg-teal-500 text-white hover:bg-teal-600 hover:shadow-xl hover:scale-110 active:scale-95'
+                            }`}
+                            title="Add another receiver"
+                        >
+                            <FiUserPlusTyped className="w-6 h-6" />
+                        </button>
+                        <div className="absolute right-full mr-3 top-1/2 -translate-y-1/2 bg-gray-900 text-white text-xs py-2 px-3 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap shadow-lg">
+                            Add another receiver
                         </div>
                     </div>
                 )}
@@ -455,10 +510,13 @@ const ActionSidebar: React.FC<ActionSidebarProps> = ({ allowReassign, currentUse
                         {/* Reject Button */}
                         <button
                             onClick={handleRejectClick}
-                            disabled={isFinalized || currentUserTasksCompleted}
+                            disabled={isCurrentUserReceiver || currentUserTasksCompleted || isFinalized}
                             className={`flex-1 flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl font-semibold transition-all duration-200 active:scale-95 ${
-                                isFinalized ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'text-red-600 bg-red-50 border-2 border-red-100 hover:border-red-300 hover:bg-red-100'
+                                isCurrentUserReceiver || isFinalized
+                                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                    : 'text-red-600 bg-red-50 border-2 border-red-100 hover:border-red-300 hover:bg-red-100'
                             }`}
+                            title={isCurrentUserReceiver ? 'Receivers cannot reject' : 'Reject Document'}
                         >
                             <FiXCircleTyped className="w-5 h-5" />
                             <span>Reject</span>
@@ -478,15 +536,29 @@ const ActionSidebar: React.FC<ActionSidebarProps> = ({ allowReassign, currentUse
                         </button>
 
                         {/* Reassign Button (if allowed) */}
-                        {allowReassign && (
+                        {allowReassign && !isCurrentUserReceiver && (
                             <button
                                 onClick={handleReassignClick}
                                 disabled={isFinalized}
+                                title={isCurrentUserReceiver ? 'Receivers cannot reassign roles' : 'Reassign Document'}
                                 className={`p-3.5 rounded-xl transition-all duration-200 active:scale-95 ${
                                     isFinalized ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'text-[#1e293b] bg-blue-50 border-2 border-blue-100 hover:border-blue-300 hover:bg-blue-100'
                                 }`}
                             >
                                 <FiShare2Typed className="w-5 h-5" />
+                            </button>
+                        )}
+                        {/* Add Receiver Button */}
+                        {allowReceiversToAdd && isCurrentUserReceiver && (
+                            <button
+                                onClick={handleAddReceiverClick}
+                                disabled={isFinalized}
+                                title={isFinalized ? `Document is ${packageData?.status?.toLowerCase()}` : 'Add another receiver'}
+                                className={`p-3.5 rounded-xl transition-all duration-200 active:scale-95 ${
+                                    isFinalized ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'text-teal-600 bg-teal-50 border-2 border-teal-100 hover:border-teal-300 hover:bg-teal-100'
+                                }`}
+                            >
+                                <FiUserPlusTyped className="w-5 h-5" />
                             </button>
                         )}
                     </div>

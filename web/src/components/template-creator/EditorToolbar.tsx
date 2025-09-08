@@ -26,7 +26,7 @@ const FieldTool: React.FC<FieldToolProps> = ({ type, label, icon }) => {
 
     return (
         <div
-            className="flex flex-col items-center p-3 w-24 h-24 justify-center bg-gray-100 rounded-md border border-gray-200 cursor-grab active:cursor-grabbing hover:bg-blue-100 hover:text-blue-600 hover:border-blue-300 transition-all duration-150 text-gray-600 text-nowrap"
+            className="flex flex-col items-center p-3 w-24 h-24 justify-center dark:bg-gray-900 bg-gray-100 rounded-md border border-gray-200 cursor-grab active:cursor-grabbing hover:bg-blue-100 hover:text-blue-600 hover:border-blue-300 transition-all duration-150 text-gray-600 text-nowrap"
             draggable
             onDragStart={handleDragStart}
         >
@@ -38,7 +38,7 @@ const FieldTool: React.FC<FieldToolProps> = ({ type, label, icon }) => {
 
 const EditorToolbar: React.FC = () => {
     return (
-        <div className="flex items-center justify-center gap-4 flex-wrap p-2 bg-white rounded-md shadow-sm">
+        <div className="flex items-center justify-center gap-4 flex-wrap p-2 dark:bg-gray-900 bg-white rounded-md shadow-sm">
             <FieldTool type="text" label="Text" icon={<BsInputCursorTextTyped className="text-3xl" />} />
             <FieldTool type="textarea" label="Text Area" icon={<BsTextareaResizeTyped className="text-3xl" />} />
             <FieldTool type="signature" label="Signature" icon={<FaSignatureTyped className="text-3xl" />} />

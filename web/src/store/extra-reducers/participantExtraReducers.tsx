@@ -8,6 +8,7 @@ import {
     createContactForReassignment,
     performReassignment,
     downloadPackage,
+    addReceiverByParticipant,
 } from '../thunk/participantThunks';
 import { toast } from 'react-toastify';
 
@@ -126,6 +127,23 @@ export const buildParticipantExtraReducers = (builder: ActionReducerMapBuilder<P
         })
         .addCase(downloadPackage.rejected, (state, action) => {
             state.uiState.isDownloading = false; // Turn off on failure
+            toast.error(action.payload as string);
+        })
+        .addCase(addReceiverByParticipant.pending, (state) => {
+            state.uiState.addReceiverLoading = true;
+            state.uiState.addReceiverError = null;
+        })
+        .addCase(addReceiverByParticipant.fulfilled, (state, action) => {
+            state.uiState.addReceiverLoading = false;
+            state.uiState.addReceiverStep = 'success';
+            toast.success(action.payload.message);
+            // NOTE: We do not update the packageData here. The component will rely on the WebSocket
+            // event triggered by the backend to receive the fully updated package state.
+        })
+        .addCase(addReceiverByParticipant.rejected, (state, action) => {
+            state.uiState.addReceiverLoading = false;
+            state.uiState.addReceiverStep = 'failure';
+            state.uiState.addReceiverError = action.payload as string;
             toast.error(action.payload as string);
         });
 };

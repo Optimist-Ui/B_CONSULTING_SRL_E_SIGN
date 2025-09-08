@@ -24,6 +24,7 @@ const SigningDrawer: React.FC = () => {
     const [timer, setTimer] = useState(60);
 
     // Get current user's signature method from package data
+    console.log(packageData?.currentUser);
     const currentUserSignatureMethod = packageData?.currentUser?.signatureMethod;
 
     // Reset local state when drawer closes or flow restarts
@@ -172,20 +173,20 @@ const SigningDrawer: React.FC = () => {
 
     // Determine if we should show method selection or go straight to identity
     const shouldShowMethodSelection = () => {
-        return !currentUserSignatureMethod || currentUserSignatureMethod === 'Both';
+        const allowed = packageData?.currentUser?.signatureMethods ?? [];
+        return allowed.length > 1; // don’t show screen if only one (or zero)
     };
 
     // Auto-select method if user has specific signature method assigned
     useEffect(() => {
-        if (uiState.isSigningDrawerOpen && signingStep === 'method' && currentUserSignatureMethod) {
-            if (currentUserSignatureMethod === 'Email OTP') {
-                handleMethodSelect('email');
-            } else if (currentUserSignatureMethod === 'SMS OTP') {
-                handleMethodSelect('sms');
-            }
-            // If 'Both', let user choose
+        if (!uiState.isSigningDrawerOpen || signingStep !== 'method') return;
+        const allowed = packageData?.currentUser?.signatureMethods ?? [];
+        if (allowed.length === 1) {
+            // exactly one → pick it
+            const method = allowed[0].toLowerCase().includes('email') ? 'email' : 'sms';
+            handleMethodSelect(method);
         }
-    }, [uiState.isSigningDrawerOpen, signingStep, currentUserSignatureMethod]);
+    }, [uiState.isSigningDrawerOpen, signingStep, packageData?.currentUser?.signatureMethods]);
 
     // UI text helpers
     const getStepTitle = () => {

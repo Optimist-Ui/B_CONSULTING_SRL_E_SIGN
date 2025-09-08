@@ -145,6 +145,12 @@ jobs:
               -e "JWT_SECRET=$JWT_SECRET" \
               -e "CLIENT_URL=$CLIENT_URL" \
               -e "SPRYNG_API_TOKEN=$SPRYNG_API_TOKEN" \
+              -e "STRIPE_WEBHOOK_SECRET=$STRIPE_WEBHOOK_SECRET" \
+              -e "STRIPE_SECRET_KEY=$STRIPE_SECRET_KEY" \
+              -e "STARTER_YEARLY_PRICE_ID=$STARTER_YEARLY_PRICE_ID" \
+              -e "STARTER_MONTHLY_PRICE_ID=$STARTER_MONTHLY_PRICE_ID" \
+              -e "PRO_YEARLY_PRICE_ID=$PRO_YEARLY_PRICE_ID" \
+              -e "PRO_MONTHLY_PRICE_ID=$PRO_MONTHLY_PRICE_ID" \
               -e "BCRYPT_ROUNDS=$BCRYPT_ROUNDS" \
               -e "REMINDER_CRON=$REMINDER_CRON" \
               -e "ADMIN_EMAIL=$ADMIN_EMAIL" \

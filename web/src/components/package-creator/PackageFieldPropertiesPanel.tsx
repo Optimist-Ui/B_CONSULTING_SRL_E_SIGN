@@ -1,18 +1,21 @@
 import React, { useCallback, useState } from 'react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
-import { PackageField, AssignedUser, FieldRole, SignatureMethod, assignUserToField, removeUserFromField } from '../../store/slices/packageSlice';
+import { PackageField, AssignedUser, FieldRole, SignatureMethod, assignUserToField, removeUserFromField, ConcreteSignatureMethod } from '../../store/slices/packageSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, IRootState } from '../../store';
 import SearchableContactDropdown from '../common/SearchableContactDropdown'; // A new reusable contact dropdown
 import AddEditContactModal from '../common/AddEditContactModal';
 import { Contact } from '../../store/slices/contactSlice';
 import { nanoid } from '@reduxjs/toolkit';
-import { FiXCircle, FiPlusCircle } from 'react-icons/fi';
+import { FiXCircle, FiPlusCircle, FiMail, FiSmartphone } from 'react-icons/fi';
 import { ComponentType } from 'react';
+import { toast } from 'react-toastify';
 
 const FiPlusCircleTyped = FiPlusCircle as ComponentType<{ className?: string }>;
 const FiXCircleTyped = FiXCircle as ComponentType<{ className?: string }>;
+const FiMailTyped = FiMail as ComponentType<{ className?: string }>;
+const FiSmartphoneTyped = FiSmartphone as ComponentType<{ className?: string }>;
 
 interface PackageFieldPropertiesPanelProps {
     field: PackageField;
@@ -32,7 +35,7 @@ const PackageFieldPropertiesPanel: React.FC<PackageFieldPropertiesPanelProps> = 
     const [selectedRoleForAssignment, setSelectedRoleForAssignment] = useState<FieldRole | ''>('');
     const [isAddContactModalOpen, setAddContactModalOpen] = useState(false);
 
-    const [signatureMethod, setSignatureMethod] = useState<SignatureMethod>('Email OTP');
+    const [signatureMethodsForNewSigner, setSignatureMethodsForNewSigner] = useState<ConcreteSignatureMethod[]>(['Email OTP']);
 
     // Formik for managing general field properties (label, required, placeholder, options)
     const formik = useFormik({
@@ -133,6 +136,24 @@ const PackageFieldPropertiesPanel: React.FC<PackageFieldPropertiesPanelProps> = 
         return () => clearTimeout(timeoutId); // Cleanup timeout on unmount or re-render
     }, [formik.values, field.type, field.id, onUpdate, formik.dirty, formik.isValid, formik.touched.radioOptions, formik.touched.dropdownOptions, formik.touched.label]); // Re-run on form value/dirty state change
 
+    // --- NEW: Handler for the checkboxes for a NEW assignment ---
+    const handleNewSignerMethodChange = (method: ConcreteSignatureMethod) => {
+        setSignatureMethodsForNewSigner((prev) => {
+            let newMethods;
+            if (prev.includes(method)) {
+                newMethods = prev.filter((m) => m !== method); // Remove method
+            } else {
+                newMethods = [...prev, method]; // Add method
+            }
+            // Ensure at least one method is always selected
+            if (newMethods.length === 0) {
+                toast.error('A signer must have at least one authentication method.');
+                return prev; // Return original state
+            }
+            return newMethods;
+        });
+    };
+
     // Handler for adding a new user assignment to the field
     const handleAddAssignment = useCallback(() => {
         if (selectedContactForAssignment && selectedRoleForAssignment) {
@@ -141,14 +162,17 @@ const PackageFieldPropertiesPanel: React.FC<PackageFieldPropertiesPanelProps> = 
                 contactName: `${selectedContactForAssignment.firstName} ${selectedContactForAssignment.lastName}`,
                 contactEmail: selectedContactForAssignment.email,
                 role: selectedRoleForAssignment,
-                ...(selectedRoleForAssignment === 'Signer' && { signatureMethod }),
+                // Use the array if the role is Signer
+                ...(selectedRoleForAssignment === 'Signer' && { signatureMethods: signatureMethodsForNewSigner }),
             };
             dispatch(assignUserToField({ fieldId: field.id, user: newUserAssignment }));
+
+            // Reset form state
             setSelectedContactForAssignment(null);
             setSelectedRoleForAssignment('');
-            setSignatureMethod('Email OTP'); // Reset to default
+            setSignatureMethodsForNewSigner(['Email OTP']); // Reset to default
         }
-    }, [selectedContactForAssignment, selectedRoleForAssignment, signatureMethod, field.id, dispatch]);
+    }, [selectedContactForAssignment, selectedRoleForAssignment, signatureMethodsForNewSigner, field.id, dispatch]);
 
     // Handler for removing an assigned user from the field
     const handleRemoveAssignment = useCallback(
@@ -157,30 +181,52 @@ const PackageFieldPropertiesPanel: React.FC<PackageFieldPropertiesPanelProps> = 
         },
         [field.id, dispatch]
     );
+    const handleExistingUserMethodChange = (assignmentId: string, method: ConcreteSignatureMethod) => {
+        const userToUpdate = field.assignedUsers?.find((u) => u.id === assignmentId);
+        if (!userToUpdate) return;
+
+        const currentMethods = userToUpdate.signatureMethods || [];
+        let newMethods;
+
+        if (currentMethods.includes(method)) {
+            newMethods = currentMethods.filter((m) => m !== method);
+        } else {
+            newMethods = [...currentMethods, method];
+        }
+
+        if (newMethods.length === 0) {
+            toast.error('A signer must have at least one authentication method.');
+            return;
+        }
+
+        const updatedUsers = field.assignedUsers?.map((user) => (user.id === assignmentId ? { ...user, signatureMethods: newMethods } : user));
+
+        onUpdate(field.id, { assignedUsers: updatedUsers });
+    };
 
     return (
         <>
-            <div className="space-y-4">
+            <div className="space-y-4 dark:bg-gray-900 ">
                 {/* Display Field Type (Read-only) */}
                 <div>
-                    <label className="form-label text-gray-700">Field Type:</label>
+                    <label className="form-label">Field Type:</label>
                     <input
                         type="text"
-                        className="form-input bg-gray-100 text-gray-800 border-gray-300 focus:ring-blue-500 read-only"
+                        className="form-input dark:bg-gray-900  bg-gray-100 border-gray-300 focus:ring-blue-500 read-only"
                         value={field.type.charAt(0).toUpperCase() + field.type.slice(1)}
                         readOnly
                     />
                 </div>
                 {/* Label Input */}
                 <div>
-                    <label htmlFor={`label-${field.id}`} className="form-label text-gray-700">
+                    <label htmlFor={`label-${field.id}`} className="form-label">
                         Label:
                     </label>
                     <input
                         id={`label-${field.id}`}
                         name="label"
                         type="text"
-                        className="form-input bg-gray-100 text-gray-800 border-gray-300 focus:ring-blue-500"
+                        className="form-input dark:bg-gray-900  bg-gray-100 border-gray-300 focus:ring-blue-500"
                         value={formik.values.label}
                         onChange={formik.handleChange}
                         onBlur={formik.handleBlur}
@@ -190,14 +236,14 @@ const PackageFieldPropertiesPanel: React.FC<PackageFieldPropertiesPanelProps> = 
                 {/* Placeholder (for text/textarea fields) */}
                 {(field.type === 'text' || field.type === 'textarea') && (
                     <div>
-                        <label htmlFor={`placeholder-${field.id}`} className="form-label text-gray-700">
+                        <label htmlFor={`placeholder-${field.id}`} className="form-label">
                             Placeholder:
                         </label>
                         <input
                             id={`placeholder-${field.id}`}
                             name="placeholder"
                             type="text"
-                            className="form-input bg-gray-100 text-gray-800 border-gray-300 focus:ring-blue-500"
+                            className="form-input dark:bg-gray-900  bg-gray-100 border-gray-300 focus:ring-blue-500"
                             value={formik.values.placeholder}
                             onChange={formik.handleChange}
                             onBlur={formik.handleBlur}
@@ -209,14 +255,14 @@ const PackageFieldPropertiesPanel: React.FC<PackageFieldPropertiesPanelProps> = 
                 {field.type === 'radio' && (
                     <>
                         <div>
-                            <label htmlFor={`group-id-${field.id}`} className="form-label text-gray-700">
+                            <label htmlFor={`group-id-${field.id}`} className="form-label ">
                                 Radio Group ID:
                             </label>
                             <input
                                 id={`group-id-${field.id}`}
                                 name="groupId"
                                 type="text"
-                                className="form-input bg-gray-100 text-gray-800 border-gray-300 focus:ring-blue-500"
+                                className="form-input dark:bg-gray-900  bg-gray-100 border-gray-300 focus:ring-blue-500"
                                 placeholder="Unique ID for this radio group"
                                 value={formik.values.groupId}
                                 onChange={formik.handleChange}
@@ -226,14 +272,14 @@ const PackageFieldPropertiesPanel: React.FC<PackageFieldPropertiesPanelProps> = 
                             <p className="text-sm text-gray-500 mt-1">All radio buttons with the same Group ID act as a single choice set.</p>
                         </div>
                         <div>
-                            <label htmlFor={`radio-options-${field.id}`} className="form-label text-gray-700">
+                            <label htmlFor={`radio-options-${field.id}`} className="form-label ">
                                 Options (comma-separated):
                             </label>
                             <input
                                 id={`radio-options-${field.id}`}
                                 name="radioOptions"
                                 type="text"
-                                className="form-input bg-gray-100 text-gray-800 border-gray-300 focus:ring-blue-500"
+                                className="form-input dark:bg-gray-900  bg-gray-100 border-gray-300 focus:ring-blue-500"
                                 placeholder="Option 1, Option 2"
                                 value={formik.values.radioOptions}
                                 onChange={formik.handleChange}
@@ -247,21 +293,21 @@ const PackageFieldPropertiesPanel: React.FC<PackageFieldPropertiesPanelProps> = 
                 {/* Dropdown Options */}
                 {field.type === 'dropdown' && (
                     <div>
-                        <label htmlFor={`dropdown-options-${field.id}`} className="form-label text-gray-700">
+                        <label htmlFor={`dropdown-options-${field.id}`} className="form-label ">
                             Options (comma-separated):
                         </label>
                         <input
                             id={`dropdown-options-${field.id}`}
                             name="dropdownOptions"
                             type="text"
-                            className="form-input bg-gray-100 text-gray-800 border-gray-300 focus:ring-blue-500"
+                            className="form-input dark:bg-gray-900   border-gray-300 focus:ring-blue-500"
                             placeholder="Option 1, Option 2"
                             value={formik.values.dropdownOptions}
                             onChange={formik.handleChange}
                             onBlur={formik.handleBlur}
                         />
                         {formik.touched.dropdownOptions && formik.errors.dropdownOptions ? <div className="text-red-500 mt-1 text-sm">{formik.errors.dropdownOptions}</div> : null}
-                        <p className="text-sm text-gray-500 mt-1">Enter at least one option for the dropdown.</p>
+                        <p className="text-sm  mt-1">Enter at least one option for the dropdown.</p>
                     </div>
                 )}
                 {/* Required Checkbox */}
@@ -275,16 +321,16 @@ const PackageFieldPropertiesPanel: React.FC<PackageFieldPropertiesPanelProps> = 
                         onChange={formik.handleChange}
                         onBlur={formik.handleBlur}
                     />
-                    <label htmlFor={`required-${field.id}`} className="form-label mb-0 text-gray-700">
+                    <label htmlFor={`required-${field.id}`} className="form-label mb-0">
                         Required
                     </label>
                 </div>
 
-                <hr className="my-6 border-gray-200" />
+                <hr className="my-6 dark:bg-gray-900  border-gray-200" />
 
                 {/* Role Assignment Section */}
                 <div>
-                    <h4 className="font-semibold mb-3 text-gray-800">Assign Users to Field</h4>
+                    <h4 className="font-semibold mb-3">Assign Users to Field</h4>
                     <div className="flex flex-col gap-3 mb-4">
                         <SearchableContactDropdown // Reusable contact selection
                             contacts={contacts}
@@ -302,14 +348,31 @@ const PackageFieldPropertiesPanel: React.FC<PackageFieldPropertiesPanelProps> = 
                         </select>
                         {/* NEW: Conditional Signature Method Dropdown */}
                         {selectedRoleForAssignment === 'Signer' && (
-                            <div>
-                                <label className="text-sm text-gray-600 mb-1 block">Signature Method:</label>
-                                <select className="form-select w-full" value={signatureMethod} onChange={(e) => setSignatureMethod(e.target.value as SignatureMethod)}>
-                                    <option value="Email OTP">Via Email OTP Code</option>
-                                    <option value="SMS OTP">Via SMS OTP Code</option>
-                                </select>
+                            <div className="p-2 border rounded-md bg-white">
+                                <label className="text-sm font-semibold text-gray-700 block mb-2">Signature Method(s):</label>
+                                <div className="space-y-2">
+                                    <label className="flex items-center text-sm gap-2 cursor-pointer">
+                                        <input
+                                            type="checkbox"
+                                            className="form-checkbox"
+                                            checked={signatureMethodsForNewSigner.includes('Email OTP')}
+                                            onChange={() => handleNewSignerMethodChange('Email OTP')}
+                                        />
+                                        <span>Via Email OTP</span>
+                                    </label>
+                                    <label className="flex items-center text-sm gap-2 cursor-pointer">
+                                        <input
+                                            type="checkbox"
+                                            className="form-checkbox"
+                                            checked={signatureMethodsForNewSigner.includes('SMS OTP')}
+                                            onChange={() => handleNewSignerMethodChange('SMS OTP')}
+                                        />
+                                        <span>Via SMS OTP</span>
+                                    </label>
+                                </div>
                             </div>
                         )}
+
                         <button
                             type="button"
                             onClick={handleAddAssignment}
@@ -320,30 +383,51 @@ const PackageFieldPropertiesPanel: React.FC<PackageFieldPropertiesPanelProps> = 
                         </button>
                     </div>
 
-                    <div className="mt-4 border p-3 rounded-md bg-gray-50 max-h-48 overflow-y-auto">
-                        <p className="text-sm font-semibold mb-2 text-gray-700">Assigned to "{field.label}" Field:</p>
+                    <div className="mt-4 max-h-60 overflow-y-auto space-y-2">
+                        <p className="text-sm font-semibold mb-2">Assigned Users:</p>
                         {field.assignedUsers && field.assignedUsers.length > 0 ? (
-                            <ul className="space-y-2">
-                                {field.assignedUsers.map((assignment) => (
-                                    <li key={assignment.id} className="flex justify-between items-center bg-white p-2 rounded shadow-sm text-sm border border-gray-200">
-                                        <span className="font-medium text-gray-800">
+                            field.assignedUsers.map((assignment) => (
+                                <div key={assignment.id} className="bg-white p-3 rounded shadow-sm border">
+                                    <div className="flex justify-between items-center text-sm">
+                                        <span className="font-medium">
                                             {assignment.contactName}
                                             <span className="ml-2 text-blue-600 font-semibold text-xs">({assignment.role})</span>
-                                            <span className="block text-gray-500 text-xs truncate">{assignment.contactEmail}</span>
                                         </span>
-                                        <button
-                                            type="button"
-                                            onClick={() => handleRemoveAssignment(assignment.id)}
-                                            className="text-red-500 hover:text-red-700 p-1 rounded-full transition-colors"
-                                            title="Remove assignment"
-                                        >
+                                        <button type="button" onClick={() => handleRemoveAssignment(assignment.id)} className="text-red-500 hover:text-red-700 p-1" title="Remove assignment">
                                             <FiXCircleTyped />
                                         </button>
-                                    </li>
-                                ))}
-                            </ul>
+                                    </div>
+
+                                    {/* --- MODIFICATION: Edit Existing User's Methods --- */}
+                                    {assignment.role === 'Signer' && (
+                                        <div className="mt-2 pt-2 border-t">
+                                            <label className="text-xs font-semibold text-gray-600 block mb-2">Allowed Methods:</label>
+                                            <div className="flex gap-4">
+                                                <label className="flex items-center text-sm gap-2 cursor-pointer">
+                                                    <input
+                                                        type="checkbox"
+                                                        className="form-checkbox"
+                                                        checked={assignment.signatureMethods?.includes('Email OTP')}
+                                                        onChange={() => handleExistingUserMethodChange(assignment.id, 'Email OTP')}
+                                                    />
+                                                    <span>Email</span>
+                                                </label>
+                                                <label className="flex items-center text-sm gap-2 cursor-pointer">
+                                                    <input
+                                                        type="checkbox"
+                                                        className="form-checkbox"
+                                                        checked={assignment.signatureMethods?.includes('SMS OTP')}
+                                                        onChange={() => handleExistingUserMethodChange(assignment.id, 'SMS OTP')}
+                                                    />
+                                                    <span>SMS</span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            ))
                         ) : (
-                            <p className="text-center text-gray-500 text-sm py-4">No users assigned to this field.</p>
+                            <p className="text-center text-gray-500 text-sm py-4">No users assigned.</p>
                         )}
                     </div>
                 </div>
@@ -353,12 +437,7 @@ const PackageFieldPropertiesPanel: React.FC<PackageFieldPropertiesPanelProps> = 
                 isOpen={isAddContactModalOpen}
                 onClose={() => setAddContactModalOpen(false)}
                 onSaveSuccess={(newContact) => {
-                    // This is the key part!
-                    // Automatically select the new contact in the dropdown
                     setSelectedContactForAssignment(newContact);
-
-                    // The modal will close itself via its internal `onClose` call,
-                    // but you can also call it here if needed.
                     setAddContactModalOpen(false);
                 }}
             />

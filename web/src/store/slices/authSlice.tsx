@@ -11,6 +11,7 @@ export interface User {
     phone?: string;
     language?: string;
     profileImage?: string;
+    hasHadTrial?: boolean;
 }
 
 export interface AuthState {

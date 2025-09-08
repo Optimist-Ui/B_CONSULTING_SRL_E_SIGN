@@ -6,7 +6,7 @@ import { AppDispatch, IRootState } from '../../store';
 import { DocumentTemplate } from '../../store/slices/templateSlice';
 import { fetchTemplates, getTemplateById } from '../../store/thunk/templateThunks'; // Updated import
 import { uploadPackageDocument } from '../../store/thunk/packageThunks'; // Keep this import
-import { startPackageCreation, setPackageTitle, setPackageLoading, setPackageError } from '../../store/slices/packageSlice';
+import { startPackageCreation, setPackageTitle, setPackageLoading, setPackageError, setCurrentPackage } from '../../store/slices/packageSlice';
 import { loadPdfDocument, renderPdfPageToCanvas } from '../../utils/pdf-utils';
 import { PDFDocumentProxy } from 'pdfjs-dist/types/src/display/api';
 import { toast } from 'react-toastify';
@@ -186,8 +186,16 @@ const Step1_DocumentSelection: React.FC<StepProps> = ({ onNext }) => {
     const handleTemplateSelect = async (e: React.ChangeEvent<HTMLSelectElement>) => {
         const templateId = e.target.value;
         if (!templateId) {
-            dispatch(startPackageCreation({ name: 'New Package' }));
+            // Instead of creating a new package, just clear the current one
+            dispatch(setCurrentPackage(null));
             setSelectedTemplateId(null);
+            formik.resetForm();
+
+            // Clear canvas
+            if (canvasRef.current) {
+                const context = canvasRef.current.getContext('2d');
+                context?.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+            }
             return;
         }
 
@@ -224,18 +232,18 @@ const Step1_DocumentSelection: React.FC<StepProps> = ({ onNext }) => {
     };
 
     return (
-        <div className="p-8">
+        <div className="p-8 dark:bg-gray-900">
             <div className="max-w-6xl mx-auto">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     {/* Left Column - Document Selection */}
                     <div className="space-y-6">
                         <div>
-                            <h2 className="text-2xl font-bold text-gray-900 mb-2">Choose Document Source</h2>
-                            <p className="text-gray-600">Select an existing template or upload a new PDF document</p>
+                            <h2 className="text-2xl font-bold mb-2">Choose Document Source</h2>
+                            <p>Select an existing template or upload a new PDF document</p>
                         </div>
 
                         {/* Template Selection */}
-                        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-200">
+                        <div className="bg-gradient-to-r dark:bg-gray-900 from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-200">
                             <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
                                 <FiFileTyped className="text-blue-600" />
                                 Use Existing Template

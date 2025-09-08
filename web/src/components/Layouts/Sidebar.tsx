@@ -1,33 +1,90 @@
+import React, { useEffect } from 'react';
 import PerfectScrollbar from 'react-perfect-scrollbar';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { toggleSidebar } from '../../store/slices/themeConfigSlice';
-import AnimateHeight from 'react-animate-height';
 import { IRootState } from '../../store';
-import { useState, useEffect } from 'react';
+import { useSubscription } from '../../store/hooks/useSubscription';
+
+// Import the banner and its CSS
+import SubscriptionNotificationBanner from '../subscriptions/SubscriptionNotificationBanner';
+import '../../assets/css/sidebar.css';
+
+// Icon imports
 import IconCaretsDown from '../Icon/IconCaretsDown';
-import IconCaretDown from '../Icon/IconCaretDown';
-import IconMenuCalendar from '../Icon/Menu/IconMenuCalendar';
-import IconMenuTables from '../Icon/Menu/IconMenuTables';
 import IconUser from '../Icon/IconUser';
 import IconMenuDocumentation from '../Icon/Menu/IconMenuDocumentation';
-import IconMenuContacts from '../Icon/Menu/IconMenuContacts';
 import IconUsersGroup from '../Icon/IconUsersGroup';
 import IconMenuElements from '../Icon/Menu/IconMenuElements';
+import IconCreditCard from '../Icon/IconCreditCard';
+import IconLockDots from '../Icon/IconLockDots';
+import IconPlus from '../Icon/IconPlus';
 
+// --- Reusable NavItem Component ---
+const NavItem: React.FC<{
+    to: string;
+    icon: React.ComponentType<{ className?: string }>;
+    text: string;
+}> = ({ to, icon: Icon, text }) => {
+    const navigate = useNavigate();
+    const { t } = useTranslation();
+    const { subscriptionStatus } = useSelector((state: IRootState) => state.subscription);
+    const hasActiveSubscription = subscriptionStatus?.hasActiveSubscription ?? false;
+    const canCreatePackages = subscriptionStatus?.canCreatePackages ?? false;
+
+    let isLocked = false;
+    let reason = '';
+
+    const activeSubscriptionRoutes = ['/dashboard', '/my-documents', '/templates', '/contacts'];
+    if (activeSubscriptionRoutes.includes(to)) {
+        isLocked = !hasActiveSubscription;
+        reason = 'active_subscription_required';
+    } else if (to === '/add-document') {
+        isLocked = !canCreatePackages;
+        reason = hasActiveSubscription ? 'package_creation_not_allowed' : 'active_subscription_required';
+    }
+
+    const handleClick = (e: React.MouseEvent) => {
+        if (isLocked) {
+            e.preventDefault();
+            navigate('/subscription-required', { state: { from: { pathname: to }, reason } });
+        }
+    };
+
+    return (
+        <li className="nav-item">
+            <NavLink to={isLocked ? '#' : to} className={`group ${isLocked ? 'opacity-60' : ''}`} onClick={handleClick}>
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center">
+                        <Icon className="group-hover:!text-primary shrink-0" />
+                        <span className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">{t(text)}</span>
+                    </div>
+                    {isLocked && <IconLockDots className="w-5 ms-6 h-5 text-gray-500" />}
+                </div>
+            </NavLink>
+        </li>
+    );
+};
+
+// --- Main Sidebar Component ---
 const Sidebar = () => {
-    const [currentMenu, setCurrentMenu] = useState<string>('');
     const themeConfig = useSelector((state: IRootState) => state.themeConfig);
     const semidark = useSelector((state: IRootState) => state.themeConfig.semidark);
     const location = useLocation();
     const dispatch = useDispatch();
     const { t } = useTranslation();
-    const toggleMenu = (value: string) => {
-        setCurrentMenu((oldValue) => {
-            return oldValue === value ? '' : value;
-        });
-    };
+
+    const { subscriptionStatus, hasActiveSubscription, canCreatePackages } = useSubscription({
+        autoFetchStatus: true,
+        fetchOnMount: true,
+    });
+
+    useEffect(() => {
+        if (window.innerWidth < 1024 && themeConfig.sidebar) {
+            dispatch(toggleSidebar());
+        }
+    }, [location, dispatch, themeConfig.sidebar]);
 
     useEffect(() => {
         const selector = document.querySelector('.sidebar ul a[href="' + window.location.pathname + '"]');
@@ -35,22 +92,12 @@ const Sidebar = () => {
             selector.classList.add('active');
             const ul: any = selector.closest('ul.sub-menu');
             if (ul) {
-                let ele: any = ul.closest('li.menu').querySelectorAll('.nav-link') || [];
-                if (ele.length) {
-                    ele = ele[0];
-                    setTimeout(() => {
-                        ele.click();
-                    });
+                let ele: any = ul.closest('li.menu')?.querySelectorAll('.nav-link')?.[0];
+                if (ele) {
+                    setTimeout(() => ele.click());
                 }
             }
         }
-    }, []);
-
-    useEffect(() => {
-        if (window.innerWidth < 1024 && themeConfig.sidebar) {
-            dispatch(toggleSidebar());
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [location]);
 
     return (
@@ -58,7 +105,7 @@ const Sidebar = () => {
             <nav
                 className={`sidebar fixed min-h-screen h-full top-0 bottom-0 w-[260px] shadow-[5px_0_25px_0_rgba(94,92,154,0.1)] z-50 transition-all duration-300 ${semidark ? 'text-white-dark' : ''}`}
             >
-                <div className="bg-white dark:bg-black h-full">
+                <div className="bg-white dark:bg-black h-full flex flex-col">
                     <div className="flex justify-between items-center px-4 py-3">
                         <NavLink to="/" className="main-logo flex items-center shrink-0">
                             <img className="w-8 ml-[5px] flex-none" src="/assets/images/logo.svg" alt="logo" />
@@ -73,71 +120,54 @@ const Sidebar = () => {
                             <IconCaretsDown className="m-auto rotate-90" />
                         </button>
                     </div>
-                    <PerfectScrollbar className="h-[calc(100vh-80px)] relative">
+
+                    <PerfectScrollbar className="relative flex-grow">
                         <ul className="relative font-semibold space-y-0.5 p-4 py-0">
-                            <li className="nav-item">
-                                <ul>
-                                    <li className="nav-item">
-                                        <NavLink to="/" className="group">
-                                            <div className="flex items-center">
-                                                <IconMenuDocumentation className="group-hover:!text-primary shrink-0" />
-                                                <span className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">{t('All Documents')}</span>
-                                            </div>
-                                        </NavLink>
-                                    </li>
-                                </ul>
-                            </li>
-                            {/* <li className="nav-item">
-                                <ul>
-                                    <li className="nav-item">
-                                        <NavLink to="/my-documents" className="group">
-                                            <div className="flex items-center">
-                                                <IconMenuDocumentation className="group-hover:!text-primary shrink-0" />
-                                                <span className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">{t('My Documents')}</span>
-                                            </div>
-                                        </NavLink>
-                                    </li>
-                                </ul>
-                            </li> */}
-                            <li className="nav-item">
-                                <ul>
-                                    <li className="nav-item">
-                                        <NavLink to="/templates" className="group">
-                                            <div className="flex items-center">
-                                                <IconMenuElements className="group-hover:!text-primary shrink-0" />
-                                                <span className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">{t('Templates')}</span>
-                                            </div>
-                                        </NavLink>
-                                    </li>
-                                </ul>
-                            </li>
-                            <li className="nav-item">
-                                <ul>
-                                    <li className="nav-item">
-                                        <NavLink to="/contacts" className="group">
-                                            <div className="flex items-center">
-                                                <IconUsersGroup className="group-hover:!text-primary shrink-0" />
-                                                <span className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">{t('Contacts List')}</span>
-                                            </div>
-                                        </NavLink>
-                                    </li>
-                                </ul>
-                            </li>
+                            <h2 className="py-3 px-4 text-white-dark text-xs font-extrabold uppercase dark:text-gray-500">Dashboard</h2>
+
+                            <NavItem to="/dashboard" icon={IconMenuDocumentation} text="All Documents" />
+                            <NavItem to="/templates" icon={IconMenuElements} text="Templates" />
+                            <NavItem to="/contacts" icon={IconUsersGroup} text="Contacts List" />
+                            <NavItem to="/add-document" icon={IconPlus} text="Add Document" />
+
+                            <h2 className="py-3 px-4 text-white-dark text-xs font-extrabold uppercase dark:text-gray-500">Settings</h2>
 
                             <li className="nav-item">
-                                <ul>
-                                    <li className="nav-item">
-                                        <NavLink to="/profile" className="group">
-                                            <div className="flex items-center">
-                                                <IconUser className="group-hover:!text-primary shrink-0" />
-                                                <span className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">{t('Profile')}</span>
-                                            </div>
-                                        </NavLink>
-                                    </li>
-                                </ul>
+                                <NavLink to="/subscriptions" className="group">
+                                    <div className="flex items-center">
+                                        <IconCreditCard className="group-hover:!text-primary shrink-0" />
+                                        <span className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">{t('Subscriptions')}</span>
+                                    </div>
+                                </NavLink>
+                            </li>
+                            <li className="nav-item">
+                                <NavLink to="/payment-methods" className="group">
+                                    <div className="flex items-center">
+                                        <IconCreditCard className="group-hover:!text-primary shrink-0" />
+                                        <span className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">{t('Payment Methods')}</span>
+                                    </div>
+                                </NavLink>
+                            </li>
+                            <li className="nav-item">
+                                <NavLink to="/profile" className="group">
+                                    <div className="flex items-center">
+                                        <IconUser className="group-hover:!text-primary shrink-0" />
+                                        <span className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">{t('Profile')}</span>
+                                    </div>
+                                </NavLink>
                             </li>
                         </ul>
                     </PerfectScrollbar>
+
+                    {/* RENDER THE BANNER AT THE BOTTOM */}
+                    {subscriptionStatus && (
+                        <SubscriptionNotificationBanner
+                            subscriptionStatus={subscriptionStatus.status}
+                            hasActiveSubscription={hasActiveSubscription}
+                            canCreatePackages={canCreatePackages}
+                            reason={subscriptionStatus.reason}
+                        />
+                    )}
                 </div>
             </nav>
         </div>

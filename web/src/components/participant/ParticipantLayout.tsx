@@ -10,6 +10,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import RejectModal from './modals/RejectModal';
 import ReassignDrawer from './modals/ReassignDrawer';
 import SigningDrawer from './modals/SigningDrawer';
+import AddReceiverDrawer from './modals/AddReceiverDrawer';
 import '../../assets/css/participanLayout.scss';
 
 // Helper for typed icons
@@ -42,38 +43,30 @@ const ParticipantLayout: React.FC<ParticipantLayoutProps> = ({ packageData }) =>
             return false; // Don't show completion message for finalized documents
         }
 
-        const currentUserFields = packageData.fields?.filter(field => 
-            field.isAssignedToCurrentUser
-        ) || [];
+        const currentUserFields = packageData.fields?.filter((field) => field.isAssignedToCurrentUser) || [];
 
         if (currentUserFields.length === 0) {
             return false; // No fields assigned, don't show completion message
         }
 
-        // Check if all required fields are completed
-        const allRequiredFieldsCompleted = currentUserFields.every(field => {
-            if (!field.required) return true; // Skip non-required fields
-            
-            const fieldValue = fieldValues[field.id];
-            const hasValue = fieldValue !== undefined && fieldValue !== null && fieldValue !== '';
-            
-            // For signature fields, also check if they're signed
-            if (field.type === 'signature' && field.assignedUsers?.length > 0) {
-                const currentUserAssignment = field.assignedUsers.find(user => 
-                    user.contactId === packageData.currentUser?.contactId
-                );
+        const allFieldsCompleted = currentUserFields.every((field) => {
+            // For signature fields, the definitive status is the 'signed' flag
+            if (field.type === 'signature') {
+                const currentUserAssignment = field.assignedUsers?.find((user) => user.contactId === packageData.currentUser?.contactId);
                 return currentUserAssignment?.signed || false;
             }
-            
-            return hasValue;
+
+            // For all other field types, check for a value in the state
+            const fieldValue = fieldValues[field.id];
+            return fieldValue !== undefined && fieldValue !== null && fieldValue !== '';
         });
 
-        return allRequiredFieldsCompleted;
+        return allFieldsCompleted;
     }, [packageData, fieldValues]);
 
     const progressData = useMemo(() => {
         const status = packageData.status;
-        
+
         // Handle different document statuses
         switch (status) {
             case 'Completed':
@@ -83,9 +76,9 @@ const ParticipantLayout: React.FC<ParticipantLayoutProps> = ({ packageData }) =>
                     color: 'bg-gradient-to-r from-green-500 to-green-600',
                     icon: <FiCheckTyped className="w-4 h-4 text-green-600" />,
                     bgColor: 'bg-green-50',
-                    borderColor: 'border-green-200'
+                    borderColor: 'border-green-200',
                 };
-                
+
             case 'Rejected':
                 return {
                     percentage: 0,
@@ -93,9 +86,9 @@ const ParticipantLayout: React.FC<ParticipantLayoutProps> = ({ packageData }) =>
                     color: 'bg-gradient-to-r from-red-500 to-red-600',
                     icon: <FiXIconTyped className="w-4 h-4 text-red-600" />,
                     bgColor: 'bg-red-50',
-                    borderColor: 'border-red-200'
+                    borderColor: 'border-red-200',
                 };
-                
+
             case 'Expired':
                 return {
                     percentage: 0,
@@ -103,9 +96,9 @@ const ParticipantLayout: React.FC<ParticipantLayoutProps> = ({ packageData }) =>
                     color: 'bg-gradient-to-r from-orange-500 to-orange-600',
                     icon: <FiClockTyped className="w-4 h-4 text-orange-600" />,
                     bgColor: 'bg-orange-50',
-                    borderColor: 'border-orange-200'
+                    borderColor: 'border-orange-200',
                 };
-                
+
             case 'Draft':
                 return {
                     percentage: 10,
@@ -113,9 +106,9 @@ const ParticipantLayout: React.FC<ParticipantLayoutProps> = ({ packageData }) =>
                     color: 'bg-gradient-to-r from-gray-400 to-gray-500',
                     icon: <FiClockTyped className="w-4 h-4 text-gray-500" />,
                     bgColor: 'bg-gray-50',
-                    borderColor: 'border-gray-200'
+                    borderColor: 'border-gray-200',
                 };
-                
+
             case 'Archived':
                 return {
                     percentage: 100,
@@ -123,9 +116,9 @@ const ParticipantLayout: React.FC<ParticipantLayoutProps> = ({ packageData }) =>
                     color: 'bg-gradient-to-r from-gray-500 to-gray-600',
                     icon: <FiCheckTyped className="w-4 h-4 text-gray-600" />,
                     bgColor: 'bg-gray-50',
-                    borderColor: 'border-gray-200'
+                    borderColor: 'border-gray-200',
                 };
-                
+
             case 'Sent':
             default:
                 // If current user has completed all tasks, show completion state
@@ -136,59 +129,52 @@ const ParticipantLayout: React.FC<ParticipantLayoutProps> = ({ packageData }) =>
                         color: 'bg-gradient-to-r from-green-500 to-green-600',
                         icon: <FiCheckTyped className="w-4 h-4 text-green-600" />,
                         bgColor: 'bg-green-50',
-                        borderColor: 'border-green-200'
+                        borderColor: 'border-green-200',
                     };
                 }
 
                 // Calculate progress based on field completion for active documents
-                const currentUserFields = packageData.fields?.filter(field => 
-                    field.isAssignedToCurrentUser
-                ) || [];
-                
-                const totalRequiredFields = currentUserFields.filter(field => field.required).length;
-                
+                const currentUserFields = packageData.fields?.filter((field) => field.isAssignedToCurrentUser) || [];
+
+                const totalRequiredFields = currentUserFields.filter((field) => field.required).length;
+
                 // Count completed fields
                 let completedFields = 0;
-                
+
                 // Check field values from Redux store
-                currentUserFields.forEach(field => {
+                currentUserFields.forEach((field) => {
                     const fieldValue = fieldValues[field.id];
                     if (fieldValue !== undefined && fieldValue !== null && fieldValue !== '') {
                         completedFields++;
                     }
-                    
+
                     // For signature fields, also check if they're signed
                     if (field.type === 'signature' && field.assignedUsers?.length > 0) {
-                        const currentUserAssignment = field.assignedUsers.find(user => 
-                            user.contactId === packageData.currentUser?.contactId
-                        );
+                        const currentUserAssignment = field.assignedUsers.find((user) => user.contactId === packageData.currentUser?.contactId);
                         if (currentUserAssignment?.signed) {
                             completedFields++;
                         }
                     }
                 });
-                
+
                 // Base progress starts at 20% if terms are agreed
                 let baseProgress = hasAgreedToTerms ? 25 : 10;
-                
+
                 // Add progress based on field completion
-                const fieldProgress = totalRequiredFields > 0 
-                    ? Math.floor((completedFields / totalRequiredFields) * 65) // 65% for field completion
-                    : 50; // If no required fields, give 50% for being sent
-                
+                const fieldProgress =
+                    totalRequiredFields > 0
+                        ? Math.floor((completedFields / totalRequiredFields) * 65) // 65% for field completion
+                        : 50; // If no required fields, give 50% for being sent
+
                 const totalProgress = Math.min(baseProgress + fieldProgress, 95); // Cap at 95% until fully completed
-                
+
                 return {
                     percentage: totalProgress,
-                    label: totalProgress < 30 
-                        ? 'Review and accept terms' 
-                        : totalProgress < 80 
-                        ? `${completedFields}/${totalRequiredFields} fields completed`
-                        : 'Ready for final submission',
+                    label: totalProgress < 30 ? 'Review and accept terms' : totalProgress < 80 ? `${completedFields}/${totalRequiredFields} fields completed` : 'Ready for final submission',
                     color: 'bg-gradient-to-r from-[#1e293b] to-blue-600',
                     icon: <FiClockTyped className="w-4 h-4 text-blue-600" />,
                     bgColor: 'bg-blue-50',
-                    borderColor: 'border-blue-200'
+                    borderColor: 'border-blue-200',
                 };
         }
     }, [packageData, fieldValues, hasAgreedToTerms, currentUserTasksCompleted]);
@@ -287,14 +273,21 @@ const ParticipantLayout: React.FC<ParticipantLayoutProps> = ({ packageData }) =>
                                             <span className="px-2 py-1 bg-white bg-opacity-70 rounded-md text-xs font-medium">PDF</span>
                                         </div>
                                         <div className="mt-2">
-                                            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                                                packageData.status === 'Completed' ? 'bg-green-100 text-green-800' :
-                                                packageData.status === 'Rejected' ? 'bg-red-100 text-red-800' :
-                                                packageData.status === 'Expired' ? 'bg-orange-100 text-orange-800' :
-                                                packageData.status === 'Draft' ? 'bg-gray-100 text-gray-800' :
-                                                packageData.status === 'Archived' ? 'bg-gray-100 text-gray-800' :
-                                                'bg-blue-100 text-blue-800'
-                                            }`}>
+                                            <span
+                                                className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                                                    packageData.status === 'Completed'
+                                                        ? 'bg-green-100 text-green-800'
+                                                        : packageData.status === 'Rejected'
+                                                        ? 'bg-red-100 text-red-800'
+                                                        : packageData.status === 'Expired'
+                                                        ? 'bg-orange-100 text-orange-800'
+                                                        : packageData.status === 'Draft'
+                                                        ? 'bg-gray-100 text-gray-800'
+                                                        : packageData.status === 'Archived'
+                                                        ? 'bg-gray-100 text-gray-800'
+                                                        : 'bg-blue-100 text-blue-800'
+                                                }`}
+                                            >
                                                 {packageData.status}
                                             </span>
                                         </div>
@@ -314,28 +307,23 @@ const ParticipantLayout: React.FC<ParticipantLayoutProps> = ({ packageData }) =>
                                     <span className="text-sm font-semibold text-[#1e293b]">{progressData.percentage}%</span>
                                 </div>
                                 <div className="w-full bg-gray-200 rounded-full h-2 mb-2">
-                                    <div 
-                                        className={`${progressData.color} h-2 rounded-full transition-all duration-700 ease-out`} 
-                                        style={{ width: `${progressData.percentage}%` }}
-                                    ></div>
+                                    <div className={`${progressData.color} h-2 rounded-full transition-all duration-700 ease-out`} style={{ width: `${progressData.percentage}%` }}></div>
                                 </div>
                                 <p className="text-xs text-gray-600 font-medium">{progressData.label}</p>
-                                
+
                                 {/* Additional status info for active documents */}
                                 {packageData.status === 'Sent' && (
                                     <div className="mt-3 pt-3 border-t border-gray-200">
                                         <div className="flex items-center justify-between text-xs text-gray-500">
                                             <span>Terms accepted</span>
-                                            <span className={hasAgreedToTerms ? 'text-green-600 font-medium' : 'text-gray-400'}>
-                                                {hasAgreedToTerms ? '✓' : '○'}
-                                            </span>
+                                            <span className={hasAgreedToTerms ? 'text-green-600 font-medium' : 'text-gray-400'}>{hasAgreedToTerms ? '✓' : '○'}</span>
                                         </div>
-                                        {packageData.fields?.filter(f => f.isAssignedToCurrentUser && f.required).length > 0 && (
+                                        {packageData.fields?.filter((f) => f.isAssignedToCurrentUser && f.required).length > 0 && (
                                             <div className="flex items-center justify-between text-xs text-gray-500 mt-1">
                                                 <span>Required fields</span>
                                                 <span className="font-medium">
-                                                    {packageData.fields.filter(f => f.isAssignedToCurrentUser && f.required && fieldValues[f.id]).length}/
-                                                    {packageData.fields.filter(f => f.isAssignedToCurrentUser && f.required).length}
+                                                    {packageData.fields.filter((f) => f.isAssignedToCurrentUser && f.required && fieldValues[f.id]).length}/
+                                                    {packageData.fields.filter((f) => f.isAssignedToCurrentUser && f.required).length}
                                                 </span>
                                             </div>
                                         )}
@@ -347,15 +335,10 @@ const ParticipantLayout: React.FC<ParticipantLayoutProps> = ({ packageData }) =>
                 </aside>
 
                 <main className="flex-1 flex flex-col overflow-hidden">
-                    <HeaderControls
-                        documentName={packageData.name}
-                        participants={participantsWithStatus}
-                        status={packageData.status}
-                        options={packageData.options}
-                    />
+                    <HeaderControls documentName={packageData.name} participants={participantsWithStatus} status={packageData.status} options={packageData.options} />
                     <div className="flex-1 overflow-auto bg-gray-100">
                         <DocumentViewer packageData={packageData} fieldValues={fieldValues} />
-                        
+
                         {/* Success Message for Completed Tasks */}
                         {currentUserTasksCompleted && (
                             <div className="flex items-center justify-center p-6 sm:p-8 transition-all duration-300">
@@ -367,12 +350,10 @@ const ParticipantLayout: React.FC<ParticipantLayoutProps> = ({ packageData }) =>
                                                     <FiCheckTyped className="w-8 h-8 text-white" />
                                                 </div>
                                             </div>
-                                            <h3 className="text-xl sm:text-2xl font-bold text-green-800 mb-2">
-                                                You're All Set!
-                                            </h3>
+                                            <h3 className="text-xl sm:text-2xl font-bold text-green-800 mb-2">You're All Set!</h3>
                                             <p className="text-green-700 mb-4 text-sm sm:text-base leading-relaxed">
-                                                Congratulations! You have successfully completed all your assigned tasks for this document. 
-                                                Your responses have been submitted and the document is ready for the next steps in the process.
+                                                Congratulations! You have successfully completed all your assigned tasks for this document. Your responses have been submitted and the document is ready
+                                                for the next steps in the process.
                                             </p>
                                             <div className="space-y-3">
                                                 <div className="flex items-center justify-center gap-2 text-green-600">
@@ -383,7 +364,7 @@ const ParticipantLayout: React.FC<ParticipantLayoutProps> = ({ packageData }) =>
                                                     <FiCheckTyped className="w-5 h-5" />
                                                     <span className="text-sm font-medium">Terms of use accepted</span>
                                                 </div>
-                                                {packageData.fields?.some(f => f.type === 'signature' && f.isAssignedToCurrentUser) && (
+                                                {packageData.fields?.some((f) => f.type === 'signature' && f.isAssignedToCurrentUser) && (
                                                     <div className="flex items-center justify-center gap-2 text-green-600">
                                                         <FiCheckTyped className="w-5 h-5" />
                                                         <span className="text-sm font-medium">Digital signature applied</span>
@@ -392,9 +373,9 @@ const ParticipantLayout: React.FC<ParticipantLayoutProps> = ({ packageData }) =>
                                             </div>
                                             <div className="mt-6 p-4 bg-white bg-opacity-70 rounded-xl border border-green-200">
                                                 <p className="text-sm text-green-700">
-                                                    <span className="font-semibold">What happens next?</span><br />
-                                                    The document will proceed to other participants for their review and completion. 
-                                                    You will be notified when the entire document process is completed.
+                                                    <span className="font-semibold">What happens next?</span>
+                                                    <br />
+                                                    The document will proceed to other participants for their review and completion. You will be notified when the entire document process is completed.
                                                 </p>
                                             </div>
                                         </div>
@@ -450,10 +431,16 @@ const ParticipantLayout: React.FC<ParticipantLayoutProps> = ({ packageData }) =>
                     </div>
                 </main>
 
-                <ActionSidebar allowReassign={packageData.options.allowReassign} currentUserTasksCompleted={currentUserTasksCompleted} />
+                <ActionSidebar
+                    allowReassign={packageData.options.allowReassign}
+                    currentUserTasksCompleted={currentUserTasksCompleted}
+                    allowReceiversToAdd={true}
+                    // allowReceiversToAdd={packageData.options.allowReceiversToAdd ?? false}
+                />
 
                 {uiState.isRejectModalOpen && <RejectModal />}
                 {uiState.isReassignDrawerOpen && <ReassignDrawer />}
+                {uiState.isAddReceiverDrawerOpen && <AddReceiverDrawer />}
                 {uiState.isSigningDrawerOpen && <SigningDrawer />}
             </div>
         </div>

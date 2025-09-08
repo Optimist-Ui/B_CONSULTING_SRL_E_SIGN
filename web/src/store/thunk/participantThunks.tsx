@@ -31,6 +31,12 @@ interface DownloadPayload {
     fileName: string;
 }
 
+interface AddReceiverParams {
+    packageId: string;
+    participantId: string;
+    newContactId: string;
+}
+
 /**
  * Fetches the publicly accessible package data for a specific participant.
  */
@@ -133,5 +139,17 @@ export const downloadPackage = createAsyncThunk<DownloadPayload, FetchParams>('p
             return rejectWithValue(errorJson.error || 'Failed to download the document.');
         }
         return rejectWithValue(error.response?.data?.error || 'Failed to download the document.');
+    }
+});
+
+/**
+ * Allows a participant to add a new receiver to the package.
+ */
+export const addReceiverByParticipant = createAsyncThunk('participant/addReceiver', async ({ packageId, participantId, newContactId }: AddReceiverParams, { rejectWithValue }) => {
+    try {
+        const response = await api.post(`/api/packages/participant/${packageId}/${participantId}/add-receiver`, { newContactId });
+        return response.data; // Expects { success, message, data: { receiver } }
+    } catch (error: any) {
+        return rejectWithValue(error.response?.data?.error || 'Failed to add the new receiver.');
     }
 });

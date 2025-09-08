@@ -147,8 +147,8 @@ const TemplatesDashboard: React.FC = () => {
 
     if (step === 1) {
         return (
-            <div className="p-6 bg-gray-50 min-h-full">
-                <button onClick={handleBackToList} className="btn btn-sm bg-white border border-gray-300 text-gray-700 hover:bg-blue-100 hover:border-blue-300 transition-all duration-150 mb-4">
+            <div className="p-6 dark:bg-gray-900 bg-gray-50 min-h-full">
+                <button onClick={handleBackToList} className="btn btn-sm  bg-white border border-gray-300 text-gray-700 hover:bg-blue-100 hover:border-blue-300 transition-all duration-150 mb-4">
                     Back to Templates
                 </button>
                 <DocumentUploadStep />
@@ -159,9 +159,9 @@ const TemplatesDashboard: React.FC = () => {
 
     if (step === 2 && currentTemplate) {
         return (
-            <div className="p-4 md:p-6 flex flex-col h-full bg-gray-50">
+            <div className="p-4 md:p-6 flex flex-col h-full dark:bg-gray-900 bg-gray-50">
                 <div className="flex justify-between items-center mb-4 flex-shrink-0">
-                    <button onClick={handleBackToList} className="btn btn-sm bg-white border border-gray-300 text-gray-700 hover:bg-blue-100 hover:border-blue-300 transition-all duration-150">
+                    <button onClick={handleBackToList} className=" btn btn-sm bg-white border border-gray-300 text-gray-700 hover:bg-blue-100 hover:border-blue-300 transition-all duration-150">
                         Back to Templates
                     </button>
                     <h1 className="text-xl font-bold text-gray-900 text-center truncate px-4">Editing: {currentTemplate.name}</h1>
@@ -185,10 +185,10 @@ const TemplatesDashboard: React.FC = () => {
     }
 
     return (
-        <div className="p-6 bg-gray-50 min-h-full">
+        <div className="p-6 dark:bg-gray-900  bg-gray-50 min-h-full">
             <div className="flex justify-between items-center mb-6">
-                <h1 className="text-2xl font-bold text-gray-900">Document Templates</h1>
-                <button onClick={handleCreateNewTemplate} className="btn bg-blue-500 text-white hover:bg-blue-600 transition-all duration-150 gap-2 flex items-center">
+                <h1 className="text-2xl font-bold ">Document Templates</h1>
+                <button onClick={handleCreateNewTemplate} className="btn bg-blue-500 text-info-light hover:bg-blue-600 transition-all duration-150 gap-2 flex items-center">
                     <FiFilePlusTyped className="text-xl" />
                     Create New Template
                 </button>
@@ -208,7 +208,7 @@ const TemplatesDashboard: React.FC = () => {
                 <div className="table-responsive bg-white rounded-lg shadow-md">
                     <table className="table table-hover w-full">
                         <thead>
-                            <tr className="text-gray-700 border-b border-gray-200">
+                            <tr className="border-b border-gray-200">
                                 <th className="p-4 text-left">Name</th>
                                 <th className="p-4 text-left">Attachment UUID</th>
                                 <th className="text-center p-4">Fields</th>
@@ -218,14 +218,14 @@ const TemplatesDashboard: React.FC = () => {
                         <tbody>
                             {templates.map((template, index) => (
                                 <tr key={template._id} className={`border-b border-gray-200 last:border-b-0 ${index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}`}>
-                                    <td className="p-4 text-gray-800">{template.name}</td>
-                                    <td className="p-4 text-gray-600">{template.attachment_uuid}</td>
-                                    <td className="text-center p-4 text-gray-800">{template.fields.length}</td>
+                                    <td className="p-4 ">{template.name}</td>
+                                    <td className="p-4 ">{template.attachment_uuid}</td>
+                                    <td className="text-center p-4">{template.fields.length}</td>
                                     <td className="text-center p-4">
                                         <div className="flex items-center justify-center gap-2">
                                             <button
                                                 type="button"
-                                                className="btn btn-sm bg-white border border-gray-300 text-gray-700 hover:bg-blue-100 hover:border-blue-300 transition-all duration-150"
+                                                className="btn btn-sm bg-white border border-gray-300  hover:bg-blue-100 hover:border-blue-300 transition-all duration-150"
                                                 onClick={() => handleEditTemplate(template)}
                                             >
                                                 <FiEditTyped />

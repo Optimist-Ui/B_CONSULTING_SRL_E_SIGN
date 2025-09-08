@@ -2,7 +2,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { IRootState, AppDispatch } from '../store';
 import { setPageTitle, toggleRTL } from '../store/slices/themeConfigSlice';
-import { useEffect, useState, FormEvent, ChangeEvent } from 'react';
+import { useEffect, useState, FormEvent, ChangeEvent, ComponentType } from 'react';
 import { toast } from 'react-toastify';
 
 // Redux Imports for Authentication
@@ -14,7 +14,9 @@ import i18next from 'i18next';
 import IconCaretDown from '../components/Icon/IconCaretDown';
 import IconUser from '../components/Icon/IconUser';
 import IconMail from '../components/Icon/IconMail';
-import IconLockDots from '../components/Icon/IconLockDots';
+import IconEye from '../components/Icon/IconEye';
+import { FaEyeSlash } from 'react-icons/fa';
+const FaEyeSlashTyped = FaEyeSlash as ComponentType<{ className?: string }>;
 
 const Register = () => {
     const dispatch: AppDispatch = useDispatch();
@@ -35,6 +37,7 @@ const Register = () => {
     });
 
     const [flag, setFlag] = useState(locale);
+    const [showPassword, setShowPassword] = useState(false);
 
     useEffect(() => {
         dispatch(setPageTitle('Register'));
@@ -194,16 +197,17 @@ const Register = () => {
                                     <div className="relative text-white-dark">
                                         <input
                                             id="password"
-                                            type="password"
+                                            type={showPassword ? 'text' : 'password'}
                                             placeholder="Enter Password"
                                             className="form-input ps-10 placeholder:text-white-dark"
                                             value={formData.password}
                                             onChange={handleChange}
                                             required
                                         />
-                                        <span className="absolute end-4 top-1/2 -translate-y-1/2">
-                                            <IconLockDots fill={true} />
-                                        </span>
+                                        {/* Eye Icon Button */}
+                                        <button type="button" className="absolute end-4 top-1/2 -translate-y-1/2" onClick={() => setShowPassword(!showPassword)}>
+                                            {showPassword ? <FaEyeSlashTyped /> : <IconEye />}
+                                        </button>
                                     </div>
                                 </div>
 

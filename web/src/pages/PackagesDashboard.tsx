@@ -26,7 +26,7 @@ const PackagesDashboard: React.FC = () => {
     // Fallback content while the redirection to the stepper is initializing.
     // This will likely not be visible to the user.
     return (
-        <div className="p-6 bg-gray-50 min-h-full flex items-center justify-center">
+        <div className="p-6 dark:bg-gray-900 bg-gray-50 min-h-full flex items-center justify-center">
             <div className="text-center text-gray-600">Initializing package creation...</div>
         </div>
     );

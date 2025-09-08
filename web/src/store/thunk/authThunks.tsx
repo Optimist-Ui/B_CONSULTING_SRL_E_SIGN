@@ -58,7 +58,6 @@ export const loginUser = createAsyncThunk('auth/loginUser', async (credentials: 
     try {
         // Use 'api' and a relative path. The token is added automatically!
         const response = await api.post('/api/users/login', credentials);
-
         const { token, user } = response.data.data;
         localStorage.setItem('authToken', token);
         localStorage.setItem('userId', user._id);

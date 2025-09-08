@@ -1,16 +1,25 @@
+// ===== Updated routes.tsx =====
 import { lazy } from 'react';
 import ProtectedRoute from '../utils/ProtectedRoute';
-import PublicRoute from '../utils/PublicRoute'; // Import the PublicRoute HOC
+import SubscriptionRequiredRoute from '../utils/SubscriptionRequiredRoute';
+import PublicRoute from '../utils/PublicRoute';
 import PendingVerification from '../pages/PendingVerification';
 import VerifyEmail from '../pages/VerifyEmail';
 import MyDocuments from '../pages/MyDocuments';
 import TemplatesDashboard from '../pages/TemplatesDashboard';
 import PackageDashboard from '../pages/PackagesDashboard';
 import ParticipantPage from '../pages/ParticipantPage';
+import PackageStatusPage from '../pages/PackageStatusPage';
+import Home from '../pages/Home';
+import CookiePolicyPage from '../pages/CookiePolicyPage';
+import PaymentMethods from '../pages/PaymentMethods';
+import Subscriptions from '../pages/Subscriptions';
+import SubscriptionRequired from '../pages/SubscriptionRequired';
+import EnterpriseContact from '../pages/EnterpriseContact';
+import ReviewPage from '../pages/ReviewPage';
 
 // ---------------- LAZY LOADED PAGE COMPONENTS ----------------
 const Index = lazy(() => import('../pages/Index'));
-const GroupContacts = lazy(() => import('../pages/GroupContacts'));
 const Contacts = lazy(() => import('../pages/Contacts'));
 const Profile = lazy(() => import('../pages/Profile'));
 
@@ -26,62 +35,65 @@ const Error404 = lazy(() => import('../pages/Error404'));
 
 // ---------------- ROUTE DEFINITIONS ----------------
 const routes = [
-    // === PROTECTED ROUTES ===
-    // These routes are only accessible to authenticated users.
+    // === ROUTES THAT REQUIRE ACTIVE SUBSCRIPTION ===
     {
-        path: '/',
+        path: '/dashboard',
         element: (
-            <ProtectedRoute>
+            <SubscriptionRequiredRoute requiresActiveSubscription={true}>
                 <Index />
-            </ProtectedRoute>
+            </SubscriptionRequiredRoute>
         ),
         layout: 'default',
     },
     {
         path: '/my-documents',
         element: (
-            <ProtectedRoute>
+            <SubscriptionRequiredRoute requiresActiveSubscription={true}>
                 <MyDocuments />
-            </ProtectedRoute>
-        ),
-        layout: 'default',
-    },
-    {
-        path: '/add-document',
-        element: (
-            <ProtectedRoute>
-                <PackageDashboard />
-            </ProtectedRoute>
-        ),
-        layout: 'default',
-    },
-    {
-        path: '/templates',
-        element: (
-            <ProtectedRoute>
-                <TemplatesDashboard />
-            </ProtectedRoute>
+            </SubscriptionRequiredRoute>
         ),
         layout: 'default',
     },
     {
         path: '/contacts',
         element: (
-            <ProtectedRoute>
+            <SubscriptionRequiredRoute requiresActiveSubscription={true}>
                 <Contacts />
-            </ProtectedRoute>
+            </SubscriptionRequiredRoute>
         ),
         layout: 'default',
     },
     {
-        path: '/group-contacts',
+        path: '/package/:packageId',
         element: (
-            <ProtectedRoute>
-                <GroupContacts />
-            </ProtectedRoute>
+            <SubscriptionRequiredRoute requiresActiveSubscription={true}>
+                <PackageStatusPage />
+            </SubscriptionRequiredRoute>
         ),
         layout: 'default',
     },
+    {
+        path: '/templates',
+        element: (
+            <SubscriptionRequiredRoute requiresActiveSubscription={true}>
+                <TemplatesDashboard />
+            </SubscriptionRequiredRoute>
+        ),
+        layout: 'default',
+    },
+
+    // === ROUTE THAT REQUIRES PACKAGE CREATION ABILITY ===
+    {
+        path: '/add-document',
+        element: (
+            <SubscriptionRequiredRoute requiresPackageCreation={true}>
+                <PackageDashboard />
+            </SubscriptionRequiredRoute>
+        ),
+        layout: 'default',
+    },
+
+    // === PROTECTED ROUTES (No Subscription Required) ===
     {
         path: '/profile',
         element: (
@@ -91,26 +103,65 @@ const routes = [
         ),
         layout: 'default',
     },
+    {
+        path: '/payment-methods',
+        element: (
+            <ProtectedRoute>
+                <PaymentMethods />
+            </ProtectedRoute>
+        ),
+        layout: 'default',
+    },
+    {
+        path: '/subscriptions',
+        element: (
+            <ProtectedRoute>
+                <Subscriptions />
+            </ProtectedRoute>
+        ),
+        layout: 'default',
+    },
+
+    // === SUBSCRIPTION REQUIRED PAGE ===
+    {
+        path: '/subscription-required',
+        element: (
+            <ProtectedRoute>
+                <SubscriptionRequired />
+            </ProtectedRoute>
+        ),
+        layout: 'blank', // Use blank layout for full-screen experience
+    },
 
     // === PUBLIC ROUTES ===
-    // These routes are only accessible to non-authenticated users.
-    // If a logged-in user tries to access them, they will be redirected to '/'.
+    {
+        path: '/',
+        element: <Home />,
+        layout: 'blank',
+    },
+    {
+        path: '/enterprise-contact',
+        element: <EnterpriseContact />,
+        layout: 'blank',
+    },
+    {
+        path: '/cookie-policy',
+        element: <CookiePolicyPage />,
+        layout: 'blank',
+    },
     {
         path: '/package/:packageId/participant/:participantId',
-        element: (
-            <PublicRoute>
-                <ParticipantPage />
-            </PublicRoute>
-        ),
+        element: <ParticipantPage />,
+        layout: 'blank',
+    },
+    {
+        path: '/package/:packageId/participant/:participantId/review',
+        element: <ReviewPage />,
         layout: 'blank',
     },
     {
         path: '/terms-of-use',
-        element: (
-            <PublicRoute>
-                <TermsAndPrivacy />
-            </PublicRoute>
-        ),
+        element: <TermsAndPrivacy />,
         layout: 'blank',
     },
     {
@@ -126,12 +177,11 @@ const routes = [
         path: '/pending-verification',
         element: (
             <PublicRoute>
-                <PendingVerification />,
+                <PendingVerification />
             </PublicRoute>
         ),
         layout: 'blank',
     },
-
     {
         path: '/login',
         element: (
@@ -154,7 +204,7 @@ const routes = [
         path: '/verify-email/:token',
         element: (
             <PublicRoute>
-                <VerifyEmail />,
+                <VerifyEmail />
             </PublicRoute>
         ),
         layout: 'blank',
@@ -170,7 +220,6 @@ const routes = [
     },
 
     // === CATCH-ALL ROUTE ===
-    // This should generally be accessible to everyone.
     {
         path: '*',
         element: <Error404 />,

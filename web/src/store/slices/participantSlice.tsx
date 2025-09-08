@@ -59,6 +59,7 @@ export interface ParticipantPackageView {
     options: {
         allowReassign: boolean;
         allowDownloadUnsigned: boolean;
+        allowReceiversToAdd?: boolean;
     };
     currentUser: AssignedUser;
     owner: {
@@ -115,6 +116,12 @@ export interface ParticipantState {
         activeParticipantId: string | null;
         signatureLoading: boolean;
         signatureError: string | null;
+        isAddReceiverDrawerOpen: boolean;
+        addReceiverStep: 'select' | 'add' | 'success' | 'failure';
+        // Note: We reuse reassignmentContacts as the logic to fetch them is identical.
+        selectedAddReceiverContact: ReassignmentContact | null;
+        addReceiverLoading: boolean;
+        addReceiverError: string | null;
     };
 }
 
@@ -156,6 +163,11 @@ const initialState: ParticipantState = {
         activeParticipantId: null,
         signatureLoading: false,
         signatureError: null,
+        isAddReceiverDrawerOpen: false,
+        addReceiverStep: 'select',
+        selectedAddReceiverContact: null,
+        addReceiverLoading: false,
+        addReceiverError: null,
     },
 };
 
@@ -233,6 +245,21 @@ const participantSlice = createSlice({
         setIsDownloading: (state, action: PayloadAction<boolean>) => {
             state.uiState.isDownloading = action.payload;
         },
+        setAddReceiverDrawerOpen: (state, action: PayloadAction<boolean>) => {
+            state.uiState.isAddReceiverDrawerOpen = action.payload;
+            // Reset the flow when the drawer is closed
+            if (!action.payload) {
+                state.uiState.addReceiverStep = 'select';
+                state.uiState.selectedAddReceiverContact = null;
+                state.uiState.addReceiverError = null;
+            }
+        },
+        setAddReceiverStep: (state, action: PayloadAction<'select' | 'add' | 'success' | 'failure'>) => {
+            state.uiState.addReceiverStep = action.payload;
+        },
+        setSelectedAddReceiverContact: (state, action: PayloadAction<ReassignmentContact | null>) => {
+            state.uiState.selectedAddReceiverContact = action.payload;
+        },
         setActiveSigningFieldId: (state, action: PayloadAction<string | null>) => {
             state.uiState.activeSigningFieldId = action.payload;
         },
@@ -282,6 +309,9 @@ export const {
     setActiveSigningFieldId,
     setActiveParticipantId,
     setIsDownloading,
+    setAddReceiverDrawerOpen,
+    setAddReceiverStep,
+    setSelectedAddReceiverContact,
 } = participantSlice.actions;
 
 export default participantSlice.reducer;

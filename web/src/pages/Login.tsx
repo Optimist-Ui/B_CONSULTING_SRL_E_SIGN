@@ -1,7 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { IRootState, AppDispatch } from '../store';
-import { useEffect, useState, ChangeEvent, FormEvent } from 'react';
+import { useEffect, useState, ChangeEvent, FormEvent, ComponentType } from 'react';
 import { toast } from 'react-toastify';
 
 // Redux Imports
@@ -13,7 +13,10 @@ import Dropdown from '../components/Dropdown';
 import i18next from 'i18next';
 import IconCaretDown from '../components/Icon/IconCaretDown';
 import IconMail from '../components/Icon/IconMail';
-import IconLockDots from '../components/Icon/IconLockDots';
+import IconEye from '../components/Icon/IconEye';
+import { FaEyeSlash } from 'react-icons/fa';
+import { fetchSubscriptionStatus } from '../store/thunk/subscriptionThunks';
+const FaEyeSlashTyped = FaEyeSlash as ComponentType<{ className?: string }>;
 
 const Login = () => {
     const dispatch: AppDispatch = useDispatch();
@@ -27,6 +30,7 @@ const Login = () => {
     // Component state
     const [formData, setFormData] = useState({ email: '', password: '' });
     const [flag, setFlag] = useState(locale);
+    const [showPassword, setShowPassword] = useState(false);
 
     useEffect(() => {
         dispatch(setPageTitle('Login'));
@@ -48,8 +52,18 @@ const Login = () => {
         e.preventDefault();
         try {
             await dispatch(loginUser(formData)).unwrap();
+
+            // 2. AFTER successful login, immediately check subscription status
+            const statusResult = await dispatch(fetchSubscriptionStatus()).unwrap();
+
             toast.success('Login successful!');
-            navigate('/');
+
+            // 3. DECIDE where to redirect the user
+            if (statusResult.hasActiveSubscription) {
+                navigate('/dashboard'); // User has a plan, go to the dashboard
+            } else {
+                navigate('/subscriptions'); // New or expired user, guide them to pick a plan
+            }
         } catch (error: any) {
             toast.error(error || 'Login failed. Please check your credentials.');
         }
@@ -144,16 +158,17 @@ const Login = () => {
                                     <div className="relative text-white-dark">
                                         <input
                                             id="password"
-                                            type="password"
+                                            type={showPassword ? 'text' : 'password'}
                                             placeholder="Enter Password"
                                             className="form-input ps-10 placeholder:text-white-dark"
                                             value={formData.password}
                                             onChange={handleChange}
                                             required
                                         />
-                                        <span className="absolute end-4 top-1/2 -translate-y-1/2">
-                                            <IconLockDots fill={true} />
-                                        </span>
+                                        {/* Eye Icon Button */}
+                                        <button type="button" className="absolute end-4 top-1/2 -translate-y-1/2" onClick={() => setShowPassword(!showPassword)}>
+                                            {showPassword ? <FaEyeSlashTyped /> : <IconEye />}
+                                        </button>
                                     </div>
                                 </div>
                                 <div className="text-end">

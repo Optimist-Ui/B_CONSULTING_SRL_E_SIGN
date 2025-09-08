@@ -112,6 +112,20 @@ export const updatePackage = createAsyncThunk<DocumentPackage, UpdatePackagePayl
         return rejectWithValue(error.response?.data?.error || 'Failed to update package.');
     }
 });
+
+/**
+ * Fetches a single, complete package by its ID for the owner/initiator.
+ */
+export const fetchPackageForOwner = createAsyncThunk<DocumentPackage, string>('packages/fetchPackageForOwner', async (packageId, { rejectWithValue }) => {
+    try {
+        // This hits the authenticated, owner-only endpoint that returns the full package details.
+        const response = await api.get(`/api/packages/${packageId}`);
+        return response.data.data;
+    } catch (error: any) {
+        return rejectWithValue(error.response?.data?.error || 'Failed to fetch package details.');
+    }
+});
+
 // Delete package
 export const deletePackage = createAsyncThunk<{ message: string; packageId: string }, string>('packages/deletePackage', async (packageId, { rejectWithValue }) => {
     try {

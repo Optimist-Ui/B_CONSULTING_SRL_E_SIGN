@@ -63,8 +63,8 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
     const reminderPeriodOptions = [
         { value: '1_hour_before', label: '1 Hour Before', durationMs: 3600000 },
         { value: '2_hours_before', label: '2 Hours Before', durationMs: 7200000 },
-        { value: '1_day_before', label: '1 Day Before', durationMs: 86400000 },
-        { value: '2_days_before', label: '2 Days Before', durationMs: 172800000 },
+        { value: '1_day_before', label: '24 Hours Before', durationMs: 86400000 },
+        { value: '2_days_before', label: '48 Hours Before', durationMs: 172800000 },
     ];
 
     const availableReminderOptions = useMemo(() => {
@@ -306,10 +306,34 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
 
     const handleConfirmDate = () => {
         if (tempExpiresAt) {
-            handleOptionsChange({ expiresAt: new Date(tempExpiresAt).toISOString() });
+            const selectedDate = new Date(tempExpiresAt);
+            const now = new Date();
+
+            // Check if the selected date is in the past
+            if (selectedDate <= now) {
+                toast.error('Expiration date cannot be in the past. Please select a future date.');
+                return;
+            }
+
+            handleOptionsChange({ expiresAt: selectedDate.toISOString() });
+
+            // Format the date for user-friendly display
+            const formatOptions: Intl.DateTimeFormatOptions = {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true,
+            };
+            const formattedDate = selectedDate.toLocaleDateString('en-US', formatOptions);
+
+            toast.success(`Package expiration set to ${formattedDate}`);
         } else {
             handleOptionsChange({ expiresAt: null });
+            toast.info('Package expiration removed - package will not expire');
         }
+
         if (dateInputRef.current) {
             dateInputRef.current.blur();
         }
@@ -320,7 +344,7 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
             <div className="flex justify-center items-center h-full">
                 <div className="text-center">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                    <p className="text-gray-600 font-medium">Loading package details...</p>
+                    <p className="font-medium">Loading package details...</p>
                 </div>
             </div>
         );
@@ -347,7 +371,7 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
         <button
             onClick={() => setActiveTab(tab)}
             className={`flex-1 flex justify-center items-center gap-2 px-3 py-3 text-sm font-medium border-b-2 transition-all duration-200 ${
-                activeTab === tab ? 'border-indigo-500 text-indigo-600 bg-indigo-50' : 'border-transparent text-gray-500 hover:text-gray-800 hover:border-gray-300 hover:bg-gray-50'
+                activeTab === tab ? 'border-indigo-500 text-indigo-600 bg-indigo-50' : 'border-transparent hover:border-gray-300 hover:bg-gray-50'
             }`}
         >
             {icon} {label}
@@ -356,16 +380,16 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
 
     return (
         <>
-            <div className="h-full bg-gradient-to-br from-slate-50 to-blue-50 overflow-hidden flex flex-col">
+            <div className="h-full bg-gradient-to-br dark:bg-gray-900 from-slate-50 to-blue-50 overflow-hidden flex flex-col">
                 <div className="flex flex-grow overflow-hidden">
                     {/* PDF Preview */}
-                    <div className="flex-1 flex flex-col bg-white border-r border-gray-200">
+                    <div className="flex-1 flex flex-col dark:bg-gray-900 bg-white border-r border-gray-200">
                         {/* PDF Controls */}
-                        <div className="flex justify-between items-center px-4 py-3 bg-gray-50 border-b border-gray-200">
+                        <div className="flex justify-between items-center px-4 py-3 dark:bg-gray-900 bg-gray-50 border-b border-gray-200">
                             <div className="flex items-center gap-2">
-                                <FiEyeTyped className="w-5 h-5 text-gray-600" />
-                                <h3 className="font-semibold text-gray-800">Document Preview</h3>
-                                <span className="text-sm text-gray-500">
+                                <FiEyeTyped className="w-5 h-5" />
+                                <h3 className="font-semibold">Document Preview</h3>
+                                <span className="text-sm">
                                     ({numPages} {numPages === 1 ? 'page' : 'pages'})
                                 </span>
                             </div>
@@ -385,12 +409,12 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
                             {isRendering && (
                                 <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex flex-col justify-center items-center z-20">
                                     <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-600 border-t-transparent"></div>
-                                    <p className="mt-4 text-gray-700 font-semibold">Rendering Document...</p>
-                                    <p className="text-sm text-gray-500 mt-1">Please wait while we prepare your document</p>
+                                    <p className="mt-4  font-semibold">Rendering Document...</p>
+                                    <p className="text-sm mt-1">Please wait while we prepare your document</p>
                                 </div>
                             )}
 
-                            <div className="p-6">
+                            <div className="p-6 dark:bg-gray-900">
                                 <div className={`pdf-viewer-pages space-y-8 mx-auto ${viewMode === 'fit' ? 'max-w-full' : ''}`}>
                                     {Array.from({ length: numPages }, (_, index) => {
                                         const pageInfo = pageInfos[index];
@@ -407,12 +431,12 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
                                         return (
                                             <div key={`review-page-${index}`} className="relative">
                                                 <div className="flex justify-between items-center mb-3">
-                                                    <span className="text-sm font-medium text-gray-600">
+                                                    <span className="text-sm font-medium">
                                                         Page {index + 1} of {numPages}
                                                     </span>
                                                 </div>
                                                 <div
-                                                    className="relative bg-white shadow-2xl border border-gray-200 mx-auto overflow-hidden rounded-lg"
+                                                    className="relative dark:bg-gray-900 bg-white shadow-2xl border border-gray-200 mx-auto overflow-hidden rounded-lg"
                                                     style={{
                                                         width: containerWidth,
                                                         height: containerHeight,
@@ -451,7 +475,7 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
                                                         return (
                                                             <div
                                                                 key={field.id}
-                                                                className={`absolute border-2 border-dashed rounded-lg backdrop-blur-sm transition-all duration-200 ${
+                                                                className={`absolute  border-2 border-dashed rounded-lg backdrop-blur-sm transition-all duration-200 ${
                                                                     isInvalid
                                                                         ? 'bg-red-500/20 border-red-500'
                                                                         : hasAssignments
@@ -468,7 +492,7 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
                                                                     <span className="truncate flex-1">{field.label}</span>
                                                                 </div>
                                                                 {showPlaceholder && (
-                                                                    <div className="flex items-center justify-center h-full text-gray-500 text-xs px-2 py-1">
+                                                                    <div className="flex items-center justify-center h-full  text-xs px-2 py-1">
                                                                         <span className="truncate">{field.placeholder}</span>
                                                                     </div>
                                                                 )}
@@ -485,7 +509,7 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
                     </div>
 
                     {/* Right Settings Panel (Tabs) */}
-                    <div className="w-96 bg-white flex flex-col shadow-xl">
+                    <div className="w-96 dark:bg-gray-900 bg-white flex flex-col shadow-xl">
                         <div className="px-3 pt-3 border-b border-gray-200">
                             <div className="flex items-center rounded-t-lg overflow-hidden">
                                 <TabButton tab="summary" label="Summary" icon={<FiInfoTyped />} />
@@ -494,29 +518,29 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
                             </div>
                         </div>
 
-                        <div className="flex-1 overflow-y-auto p-6 bg-gray-50/50">
+                        <div className="flex-1 overflow-y-auto p-6 dark:bg-gray-900 bg-gray-50/50">
                             {activeTab === 'summary' && (
                                 <div className="space-y-6 animate-fadeIn">
-                                    <h3 className="text-xl font-bold text-gray-900 leading-tight">{currentPackage.name}</h3>
+                                    <h3 className="text-xl font-bold leading-tight">{currentPackage.name}</h3>
                                     <div>
-                                        <h4 className="font-semibold text-gray-700 mb-2">Details at a Glance</h4>
-                                        <div className="p-4 bg-white border rounded-lg grid grid-cols-3 gap-4 text-center">
+                                        <h4 className="font-semibold mb-2">Details at a Glance</h4>
+                                        <div className="p-4 dark:bg-gray-900 bg-white border rounded-lg grid grid-cols-3 gap-4 text-center">
                                             <div className="p-2">
                                                 <div className="text-2xl font-bold text-blue-600">{stats.totalFields}</div>
-                                                <div className="text-xs text-gray-500 mt-1">Fields</div>
+                                                <div className="text-xs mt-1">Fields</div>
                                             </div>
                                             <div className="p-2">
                                                 <div className="text-2xl font-bold text-green-600">{stats.uniqueRecipients}</div>
-                                                <div className="text-xs text-gray-500 mt-1">Recipients</div>
+                                                <div className="text-xs mt-1">Recipients</div>
                                             </div>
                                             <div className="p-2">
-                                                <div className="text-2xl font-bold text-gray-700">{numPages}</div>
-                                                <div className="text-xs text-gray-500 mt-1">Pages</div>
+                                                <div className="text-2xl font-bold">{numPages}</div>
+                                                <div className="text-xs mt-1">Pages</div>
                                             </div>
                                         </div>
                                     </div>
                                     <div>
-                                        <h4 className="font-semibold text-gray-700 mb-2">Assignment Progress</h4>
+                                        <h4 className="font-semibold mb-2">Assignment Progress</h4>
                                         <div className="w-full bg-gray-200 rounded-full h-2.5">
                                             <div
                                                 className={`h-2.5 rounded-full transition-all duration-500 ${
@@ -525,7 +549,7 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
                                                 style={{ width: `${stats.completionRate}%` }}
                                             ></div>
                                         </div>
-                                        <p className="text-xs text-gray-500 text-right mt-1">{stats.completionRate}% Complete</p>
+                                        <p className="text-xs text-right mt-1">{stats.completionRate}% Complete</p>
                                         {stats.unassignedRequiredFields.length > 0 && (
                                             <div className="mt-3 bg-red-50 border-l-4 border-red-500 text-red-700 p-3 rounded-r-lg">
                                                 <p className="font-bold text-sm">Action Required</p>
@@ -539,29 +563,29 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
                             {activeTab === 'recipients' && (
                                 <div className="space-y-6 animate-fadeIn">
                                     <div>
-                                        <h4 className="font-semibold text-gray-700 mb-2">Assigned Participants</h4>
-                                        <div className="space-y-2 p-3 bg-white border rounded-lg max-h-60 overflow-y-auto">
+                                        <h4 className="font-semibold mb-2">Assigned Participants</h4>
+                                        <div className="space-y-2 p-3 dark:bg-gray-900 bg-white border rounded-lg max-h-60 overflow-y-auto">
                                             {currentPackage.fields.flatMap((f) => f.assignedUsers || []).length > 0 ? (
                                                 currentPackage.fields
                                                     .flatMap((f) => f.assignedUsers || [])
                                                     .map((user, idx) => (
                                                         <div key={user.id || idx} className="p-3 bg-gray-50 rounded-md text-sm">
-                                                            <p className="font-bold text-gray-800">{user.contactName}</p>
+                                                            <p className="font-bold">{user.contactName}</p>
                                                             <p className="text-xs text-indigo-600 font-semibold">{user.role}</p>
                                                         </div>
                                                     ))
                                             ) : (
-                                                <div className="text-center text-sm text-gray-400 py-6">
-                                                    <FiUsersTyped className="mx-auto text-3xl mb-2 text-gray-300" />
+                                                <div className="text-center text-smpy-6">
+                                                    <FiUsersTyped className="mx-auto text-3xl mb-2" />
                                                     No users have been assigned to fields.
                                                 </div>
                                             )}
                                         </div>
                                     </div>
                                     <div>
-                                        <h4 className="font-semibold text-gray-700 mb-2">Notification-Only Receivers</h4>
-                                        <div className="space-y-3 p-4 bg-white border rounded-lg">
-                                            <p className="text-xs text-gray-600">Add contacts who will receive package notifications but are not required to sign.</p>
+                                        <h4 className="font-semibold mb-2">Notification-Only Receivers</h4>
+                                        <div className="space-y-3 p-4 dark:bg-gray-900 bg-white border rounded-lg">
+                                            <p className="text-xs">Add contacts who will receive package notifications but are not required to sign.</p>
                                             <SearchableContactDropdown
                                                 contacts={contacts}
                                                 selectedContact={selectedReceiver}
@@ -571,13 +595,13 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
                                             <button
                                                 onClick={handleAddReceiver}
                                                 disabled={!selectedReceiver}
-                                                className="w-full px-3 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-sm rounded-lg font-medium transition-colors duration-200"
+                                                className="w-full px-3 py-2 dark:bg-gray-900 bg-green-600 hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-sm rounded-lg font-medium transition-colors duration-200"
                                             >
                                                 Add Receiver
                                             </button>
                                             <div className="mt-4 space-y-2 max-h-32 overflow-y-auto">
                                                 {currentPackage.receivers.map((rec) => (
-                                                    <div key={rec.id} className="flex justify-between items-center text-sm p-2 bg-gray-50 rounded-md">
+                                                    <div key={rec.id} className="flex justify-between items-center text-sm p-2 bg-gray-50 dark:bg-gray-900 rounded-md">
                                                         <span className="font-medium">{rec.contactName}</span>
                                                         <button onClick={() => handleRemoveReceiver(rec.id)} className="text-red-500 hover:text-red-700 p-1 rounded-full">
                                                             ×
@@ -592,11 +616,11 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
 
                             {activeTab === 'settings' && (
                                 <div className="space-y-6 animate-fadeIn">
-                                    <div className="p-4 bg-white border rounded-lg">
-                                        <label className="font-semibold text-gray-800 flex items-center gap-2 mb-2">
+                                    <div className="p-4 dark:bg-gray-900 bg-white border rounded-lg">
+                                        <label className="font-semibold flex items-center gap-2 mb-2">
                                             <FiClockTyped /> Package Expiration
                                         </label>
-                                        <p className="text-xs text-gray-500 mb-3">Set a date and time when this package will no longer be accessible.</p>
+                                        <p className="text-xs mb-3">Set a date and time when this package will no longer be accessible.</p>
                                         <div className="flex items-center gap-2">
                                             <input
                                                 type="datetime-local"
@@ -613,11 +637,11 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
                                             </button>
                                         </div>
                                     </div>
-                                    <div className="p-4 bg-white border rounded-lg space-y-3">
-                                        <label className="font-semibold text-gray-800 flex items-center gap-2">
+                                    <div className="p-4 dark:bg-gray-900 bg-white border rounded-lg space-y-3">
+                                        <label className="font-semibold flex items-center gap-2">
                                             <FiBellTyped /> Expiration Reminders
                                         </label>
-                                        <label className="flex items-center text-sm gap-3 p-2 rounded-md hover:bg-gray-50">
+                                        <label className="flex items-center dark:bg-gray-900 text-sm gap-3 p-2 rounded-md hover:bg-gray-50">
                                             <input
                                                 type="checkbox"
                                                 className="mr-2 rounded"
@@ -632,9 +656,9 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
                                             }`}
                                         >
                                             <div>
-                                                <label className="text-xs font-medium text-gray-500 block mb-1">Reminder Timing</label>
+                                                <label className="text-xs font-medium block mb-1">Reminder Timing</label>
                                                 <select
-                                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100"
+                                                    className="w-full dark:bg-gray-900 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100"
                                                     value={currentPackage.options.reminderPeriod || ''}
                                                     onChange={(e) => handleOptionsChange({ reminderPeriod: e.target.value || null })}
                                                     disabled={!currentPackage.options.sendExpirationReminders || availableReminderOptions.length === 0}
@@ -649,18 +673,18 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
                                                 </select>
                                                 {/* This helper text appears when the expiration is too soon for any reminders */}
                                                 {currentPackage?.options.sendExpirationReminders && availableReminderOptions.length === 0 && currentPackage?.options.expiresAt && (
-                                                    <p className="text-xs text-amber-700 mt-2 p-2 bg-amber-50 rounded-md">
+                                                    <p className="text-xs text-amber-700 mt-2 p-2 dark:bg-gray-900 bg-amber-50 rounded-md">
                                                         The expiration date is too soon for any reminder options. Please set a later date to enable reminders.
                                                     </p>
                                                 )}
                                             </div>
                                         </div>
                                     </div>
-                                    <div className="p-4 bg-white border rounded-lg space-y-3">
-                                        <label className="font-semibold text-gray-800 flex items-center gap-2">
+                                    <div className="p-4 dark:bg-gray-900 bg-white border rounded-lg space-y-3">
+                                        <label className="font-semibold flex items-center gap-2">
                                             <FiRepeatTyped /> Automatic Reminders
                                         </label>
-                                        <label className="flex items-center text-sm gap-3 p-2 rounded-md hover:bg-gray-50">
+                                        <label className="flex items-center dark:bg-gray-900 text-sm gap-3 p-2 rounded-md hover:bg-gray-50">
                                             <input
                                                 type="checkbox"
                                                 className="mr-2 rounded"
@@ -679,14 +703,14 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
                                             }`}
                                         >
                                             <div>
-                                                <label className="text-xs font-medium text-gray-500 block mb-1">First reminder</label>
+                                                <label className="text-xs font-medium block mb-1">First reminder</label>
                                                 <div className="flex items-center gap-2 text-sm">
                                                     <input
                                                         type="number"
                                                         min="1"
                                                         // Add the 'max' attribute to enforce the limit
                                                         max={maxFirstReminderDays}
-                                                        className="w-20 px-2 py-1 border border-gray-300 rounded text-sm disabled:bg-gray-100"
+                                                        className="w-20 px-2 py-1 border dark:bg-gray-900 border-gray-300 rounded text-sm disabled:bg-gray-100"
                                                         value={currentPackage.options.firstReminderDays || ''}
                                                         onChange={(e) => {
                                                             // Prevent user from typing a value larger than the max
@@ -702,13 +726,13 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
                                                 </div>
                                             </div>
                                             <div>
-                                                <label className="text-xs font-medium text-gray-500 block mb-1">Follow-up reminders</label>
+                                                <label className="text-xs font-medium block mb-1">Follow-up reminders</label>
                                                 <div className="flex items-center gap-2 text-sm">
                                                     Repeat every
                                                     <input
                                                         type="number"
                                                         min="1"
-                                                        className="w-20 px-2 py-1 border border-gray-300 rounded text-sm disabled:bg-gray-100"
+                                                        className="w-20 px-2 py-1  dark:bg-gray-900 border border-gray-300 rounded text-sm disabled:bg-gray-100"
                                                         value={currentPackage.options.repeatReminderDays || ''}
                                                         onChange={(e) => handleOptionsChange({ repeatReminderDays: parseInt(e.target.value) || null })}
                                                         disabled={!currentPackage.options.sendAutomaticReminders || maxFirstReminderDays < 1}
@@ -722,15 +746,15 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
     */}
                                         {currentPackage.options.sendAutomaticReminders && maxFirstReminderDays < 1 && currentPackage.options.expiresAt && (
                                             <div className="pl-8 ml-2">
-                                                <p className="text-xs text-amber-700 mt-2 p-2 bg-amber-50 rounded-md">
+                                                <p className="text-xs text-amber-700 dark:bg-gray-900 mt-2 p-2 bg-amber-50 rounded-md">
                                                     The expiration date must be set to more than one day in the future to enable automatic reminders.
                                                 </p>
                                             </div>
                                         )}
                                     </div>
-                                    <div className="p-4 bg-white border rounded-lg space-y-3">
-                                        <label className="font-semibold text-gray-800">Permissions</label>
-                                        <label className="flex items-center text-sm gap-3 p-2 rounded-md hover:bg-gray-50">
+                                    <div className="p-4 dark:bg-gray-900 bg-white border rounded-lg space-y-3">
+                                        <label className="font-semibold ">Permissions</label>
+                                        <label className="flex items-center text-sm gap-3 p-2 rounded-md dark:bg-gray-900 hover:bg-gray-50">
                                             <input
                                                 type="checkbox"
                                                 className="mr-2 rounded"
@@ -739,7 +763,7 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
                                             />
                                             Allow download before signing is complete
                                         </label>
-                                        <label className="flex items-center text-sm gap-3 p-2 rounded-md hover:bg-gray-50">
+                                        <label className="flex items-center text-sm gap-3 p-2  dark:bg-gray-900 rounded-md hover:bg-gray-50">
                                             <input
                                                 type="checkbox"
                                                 className="mr-2 rounded"

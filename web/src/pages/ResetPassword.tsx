@@ -1,7 +1,7 @@
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { IRootState, AppDispatch } from '../store';
-import { useEffect, useState, FormEvent, ChangeEvent } from 'react';
+import { useEffect, useState, FormEvent, ChangeEvent, ComponentType } from 'react';
 import { toast } from 'react-toastify';
 
 // Redux Imports
@@ -12,14 +12,17 @@ import { verifyResetToken, resetPassword } from '../store/thunk/authThunks';
 import Dropdown from '../components/Dropdown';
 import i18next from 'i18next';
 import IconCaretDown from '../components/Icon/IconCaretDown';
-import IconLockDots from '../components/Icon/IconLockDots';
 import IconCircleCheck from '../components/Icon/IconCircleCheck';
 import IconXCircle from '../components/Icon/IconXCircle';
+import { FaEyeSlash } from 'react-icons/fa';
+import IconEye from '../components/Icon/IconEye';
+const FaEyeSlashTyped = FaEyeSlash as ComponentType<{ className?: string }>;
 
 const ResetPassword = () => {
     const dispatch: AppDispatch = useDispatch();
     const navigate = useNavigate();
     const { token } = useParams<{ token: string }>();
+    const [showPassword, setShowPassword] = useState(false);
 
     // Redux State Selectors
     const { loading, isTokenVerified, error: reduxError } = useSelector((state: IRootState) => state.auth);
@@ -141,16 +144,17 @@ const ResetPassword = () => {
                                     <input
                                         id="newPassword"
                                         name="newPassword"
-                                        type="password"
+                                        type={showPassword ? 'text' : 'password'}
                                         placeholder="Enter New Password"
                                         className="form-input ps-10"
                                         value={formData.newPassword}
                                         onChange={handleChange}
                                         required
                                     />
-                                    <span className="absolute start-4 top-1/2 -translate-y-1/2">
-                                        <IconLockDots fill={true} />
-                                    </span>
+                                    {/* Eye Icon Button */}
+                                    <button type="button" className="absolute end-4 top-1/2 -translate-y-1/2" onClick={() => setShowPassword(!showPassword)}>
+                                        {showPassword ? <FaEyeSlashTyped /> : <IconEye />}
+                                    </button>
                                 </div>
                             </div>
                             <div>
@@ -159,16 +163,17 @@ const ResetPassword = () => {
                                     <input
                                         id="confirmPassword"
                                         name="confirmPassword"
-                                        type="password"
+                                        type={showPassword ? 'text' : 'password'}
                                         placeholder="Confirm New Password"
                                         className="form-input ps-10"
                                         value={formData.confirmPassword}
                                         onChange={handleChange}
                                         required
                                     />
-                                    <span className="absolute start-4 top-1/2 -translate-y-1/2">
-                                        <IconLockDots fill={true} />
-                                    </span>
+                                    {/* Eye Icon Button */}
+                                    <button type="button" className="absolute end-4 top-1/2 -translate-y-1/2" onClick={() => setShowPassword(!showPassword)}>
+                                        {showPassword ? <FaEyeSlashTyped /> : <IconEye />}
+                                    </button>
                                 </div>
                             </div>
                             <button type="submit" className="btn btn-gradient !mt-6 w-full border-0 uppercase" disabled={loading}>

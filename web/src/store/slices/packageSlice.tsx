@@ -1,10 +1,12 @@
 import { createSlice, PayloadAction, nanoid } from '@reduxjs/toolkit';
 import { DocumentField as TemplateDocumentField } from './templateSlice';
 import { Contact } from './contactSlice';
+import { buildPackageExtraReducers } from '../extra-reducers/packageExtraReducers';
 
 // Type Definitions
-export type FieldRole = 'Signer' | 'FormFiller' | 'Approver';
+export type FieldRole = 'Signer' | 'FormFiller' | 'Approver' | 'Receiver';
 export type SignatureMethod = 'Email OTP' | 'SMS OTP' | 'Both';
+export type ConcreteSignatureMethod = 'Email OTP' | 'SMS OTP';
 
 export interface AssignedUser {
     id: string;
@@ -12,7 +14,8 @@ export interface AssignedUser {
     contactName: string;
     contactEmail: string;
     role: FieldRole;
-    signatureMethod?: SignatureMethod;
+    signatureMethods?: ConcreteSignatureMethod[];
+    signed?: boolean;
 }
 
 export interface PackageReceiver {
@@ -48,7 +51,7 @@ export interface DocumentPackage {
     fields: PackageField[];
     receivers: PackageReceiver[];
     options: PackageOptions;
-    status: 'Draft' | 'Sent' | 'Completed' | 'Archived';
+    status: 'Draft' | 'Sent' | 'Completed' | 'Archived' | 'Revoked' | 'Rejected' | 'Expired';
     createdAt?: string;
     updatedAt?: string;
 }
@@ -151,7 +154,7 @@ const packageSlice = createSlice({
                     if (!exists) {
                         const newUser = { ...action.payload.user, id: nanoid() };
                         if (newUser.role !== 'Signer') {
-                            delete newUser.signatureMethod;
+                            delete newUser.signatureMethods;
                         }
                         field.assignedUsers.push(newUser);
                     }
@@ -202,6 +205,9 @@ const packageSlice = createSlice({
         setPackageError: (state, action: PayloadAction<string | null>) => {
             state.error = action.payload;
         },
+    },
+    extraReducers: (builder) => {
+        buildPackageExtraReducers(builder);
     },
 });
 

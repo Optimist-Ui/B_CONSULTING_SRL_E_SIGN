@@ -1,6 +1,6 @@
 import { ActionReducerMapBuilder } from '@reduxjs/toolkit';
 import { PackageState } from '../slices/packageSlice';
-import { fetchPackages, savePackage, updatePackage, deletePackage } from '../thunk/packageThunks';
+import { fetchPackages, savePackage, updatePackage, fetchPackageForOwner, deletePackage } from '../thunk/packageThunks';
 
 export const buildPackageExtraReducers = (builder: ActionReducerMapBuilder<PackageState>) => {
     builder
@@ -47,6 +47,20 @@ export const buildPackageExtraReducers = (builder: ActionReducerMapBuilder<Packa
             }
         })
         .addCase(updatePackage.rejected, (state, action) => {
+            state.loading = false;
+            state.error = action.payload as string;
+        })
+        .addCase(fetchPackageForOwner.pending, (state) => {
+            state.loading = true;
+            state.currentPackage = null; // Clear previous data while loading
+            state.error = null;
+        })
+        .addCase(fetchPackageForOwner.fulfilled, (state, action) => {
+            state.loading = false;
+            // The fetched package is placed into the central `currentPackage` state
+            state.currentPackage = action.payload;
+        })
+        .addCase(fetchPackageForOwner.rejected, (state, action) => {
             state.loading = false;
             state.error = action.payload as string;
         })

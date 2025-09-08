@@ -53,7 +53,7 @@ const Profile = () => {
     }, [dispatch]);
 
     const [activeTab, setActiveTab] = useState<'profile' | 'password'>('profile');
-    const [imagePreview, setImagePreview] = useState<string>('/assets/images/user-profile.jpeg');
+    const [imagePreview, setImagePreview] = useState<string>('/assets/images/agent-1.png');
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     // This is the new effect that constructs the full, correct URL
@@ -66,30 +66,39 @@ const Profile = () => {
             setImagePreview(`${backendUrl}${user.profileImage}`);
         } else {
             // Fallback to the default local image if the user has no profile picture
-            setImagePreview('/assets/images/user-profile.jpeg');
+            setImagePreview('/assets/images/agent-1.png');
         }
     }, [user]);
 
     // --- Formik Schemas ---
     const ProfileSchema = Yup.object().shape({
-        firstName: Yup.string().required('First name is required'),
-        lastName: Yup.string().required('Last name is required'),
-        email: Yup.string().email('Invalid email format').required('Email is required'),
+        firstName: Yup.string().required('First name is required').min(2, 'First name must be at least 2 characters').max(50, 'First name cannot exceed 50 characters'),
+
+        lastName: Yup.string().required('Last name is required').min(2, 'Last name must be at least 2 characters').max(50, 'Last name cannot exceed 50 characters'),
+
+        email: Yup.string().email('Invalid email format').required('Email is required').max(254, 'Email cannot exceed 254 characters'),
+
         phone: Yup.string()
+            .max(25, 'Phone number seems too long')
             .test('is-valid-phone', 'Phone number is not valid', (value) => !value || isValidPhoneNumber(value || ''))
             .nullable(),
+
         language: Yup.object().nullable().required('Language is required'),
     });
 
+    // --- Password Validation Schema ---
     const PasswordSchema = Yup.object().shape({
-        currentPassword: Yup.string().required('Current password is required'),
+        currentPassword: Yup.string().required('Current password is required').min(6, 'Password must be at least 6 characters').max(128, 'Password cannot exceed 128 characters'),
+
         newPassword: Yup.string()
+            .required('New password is required')
             .min(6, 'Password must be at least 6 characters')
-            .notOneOf([Yup.ref('currentPassword')], 'New password cannot be the same as the current one')
-            .required('New password is required'),
+            .max(128, 'Password cannot exceed 128 characters')
+            .notOneOf([Yup.ref('currentPassword')], 'New password cannot be the same as the current one'),
+
         confirmNewPassword: Yup.string()
-            .oneOf([Yup.ref('newPassword')], 'Passwords must match')
-            .required('Please confirm your new password'),
+            .required('Please confirm your new password')
+            .oneOf([Yup.ref('newPassword')], 'Passwords must match'),
     });
 
     // --- Event Handlers ---
@@ -230,8 +239,7 @@ const Profile = () => {
                                             <PhoneInput
                                                 name="phone"
                                                 international
-                                                countryCallingCodeEditable={false}
-                                                defaultCountry="US"
+                                                defaultCountry="BE"
                                                 className="form-input"
                                                 value={values.phone}
                                                 onChange={(value) => setFieldValue('phone', value || '')}
