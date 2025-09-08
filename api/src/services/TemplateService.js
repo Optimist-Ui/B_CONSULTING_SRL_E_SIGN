@@ -115,7 +115,7 @@ class TemplateService {
     }
 
     const attachment_uuid = `cs_test_${uuidv4()}`;
-    const fileUrl = `/Uploads/templates/${file.filename}`;
+    const fileUrl = `/uploads/templates/${file.filename}`;
 
     return {
       attachment_uuid,
