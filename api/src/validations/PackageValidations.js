@@ -1,6 +1,33 @@
 // validations/PackageValidations.js (Updated)
 const { body, query, param } = require("express-validator");
 
+const assignedUserValidator = (au) => {
+  // Base structure is always required
+  if (
+    !au.id ||
+    !au.contactId ||
+    !au.contactName ||
+    !au.contactEmail ||
+    !["Signer", "FormFiller", "Approver"].includes(au.role)
+  ) {
+    return false;
+  }
+
+  // Role-specific validation
+  if (au.role === "Signer") {
+    const methods = au.signatureMethods;
+    if (!Array.isArray(methods) || methods.length === 0) {
+      return false; // Signers must have an array of methods
+    }
+    // Each method must be one of the allowed types
+    const validMethods = ["Email OTP", "SMS OTP"];
+    if (!methods.every((method) => validMethods.includes(method))) {
+      return false;
+    }
+  }
+  return true;
+};
+
 const createPackageValidation = [
   body("name")
     .notEmpty()
@@ -53,15 +80,7 @@ const createPackageValidation = [
             field.label &&
             typeof field.label === "string" &&
             (!field.assignedUsers ||
-              field.assignedUsers.every(
-                (au) =>
-                  au.id &&
-                  au.contactId &&
-                  au.contactName &&
-                  au.contactEmail &&
-                  ["Signer", "FormFiller", "Approver"].includes(au.role) &&
-                  (au.role !== "Signer" || au.signatureMethod)
-              ))
+              field.assignedUsers.every(assignedUserValidator))
         )
       ) {
         throw new Error("Invalid field or assigned user structure");
@@ -191,15 +210,7 @@ const updatePackageValidation = [
             field.label &&
             typeof field.label === "string" &&
             (!field.assignedUsers ||
-              field.assignedUsers.every(
-                (au) =>
-                  au.id &&
-                  au.contactId &&
-                  au.contactName &&
-                  au.contactEmail &&
-                  ["Signer", "FormFiller", "Approver"].includes(au.role) &&
-                  (au.role !== "Signer" || au.signatureMethod)
-              ))
+              field.assignedUsers.every(assignedUserValidator))
         )
       ) {
         throw new Error("Invalid field or assigned user structure");
@@ -544,6 +555,16 @@ const manualReminderValidation = [
     .isMongoId()
     .withMessage("A valid package ID is required in the URL parameter"),
 ];
+const addReceiverByParticipantValidation = [
+  param("packageId").isMongoId().withMessage("A valid package ID is required."),
+  param("participantId")
+    .isString()
+    .notEmpty()
+    .withMessage("A valid participant ID is required."),
+  body("newContactId")
+    .isMongoId()
+    .withMessage("A valid new contact ID is required to add a receiver."),
+];
 
 module.exports = {
   createPackageValidation,
@@ -563,4 +584,5 @@ module.exports = {
   getPackagesValidation,
   revokePackageValidation,
   manualReminderValidation,
+  addReceiverByParticipantValidation,
 };

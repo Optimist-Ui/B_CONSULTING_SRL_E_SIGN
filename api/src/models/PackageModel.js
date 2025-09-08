@@ -11,12 +11,37 @@ const assignedUserSchema = new Schema({
     enum: ["Signer", "FormFiller", "Approver"],
     required: true,
   },
-  signatureMethod: {
-    type: String,
-    enum: ["Email OTP", "SMS OTP"],
+  signatureMethods: {
+    type: [
+      {
+        type: String,
+        enum: ["Email OTP", "SMS OTP"],
+      },
+    ],
+    default: undefined,
     required: function () {
       return this.role === "Signer";
     },
+    validate: [
+      {
+        validator: function (methods) {
+          if (this.role === "Signer") {
+            return Array.isArray(methods) && methods.length > 0;
+          }
+          return true;
+        },
+        message: "Signers must have at least one signature method.",
+      },
+      {
+        validator: function (methods) {
+          if (Array.isArray(methods)) {
+            return new Set(methods).size === methods.length;
+          }
+          return true;
+        },
+        message: "Signature methods cannot contain duplicates.",
+      },
+    ],
   },
   signed: { type: Boolean, default: false },
   signedAt: { type: Date },
@@ -87,6 +112,7 @@ const packageOptionsSchema = new Schema({
   repeatReminderDays: { type: Number },
   allowDownloadUnsigned: { type: Boolean, default: true },
   allowReassign: { type: Boolean, default: true },
+  allowReceiversToAdd: { type: Boolean, default: true },
 });
 
 // New schema for auditing reassignments
@@ -110,6 +136,23 @@ const reassignmentHistorySchema = new Schema({
   reason: { type: String, required: true },
   reassignedAt: { type: Date, default: Date.now },
   reassignedIP: { type: String },
+});
+
+const receiverHistorySchema = new Schema({
+  addedBy: {
+    // The participant who added the new receiver
+    participantId: { type: String, required: true },
+    contactName: { type: String, required: true },
+    contactEmail: { type: String, required: true },
+  },
+  newReceiver: {
+    // The contact who was added
+    contactId: { type: Schema.Types.ObjectId, ref: "Contact", required: true },
+    contactName: { type: String, required: true },
+    contactEmail: { type: String, required: true },
+  },
+  addedAt: { type: Date, default: Date.now },
+  addedIP: { type: String },
 });
 
 const packageSchema = new Schema(
@@ -158,6 +201,7 @@ const packageSchema = new Schema(
 
     // Add reassignment history tracking
     reassignmentHistory: [reassignmentHistorySchema],
+    receiverHistory: [receiverHistorySchema],
   },
   { timestamps: true }
 );

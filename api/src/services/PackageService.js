@@ -495,10 +495,12 @@ class PackageService {
     if (
       !assignedUser ||
       assignedUser.role !== "Signer" ||
-      assignedUser.signatureMethod !== "Email OTP" ||
+      !assignedUser.signatureMethods.includes("Email OTP") || // <-- Change this line
       assignedUser.signed
     ) {
-      throw new Error("Invalid participant or signature already completed.");
+      throw new Error(
+        "Invalid participant, this signature method is not enabled, or the signature is already completed."
+      );
     }
 
     if (assignedUser.contactEmail !== email) {
@@ -631,11 +633,11 @@ class PackageService {
     if (
       !assignedUser ||
       assignedUser.role !== "Signer" ||
-      assignedUser.signatureMethod !== "SMS OTP" ||
+      !assignedUser.signatureMethods.includes("SMS OTP") || // <-- Change this line
       assignedUser.signed
     ) {
       throw new Error(
-        "Invalid participant, wrong signature method, or signature already completed."
+        "Invalid participant, this signature method is not enabled, or the signature is already completed."
       );
     }
 
@@ -1356,6 +1358,93 @@ class PackageService {
     };
   }
 
+  /**
+   * Allows a participant with the 'Receiver' role to add another contact as a receiver.
+   */
+  async addReceiverByParticipant(packageId, participantId, newContactId, ip) {
+    const pkg = await this.Package.findById(packageId);
+    if (!pkg) {
+      throw new Error("Package not found.");
+    }
+
+    // --- PERMISSION CHECKS ---
+    if (!pkg.options.allowReceiversToAdd) {
+      throw new Error("This feature is not enabled for this package.");
+    }
+    if (pkg.status !== "Sent") {
+      throw new Error("Receivers can only be added to active packages.");
+    }
+
+    const currentParticipant = this._findParticipant(pkg, participantId);
+    if (
+      !currentParticipant ||
+      !pkg.receivers.some((r) => r.id === participantId)
+    ) {
+      throw new Error("You must be a Receiver to add other receivers.");
+    }
+
+    // --- VALIDATION CHECKS ---
+    const newContact = await this.Contact.findOne({
+      _id: newContactId,
+      ownerId: pkg.ownerId,
+    });
+    if (!newContact) {
+      throw new Error(
+        "The selected contact is invalid or not associated with the package owner."
+      );
+    }
+
+    const allParticipantContactIds = new Set([
+      ...pkg.fields.flatMap((f) =>
+        f.assignedUsers.map((u) => u.contactId.toString())
+      ),
+      ...pkg.receivers.map((r) => r.contactId.toString()),
+    ]);
+    if (allParticipantContactIds.has(newContactId)) {
+      throw new Error(
+        "The selected contact is already a participant in this package."
+      );
+    }
+
+    // --- PERFORM ACTION ---
+    const { v4: uuidv4 } = require("uuid");
+    const newReceiver = {
+      id: uuidv4(),
+      contactId: newContact._id,
+      contactName: `${newContact.firstName} ${newContact.lastName}`,
+      contactEmail: newContact.email,
+    };
+
+    pkg.receivers.push(newReceiver);
+
+    pkg.receiverHistory.push({
+      addedBy: {
+        participantId: currentParticipant.id,
+        contactName: currentParticipant.contactName,
+        contactEmail: currentParticipant.contactEmail,
+      },
+      newReceiver: {
+        contactId: newContact._id,
+        contactName: newReceiver.contactName,
+        contactEmail: newReceiver.contactEmail,
+      },
+      addedAt: new Date(),
+      addedIP: ip,
+    });
+
+    await pkg.save();
+    await this.emitPackageUpdate(pkg);
+
+    // --- SEND NOTIFICATIONS ---
+    await this._sendNewReceiverNotifications(
+      pkg,
+      currentParticipant,
+      newReceiver
+    );
+
+    return { message: "Receiver added successfully.", receiver: newReceiver };
+  }
+
   //Helpers
 
   async _completeSignature(
@@ -1489,21 +1578,28 @@ class PackageService {
     });
   }
 
+  /**
+   * Sends notifications when a package is completed.
+   * This includes:
+   * 1. A completion notification for ALL participants.
+   * 2. A "Please leave a review" notification for eligible roles.
+   * @private
+   */
   async _sendCompletionNotifications(pkg, initiatorName) {
     const packageOwner = await this.User.findById(pkg.ownerId);
 
-    // Create a map of all unique participants and receivers to easily access their details.
-    // We use email as the key to ensure each person is only processed once.
     const allRecipients = new Map();
 
-    // Add all action-takers (Signers, Approvers, etc.)
+    // Add all action-takers (Signer, Approver, FormFiller)
     pkg.fields.forEach((field) => {
       field.assignedUsers.forEach((user) => {
         if (!allRecipients.has(user.contactEmail)) {
           allRecipients.set(user.contactEmail, {
-            // Store the unique ID for this person's role in the package
             participantId: user.id,
             email: user.contactEmail,
+            name: user.contactName,
+            // --- MODIFICATION: Store the role for the review eligibility check
+            role: user.role,
           });
         }
       });
@@ -1515,30 +1611,59 @@ class PackageService {
         allRecipients.set(receiver.contactEmail, {
           participantId: receiver.id,
           email: receiver.contactEmail,
+          name: receiver.contactName,
+          // --- MODIFICATION: Assign a 'Receiver' role
+          role: "Receiver",
         });
       }
     });
 
-    // Ensure the package owner also gets a notification with a valid link
-    // The owner's unique ID for access purposes is simply their own userId.
+    // Ensure the package owner is on the list
     if (packageOwner && !allRecipients.has(packageOwner.email)) {
       allRecipients.set(packageOwner.email, {
-        participantId: packageOwner._id.toString(), // The owner can use their own ID
+        participantId: packageOwner._id.toString(),
         email: packageOwner.email,
+        name: initiatorName,
+        // --- MODIFICATION: The owner has the 'Initiator' role
+        role: "Initiator",
       });
     }
 
-    // Now, loop through the unique recipients and send each one a personalized email
+    // --- MODIFICATION: Define roles eligible for a review request
+    const rolesEligibleForReview = [
+      "Initiator",
+      "Signer",
+      "Approver",
+      "FormFiller",
+    ];
+
+    // Now, loop through the unique recipients and send notifications
     for (const recipient of allRecipients.values()) {
-      // ✅ CORRECT: Generate the specific participant access link for each person.
       const universalAccessLink = `${process.env.CLIENT_URL}/package/${pkg._id}/participant/${recipient.participantId}`;
 
+      // 1. Send the standard completion notification to EVERYONE
       await this.EmailService.sendDocumentCompletedNotification(
         recipient.email,
         initiatorName,
         pkg.name,
-        universalAccessLink // Pass the correct, personalized link
+        universalAccessLink
       );
+
+      // 2. Send the review request ONLY to eligible roles
+      if (rolesEligibleForReview.includes(recipient.role)) {
+        // --- MODIFICATION: Construct the specific review link
+        const reviewLink = `${process.env.CLIENT_URL}/package/${pkg._id}/participant/${recipient.participantId}/review`;
+
+        // Wait a brief moment to avoid emails being flagged as spam
+        await new Promise((resolve) => setTimeout(resolve, 200));
+
+        await this.EmailService.sendRequestForReviewEmail(
+          recipient.email,
+          recipient.name,
+          pkg.name,
+          reviewLink
+        );
+      }
     }
   }
 
@@ -2002,6 +2127,59 @@ class PackageService {
         pkg.name
       );
     }
+  }
+
+  /**
+   * A private helper method to determine if a given participant can add receivers.
+   */
+  _canParticipantAddReceivers(pkg, participantId) {
+    if (!pkg.options.allowReceiversToAdd) {
+      return { canAdd: false, reason: "Feature disabled by sender." };
+    }
+    if (pkg.status !== "Sent") {
+      return { canAdd: false, reason: "Package is not currently active." };
+    }
+
+    // Check if the current user is a Receiver in the receivers list.
+    const isReceiver = pkg.receivers.some((r) => r.id === participantId);
+    if (!isReceiver) {
+      return {
+        canAdd: false,
+        reason: "Only participants with a 'Receiver' role can add others.",
+      };
+    }
+
+    return { canAdd: true };
+  }
+
+  /**
+   * Sends notifications when a new receiver is added by another participant.
+   */
+  async _sendNewReceiverNotifications(pkg, addedBy, newReceiver) {
+    const packageOwner = await this.User.findById(pkg.ownerId).select(
+      "firstName lastName email"
+    );
+    const ownerName = `${packageOwner.firstName} ${packageOwner.lastName}`;
+    const viewUrl = `${process.env.CLIENT_URL}/package/${pkg._id}/participant/${newReceiver.id}`;
+
+    // 1. Notify the new receiver
+    await this.EmailService.sendNewReceiverNotification(
+      newReceiver.contactEmail,
+      newReceiver.contactName,
+      ownerName,
+      addedBy.contactName,
+      pkg.name,
+      viewUrl
+    );
+
+    // 2. Notify the package owner
+    await this.EmailService.sendNewReceiverOwnerNotification(
+      packageOwner.email,
+      ownerName,
+      newReceiver.contactName,
+      addedBy.contactName,
+      pkg.name
+    );
   }
 
   // New helper method to emit package update

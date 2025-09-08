@@ -74,17 +74,18 @@ class EmailService {
       console.error("Error sending password reset email:", error.response.body);
     }
   }
-
   // --- PASSWORD RESET SUCCESS METHOD ---
-  async sendPasswordResetSuccessEmail(user) {
+  async sendPasswordResetSuccessEmail(user, resetPasswordUrl) {
     const loginUrl = `${process.env.CLIENT_URL}/login`;
+
     const msg = {
       to: user.email,
       from: this.fromEmail,
-      templateId: process.env.SENDGRID_PASSWORD_RESET_SUCCESS, // Correct env variable
+      templateId: process.env.SENDGRID_PASSWORD_RESET_SUCCESS,
       dynamic_template_data: {
         name: user.firstName,
         login_link: loginUrl,
+        forgot_password_link: resetPasswordUrl, // Direct reset link passed from UserService
       },
     };
 
@@ -546,6 +547,378 @@ class EmailService {
     } catch (error) {
       console.error(
         `Error sending manual reminder to ${recipientEmail}:`,
+        error.response?.body || error
+      );
+    }
+  }
+
+  /**
+   * Notifies a NEWLY ADDED RECEIVER that they have been given access to a document by another participant.
+   * Corresponds to SENDGRID_NEW_RECEIVER_NOTIFICATION.
+   * @param {string} recipientEmail - The new receiver's email.
+   * @param {string} recipientName - The new receiver's name.
+   * @param {string} senderName - The name of the original document initiator.
+   * @param {string} addedByName - The name of the participant who added them.
+   * @param {string} packageName - The name of the document.
+   * @param {string} actionUrl - The direct URL for the new receiver to view the document.
+   */
+  async sendNewReceiverNotification(
+    recipientEmail,
+    recipientName,
+    senderName,
+    addedByName,
+    packageName,
+    actionUrl
+  ) {
+    const msg = {
+      to: recipientEmail,
+      from: this.fromEmail,
+      templateId: process.env.SENDGRID_NEW_RECEIVER_NOTIFICATION, // You will need to create this template in SendGrid
+      dynamic_template_data: {
+        recipient_name: recipientName,
+        sender_name: senderName,
+        package_name: packageName,
+        added_by_name: addedByName,
+        action_link: actionUrl,
+      },
+    };
+    try {
+      await sgMail.send(msg);
+      console.log(`New receiver notification sent to: ${recipientEmail}`);
+    } catch (error) {
+      console.error(
+        `Error sending new receiver notification to ${recipientEmail}:`,
+        error.response?.body || error
+      );
+    }
+  }
+
+  /**
+   * Notifies the document OWNER that a participant has added a new receiver.
+   * Corresponds to SENDGRID_NEW_RECEIVER_OWNER_NOTIFICATION.
+   * @param {string} recipientEmail - The owner's email.
+   * @param {string} ownerName - The owner's name.
+   * @param {string} newReceiverName - The name of the new receiver who was added.
+   * @param {string} addedByName - The name of the participant who added the new receiver.
+   * @param {string} packageName - The name of the document.
+   */
+  async sendNewReceiverOwnerNotification(
+    recipientEmail,
+    ownerName,
+    newReceiverName,
+    addedByName,
+    packageName
+  ) {
+    const documentLink = `${process.env.CLIENT_URL}/dashboard`; // A general link for the owner
+    const msg = {
+      to: recipientEmail,
+      from: this.fromEmail,
+      templateId: process.env.SENDGRID_NEW_RECEIVER_OWNER_NOTIFICATION, // You will need to create this template in SendGrid
+      dynamic_template_data: {
+        initiator_name: ownerName,
+        package_name: packageName,
+        new_receiver_name: newReceiverName,
+        added_by_name: addedByName,
+        document_link: documentLink,
+      },
+    };
+    try {
+      await sgMail.send(msg);
+      console.log(
+        `'Receiver Added' owner notification sent to: ${recipientEmail}`
+      );
+    } catch (error) {
+      console.error(
+        `Error sending 'Receiver Added' owner notification to ${recipientEmail}:`,
+        error.response?.body || error
+      );
+    }
+  }
+
+  /**
+   * Sends a confirmation email when a user's subscription is successfully activated.
+   * @param {string} recipientEmail - The user's email.
+   * @param {string} userName - The user's first name.
+   * @param {string} planName - The name of the subscribed plan (e.g., "Pro").
+   * @param {number} amount - The amount charged (e.g., 19.99).
+   * @param {string} renewalDate - The date the subscription will renew.
+   * @param {string} invoiceUrl - The direct URL to the Stripe invoice.
+   */
+  async sendSubscriptionConfirmation(
+    recipientEmail,
+    userName,
+    planName,
+    amount,
+    renewalDate,
+    invoiceUrl
+  ) {
+    const msg = {
+      to: recipientEmail,
+      from: this.fromEmail,
+      templateId: process.env.SENDGRID_SUBSCRIPTION_SUCCESS_TEMPLATE_ID, // Add this to your .env
+      dynamic_template_data: {
+        user_name: userName,
+        plan_name: planName,
+        plan_price: `$${amount}`,
+        renewal_date: renewalDate,
+        invoice_link: invoiceUrl,
+        billing_portal_link: `${process.env.CLIENT_URL}/subscriptions`, // A link to your new billing page
+      },
+    };
+    try {
+      await sgMail.send(msg);
+      console.log(`Subscription confirmation sent to: ${recipientEmail}`);
+    } catch (error) {
+      console.error(
+        `Error sending subscription confirmation to ${recipientEmail}:`,
+        error.response?.body || error
+      );
+    }
+  }
+
+  /**
+   * Sends an email confirming that auto-renewal has been turned off.
+   * @param {string} recipientEmail - The user's email.
+   * @param {string} userName - The user's first name.
+   * @param {string} planName - The name of the plan being cancelled.
+   * @param {string} expiryDate - The date the subscription will expire.
+   */
+  async sendCancellationConfirmation(
+    recipientEmail,
+    userName,
+    planName,
+    expiryDate
+  ) {
+    const msg = {
+      to: recipientEmail,
+      from: this.fromEmail,
+      // ❗ ACTION: Add this new template ID to your .env file
+      templateId: process.env.SENDGRID_SUBSCRIPTION_CANCEL_TEMPLATE_ID,
+      dynamic_template_data: {
+        user_name: userName,
+        plan_name: planName,
+        expiry_date: expiryDate,
+        billing_portal_link: `${process.env.CLIENT_URL}/subscriptions`,
+      },
+    };
+    try {
+      await sgMail.send(msg);
+      console.log(
+        `Subscription cancellation confirmation sent to: ${recipientEmail}`
+      );
+    } catch (error) {
+      console.error(
+        `Error sending cancellation confirmation to ${recipientEmail}:`,
+        error.response?.body || error
+      );
+    }
+  }
+
+  /**
+   * Sends an email confirming that auto-renewal has been turned back on.
+   * @param {string} recipientEmail - The user's email.
+   * @param {string} userName - The user's first name.
+   * @param {string} planName - The name of the reactivated plan.
+   * @param {string} renewalDate - The next renewal date.
+   */
+  async sendReactivationConfirmation(
+    recipientEmail,
+    userName,
+    planName,
+    renewalDate
+  ) {
+    const msg = {
+      to: recipientEmail,
+      from: this.fromEmail,
+      // ❗ ACTION: Add this new template ID to your .env file
+      templateId: process.env.SENDGRID_SUBSCRIPTION_REACTIVATE_TEMPLATE_ID,
+      dynamic_template_data: {
+        user_name: userName,
+        plan_name: planName,
+        renewal_date: renewalDate,
+        billing_portal_link: `${process.env.CLIENT_URL}/subscriptions`,
+      },
+    };
+    try {
+      await sgMail.send(msg);
+      console.log(
+        `Subscription reactivation confirmation sent to: ${recipientEmail}`
+      );
+    } catch (error) {
+      console.error(
+        `Error sending reactivation confirmation to ${recipientEmail}:`,
+        error.response?.body || error
+      );
+    }
+  }
+
+  /**
+   * Sends an email confirming that a free trial has been activated.
+   * @param {string} recipientEmail - The user's email.
+   * @param {string} userName - The user's first name.
+   * @param {string} planName - The name of the trial plan.
+   * @param {string} trialEndDate - When the trial expires.
+   * @param {number} documentLimit - Number of documents they can create during trial.
+   */
+  async sendTrialActivationEmail(
+    recipientEmail,
+    userName,
+    planName,
+    trialEndDate,
+    documentLimit
+  ) {
+    const msg = {
+      to: recipientEmail,
+      from: this.fromEmail,
+      // ❗ ACTION: Add this template ID to your .env file
+      templateId: process.env.SENDGRID_TRIAL_ACTIVATION_TEMPLATE_ID,
+      dynamic_template_data: {
+        user_name: userName,
+        plan_name: planName,
+        trial_end_date: trialEndDate,
+        document_limit: documentLimit,
+        dashboard_link: `${process.env.CLIENT_URL}/dashboard`,
+        billing_portal_link: `${process.env.CLIENT_URL}/subscriptions`,
+      },
+    };
+    try {
+      await sgMail.send(msg);
+      console.log(`Trial activation email sent to: ${recipientEmail}`);
+    } catch (error) {
+      console.error(
+        `Error sending trial activation email to ${recipientEmail}:`,
+        error.response?.body || error
+      );
+    }
+  }
+
+  /**
+   * Sends an email confirming that the trial has ended and the subscription is now active.
+   * @param {string} recipientEmail - The user's email.
+   * @param {string} userName - The user's first name.
+   * @param {string} planName - The name of the now-active plan.
+   * @param {string} firstBillingDate - When they were first charged.
+   * @param {string} nextBillingDate - When the next charge will occur.
+   * @param {string} amount - The amount charged.
+   * @param {string} invoiceUrl - Link to the Stripe invoice.
+   */
+  async sendTrialToActiveTransitionEmail(
+    recipientEmail,
+    userName,
+    planName,
+    firstBillingDate,
+    nextBillingDate,
+    amount,
+    invoiceUrl
+  ) {
+    const msg = {
+      to: recipientEmail,
+      from: this.fromEmail,
+      // ❗ ACTION: Add this template ID to your .env file
+      templateId: process.env.SENDGRID_TRIAL_TO_ACTIVE_TEMPLATE_ID,
+      dynamic_template_data: {
+        user_name: userName,
+        plan_name: planName,
+        first_billing_date: firstBillingDate,
+        next_billing_date: nextBillingDate,
+        amount: amount,
+        invoice_url: invoiceUrl,
+        billing_portal_link: `${process.env.CLIENT_URL}/subscriptions`,
+      },
+    };
+    try {
+      await sgMail.send(msg);
+      console.log(
+        `Trial to active transition email sent to: ${recipientEmail}`
+      );
+    } catch (error) {
+      console.error(
+        `Error sending trial to active transition email to ${recipientEmail}:`,
+        error.response?.body || error
+      );
+    }
+  }
+
+  /**
+   * Sends an email to a participant inviting them to review a completed package.
+   * @param {string} recipientEmail - The participant's email.
+   * @param {string} participantName - The participant's name.
+   * @param {string} packageName - The name of the package.
+   * @param {string} reviewLink - The direct URL to leave a review.
+   */
+  async sendRequestForReviewEmail(
+    recipientEmail,
+    participantName,
+    packageName,
+    reviewLink
+  ) {
+    const msg = {
+      to: recipientEmail,
+      from: this.fromEmail,
+      // ❗ ACTION: Create this template and add its ID to your .env file
+      templateId: process.env.SENDGRID_REVIEW_REQUEST_TEMPLATE_ID,
+      dynamic_template_data: {
+        participant_name: participantName,
+        package_name: packageName,
+        review_link: reviewLink,
+      },
+    };
+    try {
+      await sgMail.send(msg);
+      console.log(`Review request email sent to: ${recipientEmail}`);
+    } catch (error) {
+      console.error(
+        `Error sending review request email to ${recipientEmail}:`,
+        error.response?.body || error
+      );
+    }
+  }
+
+  /**
+   * Sends a "Thank you, your feedback helps us improve" email for low ratings.
+   * @param {string} recipientEmail - The reviewer's email.
+   * @param {string} reviewerName - The reviewer's name.
+   */
+  async sendReviewImprovementEmail(recipientEmail, reviewerName) {
+    const msg = {
+      to: recipientEmail,
+      from: this.fromEmail,
+      // ❗ ACTION: Create this template and add its ID to your .env file
+      templateId: process.env.SENDGRID_REVIEW_IMPROVEMENT_TEMPLATE_ID,
+      dynamic_template_data: {
+        reviewer_name: reviewerName,
+      },
+    };
+    try {
+      await sgMail.send(msg);
+    } catch (error) {
+      console.error(
+        "Error sending review improvement email:",
+        error.response?.body || error
+      );
+    }
+  }
+
+  /**
+   * Sends an appreciation email for positive feedback.
+   * @param {string} recipientEmail - The reviewer's email.
+   * @param {string} reviewerName - The reviewer's name.
+   */
+  async sendReviewAppreciationEmail(recipientEmail, reviewerName) {
+    const msg = {
+      to: recipientEmail,
+      from: this.fromEmail,
+      // ❗ ACTION: Create this template and add its ID to your .env file
+      templateId: process.env.SENDGRID_REVIEW_APPRECIATION_TEMPLATE_ID,
+      dynamic_template_data: {
+        reviewer_name: reviewerName,
+      },
+    };
+    try {
+      await sgMail.send(msg);
+    } catch (error) {
+      console.error(
+        "Error sending review appreciation email:",
         error.response?.body || error
       );
     }

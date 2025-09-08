@@ -160,21 +160,30 @@ class UserService {
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
+    // Generate new security reset token
+    const securityResetToken = crypto.randomBytes(32).toString("hex");
+    const resetTokenExpiresAt = new Date(Date.now() + 3600000); // 1 hour
+
     await this.User.findOneAndUpdate(
       { resetToken: resetToken },
       {
         $set: {
           password: hashedPassword,
-          resetToken: null,
-          resetTokenExpiresAt: null,
+          resetToken: securityResetToken, // Set new token for security alert
+          resetTokenExpiresAt: resetTokenExpiresAt,
         },
       },
       { new: true }
     );
 
-    // --- TRIGGER THE SUCCESS EMAIL ---
-    // Call the new email service method to notify the user
-    await this.emailService.sendPasswordResetSuccessEmail(user);
+    // Generate the direct reset link
+    const resetPasswordUrl = `${process.env.CLIENT_URL}/reset-password/${securityResetToken}`;
+
+    // Send success email with the reset link
+    await this.emailService.sendPasswordResetSuccessEmail(
+      user,
+      resetPasswordUrl
+    );
 
     return { message: "Password reset successful" };
   }
@@ -191,16 +200,30 @@ class UserService {
       throw new Error("The current password you entered is incorrect.");
     }
 
-    // --- NEW BUSINESS RULE ---
     if (currentPassword === newPassword) {
       throw new Error("The new password cannot be the same as the old one.");
     }
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // Generate security reset token
+    const securityResetToken = crypto.randomBytes(32).toString("hex");
+    const resetTokenExpiresAt = new Date(Date.now() + 3600000); // 1 hour
+
+    // Update password and set security reset token
     user.password = hashedPassword;
+    user.resetToken = securityResetToken;
+    user.resetTokenExpiresAt = resetTokenExpiresAt;
     await user.save();
 
-    await this.emailService.sendPasswordResetSuccessEmail(user);
+    // Generate the direct reset link
+    const resetPasswordUrl = `${process.env.CLIENT_URL}/reset-password/${securityResetToken}`;
+
+    // Send success email with the reset link
+    await this.emailService.sendPasswordResetSuccessEmail(
+      user,
+      resetPasswordUrl
+    );
 
     return { message: "Your password has been changed successfully." };
   }
@@ -216,6 +239,48 @@ class UserService {
     if (!user) throw new Error("User not found");
     return this._sanitizeUser(user);
   }
+
+  async findUserByStripeCustomerId(stripeCustomerId) {
+    try {
+      return await this.User.findOne({ stripeCustomerId });
+    } catch (error) {
+      console.error("Error finding user by Stripe customer ID:", error);
+      throw error;
+    }
+  }
+
+  async findUserBySubscriptionId(subscriptionId) {
+    try {
+      return await this.User.findOne({
+        "subscription.subscriptionId": subscriptionId,
+      });
+    } catch (error) {
+      console.error("Error finding user by subscription ID:", error);
+      throw error;
+    }
+  }
+
+  async updateUser(userId, updateData) {
+    try {
+      return await this.User.findByIdAndUpdate(userId, updateData, {
+        new: true,
+        runValidators: true,
+      });
+    } catch (error) {
+      console.error("Error updating user:", error);
+      throw error;
+    }
+  }
+
+  async findUserById(userId) {
+    try {
+      return await this.User.findById(userId).populate("subscription.planId");
+    } catch (error) {
+      console.error("Error finding user by ID:", error);
+      throw error;
+    }
+  }
+  
 }
 
 module.exports = UserService;

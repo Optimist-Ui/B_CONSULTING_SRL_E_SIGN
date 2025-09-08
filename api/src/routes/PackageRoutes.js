@@ -1,6 +1,7 @@
 // routes/packageRoutes.js (Updated)
 const express = require("express");
 const authenticateUser = require("../middlewares/authenticate");
+const requireActiveSubscription = require("../middlewares/requireActiveSubscription");
 const validate = require("../middlewares/validate");
 const {
   createPackageValidation,
@@ -20,6 +21,7 @@ const {
   manualReminderValidation,
   sendSmsOtpValidation,
   verifySmsOtpValidation,
+  addReceiverByParticipantValidation,
 } = require("../validations/PackageValidations");
 const { uploadPackage } = require("../middlewares/upload");
 
@@ -98,6 +100,13 @@ module.exports = (container) => {
     packageController.performReassignment.bind(packageController)
   );
 
+  router.post(
+    "/participant/:packageId/:participantId/add-receiver",
+    addReceiverByParticipantValidation,
+    validate,
+    packageController.addReceiverByParticipant.bind(packageController)
+  );
+
   // Public route for enhanced participant view with reassignment info
   router.get(
     "/participant/:packageId/:participantId/enhanced",
@@ -134,6 +143,7 @@ module.exports = (container) => {
   router
     .route("/")
     .post(
+      requireActiveSubscription(container),
       createPackageValidation,
       validate,
       packageController.createPackage.bind(packageController)

@@ -3,14 +3,20 @@ const dotenv = require("dotenv");
 const cors = require("cors");
 const helmet = require("helmet");
 const path = require("path");
+const swaggerUi = require("swagger-ui-express");
 
 dotenv.config();
 
 const container = require("./config/container");
+const swaggerSpec = require("./config/swaggerConfig");
 const userRoutes = require("./routes/UserRoutes")(container); // Pass container
 const packageRoutes = require("./routes/PackageRoutes")(container);
 const contactRoutes = require("./routes/ContactRoutes")(container);
 const templateRoutes = require("./routes/TemplateRoutes")(container);
+const subscriptionRoutes = require("./routes/SubscriptionRoutes")(container);
+const paymentMethodRoutes = require("./routes/PaymentMethodRoutes")(container);
+const webhookRoutes = require("./routes/WebhookRoutes")(container);
+const reviewRoutes = require("./routes/ReviewRoutes")(container);
 
 const app = express();
 
@@ -18,16 +24,24 @@ const clientURL = process.env.CLIENT_URL || "http://localhost:5173";
 
 app.use(cors({ origin: clientURL, credentials: true }));
 app.use(helmet({ crossOriginResourcePolicy: false }));
+
+app.use('/api/webhooks/stripe', webhookRoutes);
+
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use("/public", express.static(path.join(__dirname, "public")));
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // ✅ Routes
 app.use("/api/users", userRoutes);
 app.use("/api/contacts", contactRoutes);
 app.use("/api/packages", packageRoutes);
 app.use("/api/templates", templateRoutes);
+app.use("/api/plans", subscriptionRoutes);
+app.use("/api/reviews", reviewRoutes);
+app.use("/api/payment-methods", paymentMethodRoutes);
 
 const cronService = container.resolve("cronService");
 cronService.initialize(container);

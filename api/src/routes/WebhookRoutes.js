@@ -1,15 +1,14 @@
-// routes/WebhookRoutes.js
 const express = require("express");
 
 module.exports = (container) => {
   const router = express.Router();
   const webhookController = container.resolve("webhookController");
 
-  // POST /api/webhooks/docuseal
-  // This endpoint is called by the DocuSeal server.
+  // Stripe requires the raw body to construct the event
   router.post(
-    "/docuseal",
-    webhookController.handleDocuSealWebhook.bind(webhookController)
+    "/",
+    express.raw({ type: "application/json" }), // ✅ Special Middleware!
+    webhookController.handleStripeEvents.bind(webhookController)
   );
 
   return router;

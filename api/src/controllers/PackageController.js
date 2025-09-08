@@ -1,8 +1,9 @@
 const { successResponse, errorResponse } = require("../utils/responseHandler");
 
 class PackageController {
-  constructor({ packageService }) {
+  constructor({ packageService, userService }) {
     this.packageService = packageService;
+    this.userService = userService;
   }
 
   async uploadPackage(req, res) {
@@ -27,10 +28,19 @@ class PackageController {
   async createPackage(req, res) {
     try {
       const userId = req.user.id;
+      const user = req.userWithSubscription;
       const packageData = await this.packageService.createPackage(
         userId,
         req.body
       );
+
+      if (user.subscription.planId.documentLimit !== -1) {
+        const newCount = user.documentsCreatedThisMonth + 1;
+        await this.userService.updateUser(user.id, {
+          documentsCreatedThisMonth: newCount,
+        });
+      }
+
       successResponse(res, packageData, "Package created successfully", 201);
     } catch (error) {
       errorResponse(res, error, "Failed to create package");
@@ -460,6 +470,25 @@ class PackageController {
       successResponse(res, result, result.message);
     } catch (error) {
       errorResponse(res, error, "Failed to send reminders.");
+    }
+  }
+
+  async addReceiverByParticipant(req, res) {
+    try {
+      const { packageId, participantId } = req.params;
+      const { newContactId } = req.body;
+      const ip = req.ip;
+
+      const result = await this.packageService.addReceiverByParticipant(
+        packageId,
+        participantId,
+        newContactId,
+        ip
+      );
+
+      successResponse(res, result, "New receiver added successfully");
+    } catch (error) {
+      errorResponse(res, error, "Failed to add new receiver");
     }
   }
 }

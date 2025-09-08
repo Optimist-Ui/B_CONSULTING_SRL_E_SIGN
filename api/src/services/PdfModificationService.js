@@ -10,12 +10,14 @@ class PdfModificationService {
       .replace("/Uploads/", "/uploads/")
       .replace("/public/uploads/", "/uploads/")
       .replace(/^\/uploads\//, "uploads/");
+
     const filePath = path.join(
       process.cwd(),
       "src",
       "public",
       cleanRelativePath
     );
+
     const existingPdfBytes = await fs.readFile(filePath);
     const pdfDoc = await PDFDocument.load(existingPdfBytes);
 
@@ -47,10 +49,10 @@ class PdfModificationService {
       case "Rejected":
         await this.embedRejectedFields(pdfDoc, pkg, fonts);
         break;
-      case "Rejected":
-        await this.embedRejectedFields(pdfDoc, pkg, fonts);
+      case "Revoked":
+        await this.embedRevokedOverlay(pdfDoc, pkg, fonts);
+        await this.embedUnsignedFields(pdfDoc, pkg, fonts);
         break;
-
       default:
         await this.embedUnsignedFields(pdfDoc, pkg, fonts);
         break;
@@ -65,55 +67,153 @@ class PdfModificationService {
    */
   async embedCompletedFields(pdfDoc, pkg, fonts) {
     const pages = pdfDoc.getPages();
-    for (const field of pkg.fields) {
-      if (!field.value) continue;
-      const page = pages[field.page - 1];
-      if (!page) continue;
+    const uiScale = 1.5;
+    const horizontalPadding = 5 / uiScale;
 
-      let textToDraw = "";
-      const yOffset = page.getHeight() - field.y - field.height / 2; // Center text vertically
+    console.log("=== embedCompletedFields DEBUG ===");
+    console.log("Total fields:", pkg.fields.length);
+
+    for (const field of pkg.fields) {
+      console.log(
+        `Field ${field.id}: type=${
+          field.type
+        }, hasValue=${!!field.value}, value=`,
+        field.value
+      );
+
+      if (!field.value) {
+        console.log(`Skipping field ${field.id} - no value`);
+        continue;
+      }
+
+      const page = pages[field.page - 1];
+      if (!page) {
+        console.log(
+          `Skipping field ${field.id} - page ${field.page} not found`
+        );
+        continue;
+      }
+
+      const originalX = field.x / uiScale;
+      const originalY = field.y / uiScale;
+      const originalWidth = field.width / uiScale;
+      const originalHeight = field.height / uiScale;
+
+      console.log(`Processing field ${field.id} on page ${field.page}`);
+
+      let adjustedX = originalX;
+      const pageWidth = page.getWidth();
+      if (originalX + originalWidth > pageWidth) {
+        adjustedX = pageWidth - originalWidth;
+        console.log(
+          `Adjusted x for field ${field.id} from ${originalX} to ${adjustedX}`
+        );
+      }
 
       if (field.type === "signature" && typeof field.value === "object") {
-        const sig = field.value;
-        const signatureText = `Digitally Signed by SignatureFlow`;
-        const detailsText = `${sig.signedBy}\nDate: ${new Date(
-          sig.date
-        ).toLocaleString()}\nMethod: ${sig.method || "Email OTP"}`;
+        console.log(`Drawing signature for field ${field.id}`);
+        console.log(
+          `Field position: x=${adjustedX}, y=${originalY}, width=${originalWidth}, height=${originalHeight}`
+        );
 
-        // Draw signature text
-        page.drawText(signatureText, {
-          x: field.x + 5,
-          y: yOffset + 10, // Move up to avoid overlap
+        const sig = field.value;
+        const signerName = sig.signedBy;
+        const signerEmail = sig.email || sig.signedByEmail || "N/A";
+        const signatureDate = new Date(sig.date).toLocaleString();
+        const signatureMethod = sig.method || "Email OTP";
+        const certificationText = "Digitally Signed by E-Sign.eu";
+
+        // Calculate vertical positioning from the top of the field area
+        const fieldTop = page.getHeight() - originalY;
+        const fieldBottom = fieldTop - originalHeight;
+
+        // Define line spacing
+        const lineSpacing = 12;
+        const smallLineSpacing = 10;
+
+        // Start from the top of the field and work downward
+        let currentY = fieldTop - 8; // Small padding from top
+
+        console.log(`Drawing signer name at y=${currentY}`);
+        // Draw signer name (most prominent)
+        page.drawText(signerName, {
+          x: adjustedX + horizontalPadding,
+          y: currentY,
           font: fonts.helveticaBold,
           size: 11,
-          color: rgb(0.11, 0.22, 0.4),
+          color: rgb(0.1, 0.1, 0.1),
+          maxWidth: originalWidth - 2 * horizontalPadding,
         });
-        // Draw details below signature
-        page.drawText(detailsText, {
-          x: field.x + 5,
-          y: yOffset - 10, // Move down for details
+        currentY -= lineSpacing;
+
+        console.log(`Drawing email at y=${currentY}`);
+        // Draw email
+        page.drawText(`Email: ${signerEmail}`, {
+          x: adjustedX + horizontalPadding,
+          y: currentY,
           font: fonts.helvetica,
-          size: 8,
-          color: rgb(0.2, 0.2, 0.2),
-          lineHeight: 10,
+          size: 9,
+          color: rgb(0.3, 0.3, 0.3),
+          maxWidth: originalWidth - 2 * horizontalPadding,
         });
+        currentY -= smallLineSpacing;
+
+        console.log(`Drawing date at y=${currentY}`);
+        // Draw date
+        page.drawText(`Date: ${signatureDate}`, {
+          x: adjustedX + horizontalPadding,
+          y: currentY,
+          font: fonts.helvetica,
+          size: 9,
+          color: rgb(0.3, 0.3, 0.3),
+          maxWidth: originalWidth - 2 * horizontalPadding,
+        });
+        currentY -= smallLineSpacing;
+
+        console.log(`Drawing method at y=${currentY}`);
+        // Draw method
+        page.drawText(`Method: ${signatureMethod}`, {
+          x: adjustedX + horizontalPadding,
+          y: currentY,
+          font: fonts.helvetica,
+          size: 9,
+          color: rgb(0.3, 0.3, 0.3),
+          maxWidth: originalWidth - 2 * horizontalPadding,
+        });
+        currentY -= smallLineSpacing + 3; // Extra space before certification
+
+        console.log(`Drawing certification text at y=${currentY}`);
+        // Draw certification text at the bottom (smaller and less prominent)
+        page.drawText(certificationText, {
+          x: adjustedX + horizontalPadding,
+          y: currentY,
+          font: fonts.helveticaOblique,
+          size: 7,
+          color: rgb(0.5, 0.5, 0.5),
+          maxWidth: originalWidth - 2 * horizontalPadding,
+        });
+
+        console.log(`Signature drawing completed for field ${field.id}`);
       } else if (field.type === "checkbox") {
-        textToDraw = field.value ? "X" : "";
+        const yOffset = page.getHeight() - originalY - originalHeight / 2;
+        const textToDraw = field.value ? "X" : "";
         page.drawText(textToDraw, {
-          x: field.x + field.width / 4,
+          x: adjustedX + originalWidth / 4,
           y: yOffset,
           font: fonts.helvetica,
           size: 14,
           color: rgb(0, 0, 0),
         });
       } else {
-        textToDraw = field.value.toString();
+        const yOffset = page.getHeight() - originalY - originalHeight / 2;
+        const textToDraw = field.value.toString();
         page.drawText(textToDraw, {
-          x: field.x + 5,
+          x: adjustedX + horizontalPadding,
           y: yOffset,
           font: fonts.helvetica,
           size: 10,
           color: rgb(0, 0, 0),
+          maxWidth: originalWidth - 2 * horizontalPadding,
         });
       }
     }
@@ -126,6 +226,8 @@ class PdfModificationService {
     if (!pkg.rejectionDetails?.rejectedBy) return;
 
     const pages = pdfDoc.getPages();
+    const uiScale = 1.5;
+    const horizontalPadding = 5 / uiScale;
     const rejecterContactId =
       pkg.rejectionDetails.rejectedBy.contactId.toString();
 
@@ -133,30 +235,109 @@ class PdfModificationService {
       const isAssignedToRejecter = field.assignedUsers.some(
         (user) => user.contactId.toString() === rejecterContactId
       );
+
       if (!isAssignedToRejecter) continue;
 
       const page = pages[field.page - 1];
       if (!page) continue;
 
-      const yOffset = page.getHeight() - field.y;
+      const originalX = field.x / uiScale;
+      const originalY = field.y / uiScale;
+      const originalWidth = field.width / uiScale;
+      const originalHeight = field.height / uiScale;
+
+      let adjustedX = originalX;
+      const pageWidth = page.getWidth();
+      if (originalX + originalWidth > pageWidth) {
+        adjustedX = pageWidth - originalWidth;
+      }
+
+      // Draw background rectangle for rejection
+      const yOffset = page.getHeight() - originalY;
       page.drawRectangle({
-        x: field.x,
-        y: yOffset - field.height,
-        width: field.width,
-        height: field.height,
+        x: adjustedX,
+        y: yOffset - originalHeight,
+        width: originalWidth,
+        height: originalHeight,
         color: rgb(0.98, 0.9, 0.9),
         borderColor: rgb(0.7, 0, 0),
         borderWidth: 1,
       });
 
-      const text = `REJECTED\nReason: ${pkg.rejectionDetails.reason}`;
-      page.drawText(text, {
-        x: field.x + 5,
-        y: yOffset - field.height / 2,
+      // Get rejection details
+      const rejectedBy = pkg.rejectionDetails.rejectedBy;
+      const rejectedByName =
+        rejectedBy.contactName || rejectedBy.name || "Unknown";
+      const rejectedByEmail =
+        rejectedBy.email || rejectedBy.contactEmail || "N/A";
+      const rejectionDate = new Date(
+        pkg.rejectionDetails.rejectedAt
+      ).toLocaleString();
+      const rejectionReason =
+        pkg.rejectionDetails.reason || "No reason provided";
+
+      // Calculate vertical positioning from the top of the field area
+      const fieldTop = page.getHeight() - originalY;
+
+      // Define line spacing for rejection
+      const lineSpacing = 11;
+      const smallLineSpacing = 9;
+
+      // Start from the top of the field and work downward
+      let currentY = fieldTop - 6; // Small padding from top
+
+      // Draw "REJECTED" header
+      page.drawText("REJECTED", {
+        x: adjustedX + horizontalPadding,
+        y: currentY,
         font: fonts.helveticaBold,
-        size: 9,
-        lineHeight: 12,
+        size: 10,
         color: rgb(0.7, 0, 0),
+        maxWidth: originalWidth - 2 * horizontalPadding,
+      });
+      currentY -= lineSpacing;
+
+      // Draw rejected by name
+      page.drawText(`By: ${rejectedByName}`, {
+        x: adjustedX + horizontalPadding,
+        y: currentY,
+        font: fonts.helvetica,
+        size: 8,
+        color: rgb(0.6, 0, 0),
+        maxWidth: originalWidth - 2 * horizontalPadding,
+      });
+      currentY -= smallLineSpacing;
+
+      // Draw rejected by email
+      page.drawText(`Email: ${rejectedByEmail}`, {
+        x: adjustedX + horizontalPadding,
+        y: currentY,
+        font: fonts.helvetica,
+        size: 8,
+        color: rgb(0.6, 0, 0),
+        maxWidth: originalWidth - 2 * horizontalPadding,
+      });
+      currentY -= smallLineSpacing;
+
+      // Draw rejection date
+      page.drawText(`Date: ${rejectionDate}`, {
+        x: adjustedX + horizontalPadding,
+        y: currentY,
+        font: fonts.helvetica,
+        size: 8,
+        color: rgb(0.6, 0, 0),
+        maxWidth: originalWidth - 2 * horizontalPadding,
+      });
+      currentY -= smallLineSpacing;
+
+      // Draw rejection reason
+      page.drawText(`Reason: ${rejectionReason}`, {
+        x: adjustedX + horizontalPadding,
+        y: currentY,
+        font: fonts.helvetica,
+        size: 8,
+        color: rgb(0.6, 0, 0),
+        maxWidth: originalWidth - 2 * horizontalPadding,
       });
     }
   }
@@ -166,25 +347,36 @@ class PdfModificationService {
    */
   async embedUnsignedFields(pdfDoc, pkg, fonts) {
     const pages = pdfDoc.getPages();
+    const uiScale = 1.5;
+    const horizontalPadding = 4 / uiScale;
+    const verticalPadding = 12 / uiScale;
+
     for (const field of pkg.fields) {
       const page = pages[field.page - 1];
       if (!page) continue;
 
-      const yOffset = page.getHeight() - field.y - field.height;
+      const originalX = field.x / uiScale;
+      const originalY = field.y / uiScale;
+      const originalWidth = field.width / uiScale;
+      const originalHeight = field.height / uiScale;
+
+      const yOffset = page.getHeight() - originalY - originalHeight;
+
       page.drawRectangle({
-        x: field.x,
+        x: originalX,
         y: yOffset,
-        width: field.width,
-        height: field.height,
+        width: originalWidth,
+        height: originalHeight,
         borderColor: rgb(0, 0, 0.5),
         borderWidth: 1,
         borderDashArray: [3, 3],
         color: rgb(0, 0, 1),
         opacity: 0.05,
       });
+
       page.drawText(field.label, {
-        x: field.x + 4,
-        y: yOffset + field.height - 12, // Place label at top of rectangle
+        x: originalX + horizontalPadding,
+        y: yOffset + originalHeight - verticalPadding,
         font: fonts.helvetica,
         size: 8,
         color: rgb(0.2, 0.2, 0.2),
@@ -227,7 +419,7 @@ class PdfModificationService {
       audit += `- Document REJECTED by ${
         pkg.rejectionDetails.rejectedBy.contactName
       } at ${formatDate(pkg.rejectionDetails.rejectedAt)}\n`;
-      audit += `  Reason: ${pkg.rejectionDetails.reason}\n`;
+      audit += ` Reason: ${pkg.rejectionDetails.reason}\n`;
     }
 
     if (pkg.status === "Revoked" && pkg.revocationDetails?.revokedBy) {
@@ -235,7 +427,7 @@ class PdfModificationService {
         pkg.revocationDetails.revokedBy.name
       } at ${formatDate(pkg.revocationDetails.revokedAt)}\n`;
       const reason = pkg.revocationDetails.reason || "No reason provided.";
-      audit += `  Reason: ${reason}\n`;
+      audit += ` Reason: ${reason}\n`;
     }
 
     if (pkg.reassignmentHistory?.length > 0) {
@@ -258,9 +450,8 @@ class PdfModificationService {
     const text = this.createAuditTrail(pkg);
     const page = pdfDoc.addPage();
     const { width, height } = page.getSize();
-
     const margin = 50;
-    let currentY = height - margin; // Start from top of page
+    let currentY = height - margin;
 
     // Add Logo if available
     if (logoImage) {
@@ -271,7 +462,7 @@ class PdfModificationService {
         width: logoDims.width,
         height: logoDims.height,
       });
-      currentY -= logoDims.height + 20; // Add padding below logo
+      currentY -= logoDims.height + 20;
     }
 
     // Add Header
@@ -284,7 +475,7 @@ class PdfModificationService {
       size: headerSize,
       color: rgb(0.1, 0.1, 0.1),
     });
-    currentY -= headerSize + 20; // Add padding below header
+    currentY -= headerSize + 20;
 
     // Add dividing line
     page.drawLine({
@@ -293,7 +484,7 @@ class PdfModificationService {
       thickness: 1,
       color: rgb(0.8, 0.8, 0.8),
     });
-    currentY -= 20; // Add padding below line
+    currentY -= 20;
 
     // Split audit text into lines for wrapping
     const auditLines = text.split("\n");
@@ -308,6 +499,7 @@ class PdfModificationService {
         currentY = height - margin;
         page = newPage;
       }
+
       page.drawText(line, {
         x: margin,
         y: currentY,
@@ -332,8 +524,8 @@ class PdfModificationService {
     const options = {
       font: fonts.helveticaBold,
       size: 120,
-      color: rgb(0.9, 0.2, 0.2), // A strong red color
-      opacity: 0.15, // Semi-transparent
+      color: rgb(0.9, 0.2, 0.2),
+      opacity: 0.15,
     };
 
     const textWidth = fonts.helveticaBold.widthOfTextAtSize(text, 120);
@@ -354,7 +546,7 @@ class PdfModificationService {
       // Draw the text diagonally across the center
       page.drawText(text, {
         x: centerX - textWidth / 2,
-        y: centerY - textHeight / 4, // Adjust for font baseline
+        y: centerY - textHeight / 4,
         ...options,
       });
     }
