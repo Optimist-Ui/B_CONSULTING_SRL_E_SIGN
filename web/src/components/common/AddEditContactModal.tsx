@@ -72,8 +72,6 @@ const AddEditContactModal: FC<AddEditContactModalProps> = ({ isOpen, onClose, co
     const dispatch: AppDispatch = useDispatch();
     const { loading } = useSelector((state: IRootState) => state.contacts);
 
-    console.log(loading);
-    
 
     const handleSaveContact = async (values: any) => {
         const customFieldsObject = values.customFields.reduce((acc: { [key: string]: string }, field: { key: string; value: string }) => {

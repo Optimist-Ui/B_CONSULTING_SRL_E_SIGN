@@ -9,6 +9,8 @@ export interface SubscriptionStatus {
     canCreatePackages: boolean;
     reason: string;
     status: 'ACTIVE' | 'INACTIVE' | 'LIMIT_REACHED' | 'EXPIRED' | 'PENDING';
+    documentsUsed?: number;
+    documentLimit?: number;
 }
 
 // Shape of the user's active subscription

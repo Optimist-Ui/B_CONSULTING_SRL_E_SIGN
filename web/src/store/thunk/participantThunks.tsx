@@ -43,7 +43,6 @@ interface AddReceiverParams {
 export const fetchPackageForParticipant = createAsyncThunk<ParticipantPackageView, FetchParams>('participant/fetchPackage', async ({ packageId, participantId }, { rejectWithValue }) => {
     try {
         const response = await api.get(`/api/packages/participant/${packageId}/${participantId}`);
-        console.log(response);
         return response.data.data;
     } catch (error: any) {
         return rejectWithValue(error.response?.data?.error || 'Failed to load document.');

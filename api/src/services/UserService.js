@@ -281,6 +281,15 @@ class UserService {
     }
   }
   
+  /**
+   * Find users with active subscriptions
+   */
+  async findUsersWithSubscriptions() {
+    return await this.User.find({
+      subscription: { $exists: true },
+      "subscription.status": { $in: ["active", "trialing"] },
+    });
+  }
 }
 
 module.exports = UserService;

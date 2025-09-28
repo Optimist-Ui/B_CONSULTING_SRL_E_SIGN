@@ -69,8 +69,12 @@ const StatusBadge: React.FC<{ status: string; cancelAtPeriodEnd: boolean }> = ({
     );
 };
 
+interface ManageSubscriptionProps {
+    onChangePlan: () => void;
+}
+
 // The Main Management Component
-const ManageSubscription: React.FC = () => {
+const ManageSubscription: React.FC<ManageSubscriptionProps> = ({ onChangePlan }) => {
     const dispatch = useDispatch<AppDispatch>();
     const { subscription, isCancelling, isReactivating, isEndingTrial } = useSelector((state: IRootState) => state.subscription);
 
@@ -140,7 +144,7 @@ const ManageSubscription: React.FC = () => {
         Swal.fire({
             icon: 'question',
             title: 'Activate Paid Plan Now?',
-            text: `You will be charged $${subscription.planPrice} immediately and gain full access to the ${subscription.planName} plan benefits, including your new document limit.`,
+            text: `You will be charged €${subscription.planPrice} immediately and gain full access to the ${subscription.planName} plan benefits, including your new document limit.`,
             showCancelButton: true,
             confirmButtonText: 'Yes, Activate Now',
             cancelButtonText: 'Stay on Trial',
@@ -194,7 +198,7 @@ const ManageSubscription: React.FC = () => {
                     </div>
                     <div className="text-right">
                         <p className="text-sm text-gray-500 dark:text-gray-400">{subscription.planInterval}ly</p>
-                        <p className="text-2xl font-bold text-gray-900 dark:text-white">${subscription.planPrice || 'N/A'}</p>
+                        <p className="text-2xl font-bold text-gray-900 dark:text-white">€{subscription.planPrice || 'N/A'}</p>
                     </div>
                 </div>
 
@@ -331,6 +335,15 @@ const ManageSubscription: React.FC = () => {
                         >
                             <IconFile className="w-4 h-4 mr-2" />
                             View Invoices
+                        </button>
+
+                        <button
+                            type="button"
+                            className="btn btn-outline-primary px-6 py-3 rounded-lg transition-colors duration-200 hover:bg-blue-100 dark:hover:bg-blue-900/50 focus:ring-2 focus:ring-blue-300"
+                            onClick={onChangePlan}
+                        >
+                            <IconTrendingUp className="w-4 h-4 mr-2" />
+                            Top-Up
                         </button>
 
                         {subscription.isTrialing ? (

@@ -44,6 +44,7 @@ class PackageService {
       receivers,
       options,
       templateId,
+      customMessage,
       status,
     } = packageData;
 
@@ -94,15 +95,23 @@ class PackageService {
       fields,
       receivers,
       options,
+      customMessage,
       status: status || "Draft",
     });
 
     // If the package was successfully created with a 'Sent' status, send the notifications.
     if (newPackage && newPackage.status === "Sent") {
-      const packageCreator = await this.User.findById(userId);
-      const senderName = `${packageCreator.firstName} ${packageCreator.lastName}`;
+      // ========================= CORRECTED LOGIC START =========================
+      // Fetch the user, call the new method to increment usage, and save.
+      const user = await this.User.findById(userId);
+      if (user) {
+        user.incrementDocumentUsage();
+        await user.save();
+      }
+      // ========================== CORRECTED LOGIC END ==========================
 
-      // This is a private helper function to avoid code duplication
+      const packageCreator = await this.User.findById(userId); // Re-fetch for name is fine
+      const senderName = `${packageCreator.firstName} ${packageCreator.lastName}`;
       await this._sendInitialNotifications(newPackage, senderName);
     }
 
@@ -244,14 +253,23 @@ class PackageService {
       );
     }
 
+    // Check if status changed from a non-sent state to "Sent"
     if (
       packageBeforeUpdate.status !== "Sent" &&
       packageData.status === "Sent"
     ) {
-      const packageCreator = await this.User.findById(userId);
+      // ========================= CORRECTED LOGIC START =========================
+      // Fetch the user, call the new method to increment usage, and save.
+      const user = await this.User.findById(userId);
+      if (user) {
+        user.incrementDocumentUsage();
+        await user.save();
+      }
+      // ========================== CORRECTED LOGIC END ==========================
+
+      const packageCreator = await this.User.findById(userId); // Re-fetch for name is fine
       const senderName = `${packageCreator.firstName} ${packageCreator.lastName}`;
 
-      // Call the same helper function
       await this._sendInitialNotifications(packageData, senderName);
     }
 
@@ -364,6 +382,10 @@ class PackageService {
             date: signer.signedAt.toISOString(),
             method: signedMethod,
           };
+          // --- Conditionally add the OTP code to the response ---
+          if (signer.signedWithOtp) {
+            signatureValue.otpCode = signer.signedWithOtp;
+          }
 
           // Conditionally add email or phone based on the method used
           if (signedMethod === "SMS OTP") {
@@ -578,6 +600,7 @@ class PackageService {
     assignedUser.signedAt = signDate;
     assignedUser.signedMethod = "Email OTP";
     assignedUser.signedIP = ip;
+    assignedUser.signedWithOtp = otp;
 
     // --- THIS IS THE FIX ---
     // 2. Store the signature details in the `value` property for the UI
@@ -586,6 +609,7 @@ class PackageService {
       email: assignedUser.contactEmail,
       date: signDate.toISOString(),
       method: "Email OTP",
+      otpCode: otp,
     };
     // ----------------------
 
@@ -595,6 +619,11 @@ class PackageService {
       const packageCreator = await this.User.findById(pkg.ownerId);
       const initiatorName = `${packageCreator.firstName} ${packageCreator.lastName}`;
       await this._sendCompletionNotifications(pkg, initiatorName);
+    } else {
+      // --- ADD THIS BLOCK ---
+      // If not fully complete, send a progress update notification
+      await this._sendActionUpdateNotification(pkg, assignedUser);
+      // --- END OF NEW BLOCK ---
     }
 
     // Save all changes to the package
@@ -711,6 +740,7 @@ class PackageService {
       fieldId,
       ip,
       "SMS OTP",
+      otp,
       otpDoc._id
     );
   }
@@ -774,6 +804,17 @@ class PackageService {
       const packageCreator = await this.User.findById(pkg.ownerId);
       const initiatorName = `${packageCreator.firstName} ${packageCreator.lastName}`;
       await this._sendCompletionNotifications(pkg, initiatorName);
+    } else {
+      // --- ADD THIS BLOCK ---
+      // Find the participant who acted to include their name in the notification
+      const actor = pkg.fields
+        .flatMap((f) => f.assignedUsers)
+        .find((u) => u.contactId.toString() === participantContactId);
+
+      if (actor) {
+        await this._sendActionUpdateNotification(pkg, actor);
+      }
+      // --- END OF NEW BLOCK ---
     }
 
     // Save the package with the updated field values
@@ -1047,7 +1088,7 @@ class PackageService {
           contactName: `${newContact.firstName} ${newContact.lastName}`,
           contactEmail: newContact.email,
           role: originalUser.role,
-          signatureMethod: originalUser.signatureMethod,
+          signatureMethods: originalUser.signatureMethods,
           signed: false,
         };
 
@@ -1453,6 +1494,7 @@ class PackageService {
     fieldId,
     ip,
     method,
+    otp,
     otpDocId
   ) {
     // Clean up OTP
@@ -1480,6 +1522,7 @@ class PackageService {
     assignedUser.signedAt = signDate;
     assignedUser.signedMethod = method;
     assignedUser.signedIP = ip;
+    assignedUser.signedWithOtp = otp;
 
     // Store signature details in field value for UI
     field.value = {
@@ -1488,6 +1531,7 @@ class PackageService {
       date: signDate.toISOString(),
       method: method,
       ip: ip, // Additional audit info
+      otpCode: otp,
     };
 
     // Check if package is completed
@@ -1528,31 +1572,44 @@ class PackageService {
    */
   isPackageCompleted(pkg) {
     return pkg.fields.every((field) => {
-      // Skip non-required fields
-      if (!field.required) {
-        return true;
-      }
-
-      // Handle signature fields - check if all assigned users have signed
+      // Handle signature fields - ALWAYS check if assigned users have signed
+      // Signatures with assigned users must be completed regardless of required flag
       if (field.type === "signature") {
-        return field.assignedUsers.every((au) => au.signed === true);
+        // If there are assigned users, they ALL must sign
+        if (field.assignedUsers && field.assignedUsers.length > 0) {
+          return field.assignedUsers.every((au) => au.signed === true);
+        }
+        // If no assigned users and not required, consider it complete
+        return !field.required;
       }
 
-      // Handle checkbox fields with Approver role - check if signed
+      // Handle checkbox fields with Approver role
       if (field.type === "checkbox") {
         const approvers = field.assignedUsers.filter(
           (au) => au.role === "Approver"
         );
+
+        // If there are approvers, they must have signed
         if (approvers.length > 0) {
-          // If there are approvers, they must have signed
           return approvers.every((au) => au.signed === true);
         }
-        // If no approvers, just check if checkbox has a valid value
+
+        // For checkboxes without approvers, check required flag
+        if (!field.required) {
+          return true;
+        }
+
+        // Required checkbox must have a valid value
         return field.value === true;
       }
 
-      // Handle all other field types (text, textarea, date, dropdown, radio)
-      // These fields are complete if they have a valid, non-empty value
+      // For all other field types (text, textarea, date, dropdown, radio)
+      // Only check if they're required
+      if (!field.required) {
+        return true;
+      }
+
+      // Required fields must have a valid, non-empty value
       if (
         field.type === "text" ||
         field.type === "textarea" ||
@@ -1708,7 +1765,8 @@ class PackageService {
         user,
         pkg,
         senderName,
-        actionUrl
+        actionUrl,
+        pkg.customMessage
       );
     }
 
@@ -1719,7 +1777,8 @@ class PackageService {
         receiver,
         pkg,
         senderName,
-        actionUrl
+        actionUrl,
+        pkg.customMessage
       );
     }
   }
@@ -2180,6 +2239,94 @@ class PackageService {
       addedBy.contactName,
       pkg.name
     );
+  }
+
+  /**
+   * @private
+   * Sends a progress update to the initiator when a participant completes an action,
+   * but the document is not yet fully completed.
+   */
+  async _sendActionUpdateNotification(pkg, actor) {
+    try {
+      // 1. Get the initiator (package owner)
+      const owner = await this.User.findById(pkg.ownerId).select(
+        "email firstName lastName"
+      );
+      if (!owner) return;
+
+      const initiatorName = `${owner.firstName} ${owner.lastName}`;
+      const actorName = actor.contactName;
+
+      // 2. Build a comprehensive list of all participants and their status
+      const participants = new Map();
+      pkg.fields.forEach((field) => {
+        field.assignedUsers.forEach((user) => {
+          if (!participants.has(user.contactId.toString())) {
+            participants.set(user.contactId.toString(), {
+              name: user.contactName,
+              contactId: user.contactId.toString(),
+              isComplete: false, // Default to pending
+            });
+          }
+        });
+      });
+
+      // 3. Determine the true status of each participant
+      for (const p of participants.values()) {
+        const requiredFields = pkg.fields.filter(
+          (f) =>
+            f.required &&
+            f.assignedUsers.some((u) => u.contactId.toString() === p.contactId)
+        );
+
+        // If a participant has no required fields, they are considered complete by default.
+        if (requiredFields.length === 0) {
+          p.isComplete = true;
+          continue;
+        }
+
+        // Check if all their required fields are signed/filled
+        p.isComplete = requiredFields.every((field) => {
+          const assignment = field.assignedUsers.find(
+            (u) => u.contactId.toString() === p.contactId
+          );
+          return assignment && assignment.signed; // `signed` flag indicates completion
+        });
+      }
+
+      // 4. Create HTML lists for the email template
+      const completedList = [];
+      const pendingList = [];
+
+      participants.forEach((p) => {
+        if (p.isComplete) {
+          completedList.push(`<li>✔️ ${p.name}</li>`);
+        } else {
+          pendingList.push(`<li>... ${p.name}</li>`);
+        }
+      });
+
+      const completedListHtml = `<ul>${completedList.join("")}</ul>`;
+      const pendingListHtml =
+        pendingList.length > 0
+          ? `<ul>${pendingList.join("")}</ul>`
+          : "<p>All participants have completed their actions!</p>";
+
+      // 5. Send the email
+      const actionLink = `${process.env.CLIENT_URL}/dashboard`; // Link to initiator's dashboard
+      await this.EmailService.sendParticipantActionNotification(
+        owner.email,
+        initiatorName,
+        pkg.name,
+        actorName,
+        completedListHtml,
+        pendingListHtml,
+        actionLink
+      );
+    } catch (error) {
+      console.error("Failed to send action update notification:", error);
+      // Do not throw an error, as the main operation (e.g., signing) was successful.
+    }
   }
 
   // New helper method to emit package update

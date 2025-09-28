@@ -49,6 +49,11 @@ const createPackageValidation = [
     .optional()
     .isMongoId()
     .withMessage("Template ID must be a valid MongoDB ID"),
+  body("customMessage")
+    .optional()
+    .isString()
+    .withMessage("Custom message must be a string")
+    .trim(),
   body("status")
     .optional()
     .isIn(["Draft", "Sent"])

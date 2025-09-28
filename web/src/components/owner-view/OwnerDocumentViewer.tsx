@@ -48,7 +48,12 @@ const OwnerDocumentViewer: React.FC<Props> = ({ packageData }) => {
         const loadPdf = async () => {
             try {
                 setIsLoading(true);
-                const correctedFileUrl = packageData.fileUrl.replace('/Uploads/templates/', '/uploads/').replace('/Uploads/', '/uploads/');
+                let correctedFileUrl = packageData.fileUrl.replace('/Uploads/templates/', '/uploads/').replace('/Uploads/', '/uploads/');
+
+                // Special case: if it's templates, prepend /public
+                if (correctedFileUrl.startsWith('/uploads/templates/')) {
+                    correctedFileUrl = '/public' + correctedFileUrl;
+                }
 
                 const fullUrl = `${BACKEND_URL}${correctedFileUrl.startsWith('/') ? '' : '/'}${correctedFileUrl}`;
 

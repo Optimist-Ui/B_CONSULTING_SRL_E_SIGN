@@ -35,7 +35,6 @@ const ParticipantLayout: React.FC<ParticipantLayoutProps> = ({ packageData }) =>
     const { fieldValues, uiState } = useSelector((state: IRootState) => state.participant);
     const { hasAgreedToTerms } = uiState;
     const termsSectionRef = useRef<HTMLDivElement>(null);
-
     // Enhanced progress calculation
     // Check if current user has completed all their tasks
     const currentUserTasksCompleted = useMemo(() => {

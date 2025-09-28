@@ -180,11 +180,11 @@ const HomePlans = () => {
                                         <div className="px-8 py-6 bg-gradient-to-r from-gray-50/80 to-blue-50/40 group-hover:from-white/10 group-hover:to-blue-400/10 transition-all duration-500 border-y border-gray-100/50 group-hover:border-white/20">
                                             <div className="flex items-baseline justify-center">
                                                 <span className="text-5xl font-bold text-gray-900 group-hover:text-white transition-colors duration-500">
-                                                    ${isYearly ? (plan.yearlyPrice / 12).toFixed(0) : plan.monthlyPrice}
+                                                    €{isYearly ? (plan.yearlyPrice / 12).toFixed(0) : plan.monthlyPrice}
                                                 </span>
                                                 <span className="ml-1 text-xl font-medium text-gray-500 group-hover:text-gray-300">/mo</span>
                                             </div>
-                                            {isYearly && <p className="text-center text-sm text-gray-500 group-hover:text-gray-400 mt-1">Billed as ${plan.yearlyPrice} per year</p>}
+                                            {isYearly && <p className="text-center text-sm text-gray-500 group-hover:text-gray-400 mt-1">Billed as €{plan.yearlyPrice} per year</p>}
                                         </div>
                                     )}
 

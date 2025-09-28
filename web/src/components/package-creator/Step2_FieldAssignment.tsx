@@ -260,57 +260,69 @@ const Step2_FieldAssignment: React.FC<StepProps> = ({ onNext, onPrevious }) => {
     }
 
     return (
-        <div className="flex flex-col flex-grow overflow-hidden gap-4 h-full dark:bg-gray-900 bg-gray-50">
-            <div className="flex-shrink-0 dark:bg-gray-900 bg-white/80 rounded-lg shadow-md p-2">
+        <div className="h-screen flex flex-col dark:bg-gray-900 bg-gray-50">
+            {/* Fixed Toolbar at the top */}
+            <div className="flex-shrink-0 dark:bg-gray-900 bg-white border-b border-gray-200 shadow-sm p-3 z-20">
                 <EditorToolbar />
             </div>
-            <div className="flex flex-grow overflow-hidden gap-4">
-                <div className="flex-grow flex flex-col items-center dark:bg-gray-900 bg-white rounded-lg shadow-md p-4 overflow-auto">
-                    <div className="pdf-viewer-pages space-y-8">
-                        {Array.from({ length: numPages }, (_, i) => i + 1).map((pageNumber) => {
-                            const pageInfo = pageInfos[pageNumber - 1];
-                            return (
-                                <div
-                                    key={`page-${pageNumber}`}
-                                    ref={pageRefs.current[pageNumber - 1]}
-                                    className="relative border border-gray-300 shadow-sm dark:bg-gray-900 bg-white flex-shrink-0"
-                                    style={{
-                                        width: pageInfo ? `${pageInfo.width}px` : 'auto',
-                                        height: pageInfo ? `${pageInfo.height}px` : 'auto',
-                                    }}
-                                    onDrop={(e) => handleDrop(e, pageNumber)}
-                                    onDragOver={handleDragOver}
-                                    onClick={() => handleFieldSelect(null)}
-                                >
-                                    <canvas ref={canvasRefs.current[pageNumber - 1]} className="block max-w-full h-auto" />
-                                    {currentPackage?.fields
-                                        .filter((field) => field.page === pageNumber)
-                                        .map((field) => (
-                                            <PackageFieldRenderer
-                                                key={field.id}
-                                                field={field}
-                                                isSelected={selectedFieldId === field.id}
-                                                onUpdate={handleFieldUpdate}
-                                                onDelete={handleFieldDelete}
-                                                onSelect={() => handleFieldSelect(field.id)}
-                                                containerRef={pageRefs.current[pageNumber - 1]}
-                                            />
-                                        ))}
-                                </div>
-                            );
-                        })}
+
+            {/* Main content area with flex layout - takes remaining height */}
+            <div className="flex flex-1 min-h-0">
+                {/* Scrollable PDF viewer area */}
+                <div className="flex-1 overflow-auto p-4 dark:bg-gray-50 bg-gray-50">
+                    <div className="flex justify-center">
+                        <div className="space-y-8 pb-8">
+                            {Array.from({ length: numPages }, (_, i) => i + 1).map((pageNumber) => {
+                                const pageInfo = pageInfos[pageNumber - 1];
+                                return (
+                                    <div
+                                        key={`page-${pageNumber}`}
+                                        ref={pageRefs.current[pageNumber - 1]}
+                                        className="relative border border-gray-300 shadow-lg dark:bg-gray-800 bg-white mx-auto"
+                                        style={{
+                                            width: pageInfo ? `${pageInfo.width}px` : 'auto',
+                                            height: pageInfo ? `${pageInfo.height}px` : 'auto',
+                                        }}
+                                        onDrop={(e) => handleDrop(e, pageNumber)}
+                                        onDragOver={handleDragOver}
+                                        onClick={() => handleFieldSelect(null)}
+                                    >
+                                        <canvas ref={canvasRefs.current[pageNumber - 1]} className="block max-w-full h-auto" />
+                                        {currentPackage?.fields
+                                            .filter((field) => field.page === pageNumber)
+                                            .map((field) => (
+                                                <PackageFieldRenderer
+                                                    key={field.id}
+                                                    field={field}
+                                                    isSelected={selectedFieldId === field.id}
+                                                    onUpdate={handleFieldUpdate}
+                                                    onDelete={handleFieldDelete}
+                                                    onSelect={() => handleFieldSelect(field.id)}
+                                                    containerRef={pageRefs.current[pageNumber - 1]}
+                                                />
+                                            ))}
+                                    </div>
+                                );
+                            })}
+                        </div>
                     </div>
                 </div>
-                <div className="w-80 flex-shrink-0 dark:bg-gray-900 bg-white rounded-lg shadow-md p-4 overflow-y-auto">
-                    <h3 className="text-lg font-bold mb-4 border-b pb-2 border-gray-200">Field Properties & Roles</h3>
-                    {selectedField ? (
-                        <PackageFieldPropertiesPanel field={selectedField} onUpdate={handleFieldUpdate} />
-                    ) : (
-                        <div className="text-center pt-10">
-                            <FiMousePointerTyped className="mx-auto text-4xl mb-4" />
-                            <p>Select a field to edit its properties or assign roles.</p>
-                        </div>
-                    )}
+
+                {/* Fixed Properties Panel on the right */}
+                <div className="w-80 flex-shrink-0 flex flex-col border-l border-gray-200 dark:bg-gray-800 bg-white">
+                    <div className="flex-shrink-0 dark:bg-gray-800 bg-white border-b border-gray-200 p-4">
+                        <h3 className="text-lg font-bold">Field Properties & Roles</h3>
+                    </div>
+                    <div className="flex-1 overflow-y-auto p-4">
+                        {selectedField ? (
+                            <PackageFieldPropertiesPanel field={selectedField} onUpdate={handleFieldUpdate} />
+                        ) : (
+                            <div className="text-center pt-10">
+                                <FiMousePointerTyped className="mx-auto text-4xl mb-4 text-gray-400" />
+                                <p className="text-gray-600 dark:text-gray-400">Select a field to edit its properties or assign roles.</p>
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
         </div>

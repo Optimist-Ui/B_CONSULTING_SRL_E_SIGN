@@ -27,7 +27,6 @@ const ActionSidebar: React.FC<ActionSidebarProps> = ({ allowReassign, allowRecei
     const dispatch = useDispatch<AppDispatch>();
     const { packageData, fieldValues, uiState, loading } = useSelector((state: IRootState) => state.participant);
     const { hasAgreedToTerms } = uiState;
-
     // Check if package is in a final state
     const isFinalized = packageData?.status === 'Completed' || packageData?.status === 'Rejected' || packageData?.status === 'Revoked';
     const isCurrentUserReceiver = packageData?.currentUser?.role === 'Receiver';
@@ -178,6 +177,7 @@ const ActionSidebar: React.FC<ActionSidebarProps> = ({ allowReassign, allowRecei
 
     const getReassignButtonTooltip = () => {
         if (isFinalized) return `Document is ${packageData?.status.toLowerCase()}`;
+        if (currentUserTasksCompleted) return 'You cannot reassign after completing your actions.';
         return 'Reassign Document';
     };
 
@@ -233,7 +233,7 @@ const ActionSidebar: React.FC<ActionSidebarProps> = ({ allowReassign, allowRecei
                             onClick={handleRejectClick}
                             disabled={currentUserTasksCompleted || isFinalized || isCurrentUserReceiver}
                             className={`flex flex-col items-center justify-center w-16 h-16 xl:w-18 xl:h-18 rounded-2xl transition-all duration-300 hover:scale-105 active:scale-95 ${
-                                isFinalized || isCurrentUserReceiver
+                                currentUserTasksCompleted || isFinalized || isCurrentUserReceiver
                                     ? 'bg-gray-400 border-2 border-gray-300 cursor-not-allowed opacity-60 text-white'
                                     : 'text-red-600 bg-red-50 border-2 border-red-100 hover:border-red-300 hover:bg-red-100 hover:shadow-lg'
                             }`}
@@ -278,9 +278,9 @@ const ActionSidebar: React.FC<ActionSidebarProps> = ({ allowReassign, allowRecei
                         <div className="group relative">
                             <button
                                 onClick={handleReassignClick}
-                                disabled={isFinalized}
+                                disabled={isFinalized || currentUserTasksCompleted}
                                 className={`flex flex-col items-center justify-center w-16 h-16 xl:w-18 xl:h-18 rounded-2xl transition-all duration-300 hover:scale-105 active:scale-95 ${
-                                    isFinalized
+                                    isFinalized || currentUserTasksCompleted
                                         ? 'bg-gray-400 border-2 border-gray-300 cursor-not-allowed opacity-60 text-white'
                                         : 'text-[#1e293b] bg-blue-50 border-2 border-blue-100 hover:border-blue-300 hover:bg-blue-100 hover:shadow-lg'
                                 }`}
@@ -410,7 +410,7 @@ const ActionSidebar: React.FC<ActionSidebarProps> = ({ allowReassign, allowRecei
                         onClick={handleRejectClick}
                         disabled={isFinalized || currentUserTasksCompleted || isCurrentUserReceiver}
                         className={`w-14 h-14 rounded-full shadow-lg transition-all duration-300 flex items-center justify-center relative overflow-hidden ${
-                            isFinalized || isCurrentUserReceiver
+                          currentUserTasksCompleted ||  isFinalized || isCurrentUserReceiver
                                 ? 'bg-gray-400 text-white cursor-not-allowed opacity-60'
                                 : 'bg-red-500 text-white hover:bg-red-600 hover:shadow-xl hover:scale-110 active:scale-95'
                         }`}
@@ -429,9 +429,11 @@ const ActionSidebar: React.FC<ActionSidebarProps> = ({ allowReassign, allowRecei
                     <div className="group relative">
                         <button
                             onClick={handleReassignClick}
-                            disabled={isFinalized}
+                            disabled={isFinalized || currentUserTasksCompleted}
                             className={`w-14 h-14 rounded-full shadow-lg transition-all duration-300 flex items-center justify-center relative overflow-hidden ${
-                                isFinalized ? 'bg-gray-400 text-white cursor-not-allowed opacity-60' : 'bg-[#1e293b] text-white hover:bg-opacity-90 hover:shadow-xl hover:scale-110 active:scale-95'
+                                isFinalized || currentUserTasksCompleted
+                                    ? 'bg-gray-400 text-white cursor-not-allowed opacity-60'
+                                    : 'bg-[#1e293b] text-white hover:bg-opacity-90 hover:shadow-xl hover:scale-110 active:scale-95'
                             }`}
                             title={getReassignButtonTooltip()}
                         >
@@ -512,7 +514,7 @@ const ActionSidebar: React.FC<ActionSidebarProps> = ({ allowReassign, allowRecei
                             onClick={handleRejectClick}
                             disabled={isCurrentUserReceiver || currentUserTasksCompleted || isFinalized}
                             className={`flex-1 flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl font-semibold transition-all duration-200 active:scale-95 ${
-                                isCurrentUserReceiver || isFinalized
+                               currentUserTasksCompleted || isCurrentUserReceiver || isFinalized
                                     ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                                     : 'text-red-600 bg-red-50 border-2 border-red-100 hover:border-red-300 hover:bg-red-100'
                             }`}
@@ -539,10 +541,12 @@ const ActionSidebar: React.FC<ActionSidebarProps> = ({ allowReassign, allowRecei
                         {allowReassign && !isCurrentUserReceiver && (
                             <button
                                 onClick={handleReassignClick}
-                                disabled={isFinalized}
-                                title={isCurrentUserReceiver ? 'Receivers cannot reassign roles' : 'Reassign Document'}
+                                disabled={isFinalized || currentUserTasksCompleted}
+                                title={getReassignButtonTooltip()}
                                 className={`p-3.5 rounded-xl transition-all duration-200 active:scale-95 ${
-                                    isFinalized ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'text-[#1e293b] bg-blue-50 border-2 border-blue-100 hover:border-blue-300 hover:bg-blue-100'
+                                    isFinalized || currentUserTasksCompleted
+                                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                        : 'text-[#1e293b] bg-blue-50 border-2 border-blue-100 hover:border-blue-300 hover:bg-blue-100'
                                 }`}
                             >
                                 <FiShare2Typed className="w-5 h-5" />

@@ -160,14 +160,7 @@ const Sidebar = () => {
                     </PerfectScrollbar>
 
                     {/* RENDER THE BANNER AT THE BOTTOM */}
-                    {subscriptionStatus && (
-                        <SubscriptionNotificationBanner
-                            subscriptionStatus={subscriptionStatus.status}
-                            hasActiveSubscription={hasActiveSubscription}
-                            canCreatePackages={canCreatePackages}
-                            reason={subscriptionStatus.reason}
-                        />
-                    )}
+                    {subscriptionStatus && <SubscriptionNotificationBanner subscriptionStatus={subscriptionStatus} />}
                 </div>
             </nav>
         </div>

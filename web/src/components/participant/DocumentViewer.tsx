@@ -250,6 +250,11 @@ const DocumentViewer: React.FC<DocumentViewerProps> = ({ packageData, fieldValue
                                 <p>
                                     <span className="font-medium">Rejected by:</span> {packageData.rejectionDetails.rejectedBy.contactName}
                                 </p>
+                                {packageData.rejectionDetails.rejectedIP && (
+                                    <p>
+                                        <span className="font-medium">IP Address:</span> {packageData.rejectionDetails.rejectedIP}
+                                    </p>
+                                )}
                                 <p>
                                     <span className="font-medium">Date:</span> {new Date(packageData.rejectionDetails.rejectedAt).toLocaleString()}
                                 </p>

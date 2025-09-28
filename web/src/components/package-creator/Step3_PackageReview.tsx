@@ -1,13 +1,13 @@
 import React, { useEffect, useMemo, useRef, useState, ComponentType } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { IRootState, AppDispatch } from '../../store';
-import { PackageField, addReceiverToPackage, removeReceiverFromPackage, updatePackageOptions } from '../../store/slices/packageSlice';
+import { PackageField, addReceiverToPackage, removeReceiverFromPackage, updatePackageOptions, setPackageCustomMessage } from '../../store/slices/packageSlice';
 import { Contact } from '../../store/slices/contactSlice';
 import SearchableContactDropdown from '../common/SearchableContactDropdown';
 import { loadPdfDocument, renderPdfPageToCanvas } from '../../utils/pdf-utils';
 import { PDFDocumentProxy, RenderTask } from 'pdfjs-dist/types/src/display/api';
 import { toast } from 'react-toastify';
-import { FiFileText, FiList, FiUsers, FiCheck, FiAlertCircle, FiEye, FiZoomIn, FiInfo, FiSettings, FiClock, FiRepeat, FiBell, FiSave } from 'react-icons/fi';
+import { FiFileText, FiList, FiUsers, FiCheck, FiAlertCircle, FiEye, FiZoomIn, FiInfo, FiSettings, FiClock, FiRepeat, FiBell, FiSave, FiMessageSquare } from 'react-icons/fi';
 import AddEditContactModal from '../common/AddEditContactModal';
 
 const BACKEND_URL = import.meta.env.VITE_BASE_URL;
@@ -25,6 +25,7 @@ const FiClockTyped = FiClock as ComponentType<{ className?: string }>;
 const FiSettingsTyped = FiSettings as ComponentType<{ className?: string }>;
 const FiInfoTyped = FiInfo as ComponentType<{ className?: string }>;
 const FiSaveTyped = FiSave as ComponentType<{ className?: string }>;
+const FiMessageSquareTyped = FiMessageSquare as ComponentType<{ className?: string }>;
 
 interface StepProps {
     onPrevious: () => void;
@@ -522,6 +523,24 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
                             {activeTab === 'summary' && (
                                 <div className="space-y-6 animate-fadeIn">
                                     <h3 className="text-xl font-bold leading-tight">{currentPackage.name}</h3>
+                                    {/* --- THIS IS THE NEW MESSAGE BLOCK --- */}
+                                    <div>
+                                        <h4 className="font-semibold mb-2 flex items-center gap-2">
+                                            <FiMessageSquareTyped />
+                                            Optional Message for Participants
+                                        </h4>
+                                        <div className="p-4 bg-white dark:bg-gray-800 border rounded-lg">
+                                            <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
+                                                This message will be included in the initial "Action Required" email sent to all participants.
+                                            </p>
+                                            <textarea
+                                                className="w-full h-24 p-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                                placeholder="e.g., Please review and sign this document at your earliest convenience. Thank you!"
+                                                value={currentPackage.customMessage || ''}
+                                                onChange={(e) => dispatch(setPackageCustomMessage(e.target.value))}
+                                            />
+                                        </div>
+                                    </div>
                                     <div>
                                         <h4 className="font-semibold mb-2">Details at a Glance</h4>
                                         <div className="p-4 dark:bg-gray-900 bg-white border rounded-lg grid grid-cols-3 gap-4 text-center">

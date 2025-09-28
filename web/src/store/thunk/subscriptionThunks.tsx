@@ -45,7 +45,7 @@ const isCacheValid = (lastFetch: number | null, cacheDuration: number): boolean 
 // --- Thunks ---
 
 /**
- * Fetches subscription status with caching
+ Fetches subscription status with caching
  */
 export const fetchSubscriptionStatus = createAsyncThunk<SubscriptionStatus, FetchSubscriptionStatusOptions | undefined, { state: IRootState }>(
     'subscription/fetchStatus',
@@ -69,7 +69,7 @@ export const fetchSubscriptionStatus = createAsyncThunk<SubscriptionStatus, Fetc
 );
 
 /**
- * Creates a new subscription
+ Creates a new subscription
  */
 export const createSubscription = createAsyncThunk<StripeSubscriptionResponse, CreateSubscriptionArgs>('subscription/create', async ({ priceId, paymentMethodId }, { rejectWithValue }) => {
     try {
@@ -81,7 +81,7 @@ export const createSubscription = createAsyncThunk<StripeSubscriptionResponse, C
 });
 
 /**
- * Fetches the user's current active subscription details with caching
+ Fetches the user's current active subscription details with caching
  */
 export const fetchSubscription = createAsyncThunk<Subscription, FetchSubscriptionOptions | undefined, { state: IRootState }>(
     'subscription/fetchCurrent',
@@ -104,7 +104,7 @@ export const fetchSubscription = createAsyncThunk<Subscription, FetchSubscriptio
 );
 
 /**
- * Cancels the user's subscription at the end of the current billing period
+ Cancels the user's subscription at the end of the current billing period
  */
 export const cancelSubscription = createAsyncThunk('subscription/cancel', async (_, { rejectWithValue }) => {
     try {
@@ -116,7 +116,7 @@ export const cancelSubscription = createAsyncThunk('subscription/cancel', async 
 });
 
 /**
- * Reactivates a previously cancelled subscription
+ Reactivates a previously cancelled subscription
  */
 export const reactivateSubscription = createAsyncThunk('subscription/reactivate', async (_, { rejectWithValue }) => {
     try {
@@ -128,7 +128,7 @@ export const reactivateSubscription = createAsyncThunk('subscription/reactivate'
 });
 
 /**
- * Fetches the user's invoice history
+ Fetches the user's invoice history
  */
 export const fetchInvoices = createAsyncThunk<Invoice[]>('subscription/fetchInvoices', async (_, { rejectWithValue }) => {
     try {
@@ -140,7 +140,7 @@ export const fetchInvoices = createAsyncThunk<Invoice[]>('subscription/fetchInvo
 });
 
 /**
- * Creates a new subscription WITH a 14-day free trial.
+ Creates a new subscription WITH a 14-day free trial.
  */
 export const createTrialSubscription = createAsyncThunk<StripeSubscriptionResponse, CreateSubscriptionArgs>('subscription/createTrial', async ({ priceId, paymentMethodId }, { rejectWithValue }) => {
     try {
@@ -153,7 +153,7 @@ export const createTrialSubscription = createAsyncThunk<StripeSubscriptionRespon
 });
 
 /**
- * Ends the user's trial period immediately, converting it to a paid plan.
+ Ends the user's trial period immediately, converting it to a paid plan.
  */
 export const endTrialEarly = createAsyncThunk('subscription/endTrial', async (_, { rejectWithValue }) => {
     try {

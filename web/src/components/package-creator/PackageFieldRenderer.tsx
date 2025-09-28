@@ -28,6 +28,7 @@ interface PackageFieldRendererProps {
 
 const PackageFieldRenderer: React.FC<PackageFieldRendererProps> = ({ field, isSelected, onUpdate, onDelete, onSelect, containerRef }) => {
     const fieldRef = useRef<HTMLDivElement>(null);
+
     
     // Initialize position and dimensions using memoized value to prevent re-renders of the hook
     const initialPosition = useMemo(
@@ -128,6 +129,7 @@ const PackageFieldRenderer: React.FC<PackageFieldRendererProps> = ({ field, isSe
             {field.assignedUsers && field.assignedUsers.length > 0 && (
                 <div className="flex flex-wrap items-center gap-1 bg-gray-700/50 p-1 rounded-b-md justify-center">
                     {field.assignedUsers.map((assignee) => (
+                        
                         <span
                             key={assignee.id}
                             className={`badge text-white px-2 py-0.5 rounded-full text-xs font-semibold 
@@ -141,7 +143,7 @@ const PackageFieldRenderer: React.FC<PackageFieldRendererProps> = ({ field, isSe
                             title={`${assignee.contactName} (${assignee.role})`}
                         >
                             <MdOutlinePeopleAltTyped className="inline-block mr-1 -mt-0.5" />
-                            {assignee.role.slice(0, 1)} - {assignee.contactName.split(' ')[0]} {/* S. John or A. Jane */}
+                            {assignee.role} - {assignee.contactName}
                         </span>
                     ))}
                 </div>

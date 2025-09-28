@@ -46,6 +46,7 @@ const assignedUserSchema = new Schema({
   signed: { type: Boolean, default: false },
   signedAt: { type: Date },
   signedMethod: { type: String },
+  signedWithOtp: { type: String },
   signedIP: { type: String },
 });
 
@@ -165,6 +166,7 @@ const packageSchema = new Schema(
     fields: [packageFieldSchema],
     receivers: [packageReceiverSchema],
     options: { type: packageOptionsSchema, required: true },
+    customMessage: { type: String, trim: true },
     status: {
       type: String,
       enum: [

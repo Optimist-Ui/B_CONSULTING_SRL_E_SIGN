@@ -38,13 +38,50 @@ const ReadOnlyField: React.FC<ReadOnlyFieldProps> = ({ field, rejectionDetails, 
         }
     };
 
-    const getAssignedUser = () => {
+    // Get assigned user details for display
+    const getAssignedUserInfo = () => {
         if (field.assignedUsers && field.assignedUsers.length > 0) {
             const user = field.assignedUsers[0];
-            return user.contactName || user.contactEmail || 'Other Participant';
+            const signatureMethods = user.signatureMethods || [];
+
+            // Determine which contact info to show based on signature method
+            let contactInfo = user.contactName || 'Unknown User';
+
+            if (field.type === 'signature') {
+                if (signatureMethods.includes('SMS OTP') && user.contactPhone) {
+                    contactInfo = user.contactPhone;
+                } else if (signatureMethods.includes('Email OTP') && user.contactEmail) {
+                    contactInfo = user.contactEmail;
+                } else if (user.contactEmail) {
+                    contactInfo = user.contactEmail;
+                }
+            } else {
+                // For non-signature fields, prefer email over phone for professional appearance
+                if (user.contactEmail) {
+                    contactInfo = user.contactEmail;
+                } else if (user.contactPhone) {
+                    contactInfo = user.contactPhone;
+                }
+            }
+
+            return {
+                name: user.contactName || 'Unknown User',
+                contactInfo,
+                email: user.contactEmail || '',
+                phone: user.contactPhone || '',
+                role: user.role || 'Participant',
+            };
         }
-        return 'Other Participant';
+        return {
+            name: 'Other Participant',
+            contactInfo: 'Other Participant',
+            email: '',
+            phone: '',
+            role: 'Participant',
+        };
     };
+
+    const assignedUserInfo = getAssignedUserInfo();
 
     // Check if this field is assigned to the person who rejected the package
     const isAssignedToRejecter = () => {
@@ -80,6 +117,7 @@ const ReadOnlyField: React.FC<ReadOnlyFieldProps> = ({ field, rejectionDetails, 
                     ) : (
                         <p className="truncate text-gray-600">{signatureValue.email}</p>
                     )}
+                    {signatureValue.otpCode && <p className="text-gray-600 font-mono">OTP: {signatureValue.otpCode}</p>}
                     <p className="text-gray-600">{new Date(signatureValue.date).toLocaleString()}</p>
                 </div>
                 <p className="text-right text-[10px] text-gray-500 mt-auto pt-1 font-semibold">via {signatureValue.method || 'Email OTP'} by SignatureFlow</p>
@@ -98,13 +136,18 @@ const ReadOnlyField: React.FC<ReadOnlyFieldProps> = ({ field, rejectionDetails, 
                 <div className="flex items-center justify-between px-2 py-1 bg-red-100/60 rounded-t-md border-b border-red-300 flex-shrink-0">
                     <div className="flex items-center gap-1 min-w-0 flex-1">
                         <FiXCircleTyped className="w-3 h-3 text-red-600 flex-shrink-0" />
-                        <span className="text-xs font-semibold text-red-700 truncate leading-tight">
-                            {field.label}
-                            {field.required && <span className="text-red-500 ml-0.5">*</span>}
-                        </span>
+                        <div className="flex flex-col min-w-0 flex-1">
+                            <span className="text-xs font-semibold text-red-700 truncate leading-tight">
+                                {field.label}
+                                {field.required && <span className="text-red-500 ml-0.5">*</span>}
+                            </span>
+                            <div className="flex items-center gap-1">
+                                <FiUserTyped className="w-2 h-2 text-red-600" />
+                                <span className="text-[9px] text-red-700 font-medium truncate">{assignedUserInfo.contactInfo}</span>
+                            </div>
+                        </div>
                     </div>
                     <div className="flex items-center gap-1">
-                        <FiUserTyped className="w-3 h-3 text-red-600" />
                         <FiAlertTriangleTyped className="w-3 h-3 text-red-600" />
                     </div>
                 </div>
@@ -133,18 +176,23 @@ const ReadOnlyField: React.FC<ReadOnlyFieldProps> = ({ field, rejectionDetails, 
         <div
             style={baseStyles}
             className="bg-gray-100/80 border-2 border-dashed border-gray-300 rounded-lg shadow-sm backdrop-blur-sm opacity-70 hover:opacity-80 transition-all duration-200 flex flex-col overflow-hidden"
-            title={`Field for ${getAssignedUser()}: ${field.label}`}
+            title={`Field for ${assignedUserInfo.name} (${assignedUserInfo.contactInfo}): ${field.label}`}
         >
             <div className="flex items-center justify-between px-2 py-1 bg-gray-200/60 rounded-t-md border-b border-gray-300 flex-shrink-0">
                 <div className="flex items-center gap-1 min-w-0 flex-1">
                     {getFieldIcon()}
-                    <span className="text-xs font-semibold text-gray-600 truncate leading-tight">
-                        {field.label}
-                        {field.required && <span className="text-gray-400 ml-0.5">*</span>}
-                    </span>
+                    <div className="flex flex-col min-w-0 flex-1">
+                        <span className="text-xs font-semibold text-gray-600 truncate leading-tight">
+                            {field.label}
+                            {field.required && <span className="text-gray-400 ml-0.5">*</span>}
+                        </span>
+                        <div className="flex items-center gap-1">
+                            <FiUserTyped className="w-2 h-2 text-gray-500" />
+                            <span className="text-[9px] text-gray-500 font-medium truncate">{assignedUserInfo.contactInfo}</span>
+                        </div>
+                    </div>
                 </div>
                 <div className="flex items-center gap-1">
-                    <FiUserTyped className="w-3 h-3 text-gray-500" />
                     <FiLockTyped className="w-3 h-3 text-gray-500" />
                 </div>
             </div>
@@ -153,33 +201,35 @@ const ReadOnlyField: React.FC<ReadOnlyFieldProps> = ({ field, rejectionDetails, 
                     <>
                         <FaSignatureTyped className="text-lg text-gray-400 mb-1" />
                         <span className="text-xs text-gray-500 font-medium text-center leading-tight">Signature Field</span>
+                        <span className="text-[10px] text-gray-400 text-center leading-tight mt-0.5 truncate max-w-full">{assignedUserInfo.name}</span>
                     </>
                 ) : field.type === 'checkbox' ? (
                     <>
                         <FiSquareTyped className="w-5 h-5 text-gray-400 mb-1" />
                         <span className="text-xs text-gray-500 font-medium text-center leading-tight">Checkbox</span>
+                        <span className="text-[10px] text-gray-400 text-center leading-tight mt-0.5 truncate max-w-full">{assignedUserInfo.name}</span>
                     </>
                 ) : field.type === 'textarea' ? (
                     <div className="w-full h-full flex items-center justify-center">
                         <div className="flex flex-col items-center">
                             <FiFileTextTyped className="w-4 h-4 text-gray-400 mb-1" />
                             <span className="text-xs text-gray-500 font-medium text-center leading-tight">Text Area</span>
+                            <span className="text-[10px] text-gray-400 text-center leading-tight mt-0.5 truncate max-w-full">{assignedUserInfo.name}</span>
                         </div>
                     </div>
                 ) : field.type === 'date' ? (
                     <>
                         <FiCalendarTyped className="w-4 h-4 text-gray-400 mb-1" />
                         <span className="text-xs text-gray-500 font-medium text-center leading-tight">Date Field</span>
+                        <span className="text-[10px] text-gray-400 text-center leading-tight mt-0.5 truncate max-w-full">{assignedUserInfo.name}</span>
                     </>
                 ) : (
                     <>
                         <FiFileTextTyped className="w-4 h-4 text-gray-400 mb-1" />
                         <span className="text-xs text-gray-500 font-medium text-center leading-tight">Text Field</span>
+                        <span className="text-[10px] text-gray-400 text-center leading-tight mt-0.5 truncate max-w-full">{assignedUserInfo.name}</span>
                     </>
                 )}
-                <div className="mt-1 text-center">
-                    <span className="text-xs text-gray-500 font-medium truncate max-w-full block">{getAssignedUser()}</span>
-                </div>
             </div>
         </div>
     );

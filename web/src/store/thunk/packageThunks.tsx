@@ -15,6 +15,7 @@ interface SavePackagePayload {
     options: DocumentPackage['options'];
     templateId?: string;
     saveAsTemplate?: boolean;
+    customMessage?: string;
     status?: DocumentPackage['status'];
 }
 // Interface for updating a package

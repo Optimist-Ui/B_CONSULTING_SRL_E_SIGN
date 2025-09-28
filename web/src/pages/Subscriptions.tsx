@@ -1,6 +1,7 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { IRootState, AppDispatch } from '../store';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 // Redux Thunks
 import { fetchPlans } from '../store/thunk/planThunks';
@@ -21,6 +22,8 @@ const Spinner = () => (
 const Subscriptions: React.FC = () => {
     const dispatch = useDispatch<AppDispatch>();
     const { user } = useSelector((state: IRootState) => state.auth);
+    const location = useLocation();
+    const navigate = useNavigate();
 
     // --- 👇 USE THE HOOK TO MANAGE SUBSCRIPTION DATA 👇 ---
     const { subscription, isFetchingDetails } = useSubscription({
@@ -28,6 +31,8 @@ const Subscriptions: React.FC = () => {
         fetchOnMount: true,
     });
     // --- END OF CHANGE ---
+
+    const [isSelectingPlan, setIsSelectingPlan] = useState(false);
 
     useEffect(() => {
         dispatch(setPageTitle('Billing & Subscriptions'));
@@ -40,13 +45,29 @@ const Subscriptions: React.FC = () => {
         // `fetchDetails` is removed because the hook now handles it.
     }, [dispatch, user]);
 
+    useEffect(() => {
+        const params = new URLSearchParams(location.search);
+        if (params.get('mode') === 'upgrade') {
+            setIsSelectingPlan(true);
+        }
+    }, [location.search]);
+
+    const handleCancelChange = () => {
+        setIsSelectingPlan(false);
+        navigate('/subscriptions', { replace: true }); // Clean the URL by removing query params
+    };
+
     // The loading state check is now powered by the smarter hook. It will not show
     // a spinner if the data is already in the Redux store.
     if (isFetchingDetails) {
         return <Spinner />;
     }
 
-    return <div className="p-4 md:p-6">{subscription ? <ManageSubscription /> : <PlanSelection />}</div>;
+    return (
+        <div className="p-4 md:p-6">
+            {subscription && !isSelectingPlan ? <ManageSubscription onChangePlan={() => setIsSelectingPlan(true)} /> : <PlanSelection onCancelChange={subscription ? handleCancelChange : undefined} />}
+        </div>
+    );
 };
 
 export default Subscriptions;

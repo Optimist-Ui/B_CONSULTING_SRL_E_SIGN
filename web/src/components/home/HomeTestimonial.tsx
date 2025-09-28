@@ -71,7 +71,7 @@ const StarRating = ({ rating }: { rating: number }) => {
 };
 
 const HomeTestimonial = () => {
-     const navigate = useNavigate();
+    const navigate = useNavigate();
     const dispatch = useDispatch<AppDispatch>();
     const { reviews, status } = useSelector((state: IRootState) => state.reviews.featuredReviews);
     const [isVisible, setIsVisible] = useState(false);
@@ -81,6 +81,18 @@ const HomeTestimonial = () => {
         dispatch(fetchFeaturedReviews());
         setIsVisible(true);
     }, [dispatch]);
+
+    /**
+     * Masks a name for privacy, showing the first 3 characters followed by '***'.
+     * @param name The full name string.
+     * @returns The masked name.
+     */
+    const maskName = (name: string): string => {
+        if (!name || name.length <= 3) {
+            return '***';
+        }
+        return `${name.substring(0, 3)}***`;
+    };
 
     // Enhanced loading state
     if (status === 'loading' || status === 'idle') {
@@ -212,7 +224,7 @@ const HomeTestimonial = () => {
                                         <div className="flex items-center gap-4 mt-auto pt-6 border-t border-gray-100">
                                             <Avatar name={review.reviewerName} />
                                             <div className="flex-1">
-                                                <div className="font-bold text-gray-900 text-lg">{review.reviewerName}</div>
+                                                <div className="font-bold text-gray-900 text-lg">{maskName(review.reviewerName)}</div>
                                                 <div className="text-blue-600 font-semibold text-sm bg-blue-50 px-3 py-1 rounded-full inline-block">{review.reviewerRole}</div>
                                             </div>
                                             {/* Verified badge */}
@@ -280,7 +292,10 @@ const HomeTestimonial = () => {
                         <div className="relative z-10">
                             <h3 className="text-2xl lg:text-3xl font-bold mb-4">Ready to join our satisfied customers?</h3>
                             <p className="text-blue-100 text-lg mb-8 max-w-2xl mx-auto">Start your free trial today and experience why thousands of professionals choose our platform</p>
-                            <button onClick={() => navigate('/subscriptions')} className="bg-white text-blue-600 px-8 py-4 rounded-xl font-bold text-lg hover:bg-blue-50 transition-all duration-300 hover:scale-105 hover:shadow-xl shadow-lg">
+                            <button
+                                onClick={() => navigate('/subscriptions')}
+                                className="bg-white text-blue-600 px-8 py-4 rounded-xl font-bold text-lg hover:bg-blue-50 transition-all duration-300 hover:scale-105 hover:shadow-xl shadow-lg"
+                            >
                                 Start Free Trial
                             </button>
                         </div>

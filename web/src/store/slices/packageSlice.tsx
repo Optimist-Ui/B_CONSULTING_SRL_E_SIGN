@@ -51,6 +51,7 @@ export interface DocumentPackage {
     fields: PackageField[];
     receivers: PackageReceiver[];
     options: PackageOptions;
+    customMessage?: string;
     status: 'Draft' | 'Sent' | 'Completed' | 'Archived' | 'Revoked' | 'Rejected' | 'Expired';
     createdAt?: string;
     updatedAt?: string;
@@ -102,6 +103,7 @@ const packageSlice = createSlice({
                 fields: action.payload.fields ? action.payload.fields.map((field) => ({ ...field, assignedUsers: field.assignedUsers || [] })) : [],
                 receivers: [],
                 options: defaultPackageOptions,
+                customMessage: '',
                 status: 'Draft',
             } as DocumentPackage;
             state.isCreatingOrEditingPackage = true;
@@ -190,6 +192,11 @@ const packageSlice = createSlice({
                 };
             }
         },
+        setPackageCustomMessage: (state, action: PayloadAction<string>) => {
+            if (state.currentPackage) {
+                state.currentPackage.customMessage = action.payload;
+            }
+        },
         setSelectedPackageField: (state, action: PayloadAction<string | null>) => {
             state.selectedFieldId = action.payload;
         },
@@ -223,6 +230,7 @@ export const {
     addReceiverToPackage,
     removeReceiverFromPackage,
     updatePackageOptions,
+    setPackageCustomMessage,
     setSelectedPackageField,
     setPackageActiveStep,
     clearPackageState,

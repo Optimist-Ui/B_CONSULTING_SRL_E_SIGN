@@ -1,23 +1,23 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { SubscriptionStatus } from '../../store/slices/subscriptionSlice';
 
 // Import your icon components
-import { IconRocket, IconX, IconStar } from '../Icon/IconRocket';
+import { IconRocket, IconStar } from '../Icon/IconRocket';
 import IconLockDots from '../common/IconLockDots';
+import IconArchive from '../Icon/IconArchive';
 
 interface SubscriptionBannerProps {
-    subscriptionStatus: SubscriptionStatus['status'];
-    hasActiveSubscription: boolean;
-    canCreatePackages: boolean;
-    reason?: string;
+    subscriptionStatus: SubscriptionStatus;
 }
 
-const SubscriptionNotificationBanner: React.FC<SubscriptionBannerProps> = ({ hasActiveSubscription, canCreatePackages, reason }) => {
+const SubscriptionNotificationBanner: React.FC<SubscriptionBannerProps> = ({ subscriptionStatus }) => {
     const navigate = useNavigate();
 
+    const { hasActiveSubscription, canCreatePackages, reason, status, documentsUsed, documentLimit } = subscriptionStatus;
+
     const handleUpgrade = () => {
-        navigate('/subscriptions');
+        navigate('/subscriptions?mode=upgrade');
     };
 
     const getBannerConfig = () => {
@@ -38,6 +38,18 @@ const SubscriptionNotificationBanner: React.FC<SubscriptionBannerProps> = ({ has
                 icon: IconStar,
                 ctaText: 'Upgrade Plan',
             };
+        }
+        if (status === 'ACTIVE' && documentsUsed !== undefined && documentLimit !== undefined) {
+            const remaining = documentLimit - documentsUsed;
+            if (remaining <= 5 && remaining > 0) {
+                return {
+                    title: 'Running Low on Documents',
+                    message: `You have only ${remaining} documents left. Upgrade to get more.`,
+                    bgGradient: 'from-yellow-600 to-orange-600',
+                    icon: IconArchive, // Use a warning icon
+                    ctaText: 'Upgrade Plan',
+                };
+            }
         }
         return null;
     };

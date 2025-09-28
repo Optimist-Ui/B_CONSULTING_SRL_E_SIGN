@@ -1,4 +1,4 @@
-const cron = require('node-cron');
+const cron = require("node-cron");
 
 class CronService {
   constructor() {
@@ -11,26 +11,29 @@ class CronService {
    */
   initialize(container) {
     if (this.isInitialized) {
-      console.log('CronService already initialized');
+      console.log("CronService already initialized");
       return;
     }
 
-    console.log('Initializing CronService...');
-    
+    console.log("Initializing CronService...");
+
     // Import and register all jobs
-    const ExpiryJob = require('../jobs/ExpiryJob');
-    const ReminderJob = require('../jobs/ReminderJob');
+    const ExpiryJob = require("../jobs/ExpiryJob");
+    const ReminderJob = require("../jobs/ReminderJob");
+    const SubscriptionExpiryJob = require("../jobs/SubscriptionExpiryJob");
 
     // Initialize jobs with container dependencies
     const expiryJob = new ExpiryJob(container);
     const reminderJob = new ReminderJob(container);
+    const subscriptionExpiryJob = new SubscriptionExpiryJob(container);
 
     // Register jobs
-    this.registerJob('packageExpiry', expiryJob);
-    this.registerJob('expiryReminders', reminderJob);
+    this.registerJob("packageExpiry", expiryJob);
+    this.registerJob("expiryReminders", reminderJob);
+    this.registerJob("subscriptionExpiry", subscriptionExpiryJob);
 
     this.isInitialized = true;
-    console.log('CronService initialized successfully');
+    console.log("CronService initialized successfully");
   }
 
   /**
@@ -43,22 +46,26 @@ class CronService {
     }
 
     try {
-      const cronJob = cron.schedule(jobInstance.schedule, async () => {
-        console.log(`Running job: ${name}`);
-        try {
-          await jobInstance.execute();
-        } catch (error) {
-          console.error(`Error in job ${name}:`, error);
+      const cronJob = cron.schedule(
+        jobInstance.schedule,
+        async () => {
+          console.log(`Running job: ${name}`);
+          try {
+            await jobInstance.execute();
+          } catch (error) {
+            console.error(`Error in job ${name}:`, error);
+          }
+        },
+        {
+          scheduled: false,
+          timezone: "UTC",
         }
-      }, {
-        scheduled: false,
-        timezone: 'UTC'
-      });
+      );
 
       this.jobs.set(name, {
         instance: jobInstance,
         cronJob: cronJob,
-        name: name
+        name: name,
       });
 
       cronJob.start();
@@ -72,7 +79,7 @@ class CronService {
    * Start all jobs
    */
   startAll() {
-    console.log('Starting all cron jobs...');
+    console.log("Starting all cron jobs...");
     for (const [name, job] of this.jobs) {
       job.cronJob.start();
       console.log(`Started job: ${name}`);
@@ -83,7 +90,7 @@ class CronService {
    * Stop all jobs
    */
   stopAll() {
-    console.log('Stopping all cron jobs...');
+    console.log("Stopping all cron jobs...");
     for (const [name, job] of this.jobs) {
       job.cronJob.stop();
       console.log(`Stopped job: ${name}`);
@@ -114,7 +121,7 @@ class CronService {
       name: job.name,
       schedule: job.instance.schedule,
       running: job.cronJob.running,
-      lastRun: job.instance.lastRun || null
+      lastRun: job.instance.lastRun || null,
     };
   }
 

@@ -7,6 +7,7 @@ const {
   updateTemplateValidation,
   templateIdValidation,
 } = require("../validations/TemplateValidations");
+const requireActiveSubscription = require("../middlewares/requireActiveSubscription");
 
 /**
  * @swagger

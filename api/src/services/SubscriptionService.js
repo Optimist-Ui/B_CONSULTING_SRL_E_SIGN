@@ -1,3 +1,5 @@
+// src/services/SubscriptionService.js
+
 class SubscriptionService {
   constructor({
     Plan,
@@ -21,7 +23,7 @@ class SubscriptionService {
    * Fetches all available subscription plans from the database.
    */
   async getAllPlans() {
-    const plans = await this.Plan.find({}).sort({ monthlyPrice: 1 }); // Sort by price, ascending
+    const plans = await this.Plan.find({}).sort({ monthlyPrice: 1 });
     if (!plans) {
       throw new Error("No subscription plans found.");
     }
@@ -29,12 +31,7 @@ class SubscriptionService {
   }
 
   /**
-   * Checks the user's current subscription and returns a simple access status for the UI.
-   * This is a lightweight alternative to getSubscription for UI permission checks.
-   */
-  /**
-   * Enhanced getSubscription to include trial information
-   * @param {string} userId - The user ID
+   * FIX APPLIED: Use local DB dates as a fallback if live Stripe dates are null.
    */
   async getSubscription(userId) {
     try {
@@ -48,103 +45,83 @@ class SubscriptionService {
         { expand: ["plan.product"] }
       );
 
-      let renewsAtDate = null;
-      let startDate = null;
-      let trialEndDate = null;
-
-      // Determine the RENEWAL date (period end)
-      if (
-        stripeSubscription.current_period_end &&
-        typeof stripeSubscription.current_period_end === "number"
-      ) {
-        renewsAtDate = new Date(stripeSubscription.current_period_end * 1000);
-      } else if (user.subscription.current_period_end) {
-        const dbDate = new Date(user.subscription.current_period_end);
-        if (!isNaN(dbDate.getTime())) {
-          renewsAtDate = dbDate;
-        }
-      }
-
-      // Determine the START date (period start)
-      if (
-        stripeSubscription.current_period_start &&
-        typeof stripeSubscription.current_period_start === "number"
-      ) {
-        startDate = new Date(stripeSubscription.current_period_start * 1000);
-      } else if (user.subscription.current_period_start) {
-        const dbDate = new Date(user.subscription.current_period_start);
-        if (!isNaN(dbDate.getTime())) {
-          startDate = dbDate;
-        }
-      }
-
-      // Determine trial end date (if in trial)
-      if (stripeSubscription.status === "trialing") {
-        if (
-          stripeSubscription.trial_end &&
-          typeof stripeSubscription.trial_end === "number"
-        ) {
-          trialEndDate = new Date(stripeSubscription.trial_end * 1000);
-        } else if (user.subscription.trial_end) {
-          const dbDate = new Date(user.subscription.trial_end);
-          if (!isNaN(dbDate.getTime())) {
-            trialEndDate = dbDate;
-          }
-        }
-      }
-
       const planDetails = stripeSubscription.plan;
-      const planPrice =
-        planDetails && planDetails.amount
-          ? (planDetails.amount / 100).toFixed(2)
-          : "0.00";
-      const planInterval = planDetails ? planDetails.interval : "N/A";
-
       const isTrialing = stripeSubscription.status === "trialing";
-      const plan = await this.planService.findPlanById(
-        user.subscription.planId
-      );
-      const documentLimit = isTrialing ? 3 : plan?.documentLimit || 0;
+
+      // ========================= CORRECTED LOGIC START =========================
+      // This logic now prioritizes the live Stripe timestamp, but falls back to the
+      // date stored in your database to prevent null values during API lag.
+
+      let renewsAt = null;
+      if (stripeSubscription.current_period_end) {
+        renewsAt = new Date(
+          stripeSubscription.current_period_end * 1000
+        ).toISOString();
+      } else if (user.subscription.current_period_end) {
+        renewsAt = new Date(user.subscription.current_period_end).toISOString();
+      }
+
+      let startDate = null;
+      if (stripeSubscription.current_period_start) {
+        startDate = new Date(
+          stripeSubscription.current_period_start * 1000
+        ).toISOString();
+      } else if (user.subscription.current_period_start) {
+        startDate = new Date(
+          user.subscription.current_period_start
+        ).toISOString();
+      }
+
+      let trialEndDate = null;
+      if (isTrialing) {
+        if (stripeSubscription.trial_end) {
+          trialEndDate = new Date(
+            stripeSubscription.trial_end * 1000
+          ).toISOString();
+        } else if (user.subscription.trial_end) {
+          trialEndDate = new Date(user.subscription.trial_end).toISOString();
+        }
+      }
+      // ========================== CORRECTED LOGIC END ==========================
 
       const result = {
         planName: user.subscription.planName,
-        documentLimit: documentLimit, // Use the dynamically set limit
-        documentsUsed: user.documentsCreatedThisMonth || 0,
+        documentLimit: user.getTotalDocumentLimit(),
+        documentsUsed: user.getTotalDocumentsUsed(),
         status: stripeSubscription.status,
-        renewsAt: renewsAtDate ? renewsAtDate.toISOString() : null,
+        renewsAt: renewsAt,
+        startDate: startDate,
         cancelAtPeriodEnd: stripeSubscription.cancel_at_period_end,
-        planPrice: planPrice,
-        planInterval: planInterval,
-        startDate: startDate ? startDate.toISOString() : null,
+        planPrice: planDetails ? (planDetails.amount / 100).toFixed(2) : "0.00",
+        planInterval: planDetails ? planDetails.interval : "N/A",
+        isTrialing: isTrialing,
+        trialEndDate: trialEndDate,
       };
-
-      if (isTrialing) {
-        result.trialEndDate = trialEndDate ? trialEndDate.toISOString() : null;
-        result.isTrialing = true;
-      } else {
-        result.isTrialing = false;
-      }
 
       return result;
     } catch (error) {
+      if (error instanceof RangeError) {
+        throw new Error("Failed to parse subscription dates from Stripe.");
+      }
       throw new Error(error.message || "Failed to fetch subscription details.");
     }
   }
-  // Updated createTrialSubscription method in SubscriptionService.js
+  /**
+   * REWRITTEN: Creates a trial and correctly initializes the subscriptionHistory.
+   */
   async createTrialSubscription({ userId, priceId, paymentMethodId }) {
     try {
-      // 1. Fetch user and plan, same as regular subscription
       const user = await this.userService.findUserById(userId);
       if (!user) throw new Error("User not found");
 
       const plan = await this.planService.findPlanByPriceId(priceId);
       if (!plan) throw new Error("Plan not found");
 
-      // --- TRIAL ABUSE PREVENTION ---
       if (user.hasHadTrial) {
         throw new Error("This account has already used a free trial.");
       }
 
+      // --- TRIAL ABUSE PREVENTION ---
       const paymentMethod = await this.stripe.paymentMethods.retrieve(
         paymentMethodId
       );
@@ -164,7 +141,6 @@ class SubscriptionService {
       }
       // --- END OF TRIAL ABUSE PREVENTION ---
 
-      // 3. Create Stripe customer if they don't exist
       let stripeCustomerId = user.stripeCustomerId;
       if (!stripeCustomerId) {
         const customer = await this.stripe.customers.create({
@@ -173,10 +149,8 @@ class SubscriptionService {
           metadata: { userId: userId.toString() },
         });
         stripeCustomerId = customer.id;
-        await this.userService.updateUser(userId, { stripeCustomerId });
       }
 
-      // 4. Attach and set as default payment method
       await this.stripe.paymentMethods.attach(paymentMethodId, {
         customer: stripeCustomerId,
       });
@@ -184,7 +158,6 @@ class SubscriptionService {
         invoice_settings: { default_payment_method: paymentMethodId },
       });
 
-      // 5. Create the subscription in Stripe WITH the trial period
       const subscription = await this.stripe.subscriptions.create({
         customer: stripeCustomerId,
         items: [{ price: priceId }],
@@ -192,55 +165,50 @@ class SubscriptionService {
         default_payment_method: paymentMethodId,
       });
 
-      // 🔧 FIXED: Proper date handling for trial subscriptions
-      const subscriptionData = {
+      const trialStartDate = new Date(subscription.trial_start * 1000);
+      const trialEndDate = new Date(subscription.trial_end * 1000);
+
+      // Correctly initialize the subscription history for the trial
+      const trialHistory = {
+        type: "trial",
+        planId: plan._id,
+        planName: "Trial",
+        startDate: trialStartDate,
+        endDate: trialEndDate,
+        documentLimit: 3, // Standard trial limit
+        documentsUsed: 0,
+        status: "active",
+      };
+
+      await this.userService.updateUser(userId, {
+        stripeCustomerId,
         subscription: {
           subscriptionId: subscription.id,
           planId: plan._id,
           planName: plan.name,
-          status: subscription.status, // 'trialing'
-          // For trial subscriptions, use trial_start as the period start
-          current_period_start: subscription.trial_start
-            ? new Date(subscription.trial_start * 1000)
-            : new Date(), // Fallback to now if trial_start is missing
-          // For trial subscriptions, the "current period end" should be the trial end date
-          current_period_end: subscription.trial_end
-            ? new Date(subscription.trial_end * 1000)
-            : new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), // Fallback: 14 days from now
-          // Store the actual trial end date
-          trial_end: subscription.trial_end
-            ? new Date(subscription.trial_end * 1000)
-            : new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
+          status: subscription.status,
+          current_period_start: trialStartDate,
+          current_period_end: trialEndDate,
+          trial_end: trialEndDate,
         },
         hasHadTrial: true,
-      };
-
-      console.log("Trial subscription data being saved:", {
-        current_period_start:
-          subscriptionData.subscription.current_period_start,
-        current_period_end: subscriptionData.subscription.current_period_end,
-        trial_end: subscriptionData.subscription.trial_end,
+        subscriptionHistory: [trialHistory], // Initialize history array
       });
 
-      await this.userService.updateUser(userId, subscriptionData);
-
-      // 7. Save the card fingerprint to prevent reuse
       await this.UsedTrialFingerprint.create({ fingerprint, usedBy: userId });
 
-      // 8. Send trial activation email
       try {
-        const trialEndDate =
-          subscriptionData.subscription.trial_end.toLocaleDateString("en-US", {
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-          });
+        const formattedTrialEndDate = trialEndDate.toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        });
 
         await this.emailService.sendTrialActivationEmail(
           user.email,
           user.firstName,
           plan.name,
-          trialEndDate,
+          formattedTrialEndDate,
           3
         );
       } catch (emailError) {
@@ -253,10 +221,7 @@ class SubscriptionService {
       return {
         id: subscription.id,
         status: subscription.status,
-        trial_end: subscriptionData.subscription.trial_end,
-        billing_cycle_start: subscription.current_period_end
-          ? new Date(subscription.current_period_end * 1000)
-          : null, // This is when actual billing starts (after trial)
+        trial_end: trialEndDate.toISOString(),
       };
     } catch (error) {
       console.error("Error creating trial subscription:", error);
@@ -264,108 +229,146 @@ class SubscriptionService {
     }
   }
 
-  // In class SubscriptionService
-
   /**
-   * Ends a user's trial period immediately, converting them to a paid subscriber.
-   * @param {string} userId - The ID of the user ending their trial.
+   * Alternative approach: Let the webhook handle the date updates
+   * This is more reliable than trying to get immediate dates from Stripe
+   * FIX: Properly calculate end dates based on plan interval (monthly vs yearly)
    */
   async endTrialEarly(userId) {
-    // 1. Find the user and their subscription details
     const user = await this.userService.findUserById(userId);
-    if (!user || !user.subscription || !user.subscription.subscriptionId) {
+    if (
+      !user ||
+      !user.subscription ||
+      !user.subscription.subscriptionId ||
+      user.subscription.status !== "trialing"
+    ) {
       throw new Error("No active trial found to end.");
     }
 
-    const { status, subscriptionId, planName } = user.subscription;
-
-    // 2. Security Check: Ensure the subscription is actually in a trial period.
-    if (status !== "trialing") {
-      throw new Error("Your subscription is not in a trial period.");
-    }
-
-    // 3. Call Stripe to update the subscription
     try {
-      const updatedSubscription = await this.stripe.subscriptions.update(
-        subscriptionId,
+      const subscription = await this.stripe.subscriptions.update(
+        user.subscription.subscriptionId,
         {
-          trial_end: "now", // End the trial immediately
-          // --- FIX: Expand the response to include the newly generated invoice ---
+          trial_end: "now",
+          proration_behavior: "none",
           expand: ["latest_invoice"],
         }
       );
 
-      // --- FIX: Manually trigger the subscription confirmation email ---
-      // This is the most reliable way to ensure the email is sent for this specific action.
-      const invoice = updatedSubscription.latest_invoice;
+      const plan = await this.planService.findPlanById(
+        user.subscription.planId
+      );
 
-      // Ensure the invoice was created and successfully paid before sending an email
-      if (invoice && invoice.status === "paid") {
-        const amount = (invoice.amount_paid / 100).toFixed(2);
-        const renewalDate = new Date(
-          updatedSubscription.current_period_end * 1000
-        ).toLocaleDateString("en-US", {
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-        });
-        const invoiceUrl = invoice.hosted_invoice_url;
+      // CRITICAL FIX: Determine if this is monthly or yearly based on the price ID
+      const stripeSubscription = await this.stripe.subscriptions.retrieve(
+        user.subscription.subscriptionId
+      );
+      const currentPriceId = stripeSubscription.items.data[0].price.id;
 
-        // Use a non-blocking try/catch so that if the email fails,
-        // the user's activation process still succeeds.
-        try {
-          await this.emailService.sendSubscriptionConfirmation(
-            user.email,
-            user.firstName,
-            planName,
-            amount,
-            renewalDate,
-            invoiceUrl
-          );
-          console.log(
-            `Successfully sent end-trial confirmation email to user ${userId}.`
-          );
-        } catch (emailError) {
-          console.error(
-            `[Non-blocking] Failed to send end-trial confirmation email for user ${userId}:`,
-            emailError
-          );
-        }
+      // Check if it's yearly or monthly
+      const isYearly = currentPriceId === plan.yearlyPriceId;
+      const isMonthly = currentPriceId === plan.monthlyPriceId;
+
+      // Calculate proper end date based on plan interval
+      const now = Date.now();
+      let calculatedEndTime;
+
+      if (isYearly) {
+        // Add 365 days for yearly
+        calculatedEndTime = now + 365 * 24 * 60 * 60 * 1000;
+      } else {
+        // Default to 30 days for monthly
+        calculatedEndTime = now + 30 * 24 * 60 * 60 * 1000;
       }
-      // --- END OF FIX ---
+
+      // Create a fallback subscription object with properly calculated dates
+      const fallbackSubscription = {
+        ...subscription,
+        current_period_start: Math.floor(now / 1000), // Now in Unix timestamp
+        current_period_end: Math.floor(calculatedEndTime / 1000), // Calculated end time
+      };
+
+      const updatedHistory = await this.processSubscriptionTransition(
+        user,
+        plan,
+        "trial_to_paid",
+        fallbackSubscription,
+        isYearly
+      );
+
+      // Use calculated dates for the subscription object
+      const updatedSubscriptionData = {
+        subscriptionId: subscription.id,
+        planId: user.subscription.planId,
+        planName: user.subscription.planName,
+        status: subscription.status,
+        current_period_start: new Date(
+          fallbackSubscription.current_period_start * 1000
+        ),
+        current_period_end: new Date(
+          fallbackSubscription.current_period_end * 1000
+        ),
+        trial_end: subscription.trial_end
+          ? new Date(subscription.trial_end * 1000)
+          : null,
+      };
+
+      await this.userService.updateUser(user._id, {
+        subscription: updatedSubscriptionData,
+        subscriptionHistory: updatedHistory,
+      });
+
+      // The webhook will later update with the actual Stripe dates when they become available
+      const invoice = subscription.latest_invoice;
+      if (invoice && invoice.status === "paid") {
+        await this.processSubscriptionConfirmationEmail(invoice);
+      }
 
       return {
-        message:
-          "Your trial has been successfully ended. Your paid subscription is now active.",
-        status: "active", // We can optimistically return 'active'
+        message: "Your trial has ended. Your paid subscription is now active.",
+        status: "active",
       };
     } catch (error) {
       console.error(`Stripe error ending trial for user ${userId}:`, error);
-      // Pass a more user-friendly error message
       throw new Error(
-        "Could not activate your subscription at this time. Please check your payment method or contact support."
+        "Could not activate your subscription. Please check your payment method or contact support."
       );
     }
   }
 
   /**
-   * Checks the user's current subscription and returns a simple access status for the UI.
-   * This is a lightweight alternative to getSubscription for UI permission checks.
+   * Marks expired subscription history entries as "expired".
+   */
+  async handleSubscriptionExpiry(userId) {
+    const user = await this.userService.findUserById(userId);
+    if (!user || !user.subscriptionHistory) return;
+
+    const now = new Date();
+    let hasChanges = false;
+
+    user.subscriptionHistory.forEach((entry) => {
+      if (
+        entry.status === "active" &&
+        entry.endDate &&
+        new Date(entry.endDate) < now
+      ) {
+        entry.status = "expired";
+        hasChanges = true;
+      }
+    });
+
+    if (hasChanges) {
+      await user.save();
+    }
+  }
+
+  /**
+   * REWRITTEN: Gets status using the new accurate User model methods.
    */
   async getSubscriptionStatus(userId) {
     try {
       const user = await this.userService.findUserById(userId);
-      if (!user) {
-        return {
-          hasActiveSubscription: false,
-          canCreatePackages: false,
-          reason: "User not found.",
-          status: "INACTIVE",
-        };
-      }
-
-      // Case 1: No subscription at all
-      if (!user.subscription || !user.subscription.planId) {
+      if (!user || !user.subscription) {
         return {
           hasActiveSubscription: false,
           canCreatePackages: false,
@@ -374,20 +377,8 @@ class SubscriptionService {
         };
       }
 
-      const { status, planId } = user.subscription;
+      const { status } = user.subscription;
 
-      // Get plan details
-      const plan = await this.planService.findPlanById(planId);
-      if (!plan) {
-        return {
-          hasActiveSubscription: false,
-          canCreatePackages: false,
-          reason: "Plan not found.",
-          status: "INACTIVE",
-        };
-      }
-
-      // Case 2: Subscription exists but is not active or trialing
       if (!["active", "trialing"].includes(status)) {
         return {
           hasActiveSubscription: false,
@@ -397,34 +388,29 @@ class SubscriptionService {
         };
       }
 
-      // Case 3: Check document limit
-      const isTrialing = status === "trialing";
-      const documentLimit = isTrialing ? 3 : plan.documentLimit;
-      const documentsUsed = user.documentsCreatedThisMonth || 0;
+      const canCreate = user.canCreateDocument();
 
-      if (documentLimit !== -1 && documentsUsed >= documentLimit) {
+      if (!canCreate) {
         return {
           hasActiveSubscription: true,
           canCreatePackages: false,
-          reason: "You have reached your monthly document limit.",
+          reason: "You have reached your document limit.",
           status: "LIMIT_REACHED",
-          documentsUsed,
-          documentLimit,
+          documentsUsed: user.getTotalDocumentsUsed(),
+          documentLimit: user.getTotalDocumentLimit(),
         };
       }
 
-      // Case 4: Everything is good
       return {
         hasActiveSubscription: true,
         canCreatePackages: true,
         reason: "Subscription is active.",
         status: "ACTIVE",
-        documentsUsed,
-        documentLimit,
+        documentsUsed: user.getTotalDocumentsUsed(),
+        documentLimit: user.getTotalDocumentLimit(),
       };
     } catch (error) {
       console.error("Error fetching subscription status:", error);
-      // Return safe default on error
       return {
         hasActiveSubscription: false,
         canCreatePackages: false,
@@ -433,21 +419,22 @@ class SubscriptionService {
       };
     }
   }
+
+  /**
+   * REWRITTEN: This now handles new subscriptions, trial-to-paid, AND upgrades/top-ups correctly.
+   * FIX APPLIED: This now correctly updates the subscription dates for all scenarios.
+   */
   async createSubscription({ userId, priceId, paymentMethodId }) {
     try {
-      // 1. Get the user from database
       const user = await this.userService.findUserById(userId);
-      if (!user) {
-        throw new Error("User not found");
-      }
+      if (!user) throw new Error("User not found");
 
-      // 2. Get the plan details from your database
-      const plan = await this.planService.findPlanByPriceId(priceId);
-      if (!plan) {
-        throw new Error("Plan not found");
-      }
+      const newPlan = await this.planService.findPlanByPriceId(priceId);
+      if (!newPlan) throw new Error("Plan not found");
 
-      // 3. Create or get Stripe customer
+      const isTrialToPaid = user.subscription?.status === "trialing";
+      const isTopUp = user.subscription?.status === "active" && !isTrialToPaid;
+
       let stripeCustomerId = user.stripeCustomerId;
       if (!stripeCustomerId) {
         const customer = await this.stripe.customers.create({
@@ -456,116 +443,211 @@ class SubscriptionService {
           metadata: { userId: userId.toString() },
         });
         stripeCustomerId = customer.id;
-
-        // Update user with Stripe customer ID
-        await this.userService.updateUser(userId, {
-          stripeCustomerId: stripeCustomerId,
-        });
       }
-
-      // 4. Attach payment method to customer
       await this.stripe.paymentMethods.attach(paymentMethodId, {
         customer: stripeCustomerId,
       });
-
-      // 5. Set as default payment method
       await this.stripe.customers.update(stripeCustomerId, {
-        invoice_settings: {
-          default_payment_method: paymentMethodId,
-        },
+        invoice_settings: { default_payment_method: paymentMethodId },
       });
 
-      const subscription = await this.stripe.subscriptions.create({
-        customer: stripeCustomerId,
-        items: [{ price: priceId }],
-        default_payment_method: paymentMethodId,
-        expand: ["latest_invoice"],
-      });
+      let subscription;
+      let transitionType = "new";
 
-      // --- 👇 FINAL, EVIDENCE-BASED LOGIC STARTS HERE 👇 ---
-      let periodStart, periodEnd;
+      const isYearly = priceId === newPlan.yearlyPriceId;
 
-      // PRIORITY 1: The invoice's first line item period is the most reliable source on creation.
-      // We use optional chaining (?.) for safety, in case this structure ever changes.
-      const lineItemPeriod =
-        subscription.latest_invoice?.lines?.data?.[0]?.period;
+      // Replace the trial-to-paid section in your createSubscription method with this:
 
-      if (lineItemPeriod) {
-        if (lineItemPeriod.start) {
-          periodStart = new Date(lineItemPeriod.start * 1000);
-        }
-        if (lineItemPeriod.end) {
-          periodEnd = new Date(lineItemPeriod.end * 1000);
-        }
-        console.log(`[Line Item Logic] Determined subscription period.`);
-      }
+      if (isTrialToPaid) {
+        transitionType = "trial_to_paid";
+        const currentSub = await this.stripe.subscriptions.retrieve(
+          user.subscription.subscriptionId
+        );
 
-      // PRIORITY 2: Fallback to the main subscription object's period.
-      if (!periodStart && subscription.current_period_start) {
-        periodStart = new Date(subscription.current_period_start * 1000);
-        console.log(`[Subscription Logic Fallback] Determined start date.`);
-      }
-      if (!periodEnd && subscription.current_period_end) {
-        periodEnd = new Date(subscription.current_period_end * 1000);
-        console.log(`[Subscription Logic Fallback] Determined end date.`);
-      }
+        console.log("BEFORE TRIAL-TO-PAID UPDATE:", {
+          id: currentSub.id,
+          status: currentSub.status,
+          current_period_start: currentSub.current_period_start,
+          current_period_end: currentSub.current_period_end,
+        });
 
-      console.log(`Final determined subscription start date: ${periodStart}`);
-      console.log(`Final determined subscription end date: ${periodEnd}`);
+        subscription = await this.stripe.subscriptions.update(
+          user.subscription.subscriptionId,
+          {
+            trial_end: "now",
+            proration_behavior: "none",
+            items: [{ id: currentSub.items.data[0].id, price: priceId }],
+            expand: ["latest_invoice"],
+          }
+        );
 
-      const subscriptionData = {
-        subscription: {
-          subscriptionId: subscription.id,
-          planId: plan._id,
-          planName: plan.name,
+        console.log("AFTER TRIAL-TO-PAID UPDATE:", {
+          id: subscription.id,
           status: subscription.status,
-          current_period_start: periodStart,
-          current_period_end: periodEnd,
-        },
+          current_period_start: subscription.current_period_start,
+          current_period_end: subscription.current_period_end,
+        });
+
+        // If billing period dates are missing, calculate them based on plan interval
+        if (
+          !subscription.current_period_start ||
+          !subscription.current_period_end
+        ) {
+          console.log(
+            "Trial-to-paid missing period dates, calculating based on plan interval..."
+          );
+
+          // Check if the new plan is yearly or monthly
+          const now = Date.now();
+          const calculatedEndTime = isYearly
+            ? now + 365 * 24 * 60 * 60 * 1000 // 365 days for yearly
+            : now + 30 * 24 * 60 * 60 * 1000; // 30 days for monthly
+
+          // Override the subscription object with calculated dates
+          subscription = {
+            ...subscription,
+            current_period_start: Math.floor(now / 1000),
+            current_period_end: Math.floor(calculatedEndTime / 1000),
+          };
+
+          console.log("Calculated dates for trial-to-paid:", {
+            id: subscription.id,
+            status: subscription.status,
+            current_period_start: subscription.current_period_start,
+            current_period_end: subscription.current_period_end,
+            interval: isYearly ? "yearly" : "monthly",
+          });
+        }
+      } else if (isTopUp) {
+        transitionType = "top_up";
+        const currentSub = await this.stripe.subscriptions.retrieve(
+          user.subscription.subscriptionId
+        );
+        subscription = await this.stripe.subscriptions.update(
+          user.subscription.subscriptionId,
+          {
+            proration_behavior: "create_prorations",
+            items: [{ id: currentSub.items.data[0].id, price: priceId }],
+            expand: ["latest_invoice"],
+          }
+        );
+
+        if (
+          !subscription.current_period_start ||
+          !subscription.current_period_end
+        ) {
+          console.log(
+            "Top-up missing period dates, calculating based on plan interval..."
+          );
+
+          const now = Date.now();
+          const calculatedEndTime = isYearly
+            ? now + 365 * 24 * 60 * 60 * 1000 // 365 days for yearly
+            : now + 30 * 24 * 60 * 60 * 1000; // 30 days for monthly
+
+          subscription = {
+            ...subscription,
+            current_period_start: Math.floor(now / 1000),
+            current_period_end: Math.floor(calculatedEndTime / 1000),
+          };
+        }
+      } else {
+        subscription = await this.stripe.subscriptions.create({
+          customer: stripeCustomerId,
+          items: [{ price: priceId }],
+          default_payment_method: paymentMethodId,
+          expand: ["latest_invoice"],
+        });
+
+        if (
+          !subscription.current_period_start ||
+          !subscription.current_period_end
+        ) {
+          console.log(
+            "New subscription missing period dates, calculating based on plan interval..."
+          );
+
+          const now = Date.now();
+          const calculatedEndTime = isYearly
+            ? now + 365 * 24 * 60 * 60 * 1000 // 365 days for yearly
+            : now + 30 * 24 * 60 * 60 * 1000; // 30 days for monthly
+
+          subscription = {
+            ...subscription,
+            current_period_start: Math.floor(now / 1000),
+            current_period_end: Math.floor(calculatedEndTime / 1000),
+          };
+        }
+      }
+
+      const updatedHistory = await this.processSubscriptionTransition(
+        user,
+        newPlan,
+        transitionType,
+        subscription,
+        isYearly
+      );
+
+      // ========================= CORRECTED LOGIC START =========================
+      // This unified logic ensures the entire subscription object is updated correctly
+      // for ALL scenarios (new, top-up, and trial-to-paid).
+      const updatedSubscriptionData = {
+        subscriptionId: subscription.id,
+        planId: newPlan._id,
+        planName: newPlan.name,
+        status: subscription.status,
+        current_period_start: new Date(
+          subscription.current_period_start * 1000
+        ),
+        current_period_end: new Date(subscription.current_period_end * 1000),
+        trial_end: subscription.trial_end
+          ? new Date(subscription.trial_end * 1000)
+          : null,
       };
 
-      // --- END OF FINAL LOGIC ---
+      await this.userService.updateUser(user._id, {
+        stripeCustomerId,
+        subscription: updatedSubscriptionData, // Overwrite the entire object
+        subscriptionHistory: updatedHistory,
+      });
+      // ========================== CORRECTED LOGIC END ==========================
 
-      if (subscription.status === "trialing" && !user.hasHadTrial) {
-        subscriptionData.hasHadTrial = true;
-      }
-
-      await this.userService.updateUser(userId, subscriptionData);
+      const updatedUser = await this.userService.findUserById(userId);
 
       return {
         id: subscription.id,
         status: subscription.status,
         latest_invoice: subscription.latest_invoice,
+        effectiveLimit: updatedUser.getTotalDocumentLimit(),
+        message: isTopUp
+          ? `Upgrade successful! You now have ${updatedUser.getRemainingDocuments()} documents available.`
+          : "Subscription created successfully!",
       };
     } catch (error) {
       console.error("Error creating subscription:", error);
       throw error;
     }
   }
-
   /**
    * Fetches a list of all invoices for a given user from Stripe.
    */
   async listInvoices(userId) {
     const user = await this.User.findById(userId).select("stripeCustomerId");
     if (!user || !user.stripeCustomerId) {
-      // A user with no customer ID can't have any invoices.
       return [];
     }
 
     const invoices = await this.stripe.invoices.list({
       customer: user.stripeCustomerId,
-      limit: 24, // Get the last 2 years of monthly invoices
+      limit: 24,
     });
 
-    // Sanitize the response to send only what the frontend needs
     return invoices.data.map((invoice) => ({
       id: invoice.id,
       createdAt: new Date(invoice.created * 1000),
-      amount: (invoice.total / 100).toFixed(2), // Convert from cents
+      amount: (invoice.total / 100).toFixed(2),
       currency: invoice.currency.toUpperCase(),
       status: invoice.status,
-      // This is the direct link to the Stripe-hosted invoice page
       downloadUrl: invoice.hosted_invoice_url,
     }));
   }
@@ -588,7 +670,6 @@ class SubscriptionService {
       }
     );
 
-    // --- 👇 TRIGGER CANCELLATION EMAIL 👇 ---
     try {
       const expiryDate = new Date(
         updatedSubscription.current_period_end * 1000
@@ -605,13 +686,11 @@ class SubscriptionService {
         expiryDate
       );
     } catch (emailError) {
-      // Non-blocking error: the main operation succeeded, so we just log the email failure.
       console.error(
         `[Non-blocking] Failed to send cancellation email for user ${userId}:`,
         emailError
       );
     }
-    // --- END OF EMAIL TRIGGER ---
 
     return {
       message:
@@ -639,7 +718,6 @@ class SubscriptionService {
       }
     );
 
-    // --- 👇 TRIGGER REACTIVATION EMAIL 👇 ---
     try {
       const renewalDate = new Date(
         updatedSubscription.current_period_end * 1000
@@ -661,7 +739,6 @@ class SubscriptionService {
         emailError
       );
     }
-    // --- END OF EMAIL TRIGGER ---
 
     return {
       message:
@@ -672,133 +749,99 @@ class SubscriptionService {
   }
 
   /**
-   * Enhanced handleSubscriptionUpdate to properly handle trial end dates
-   * @param {string} subscriptionId - The Stripe subscription ID
+   * Handles subscription updates from Stripe webhooks (e.g., renewals).
    */
   async handleSubscriptionUpdate(subscriptionId) {
-    try {
-      const stripeSubscription = await this.stripe.subscriptions.retrieve(
-        subscriptionId
+    const stripeSubscription = await this.stripe.subscriptions.retrieve(
+      subscriptionId
+    );
+    const user = await this.userService.findUserByStripeCustomerId(
+      stripeSubscription.customer
+    );
+    if (!user) return;
+
+    const oldPeriodStart = user.subscription.current_period_start?.getTime();
+    const newPeriodStart = new Date(
+      stripeSubscription.current_period_start * 1000
+    ).getTime();
+
+    // Check if a new billing cycle has started (renewal)
+    if (newPeriodStart > oldPeriodStart) {
+      const plan = await this.planService.findPlanById(
+        user.subscription.planId
       );
 
-      const user = await this.userService.findUserByStripeCustomerId(
-        stripeSubscription.customer
-      );
-      if (!user) {
-        console.error(
-          `User not found for Stripe customer: ${stripeSubscription.customer}`
-        );
-        return;
-      }
+      // Expire old entries
+      user.subscriptionHistory.forEach((entry) => (entry.status = "expired"));
 
-      const updateData = {
-        "subscription.status": stripeSubscription.status,
-      };
-
-      // 🔧 FIXED: Only update dates if they're valid
-      if (
-        stripeSubscription.current_period_start &&
-        !isNaN(stripeSubscription.current_period_start)
-      ) {
-        updateData["subscription.current_period_start"] = new Date(
-          stripeSubscription.current_period_start * 1000
-        );
-      }
-
-      if (
-        stripeSubscription.current_period_end &&
-        !isNaN(stripeSubscription.current_period_end)
-      ) {
-        updateData["subscription.current_period_end"] = new Date(
-          stripeSubscription.current_period_end * 1000
-        );
-      }
-
-      // Handle trial end date with validation
-      if (
-        stripeSubscription.trial_end &&
-        !isNaN(stripeSubscription.trial_end)
-      ) {
-        updateData["subscription.trial_end"] = new Date(
-          stripeSubscription.trial_end * 1000
-        );
-      } else if (stripeSubscription.status !== "trialing") {
-        // Only remove trial_end if no longer trialing AND trial_end is invalid
-        updateData["subscription.trial_end"] = null;
-      }
-
-      console.log(
-        `Updating subscription for user ${user._id} with data:`,
-        updateData
-      );
-      await this.userService.updateUser(user._id, updateData);
-
-      console.log(`Updated subscription for user ${user._id}`);
-    } catch (error) {
-      console.error("Error handling subscription update:", error);
+      // Create a new active entry for the new period
+      user.subscriptionHistory.push({
+        type: "paid",
+        planId: plan._id,
+        planName: plan.name,
+        startDate: new Date(newPeriodStart),
+        documentLimit: plan.documentLimit,
+        documentsUsed: 0,
+        status: "active",
+      });
     }
+
+    await this.userService.updateUser(user._id, {
+      "subscription.status": stripeSubscription.status,
+      "subscription.current_period_start": new Date(newPeriodStart),
+      "subscription.current_period_end": new Date(
+        stripeSubscription.current_period_end * 1000
+      ),
+      "subscription.planId":
+        (
+          await this.planService.findPlanByPriceId(
+            stripeSubscription.items.data[0].price.id
+          )
+        )?._id || user.subscription.planId,
+      "subscription.planName":
+        (
+          await this.planService.findPlanByPriceId(
+            stripeSubscription.items.data[0].price.id
+          )
+        )?.name || user.subscription.planName,
+      subscriptionHistory: user.subscriptionHistory,
+    });
   }
 
   /**
-   * Handles subscription cancellations that come from outside our app (e.g., from the Stripe dashboard).
+   * Handles subscription cancellations that come from outside our app.
    */
   async handleSubscriptionDeleted(subscriptionId) {
-    try {
-      // Find user with this subscription
-      const user = await this.userService.findUserBySubscriptionId(
-        subscriptionId
-      );
-      if (!user) {
-        console.error(`User not found for subscription: ${subscriptionId}`);
-        return;
-      }
-
-      // Clear subscription data
-      await this.userService.updateUser(user._id, {
-        subscription: undefined,
-      });
-
-      console.log(`Cleared subscription for user ${user._id}`);
-    } catch (error) {
-      console.error("Error handling subscription deletion:", error);
+    const user = await this.userService.findUserBySubscriptionId(
+      subscriptionId
+    );
+    if (!user) {
+      console.error(`User not found for subscription: ${subscriptionId}`);
+      return;
     }
+
+    await this.userService.updateUser(user._id, {
+      subscription: undefined,
+    });
   }
 
   /**
-   * Enhanced processSubscriptionConfirmationEmail to handle trial transitions
-   * @param {object} invoice - The full invoice object from the Stripe webhook.
+   * Sends subscription confirmation email after a successful payment.
    */
   async processSubscriptionConfirmationEmail(invoice) {
     try {
-      // 1. Find the user in your database using the customer ID from the invoice
       const user = await this.userService.findUserByStripeCustomerId(
         invoice.customer
       );
-      if (!user) {
+      if (!user || !user.subscription || !user.subscription.planName) {
         console.error(
-          `Could not send confirmation email: User not found for Stripe customer ID ${invoice.customer}`
+          `Could not process confirmation: User or subscription details missing for customer ID ${invoice.customer}`
         );
         return;
       }
 
-      // We can rely on our database now having the correct plan name from the createSubscription call
-      if (!user.subscription || !user.subscription.planName) {
-        console.error(
-          `Could not send confirmation email: User ${user._id} has an invoice but no subscription plan name in DB.`
-        );
-        return;
-      }
-
-      // 2. Check if this is a trial-to-active transition
-      const isTrialToActive =
-        invoice.billing_reason === "subscription_cycle" &&
-        user.subscription.status === "trialing";
-
-      // 3. Gather all the necessary data for the email
       const planName = user.subscription.planName;
       const amount = (invoice.amount_paid / 100).toFixed(2);
-
-      // Get the renewal date from the invoice line item's period end
       const renewalDateTimestamp = invoice.lines.data[0]?.period?.end;
       const renewalDate = renewalDateTimestamp
         ? new Date(renewalDateTimestamp * 1000).toLocaleDateString("en-US", {
@@ -806,46 +849,106 @@ class SubscriptionService {
             month: "long",
             day: "numeric",
           })
-        : "N/A"; // Fallback
-
+        : "N/A";
       const invoiceUrl = invoice.hosted_invoice_url;
 
-      // 4. Send appropriate email based on invoice type
-      if (isTrialToActive) {
-        // Send trial-to-active transition email
-        const firstBillingDate = new Date(
-          invoice.created * 1000
-        ).toLocaleDateString("en-US", {
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-        });
-
-        await this.emailService.sendTrialToActiveTransitionEmail(
-          user.email,
-          user.firstName,
-          planName,
-          firstBillingDate,
-          renewalDate,
-          amount,
-          invoiceUrl
-        );
-      } else if (invoice.billing_reason === "subscription_create") {
-        // Send regular subscription confirmation (only for new non-trial subscriptions)
-        await this.emailService.sendSubscriptionConfirmation(
-          user.email,
-          user.firstName,
-          planName,
-          amount,
-          renewalDate,
-          invoiceUrl
-        );
-      }
-      // For regular renewal invoices (billing_reason === "subscription_cycle" but not from trial),
-      // you might want to send a different email or no email at all
+      await this.emailService.sendSubscriptionConfirmation(
+        user.email,
+        user.firstName,
+        planName,
+        amount,
+        renewalDate,
+        invoiceUrl
+      );
     } catch (error) {
       console.error("Error processing subscription confirmation email:", error);
     }
+  }
+
+  /**
+   * REWRITTEN: Correctly handles document limits and history for upgrades, trials, and new subs.
+   * FIX APPLIED: Properly set endDate for paid subscriptions from Stripe period_end
+   */
+  async processSubscriptionTransition(
+    user,
+    newPlan,
+    transitionType,
+    stripeSub,
+    isYearly
+  ) {
+    const now = new Date();
+    const history = user.subscriptionHistory || [];
+    let newHistoryLimit = newPlan.documentLimit;
+
+    if (transitionType === "trial_to_paid") {
+      // Deactivate the old trial history
+      history.forEach((h) => {
+        if (h.type === "trial" && h.status === "active") {
+          h.status = "completed";
+          h.endDate = now;
+        }
+      });
+    } else if (transitionType === "top_up" && user.subscription) {
+      // Calculate remaining documents from all active plans
+      const remainingDocsFromOldPlan = user.getRemainingDocuments();
+
+      // Prorate the document limit for the new plan (FIX: Use seconds for precision)
+      const periodStart = stripeSub.current_period_start;
+      const periodEnd = stripeSub.current_period_end;
+      const nowSeconds = Math.floor(Date.now() / 1000);
+      const totalDuration = periodEnd - periodStart;
+      const remainingDuration = periodEnd - nowSeconds;
+
+      let proratedNewDocs = newPlan.documentLimit; // Default to full amount
+      if (totalDuration > 0 && remainingDuration > 0) {
+        const fraction = remainingDuration / totalDuration;
+        proratedNewDocs = Math.floor(fraction * newPlan.documentLimit);
+      }
+
+      // The total limit for the new history entry is what they had left + the prorated new amount
+      newHistoryLimit = remainingDocsFromOldPlan + proratedNewDocs;
+
+      // Deactivate all previous active plans
+      history.forEach((h) => {
+        if (h.status === "active") {
+          h.status = "completed";
+          h.endDate = now;
+        }
+      });
+    }
+
+    // CRITICAL FIX: Ensure we have a valid end date from Stripe
+    let endDate;
+    if (stripeSub.current_period_end) {
+      endDate = new Date(stripeSub.current_period_end * 1000);
+    } else {
+      // Fallback: set to 30 or 365 days from now if Stripe doesn't provide the date
+      console.warn("No current_period_end from Stripe, using fallback");
+      endDate = new Date(
+        now.getTime() + (isYearly ? 365 : 30) * 24 * 60 * 60 * 1000
+      );
+    }
+
+    // Add the new active entry
+    const newHistoryEntry = {
+      type:
+        transitionType === "top_up"
+          ? "top_up"
+          : transitionType === "trial_to_paid"
+          ? "paid"
+          : transitionType,
+      planId: newPlan._id,
+      planName: newPlan.name,
+      startDate: now,
+      endDate: endDate, // Use the properly calculated end date
+      documentLimit: newHistoryLimit,
+      documentsUsed: 0,
+      status: "active",
+    };
+
+    history.push(newHistoryEntry);
+
+    return history;
   }
 }
 

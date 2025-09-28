@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { IRootState, AppDispatch } from '../../store';
@@ -15,7 +15,11 @@ const Spinner = () => (
     </div>
 );
 
-const PlanSelection: React.FC = () => {
+interface PlanSelectionProps {
+    onCancelChange?: () => void;
+}
+
+const PlanSelection: React.FC<PlanSelectionProps> = ({ onCancelChange }) => {
     const dispatch = useDispatch<AppDispatch>();
     const navigate = useNavigate();
     const { plans: rawPlans, loading, error } = useSelector((state: IRootState) => state.plans);
@@ -27,8 +31,9 @@ const PlanSelection: React.FC = () => {
     const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
 
-    // Derived state to disable buttons if the user already has a plan
     const hasActiveSubscription = !!subscription;
+    const currentPlanName = subscription?.planName;
+    const currentInterval = subscription?.planInterval;
 
     // Fetch plans on component mount if they are not already loaded
     useEffect(() => {
@@ -36,6 +41,12 @@ const PlanSelection: React.FC = () => {
             dispatch(fetchPlans());
         }
     }, [dispatch, rawPlans.length]);
+
+    useEffect(() => {
+        if (hasActiveSubscription) {
+            setIsYearly(currentInterval === 'year');
+        }
+    }, [hasActiveSubscription, currentInterval]);
 
     // Memoize and enrich plan data with UI-specific properties
     const plans = useMemo(() => {
@@ -74,8 +85,28 @@ const PlanSelection: React.FC = () => {
             .sort((a, b) => planOrder.indexOf(a.name) - planOrder.indexOf(b.name));
     }, [rawPlans]);
 
+    const getButtonText = (plan: Plan) => {
+        if (!hasActiveSubscription) {
+            return !hasHadTrial && plan.monthlyPrice > 0 ? 'Start 14-Day Free Trial' : 'Choose Plan';
+        }
+        const selectedInterval = isYearly ? 'year' : 'month';
+        if (plan.name === currentPlanName) {
+            if (selectedInterval === currentInterval) {
+                return 'Top-up';
+            } else {
+                return `Switch to ${isYearly ? 'Yearly' : 'Monthly'} Billing`;
+            }
+        } else {
+            return `Switch to ${plan.name}`;
+        }
+    };
+
+    const isButtonDisabled = (plan: Plan) => {
+        return false;
+    };
+
     const handleSelectPlan = (plan: Plan) => {
-        if (hasActiveSubscription) return; // Prevent selection if already subscribed
+        if (isButtonDisabled(plan)) return;
         setSelectedPlan(plan);
         setIsModalOpen(true);
     };
@@ -84,8 +115,35 @@ const PlanSelection: React.FC = () => {
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             {/* Header */}
             <div className="text-center mb-12">
-                <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white">Choose Your Plan</h1>
-                <p className="text-lg text-gray-600 dark:text-gray-400 mt-4 max-w-3xl mx-auto">Upgrade your account to unlock more features, higher limits, and dedicated support.</p>
+                {/* ========== UI FIX START ========== */}
+                {/* Back Navigation Button */}
+                {onCancelChange && (
+                    <div className="mb-8">
+                        <button
+                            onClick={onCancelChange}
+                            className="inline-flex items-center text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white font-semibold text-sm transition-colors duration-200 group"
+                        >
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                className="h-5 w-5 mr-2 transition-transform duration-200 group-hover:-translate-x-1"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                                strokeWidth={2}
+                            >
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                            </svg>
+                            Back to Subscription Management
+                        </button>
+                    </div>
+                )}
+                {/* ========== UI FIX END ========== */}
+                <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white">{hasActiveSubscription ? 'Select a New Plan' : 'Choose Your Plan'}</h1>
+                <p className="text-lg text-gray-600 dark:text-gray-400 mt-4 max-w-3xl mx-auto">
+                    {hasActiveSubscription
+                        ? 'Choose a new plan to upgrade, downgrade, or change your billing cycle.'
+                        : 'Upgrade your account to unlock more features, higher limits, and dedicated support.'}
+                </p>
             </div>
 
             {/* Billing Toggle */}
@@ -147,10 +205,10 @@ const PlanSelection: React.FC = () => {
                             {!plan.isEnterprise && (
                                 <div className="px-8 py-6 bg-gray-50 dark:bg-gray-800/40 border-y border-gray-100 dark:border-gray-700/50">
                                     <div className="flex items-baseline justify-center">
-                                        <span className="text-5xl font-bold text-gray-900 dark:text-white">${isYearly ? (plan.yearlyPrice / 12).toFixed(0) : plan.monthlyPrice}</span>
+                                        <span className="text-5xl font-bold text-gray-900 dark:text-white">€{isYearly ? (plan.yearlyPrice / 12).toFixed(0) : plan.monthlyPrice}</span>
                                         <span className="ml-1 text-xl font-medium text-gray-500 dark:text-gray-400">/mo</span>
                                     </div>
-                                    {isYearly && <p className="text-center text-sm text-green-600 dark:text-green-400 mt-1 font-semibold">Billed as ${plan.yearlyPrice} per year</p>}
+                                    {isYearly && <p className="text-center text-sm text-green-600 dark:text-green-400 mt-1 font-semibold">Billed as €{plan.yearlyPrice} per year</p>}
                                 </div>
                             )}
 
@@ -179,17 +237,10 @@ const PlanSelection: React.FC = () => {
                                 ) : (
                                     <button
                                         onClick={() => handleSelectPlan(plan)}
-                                        disabled={hasActiveSubscription}
+                                        disabled={isButtonDisabled(plan)}
                                         className={`btn w-full text-lg py-3 disabled:opacity-50 disabled:cursor-not-allowed ${plan.isPopular ? 'btn-primary' : 'btn-outline-primary'}`}
                                     >
-                                        {/* DYNAMIC BUTTON TEXT LOGIC */}
-                                        {hasActiveSubscription
-                                            ? plan.name === subscription?.planName
-                                                ? 'Current Plan'
-                                                : 'Choose Plan'
-                                            : !hasHadTrial && plan.monthlyPrice > 0
-                                            ? 'Start 14-Day Free Trial'
-                                            : 'Choose Plan'}
+                                        {getButtonText(plan)}
                                     </button>
                                 )}
                             </div>

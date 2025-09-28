@@ -273,6 +273,7 @@ class PdfModificationService {
       const rejectionDate = new Date(
         pkg.rejectionDetails.rejectedAt
       ).toLocaleString();
+      const rejectionIP = pkg.rejectionDetails.rejectedIP || "N/A";
       const rejectionReason =
         pkg.rejectionDetails.reason || "No reason provided";
 
@@ -310,6 +311,16 @@ class PdfModificationService {
 
       // Draw rejected by email
       page.drawText(`Email: ${rejectedByEmail}`, {
+        x: adjustedX + horizontalPadding,
+        y: currentY,
+        font: fonts.helvetica,
+        size: 8,
+        color: rgb(0.6, 0, 0),
+        maxWidth: originalWidth - 2 * horizontalPadding,
+      });
+      currentY -= smallLineSpacing;
+
+      page.drawText(`IP: ${rejectionIP}`, {
         x: adjustedX + horizontalPadding,
         y: currentY,
         font: fonts.helvetica,
@@ -419,7 +430,7 @@ class PdfModificationService {
       audit += `- Document REJECTED by ${
         pkg.rejectionDetails.rejectedBy.contactName
       } at ${formatDate(pkg.rejectionDetails.rejectedAt)}\n`;
-      audit += ` Reason: ${pkg.rejectionDetails.reason}\n`;
+      audit += `  Reason: ${pkg.rejectionDetails.reason} (IP: ${pkg.rejectionDetails.rejectedIP})\n`;
     }
 
     if (pkg.status === "Revoked" && pkg.revocationDetails?.revokedBy) {
@@ -466,7 +477,7 @@ class PdfModificationService {
     }
 
     // Add Header
-    const headerText = "Certificate of Completion";
+    const headerText = "Audit Certificate of Completion";
     const headerSize = 22;
     page.drawText(headerText, {
       x: margin,

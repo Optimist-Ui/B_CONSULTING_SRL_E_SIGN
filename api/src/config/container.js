@@ -22,6 +22,7 @@ const ReviewService = require("../services/ReviewService");
 
 const CronService = require("../services/CronService");
 const EmailService = require("../services/EmailService");
+const S3Service = require("../services/S3Service");
 const SmsService = require("../services/SmsService");
 const PdfModificationService = require("../services/PdfModificationService");
 
@@ -78,6 +79,7 @@ container.register({
 
   emailService: asClass(EmailService).singleton(),
   smsService: asClass(SmsService).singleton(),
+  s3Service: asClass(S3Service).singleton(),
   pdfModificationService: asClass(PdfModificationService).singleton(),
   cronService: asClass(CronService).singleton(),
 

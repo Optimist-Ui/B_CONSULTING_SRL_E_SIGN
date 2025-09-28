@@ -10,6 +10,7 @@ export interface SignatureValue {
     phone?: string;
     date: string;
     method: string;
+    otpCode?: string;
 }
 
 // Define Rejection Details Type

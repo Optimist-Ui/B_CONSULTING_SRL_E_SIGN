@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, IRootState } from '../../../store';
 import { setFieldValue, setSigningDrawerOpen, setActiveSigningFieldId, setActiveParticipantId, SignatureValue } from '../../../store/slices/participantSlice';
 import { ParticipantPackageField, RejectionDetails } from '../../../store/slices/participantSlice';
-import { FiEdit3, FiSave, FiFileText, FiCalendar, FiSquare, FiCheckSquare, FiCheckCircle, FiXCircle, FiAlertTriangle } from 'react-icons/fi';
+import { FiEdit3, FiSave, FiFileText, FiCalendar, FiSquare, FiCheckSquare, FiCheckCircle, FiXCircle, FiAlertTriangle, FiUser } from 'react-icons/fi';
 import { FaSignature, FaPen } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 
@@ -19,6 +19,7 @@ const FiCheckSquareTyped = FiCheckSquare as ComponentType<{ className?: string }
 const FiCheckCircleTyped = FiCheckCircle as ComponentType<{ className?: string }>;
 const FiXCircleTyped = FiXCircle as ComponentType<{ className?: string }>;
 const FiAlertTriangleTyped = FiAlertTriangle as ComponentType<{ className?: string }>;
+const FiUserTyped = FiUser as ComponentType<{ className?: string }>;
 
 interface InteractiveFieldProps {
     field: ParticipantPackageField;
@@ -43,6 +44,27 @@ const InteractiveField: React.FC<InteractiveFieldProps> = ({ field, value, rejec
             setIsEditing(!hasInitialValue);
         }
     }, [value, field.type]);
+
+    // Get assigned user details for display
+    const getAssignedUserInfo = () => {
+        if (field.assignedUsers && field.assignedUsers.length > 0) {
+            const user = field.assignedUsers[0];
+            return {
+                name: user.contactName || 'Unknown User',
+                email: user.contactEmail || '',
+                phone: user.contactPhone || '',
+                role: user.role || 'Participant',
+            };
+        }
+        return {
+            name: 'Current User',
+            email: '',
+            phone: '',
+            role: 'Participant',
+        };
+    };
+
+    const assignedUserInfo = getAssignedUserInfo();
 
     // Check if this field is assigned to the person who rejected the package
     const isAssignedToRejecter = () => {
@@ -204,6 +226,7 @@ const InteractiveField: React.FC<InteractiveFieldProps> = ({ field, value, rejec
                     </div>
                     <div className="text-xs text-red-700 space-y-1">
                         <p className="font-semibold truncate">By: {rejectionDetails!.rejectedBy.contactName}</p>
+                        {rejectionDetails!.rejectedIP && <p className="text-red-600 text-[10px]">IP: {rejectionDetails!.rejectedIP}</p>}
                         <p className="text-red-600 text-[10px]">{new Date(rejectionDetails!.rejectedAt).toLocaleString()}</p>
                     </div>
                     {rejectionDetails!.reason && (
@@ -223,9 +246,15 @@ const InteractiveField: React.FC<InteractiveFieldProps> = ({ field, value, rejec
                 <div className="flex items-center justify-between px-3 py-1.5 bg-white/40 rounded-t-md border-b border-green-200">
                     <div className="flex items-center gap-2 min-w-0 flex-1">
                         {getFieldIcon()}
-                        <span className="text-xs font-semibold text-slate-700 truncate">
-                            {field.label} {field.required && <span className="text-red-500 ml-1">*</span>}
-                        </span>
+                        <div className="flex flex-col min-w-0 flex-1">
+                            <span className="text-xs font-semibold text-slate-700 truncate">
+                                {field.label} {field.required && <span className="text-red-500 ml-1">*</span>}
+                            </span>
+                            <div className="flex items-center gap-1">
+                                <FiUserTyped className="w-2.5 h-2.5 text-green-600" />
+                                <span className="text-[10px] text-green-700 font-medium truncate">{assignedUserInfo.name}</span>
+                            </div>
+                        </div>
                     </div>
                     <button onClick={() => setIsEditing(true)} className="p-1.5 rounded-md hover:bg-green-200/60 transition-colors group" title="Edit field">
                         <FiEdit3Typed className="w-3.5 h-3.5 text-green-700 group-hover:text-green-800" />
@@ -251,9 +280,15 @@ const InteractiveField: React.FC<InteractiveFieldProps> = ({ field, value, rejec
                     <div className="flex items-center justify-between px-3 py-1.5 bg-white/40 rounded-t-md border-b border-current border-opacity-20">
                         <div className="flex items-center gap-2 min-w-0 flex-1">
                             {getFieldIcon()}
-                            <span className="text-xs font-semibold text-slate-700 truncate">
-                                {field.label} {field.required && <span className="text-red-500 ml-1">*</span>}
-                            </span>
+                            <div className="flex flex-col min-w-0 flex-1">
+                                <span className="text-xs font-semibold text-slate-700 truncate">
+                                    {field.label} {field.required && <span className="text-red-500 ml-1">*</span>}
+                                </span>
+                                <div className="flex items-center gap-1">
+                                    <FiUserTyped className="w-2.5 h-2.5 text-slate-500" />
+                                    <span className="text-[10px] text-slate-600 font-medium truncate">{assignedUserInfo.name}</span>
+                                </div>
+                            </div>
                         </div>
                         <button onClick={handleFinalize} className={`${colors.button} text-white p-1.5 rounded-md transition-colors shadow-sm hover:shadow-md`} title="Save field">
                             <FiSaveTyped className="w-3.5 h-3.5" />
@@ -280,9 +315,15 @@ const InteractiveField: React.FC<InteractiveFieldProps> = ({ field, value, rejec
                     <div className="flex items-center justify-between px-3 py-1.5 bg-white/40 rounded-t-md border-b border-current border-opacity-20 flex-shrink-0">
                         <div className="flex items-center gap-2 min-w-0 flex-1">
                             {getFieldIcon()}
-                            <span className="text-xs font-semibold text-slate-700 truncate">
-                                {field.label} {field.required && <span className="text-red-500 ml-1">*</span>}
-                            </span>
+                            <div className="flex flex-col min-w-0 flex-1">
+                                <span className="text-xs font-semibold text-slate-700 truncate">
+                                    {field.label} {field.required && <span className="text-red-500 ml-1">*</span>}
+                                </span>
+                                <div className="flex items-center gap-1">
+                                    <FiUserTyped className="w-2.5 h-2.5 text-slate-500" />
+                                    <span className="text-[10px] text-slate-600 font-medium truncate">{assignedUserInfo.name}</span>
+                                </div>
+                            </div>
                         </div>
                         <button onClick={handleFinalize} className={`${colors.button} text-white p-1.5 rounded-md transition-colors shadow-sm hover:shadow-md`} title="Save field">
                             <FiSaveTyped className="w-3.5 h-3.5" />
@@ -305,11 +346,19 @@ const InteractiveField: React.FC<InteractiveFieldProps> = ({ field, value, rejec
                     style={baseStyles}
                     className={`${colors.editing} border-2 rounded-lg shadow-sm backdrop-blur-sm cursor-pointer transition-all duration-200 hover:shadow-md flex flex-col overflow-hidden`}
                 >
-                    <div className="flex items-center gap-1 px-2 py-1 bg-white/40 rounded-t-md border-b border-current border-opacity-20 flex-shrink-0">
-                        {getFieldIcon()}
-                        <span className="text-xs font-semibold text-slate-700 truncate leading-tight">
-                            {field.label} {field.required && <span className="text-red-500 ml-0.5">*</span>}
-                        </span>
+                    <div className="flex items-center justify-between px-2 py-1 bg-white/40 rounded-t-md border-b border-current border-opacity-20 flex-shrink-0">
+                        <div className="flex items-center gap-1 min-w-0 flex-1">
+                            {getFieldIcon()}
+                            <div className="flex flex-col min-w-0 flex-1">
+                                <span className="text-xs font-semibold text-slate-700 truncate leading-tight">
+                                    {field.label} {field.required && <span className="text-red-500 ml-0.5">*</span>}
+                                </span>
+                                <div className="flex items-center gap-1">
+                                    <FiUserTyped className="w-2 h-2 text-slate-500" />
+                                    <span className="text-[9px] text-slate-600 font-medium truncate">{assignedUserInfo.name}</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <div className="flex-grow flex items-center justify-center p-1 min-h-0">
                         <input
@@ -321,8 +370,6 @@ const InteractiveField: React.FC<InteractiveFieldProps> = ({ field, value, rejec
                     </div>
                 </label>
             );
-
-        // Updated signature field rendering section in InteractiveField.tsx
 
         case 'signature':
             const isSigned = value && typeof value === 'object' && value.signedBy;
@@ -342,6 +389,7 @@ const InteractiveField: React.FC<InteractiveFieldProps> = ({ field, value, rejec
                             ) : (
                                 <p className="truncate text-gray-600">{signatureValue.email}</p>
                             )}
+                            {signatureValue.otpCode && <p className="text-gray-600 font-mono">OTP: {signatureValue.otpCode}</p>}
                             <p className="text-gray-600">{new Date(signatureValue.date).toLocaleString()}</p>
                         </div>
                         <p className="text-right text-[10px] text-gray-500 mt-auto pt-1 font-semibold">via {signatureValue.method || 'Email OTP'} by SignatureFlow</p>
@@ -357,14 +405,14 @@ const InteractiveField: React.FC<InteractiveFieldProps> = ({ field, value, rejec
                     switch (signatureMethod) {
                         case 'SMS OTP':
                             return {
-                                subtitle: 'Click to sign via SMS',
+                                subtitle: 'Click to sign',
                                 iconColor: 'text-green-600',
                                 bgGradient: 'bg-gradient-to-br from-green-50 to-emerald-50',
                                 borderColor: 'border-green-300',
                             };
                         case 'Email OTP':
                             return {
-                                subtitle: 'Click to sign via email',
+                                subtitle: 'Click to sign',
                                 iconColor: 'text-indigo-600',
                                 bgGradient: 'bg-gradient-to-br from-indigo-50 to-blue-50',
                                 borderColor: 'border-indigo-300',
@@ -397,10 +445,16 @@ const InteractiveField: React.FC<InteractiveFieldProps> = ({ field, value, rejec
                         <div className="flex items-center justify-between px-2 py-1 bg-white/40 rounded-t-md border-b border-current border-opacity-20 flex-shrink-0">
                             <div className="flex items-center gap-1 min-w-0 flex-1">
                                 {getFieldIcon()}
-                                <span className="text-xs font-semibold text-slate-700 truncate leading-tight">
-                                    {field.label}
-                                    {field.required && <span className="text-red-500 ml-0.5">*</span>}
-                                </span>
+                                <div className="flex flex-col min-w-0 flex-1">
+                                    <span className="text-xs font-semibold text-slate-700 truncate leading-tight">
+                                        {field.label}
+                                        {field.required && <span className="text-red-500 ml-0.5">*</span>}
+                                    </span>
+                                    <div className="flex items-center gap-1">
+                                        <FiUserTyped className="w-2 h-2 text-slate-500" />
+                                        <span className="text-[9px] text-slate-600 font-medium truncate">{assignedUserInfo.name}</span>
+                                    </div>
+                                </div>
                             </div>
                             {signatureMethod && <span className="text-[10px] font-medium text-gray-600 bg-white/60 px-1.5 py-0.5 rounded-full">{signatureMethod}</span>}
                         </div>
@@ -417,9 +471,15 @@ const InteractiveField: React.FC<InteractiveFieldProps> = ({ field, value, rejec
                 <div style={baseStyles} className="bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg flex flex-col shadow-sm">
                     <div className="flex items-center gap-2 px-3 py-1.5 bg-white/40 rounded-t-md border-b border-gray-300">
                         {getFieldIcon()}
-                        <span className="text-xs font-semibold text-slate-700 truncate">
-                            {field.label} {field.required && <span className="text-red-500 ml-1">*</span>}
-                        </span>
+                        <div className="flex flex-col min-w-0 flex-1">
+                            <span className="text-xs font-semibold text-slate-700 truncate">
+                                {field.label} {field.required && <span className="text-red-500 ml-1">*</span>}
+                            </span>
+                            <div className="flex items-center gap-1">
+                                <FiUserTyped className="w-2.5 h-2.5 text-slate-500" />
+                                <span className="text-[10px] text-slate-600 font-medium truncate">{assignedUserInfo.name}</span>
+                            </div>
+                        </div>
                     </div>
                     <div className="flex-grow flex items-center justify-center px-3 py-2">
                         <span className="text-xs text-gray-500 font-medium">Unsupported Field Type</span>

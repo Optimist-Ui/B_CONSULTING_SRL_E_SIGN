@@ -17,6 +17,7 @@ import { invalidateStatusCache } from '../../store/slices/subscriptionSlice';
 import { Modal, AddPaymentMethodForm } from '../../pages/PaymentMethods';
 import IconStar from '../Icon/IconStar';
 import IconPlus from '../Icon/IconPlus';
+import IconArchive from '../Icon/IconArchive'; // Assume warning icon for trial end note
 
 const stripePromise = loadStripe(import.meta.env.VITE_APP_STRIPE_PUBLISHABLE_KEY as string);
 
@@ -74,8 +75,11 @@ const PurchaseModalContent: React.FC<PurchaseModalProps> = ({ isOpen, onClose, p
     const dispatch = useDispatch<AppDispatch>();
 
     const { paymentMethods, loading: pmLoading } = useSelector((state: IRootState) => state.paymentMethods);
+    const { subscription } = useSelector((state: IRootState) => state.subscription);
     const { user } = useSelector((state: IRootState) => state.auth);
     const hasHadTrial = user?.hasHadTrial ?? false;
+
+    const isTopUp = !!subscription && plan.name === subscription.planName && (isYearly ? subscription.planInterval === 'year' : subscription.planInterval === 'month');
 
     // Separate loading states for each action button for a better user experience
     const [isLoading, setIsLoading] = useState<'trial' | 'purchase' | false>(false);
@@ -162,7 +166,11 @@ const PurchaseModalContent: React.FC<PurchaseModalProps> = ({ isOpen, onClose, p
         onClose();
     };
 
-    const onSuccess = () => showSuccessToast('Subscription Successful!', `Welcome to the ${plan.name} plan!`);
+    const onSuccess = () =>
+        showSuccessToast(
+            isTopUp ? 'Top-up Successful!' : 'Subscription Successful!',
+            isTopUp ? `You now have more documents available on your ${plan.name} plan!` : `Welcome to the ${plan.name} plan!`
+        );
     const onTrialSuccess = () => showSuccessToast('Free Trial Started!', `You have 14 days of access to the ${plan.name} plan!`);
 
     const handleAddNewCardSuccess = () => {
@@ -181,7 +189,7 @@ const PurchaseModalContent: React.FC<PurchaseModalProps> = ({ isOpen, onClose, p
             <div className="space-y-6">
                 {/* Plan Summary Section */}
                 <div>
-                    <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-1">Your Plan</h3>
+                    <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-1">{isTopUp ? 'Top-up Details' : 'Your Plan'}</h3>
                     <div className="flex justify-between items-center p-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
                         <div>
                             <p className="font-bold text-gray-900 dark:text-white">
@@ -192,6 +200,13 @@ const PurchaseModalContent: React.FC<PurchaseModalProps> = ({ isOpen, onClose, p
                         <p className="text-xl font-bold text-gray-900 dark:text-white">€{isYearly ? plan.yearlyPrice : plan.monthlyPrice}</p>
                     </div>
                 </div>
+
+                {subscription?.isTrialing && (
+                    <div className="bg-yellow-50 dark:bg-yellow-900/50 p-4 rounded-lg flex items-center text-yellow-800 dark:text-yellow-200">
+                        <IconArchive className="w-5 h-5 mr-2" />
+                        Note: Proceeding will end your free trial and charge you immediately.
+                    </div>
+                )}
 
                 {/* Payment Method Section */}
                 <div>
@@ -210,13 +225,13 @@ const PurchaseModalContent: React.FC<PurchaseModalProps> = ({ isOpen, onClose, p
 
                 {/* Actions Section */}
                 <div className="border-t border-gray-200 dark:border-gray-700 pt-5 space-y-3">
-                    {!hasHadTrial && plan.monthlyPrice > 0 && (
+                    {!hasHadTrial && plan.monthlyPrice > 0 && !isTopUp && (
                         <button onClick={() => handleTransaction(true)} disabled={!!isLoading} className="btn btn-primary w-full h-12 text-lg">
                             {isLoading === 'trial' ? 'Starting Trial...' : 'Start 14-Day Free Trial'}
                         </button>
                     )}
                     <button onClick={() => handleTransaction(false)} disabled={!!isLoading || !selectedPM} className="btn btn-outline-primary w-full h-12 text-lg">
-                        {isLoading === 'purchase' ? 'Processing...' : `Subscribe Now (€${isYearly ? plan.yearlyPrice : plan.monthlyPrice})`}
+                        {isLoading === 'purchase' ? 'Processing...' : `${isTopUp ? 'Top-up' : 'Subscribe'} Now (€${isYearly ? plan.yearlyPrice : plan.monthlyPrice})`}
                     </button>
                     {error && <p className="text-red-600 text-sm mt-3 text-center">{error}</p>}
                     <p className="text-xs text-gray-500 dark:text-gray-400 text-center mt-3">By continuing, you agree to our Terms of Service.</p>
@@ -226,7 +241,7 @@ const PurchaseModalContent: React.FC<PurchaseModalProps> = ({ isOpen, onClose, p
     };
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose} title="Confirm Your Subscription">
+        <Modal isOpen={isOpen} onClose={onClose} title={isTopUp ? 'Top-up Your Plan' : 'Confirm Your Subscription'}>
             {renderContent()}
         </Modal>
     );

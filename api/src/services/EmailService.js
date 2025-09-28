@@ -150,8 +150,10 @@ class EmailService {
     recipient,
     packageDetails,
     senderName,
-    actionUrl
+    actionUrl,
+    customMessage
   ) {
+    console.log(customMessage);
     const msg = {
       to: recipient.contactEmail,
       from: this.fromEmail,
@@ -161,6 +163,8 @@ class EmailService {
         sender_name: senderName,
         package_name: packageDetails.name,
         action_link: actionUrl,
+        custom_message: customMessage,
+        has_custom_message: !!customMessage,
       },
     };
 
@@ -919,6 +923,41 @@ class EmailService {
     } catch (error) {
       console.error(
         "Error sending review appreciation email:",
+        error.response?.body || error
+      );
+    }
+  }
+
+  /**
+   * Sends a notification to the initiator about a participant's action.
+   */
+  async sendParticipantActionNotification(
+    recipientEmail,
+    initiatorName,
+    packageName,
+    actorName,
+    completedListHtml,
+    pendingListHtml,
+    actionLink
+  ) {
+    const msg = {
+      to: recipientEmail,
+      from: this.fromEmail,
+      templateId: process.env.SENDGRID_PARTICIPANT_ACTION_TEMPLATE_ID,
+      dynamic_template_data: {
+        initiator_name: initiatorName,
+        package_name: packageName,
+        actor_name: actorName,
+        completed_list: completedListHtml, // Pass the generated HTML list
+        pending_list: pendingListHtml, // Pass the generated HTML list
+        action_link: actionLink,
+      },
+    };
+    try {
+      await sgMail.send(msg);
+    } catch (error) {
+      console.error(
+        "Error sending participant action notification email:",
         error.response?.body || error
       );
     }
