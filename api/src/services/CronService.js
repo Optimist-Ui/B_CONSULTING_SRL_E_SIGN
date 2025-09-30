@@ -21,16 +21,19 @@ class CronService {
     const ExpiryJob = require("../jobs/ExpiryJob");
     const ReminderJob = require("../jobs/ReminderJob");
     const SubscriptionExpiryJob = require("../jobs/SubscriptionExpiryJob");
+    const DeleteExpiredAccountsJob = require("../jobs/DeleteExpiredAccountsJob");
 
     // Initialize jobs with container dependencies
     const expiryJob = new ExpiryJob(container);
     const reminderJob = new ReminderJob(container);
     const subscriptionExpiryJob = new SubscriptionExpiryJob(container);
+    const deleteExpiredAccountsJob = new DeleteExpiredAccountsJob(container);
 
     // Register jobs
     this.registerJob("packageExpiry", expiryJob);
     this.registerJob("expiryReminders", reminderJob);
     this.registerJob("subscriptionExpiry", subscriptionExpiryJob);
+    this.registerJob("deleteExpiredAccounts", deleteExpiredAccountsJob);
 
     this.isInitialized = true;
     console.log("CronService initialized successfully");

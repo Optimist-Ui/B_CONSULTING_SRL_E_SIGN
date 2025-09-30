@@ -962,6 +962,53 @@ class EmailService {
       );
     }
   }
+
+  /**
+   * Sends account deactivation confirmation email with reactivation link.
+   */
+  async sendDeactivationEmail(user, reactivationUrl) {
+    const msg = {
+      to: user.email,
+      from: this.fromEmail,
+      templateId: process.env.SENDGRID_DEACTIVATION_TEMPLATE_ID, // Add this to .env
+      dynamic_template_data: {
+        name: `${user.firstName} ${user.lastName}`,
+        reactivation_link: reactivationUrl,
+        grace_period_days: 14,
+      },
+    };
+    try {
+      await sgMail.send(msg);
+    } catch (error) {
+      console.error(
+        "Error sending deactivation email:",
+        error.response?.body || error
+      );
+    }
+  }
+
+  /**
+   * Sends account reactivation confirmation email.
+   */
+  async sendReactivationConfirmationEmail(user) {
+    const msg = {
+      to: user.email,
+      from: this.fromEmail,
+      templateId: process.env.SENDGRID_REACTIVATION_CONFIRM_TEMPLATE_ID, // Optional new template
+      dynamic_template_data: {
+        name: `${user.firstName} ${user.lastName}`,
+        login_link: `${process.env.CLIENT_URL}/login`,
+      },
+    };
+    try {
+      await sgMail.send(msg);
+    } catch (error) {
+      console.error(
+        "Error sending reactivation confirmation email:",
+        error.response?.body || error
+      );
+    }
+  }
 }
 
 module.exports = EmailService;

@@ -117,6 +117,30 @@ class UserController {
       return errorResponse(res, error, "Failed to change password");
     }
   }
+
+  async deleteAccount(req, res) {
+    try {
+      const userId = req.user.id;
+      const result = await this.userService.deleteAccount(userId);
+      return successResponse(
+        res,
+        result,
+        "Account deactivation requested successfully"
+      );
+    } catch (error) {
+      return errorResponse(res, error, "Failed to request account deletion");
+    }
+  }
+
+  async reactivateAccount(req, res) {
+    try {
+      const { token } = req.params;
+      const result = await this.userService.reactivateAccount(token);
+      return successResponse(res, result, "Account reactivated successfully");
+    } catch (error) {
+      return errorResponse(res, error, "Failed to reactivate account");
+    }
+  }
 }
 
 module.exports = UserController;

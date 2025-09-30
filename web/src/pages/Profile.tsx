@@ -13,6 +13,10 @@ import { updateUserProfile, changePassword } from '../store/thunk/authThunks';
 import Select from 'react-select';
 import PhoneInput, { isValidPhoneNumber } from 'react-phone-number-input';
 import 'react-phone-number-input/style.css'; // Important: Import library styles
+import DeleteAccountModal from '../components/auth/DeleteAccountModal';
+import { useNavigate } from 'react-router-dom'; // For redirect
+import { logout } from '../store/slices/authSlice'; // Import logout action
+import { deleteAccount } from '../store/thunk/authThunks'; // Import new thunk
 
 // Type Definitions
 interface LanguageOption {
@@ -47,6 +51,8 @@ const languageOptions: LanguageOption[] = [
 const Profile = () => {
     const dispatch: AppDispatch = useDispatch();
     const { user, loading: authLoading } = useSelector((state: IRootState) => state.auth);
+    const navigate = useNavigate();
+    const [showCountdown, setShowCountdown] = useState(false);
 
     useEffect(() => {
         dispatch(setPageTitle('Account Settings'));
@@ -55,6 +61,7 @@ const Profile = () => {
     const [activeTab, setActiveTab] = useState<'profile' | 'password'>('profile');
     const [imagePreview, setImagePreview] = useState<string>('/assets/images/agent-1.png');
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
 
     // This is the new effect that constructs the full, correct URL
     useEffect(() => {
@@ -140,6 +147,18 @@ const Profile = () => {
             resetForm();
         } catch (error: any) {
             toast.error(error || 'Failed to change password. Please check your current password.');
+        }
+    };
+
+    const handleDeleteConfirm = async () => {
+        setShowDeleteModal(false);
+        try {
+            await dispatch(deleteAccount()).unwrap();
+            toast.success('Account deactivation requested. Check your email for details.');
+            dispatch(logout());
+            navigate('/login');
+        } catch (error: any) {
+            toast.error(error || 'Failed to request account deletion.');
         }
     };
 
@@ -258,9 +277,12 @@ const Profile = () => {
                                             />
                                             <ErrorMessage name="language" component="div" className="text-danger text-sm mt-1" />
                                         </div>
-                                        <div className="sm:col-span-2 mt-3">
+                                        <div className="sm:col-span-2 mt-3 flex flex-col sm:flex-row gap-3">
                                             <button type="submit" className="btn btn-primary" disabled={authLoading}>
                                                 {authLoading ? 'Saving...' : 'Save Changes'}
+                                            </button>
+                                            <button type="button" className="btn btn-outline-danger" onClick={() => setShowDeleteModal(true)}>
+                                                Delete Account
                                             </button>
                                         </div>
                                     </div>
@@ -307,6 +329,8 @@ const Profile = () => {
                     </Formik>
                 </div>
             )}
+
+            <DeleteAccountModal isOpen={showDeleteModal} onClose={() => setShowDeleteModal(false)} onConfirm={handleDeleteConfirm} />
         </div>
     );
 };

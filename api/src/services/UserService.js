@@ -3,7 +3,8 @@ const crypto = require("crypto");
 const { generateToken } = require("../utils/jwtHandler");
 
 class UserService {
-  constructor({ User, emailService }) {
+  constructor({ User, emailService, stripe }) {
+    this.stripe = stripe;
     this.User = User;
     this.emailService = emailService;
   }
@@ -57,6 +58,12 @@ class UserService {
     if (!user.isVerified) {
       throw new Error(
         "Account not verified. Please check your email for the verification link."
+      );
+    }
+
+    if (user.isDeactivated) {
+      throw new Error(
+        "Account is deactivated. Check your email for reactivation instructions."
       );
     }
 
@@ -228,6 +235,118 @@ class UserService {
     return { message: "Your password has been changed successfully." };
   }
 
+  async deleteAccount(userId) {
+    const user = await this.User.findById(userId);
+    if (!user) throw new Error("User not found");
+
+    // DON'T cancel subscription immediately - let them reactivate within 14 days
+    // The cron job will handle cancellation if they don't reactivate
+
+    // Generate reactivation token
+    const reactivationToken = crypto.randomBytes(32).toString("hex");
+    const reactivationExpiresAt = new Date(
+      Date.now() + 14 * 24 * 60 * 60 * 1000
+    ); // 14 days
+    const deletionScheduledAt = reactivationExpiresAt;
+
+    user.isDeactivated = true;
+    user.deactivationDate = new Date();
+    user.deletionScheduledAt = deletionScheduledAt;
+    user.reactivationToken = reactivationToken;
+    user.reactivationExpiresAt = reactivationExpiresAt;
+
+    await user.save();
+
+    // Send deactivation email with reactivation link
+    const reactivationUrl = `${process.env.CLIENT_URL}/reactivate/${reactivationToken}`;
+    await this.emailService.sendDeactivationEmail(user, reactivationUrl);
+
+    return {
+      message:
+        "Account deactivated. Check your email for reactivation instructions.",
+    };
+  }
+
+  async reactivateAccount(reactivationToken) {
+    const user = await this.User.findOne({
+      reactivationToken,
+      reactivationExpiresAt: { $gt: new Date() },
+      isDeactivated: true,
+    });
+
+    if (!user) {
+      throw new Error("Invalid or expired reactivation token.");
+    }
+
+    // SYNC WITH STRIPE: Verify subscription still exists and is valid
+    if (user.subscription && user.subscription.subscriptionId) {
+      try {
+        const stripeSubscription = await this.stripe.subscriptions.retrieve(
+          user.subscription.subscriptionId
+        );
+
+        // Update local status to match Stripe
+        user.subscription.status = stripeSubscription.status;
+
+        // If subscription was externally cancelled or expired, clear it
+        if (
+          !["active", "trialing", "past_due"].includes(
+            stripeSubscription.status
+          )
+        ) {
+          console.log(
+            `Subscription status is ${stripeSubscription.status}, clearing local data`
+          );
+          user.subscription = undefined;
+
+          if (user.subscriptionHistory) {
+            user.subscriptionHistory.forEach((entry) => {
+              if (entry.status === "active") {
+                entry.status = "expired";
+                entry.endDate = new Date();
+              }
+            });
+          }
+        }
+      } catch (error) {
+        // Subscription doesn't exist in Stripe
+        if (error.statusCode === 404) {
+          console.log("Subscription not found in Stripe, clearing local data");
+          user.subscription = undefined;
+
+          if (user.subscriptionHistory) {
+            user.subscriptionHistory.forEach((entry) => {
+              if (entry.status === "active") {
+                entry.status = "expired";
+                entry.endDate = new Date();
+              }
+            });
+          }
+        } else {
+          throw error;
+        }
+      }
+    }
+
+    // Reactivate account
+    user.isDeactivated = false;
+    user.deactivationDate = undefined;
+    user.deletionScheduledAt = undefined;
+    user.reactivationToken = undefined;
+    user.reactivationExpiresAt = undefined;
+
+    await user.save();
+
+    await this.emailService.sendReactivationConfirmationEmail(user);
+
+    return {
+      message: "Account reactivated successfully. You can now log in.",
+      hasActiveSubscription:
+        !!user.subscription &&
+        ["active", "trialing"].includes(user.subscription.status),
+    };
+  }
+
   _sanitizeUser(user) {
     // This helper method is crucial and used correctly
     const { password, ...userData } = user.toObject();
@@ -280,7 +399,7 @@ class UserService {
       throw error;
     }
   }
-  
+
   /**
    * Find users with active subscriptions
    */
@@ -289,6 +408,38 @@ class UserService {
       subscription: { $exists: true },
       "subscription.status": { $in: ["active", "trialing"] },
     });
+  }
+
+  /**
+   * Cancels subscription immediately.
+   */
+  async cancelSubscriptionImmediately(userId) {
+    const user = await this.User.findById(userId).select(
+      "subscription subscriptionHistory"
+    );
+    if (!user || !user.subscription || !user.subscription.subscriptionId) {
+      return;
+    }
+
+    try {
+      await this.stripe.subscriptions.cancel(user.subscription.subscriptionId);
+
+      // CRITICAL FIX: Also expire all active subscription history
+      if (user.subscriptionHistory) {
+        user.subscriptionHistory.forEach((entry) => {
+          if (entry.status === "active") {
+            entry.status = "expired";
+            entry.endDate = new Date(); // Mark when it was cancelled
+          }
+        });
+      }
+
+      // Clear subscription and save history changes
+      user.subscription = undefined;
+      await user.save();
+    } catch (error) {
+      console.error(`Failed to cancel subscription for user ${userId}:`, error);
+    }
   }
 }
 

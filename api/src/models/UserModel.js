@@ -104,6 +104,11 @@ const userSchema = new Schema(
       type: Boolean,
       default: false,
     },
+    isDeactivated: { type: Boolean, default: false },
+    deactivationDate: { type: Date, sparse: true },
+    deletionScheduledAt: { type: Date, sparse: true },
+    reactivationToken: { type: String, sparse: true },
+    reactivationExpiresAt: { type: Date, sparse: true },
   },
   { timestamps: true }
 );

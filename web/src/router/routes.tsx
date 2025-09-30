@@ -17,6 +17,8 @@ import Subscriptions from '../pages/Subscriptions';
 import SubscriptionRequired from '../pages/SubscriptionRequired';
 import EnterpriseContact from '../pages/EnterpriseContact';
 import ReviewPage from '../pages/ReviewPage';
+import ReactivateAccount from '../pages/ReactivateAccount';
+import DigitalSignaturesGuidePage from '../pages/DigitalSignaturesGuidePage';
 
 // ---------------- LAZY LOADED PAGE COMPONENTS ----------------
 const Index = lazy(() => import('../pages/Index'));
@@ -150,6 +152,11 @@ const routes = [
         layout: 'blank',
     },
     {
+        path: '/digital-signatures-guide',
+        element: <DigitalSignaturesGuidePage />,
+        layout: 'blank', // or 'default' depending on your preference
+    },
+    {
         path: '/package/:packageId/participant/:participantId',
         element: <ParticipantPage />,
         layout: 'blank',
@@ -205,6 +212,15 @@ const routes = [
         element: (
             <PublicRoute>
                 <VerifyEmail />
+            </PublicRoute>
+        ),
+        layout: 'blank',
+    },
+    {
+        path: '/reactivate/:token',
+        element: (
+            <PublicRoute>
+                <ReactivateAccount />
             </PublicRoute>
         ),
         layout: 'blank',

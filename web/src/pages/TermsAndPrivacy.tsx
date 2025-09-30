@@ -45,81 +45,119 @@ const TermsAndPrivacy = () => {
 
                             <div className="space-y-8">
                                 <section>
-                                    <h3 className="text-xl font-semibold text-blue-900 mb-4">1. Acceptance of Terms</h3>
+                                    <h3 className="text-xl font-semibold text-blue-900 mb-4">1. Introduction</h3>
                                     <p className="text-gray-700 leading-relaxed">
-                                        By accessing and using E-sign.eu (the "Service"), you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our
-                                        service. These terms apply to all users of the service, including initiators, signers, and administrators.
+                                        These Sites and Services Terms and Conditions (the "Terms" or "General Terms") govern your access to and use of the{' '}
+                                        <a href="https://e-signs.eu" target="_blank" rel="noopener noreferrer" className="text-blue-900 hover:underline font-medium">
+                                            e-signs.eu
+                                        </a>{' '}
+                                        websites, products, and services (collectively, the "Site" or "Services"). By using our Site or Services, you agree to be bound by these Terms, whether on
+                                        behalf of yourself or a business you represent.
+                                    </p>
+                                    <p className="text-gray-700 leading-relaxed mt-3">
+                                        If you do not agree with these Terms, you are not authorized to use the Site or Services and must discontinue use immediately.
                                     </p>
                                 </section>
 
                                 <section>
-                                    <h3 className="text-xl font-semibold text-blue-900 mb-4">2. Service Description</h3>
-                                    <p className="text-gray-700 leading-relaxed mb-3">E-sign.eu provides an electronic signature platform that enables users to:</p>
+                                    <h3 className="text-xl font-semibold text-blue-900 mb-4">2. Scope of Application</h3>
+                                    <p className="text-gray-700 leading-relaxed mb-3">These Terms apply to the following categories of users (collectively referred to as "you" or "your"):</p>
                                     <ul className="list-disc list-inside text-gray-700 space-y-2 ml-4">
-                                        <li>Create and manage signature packages</li>
-                                        <li>Assign roles and define signing fields</li>
-                                        <li>Send documents for electronic signature</li>
-                                        <li>Track document status and completion</li>
-                                        <li>Store and manage signed documents securely</li>
+                                        <li>
+                                            <strong>Website Visitors</strong> — Individuals accessing{' '}
+                                            <a href="https://e-signs.eu" target="_blank" rel="noopener noreferrer" className="text-blue-900 hover:underline font-medium">
+                                                e-signs.eu
+                                            </a>{' '}
+                                            and related websites.
+                                        </li>
+                                        <li>
+                                            <strong>Customers</strong> — Organizations or individuals subscribing to or licensing{' '}
+                                            <a href="https://e-signs.eu" target="_blank" rel="noopener noreferrer" className="text-blue-900 hover:underline font-medium">
+                                                e-signs.eu
+                                            </a>{' '}
+                                            Services.
+                                        </li>
+                                        <li>
+                                            <strong>Users</strong> — Individuals using{' '}
+                                            <a href="https://e-signs.eu" target="_blank" rel="noopener noreferrer" className="text-blue-900 hover:underline font-medium">
+                                                e-signs.eu
+                                            </a>{' '}
+                                            Services under a Customer account (including authorized employees or agents).
+                                        </li>
                                     </ul>
+                                    <p className="text-gray-700 leading-relaxed mt-3">
+                                        If you are a Customer and have entered into a separate Service Agreement or Corporate Contract with{' '}
+                                        <a href="https://e-signs.eu" target="_blank" rel="noopener noreferrer" className="text-blue-900 hover:underline font-medium">
+                                            e-signs.eu
+                                        </a>
+                                        , those terms will prevail to the extent they conflict with these Terms. These Terms are designed for business and professional use; consumer protections under
+                                        applicable law may apply separately.
+                                    </p>
                                 </section>
 
                                 <section>
-                                    <h3 className="text-xl font-semibold text-blue-900 mb-4">3. User Responsibilities</h3>
-                                    <p className="text-gray-700 leading-relaxed mb-3">As a user of E-sign.eu, you agree to:</p>
+                                    <h3 className="text-xl font-semibold text-blue-900 mb-4">3. Compliance with Local Laws</h3>
+                                    <p className="text-gray-700 leading-relaxed">
+                                        If you access the Site or Services from a jurisdiction with specific regulatory requirements or supplemental terms (such as certain EU Member States), those
+                                        jurisdiction-specific terms will apply in addition to these Terms. In the event of conflict, the jurisdiction-specific terms will prevail.
+                                    </p>
+                                </section>
+
+                                <section>
+                                    <h3 className="text-xl font-semibold text-blue-900 mb-4">4. Acceptance of Terms</h3>
+                                    <p className="text-gray-700 leading-relaxed mb-3">By accessing, using, or downloading any part of the Site or Services, you confirm that you:</p>
                                     <ul className="list-disc list-inside text-gray-700 space-y-2 ml-4">
-                                        <li>Provide accurate and complete information</li>
-                                        <li>Maintain the confidentiality of your account credentials</li>
-                                        <li>Only upload documents you have the legal right to process</li>
-                                        <li>Comply with all applicable laws and regulations</li>
-                                        <li>Not use the service for illegal or unauthorized purposes</li>
-                                        <li>Respect the intellectual property rights of others</li>
+                                        <li>Have read and understood these Terms;</li>
+                                        <li>Accept these Terms on your own behalf or on behalf of your organization;</li>
+                                        <li>Are authorized to enter into legally binding agreements in your jurisdiction.</li>
                                     </ul>
+                                    <p className="text-gray-700 leading-relaxed mt-3">If you do not meet these conditions, you must not use the Site or Services.</p>
                                 </section>
 
                                 <section>
-                                    <h3 className="text-xl font-semibold text-blue-900 mb-4">4. Electronic Signatures Legal Validity</h3>
+                                    <h3 className="text-xl font-semibold text-blue-900 mb-4">5. Site Access and Use</h3>
+                                    <div className="space-y-4">
+                                        <div>
+                                            <h4 className="font-medium text-gray-900 mb-2">5.1 Eligibility to Use</h4>
+                                            <p className="text-gray-700 leading-relaxed mb-3">
+                                                By accessing or using the{' '}
+                                                <a href="https://e-signs.eu" target="_blank" rel="noopener noreferrer" className="text-blue-900 hover:underline font-medium">
+                                                    e-signs.eu
+                                                </a>{' '}
+                                                Site or Services, you represent and warrant that:
+                                            </p>
+                                            <ul className="list-disc list-inside text-gray-700 space-y-2 ml-4">
+                                                <li>
+                                                    You are of legal age (18 years or older, or otherwise the age of majority in your country of residence) and have the legal capacity to enter into
+                                                    these Terms on your own behalf or on behalf of the company or organization you represent;
+                                                </li>
+                                                <li>
+                                                    You are authorized to use the Site and Services in compliance with applicable laws and regulations, including EU and local jurisdiction rules on
+                                                    electronic signatures and data protection; and
+                                                </li>
+                                                <li>If you are acting on behalf of a business, you are duly authorized to bind that business to these Terms.</li>
+                                            </ul>
+                                            <p className="text-gray-700 leading-relaxed mt-3">
+                                                You acknowledge that you may not use the Site or Services if you do not meet these eligibility requirements, or if your access has previously been
+                                                suspended or terminated by{' '}
+                                                <a href="https://e-signs.eu" target="_blank" rel="noopener noreferrer" className="text-blue-900 hover:underline font-medium">
+                                                    e-signs.eu
+                                                </a>{' '}
+                                                for violations of these Terms.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </section>
+
+                                <section>
+                                    <h3 className="text-xl font-semibold text-blue-900 mb-4">6. Contact Information</h3>
                                     <p className="text-gray-700 leading-relaxed">
-                                        Electronic signatures created through E-sign.eu are legally binding and enforceable under applicable electronic signature laws, including the EU eIDAS
-                                        Regulation and national implementations. Users are responsible for ensuring compliance with local laws regarding electronic signatures in their jurisdiction.
+                                        For questions about these terms, please contact us at{' '}
+                                        <a href="mailto:legal@e-sign.eu" className="text-blue-900 hover:underline font-medium">
+                                            legal@e-sign.eu
+                                        </a>{' '}
+                                        or through our support portal.
                                     </p>
-                                </section>
-
-                                <section>
-                                    <h3 className="text-xl font-semibold text-blue-900 mb-4">5. Data Security and Storage</h3>
-                                    <p className="text-gray-700 leading-relaxed">
-                                        We implement industry-standard security measures to protect your documents and data. All documents are encrypted in transit and at rest. We maintain audit
-                                        trails for all signature activities and store completed documents securely in accordance with legal retention requirements.
-                                    </p>
-                                </section>
-
-                                <section>
-                                    <h3 className="text-xl font-semibold text-blue-900 mb-4">6. Account Suspension and Termination</h3>
-                                    <p className="text-gray-700 leading-relaxed">
-                                        We reserve the right to suspend or terminate accounts that violate these terms, engage in fraudulent activity, or pose security risks. Upon termination, you may
-                                        download your documents within 30 days, after which they may be permanently deleted.
-                                    </p>
-                                </section>
-
-                                <section>
-                                    <h3 className="text-xl font-semibold text-blue-900 mb-4">7. Limitation of Liability</h3>
-                                    <p className="text-gray-700 leading-relaxed">
-                                        E-sign.eu shall not be liable for any indirect, incidental, special, or consequential damages arising from your use of the service. Our total liability shall
-                                        not exceed the amount paid by you for the service in the 12 months preceding the claim.
-                                    </p>
-                                </section>
-
-                                <section>
-                                    <h3 className="text-xl font-semibold text-blue-900 mb-4">8. Changes to Terms</h3>
-                                    <p className="text-gray-700 leading-relaxed">
-                                        We may update these terms from time to time. We will notify users of material changes via email or through the platform. Continued use of the service after
-                                        changes constitute acceptance of the new terms.
-                                    </p>
-                                </section>
-
-                                <section>
-                                    <h3 className="text-xl font-semibold text-blue-900 mb-4">9. Contact Information</h3>
-                                    <p className="text-gray-700 leading-relaxed">For questions about these terms, please contact us at legal@e-sign.eu or through our support portal.</p>
                                 </section>
                             </div>
                         </div>

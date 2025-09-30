@@ -88,6 +88,25 @@ module.exports = (container) => {
 
   /**
    * @swagger
+   * /api/users/delete-account:
+   *   post:
+   *     tags: [Users]
+   *     summary: Request account deletion
+   *     description: Deactivates the user account, cancels subscription if any, and schedules deletion after 14 days. Sends reactivation email.
+   *     responses:
+   *       '200':
+   *         description: Account deactivation requested successfully.
+   *       '401':
+   *         description: Unauthorized.
+   */
+  router.post(
+    "/delete-account",
+    authenticateUser,
+    userController.deleteAccount.bind(userController)
+  );
+
+  /**
+   * @swagger
    * /api/users/profile:
    *   get:
    *     tags: [Users]
@@ -196,6 +215,32 @@ module.exports = (container) => {
   router.get(
     "/verify-email/:token",
     userController.verifyEmail.bind(userController)
+  );
+
+  /**
+   * @swagger
+   * /api/users/reactivate/{token}:
+   *   get:
+   *     tags: [Users]
+   *     summary: Reactivate deactivated account
+   *     description: Reactivates the account using the token from email, if within grace period.
+   *     security: [] # Public endpoint
+   *     parameters:
+   *       - in: path
+   *         name: token
+   *         required: true
+   *         schema:
+   *           type: string
+   *         description: The reactivation token.
+   *     responses:
+   *       '200':
+   *         description: Account reactivated successfully.
+   *       '400':
+   *         description: Invalid or expired token.
+   */
+  router.get(
+    "/reactivate/:token",
+    userController.reactivateAccount.bind(userController)
   );
 
   /**

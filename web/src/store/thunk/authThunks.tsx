@@ -178,3 +178,21 @@ export const checkAuthStatus = createAsyncThunk('auth/checkAuthStatus', async (_
         return rejectWithValue(error.response?.data?.error || 'Invalid session.');
     }
 });
+
+export const deleteAccount = createAsyncThunk('auth/deleteAccount', async (_, { rejectWithValue }) => {
+    try {
+        const response = await api.post('/api/users/delete-account');
+        return response.data.data;
+    } catch (error: any) {
+        return rejectWithValue(error.response?.data?.error || 'Failed to request account deletion.');
+    }
+});
+
+export const reactivateAccount = createAsyncThunk('auth/reactivateAccount', async (token: string, { rejectWithValue }) => {
+    try {
+        const response = await api.get(`/api/users/reactivate/${token}`);
+        return response.data.data;
+    } catch (error: any) {
+        return rejectWithValue(error.response?.data?.error || 'Failed to reactivate account.');
+    }
+});

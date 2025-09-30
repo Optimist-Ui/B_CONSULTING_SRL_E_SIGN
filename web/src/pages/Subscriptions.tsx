@@ -26,7 +26,7 @@ const Subscriptions: React.FC = () => {
     const navigate = useNavigate();
 
     // --- 👇 USE THE HOOK TO MANAGE SUBSCRIPTION DATA 👇 ---
-    const { subscription, isFetchingDetails } = useSubscription({
+    const { subscription, isFetchingDetails, refreshDetails, refreshStatus } = useSubscription({
         autoFetchDetails: true, // Tell the hook to automatically manage fetching details
         fetchOnMount: true,
     });
@@ -41,9 +41,12 @@ const Subscriptions: React.FC = () => {
         if (user) {
             dispatch(fetchPlans());
             dispatch(fetchPaymentMethods());
+
+            // 🚀 FORCE REFRESH SUBSCRIPTION DATA ON EVERY MOUNT
+            refreshDetails(); // Force refresh details
+            refreshStatus(); // Force refresh status
         }
-        // `fetchDetails` is removed because the hook now handles it.
-    }, [dispatch, user]);
+    }, [dispatch, user, refreshDetails, refreshStatus]);
 
     useEffect(() => {
         const params = new URLSearchParams(location.search);
@@ -55,6 +58,16 @@ const Subscriptions: React.FC = () => {
     const handleCancelChange = () => {
         setIsSelectingPlan(false);
         navigate('/subscriptions', { replace: true }); // Clean the URL by removing query params
+
+        // 🔄 Refresh data when canceling plan change
+        refreshDetails();
+    };
+
+    const handleChangePlan = () => {
+        setIsSelectingPlan(true);
+
+        // 🔄 Refresh data before showing plan selection
+        refreshDetails();
     };
 
     // The loading state check is now powered by the smarter hook. It will not show
@@ -65,7 +78,7 @@ const Subscriptions: React.FC = () => {
 
     return (
         <div className="p-4 md:p-6">
-            {subscription && !isSelectingPlan ? <ManageSubscription onChangePlan={() => setIsSelectingPlan(true)} /> : <PlanSelection onCancelChange={subscription ? handleCancelChange : undefined} />}
+            {subscription && !isSelectingPlan ? <ManageSubscription onChangePlan={handleChangePlan} /> : <PlanSelection onCancelChange={subscription ? handleCancelChange : undefined} />}
         </div>
     );
 };

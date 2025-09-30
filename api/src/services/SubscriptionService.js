@@ -48,10 +48,6 @@ class SubscriptionService {
       const planDetails = stripeSubscription.plan;
       const isTrialing = stripeSubscription.status === "trialing";
 
-      // ========================= CORRECTED LOGIC START =========================
-      // This logic now prioritizes the live Stripe timestamp, but falls back to the
-      // date stored in your database to prevent null values during API lag.
-
       let renewsAt = null;
       if (stripeSubscription.current_period_end) {
         renewsAt = new Date(
@@ -82,7 +78,6 @@ class SubscriptionService {
           trialEndDate = new Date(user.subscription.trial_end).toISOString();
         }
       }
-      // ========================== CORRECTED LOGIC END ==========================
 
       const result = {
         planName: user.subscription.planName,
@@ -106,6 +101,7 @@ class SubscriptionService {
       throw new Error(error.message || "Failed to fetch subscription details.");
     }
   }
+
   /**
    * REWRITTEN: Creates a trial and correctly initializes the subscriptionHistory.
    */
@@ -175,7 +171,7 @@ class SubscriptionService {
         planName: "Trial",
         startDate: trialStartDate,
         endDate: trialEndDate,
-        documentLimit: 3, // Standard trial limit
+        documentLimit: 3,
         documentsUsed: 0,
         status: "active",
       };
@@ -192,7 +188,7 @@ class SubscriptionService {
           trial_end: trialEndDate,
         },
         hasHadTrial: true,
-        subscriptionHistory: [trialHistory], // Initialize history array
+        subscriptionHistory: [trialHistory],
       });
 
       await this.UsedTrialFingerprint.create({ fingerprint, usedBy: userId });
@@ -230,8 +226,6 @@ class SubscriptionService {
   }
 
   /**
-   * Alternative approach: Let the webhook handle the date updates
-   * This is more reliable than trying to get immediate dates from Stripe
    * FIX: Properly calculate end dates based on plan interval (monthly vs yearly)
    */
   async endTrialEarly(userId) {
@@ -259,33 +253,25 @@ class SubscriptionService {
         user.subscription.planId
       );
 
-      // CRITICAL FIX: Determine if this is monthly or yearly based on the price ID
       const stripeSubscription = await this.stripe.subscriptions.retrieve(
         user.subscription.subscriptionId
       );
       const currentPriceId = stripeSubscription.items.data[0].price.id;
 
-      // Check if it's yearly or monthly
       const isYearly = currentPriceId === plan.yearlyPriceId;
-      const isMonthly = currentPriceId === plan.monthlyPriceId;
-
-      // Calculate proper end date based on plan interval
       const now = Date.now();
       let calculatedEndTime;
 
       if (isYearly) {
-        // Add 365 days for yearly
         calculatedEndTime = now + 365 * 24 * 60 * 60 * 1000;
       } else {
-        // Default to 30 days for monthly
         calculatedEndTime = now + 30 * 24 * 60 * 60 * 1000;
       }
 
-      // Create a fallback subscription object with properly calculated dates
       const fallbackSubscription = {
         ...subscription,
-        current_period_start: Math.floor(now / 1000), // Now in Unix timestamp
-        current_period_end: Math.floor(calculatedEndTime / 1000), // Calculated end time
+        current_period_start: Math.floor(now / 1000),
+        current_period_end: Math.floor(calculatedEndTime / 1000),
       };
 
       const updatedHistory = await this.processSubscriptionTransition(
@@ -296,7 +282,6 @@ class SubscriptionService {
         isYearly
       );
 
-      // Use calculated dates for the subscription object
       const updatedSubscriptionData = {
         subscriptionId: subscription.id,
         planId: user.subscription.planId,
@@ -318,7 +303,6 @@ class SubscriptionService {
         subscriptionHistory: updatedHistory,
       });
 
-      // The webhook will later update with the actual Stripe dates when they become available
       const invoice = subscription.latest_invoice;
       if (invoice && invoice.status === "paid") {
         await this.processSubscriptionConfirmationEmail(invoice);
@@ -421,8 +405,9 @@ class SubscriptionService {
   }
 
   /**
-   * REWRITTEN: This now handles new subscriptions, trial-to-paid, AND upgrades/top-ups correctly.
-   * FIX APPLIED: This now correctly updates the subscription dates for all scenarios.
+   * FIXED: Properly handles new subscriptions, trial-to-paid, AND upgrades/top-ups
+   * - Sets hasHadTrial to true on first paid purchase
+   * - Handles missing subscription object for new users
    */
   async createSubscription({ userId, priceId, paymentMethodId }) {
     try {
@@ -432,8 +417,12 @@ class SubscriptionService {
       const newPlan = await this.planService.findPlanByPriceId(priceId);
       if (!newPlan) throw new Error("Plan not found");
 
-      const isTrialToPaid = user.subscription?.status === "trialing";
-      const isTopUp = user.subscription?.status === "active" && !isTrialToPaid;
+      // FIXED: Properly check subscription status with safe navigation
+      const currentStatus = user.subscription?.status;
+      const isTrialToPaid = currentStatus === "trialing";
+      const isTopUp = currentStatus === "active" && !isTrialToPaid;
+      const isFirstPurchase =
+        !user.subscription || !user.subscription.subscriptionId;
 
       let stripeCustomerId = user.stripeCustomerId;
       if (!stripeCustomerId) {
@@ -444,6 +433,7 @@ class SubscriptionService {
         });
         stripeCustomerId = customer.id;
       }
+
       await this.stripe.paymentMethods.attach(paymentMethodId, {
         customer: stripeCustomerId,
       });
@@ -453,10 +443,7 @@ class SubscriptionService {
 
       let subscription;
       let transitionType = "new";
-
       const isYearly = priceId === newPlan.yearlyPriceId;
-
-      // Replace the trial-to-paid section in your createSubscription method with this:
 
       if (isTrialToPaid) {
         transitionType = "trial_to_paid";
@@ -488,7 +475,6 @@ class SubscriptionService {
           current_period_end: subscription.current_period_end,
         });
 
-        // If billing period dates are missing, calculate them based on plan interval
         if (
           !subscription.current_period_start ||
           !subscription.current_period_end
@@ -497,13 +483,11 @@ class SubscriptionService {
             "Trial-to-paid missing period dates, calculating based on plan interval..."
           );
 
-          // Check if the new plan is yearly or monthly
           const now = Date.now();
           const calculatedEndTime = isYearly
-            ? now + 365 * 24 * 60 * 60 * 1000 // 365 days for yearly
-            : now + 30 * 24 * 60 * 60 * 1000; // 30 days for monthly
+            ? now + 365 * 24 * 60 * 60 * 1000
+            : now + 30 * 24 * 60 * 60 * 1000;
 
-          // Override the subscription object with calculated dates
           subscription = {
             ...subscription,
             current_period_start: Math.floor(now / 1000),
@@ -542,8 +526,8 @@ class SubscriptionService {
 
           const now = Date.now();
           const calculatedEndTime = isYearly
-            ? now + 365 * 24 * 60 * 60 * 1000 // 365 days for yearly
-            : now + 30 * 24 * 60 * 60 * 1000; // 30 days for monthly
+            ? now + 365 * 24 * 60 * 60 * 1000
+            : now + 30 * 24 * 60 * 60 * 1000;
 
           subscription = {
             ...subscription,
@@ -552,6 +536,7 @@ class SubscriptionService {
           };
         }
       } else {
+        // NEW SUBSCRIPTION - First time purchase
         subscription = await this.stripe.subscriptions.create({
           customer: stripeCustomerId,
           items: [{ price: priceId }],
@@ -569,8 +554,8 @@ class SubscriptionService {
 
           const now = Date.now();
           const calculatedEndTime = isYearly
-            ? now + 365 * 24 * 60 * 60 * 1000 // 365 days for yearly
-            : now + 30 * 24 * 60 * 60 * 1000; // 30 days for monthly
+            ? now + 365 * 24 * 60 * 60 * 1000
+            : now + 30 * 24 * 60 * 60 * 1000;
 
           subscription = {
             ...subscription,
@@ -588,9 +573,6 @@ class SubscriptionService {
         isYearly
       );
 
-      // ========================= CORRECTED LOGIC START =========================
-      // This unified logic ensures the entire subscription object is updated correctly
-      // for ALL scenarios (new, top-up, and trial-to-paid).
       const updatedSubscriptionData = {
         subscriptionId: subscription.id,
         planId: newPlan._id,
@@ -605,12 +587,19 @@ class SubscriptionService {
           : null,
       };
 
-      await this.userService.updateUser(user._id, {
+      // FIXED: Set hasHadTrial to true on first paid purchase
+      const updateData = {
         stripeCustomerId,
-        subscription: updatedSubscriptionData, // Overwrite the entire object
+        subscription: updatedSubscriptionData,
         subscriptionHistory: updatedHistory,
-      });
-      // ========================== CORRECTED LOGIC END ==========================
+      };
+
+      // If this is their first purchase (not a trial conversion), mark trial as used
+      if (isFirstPurchase && !user.hasHadTrial) {
+        updateData.hasHadTrial = true;
+      }
+
+      await this.userService.updateUser(user._id, updateData);
 
       const updatedUser = await this.userService.findUserById(userId);
 
@@ -628,6 +617,7 @@ class SubscriptionService {
       throw error;
     }
   }
+
   /**
    * Fetches a list of all invoices for a given user from Stripe.
    */
@@ -820,11 +810,23 @@ class SubscriptionService {
       return;
     }
 
+    // Expire all active subscription history
+    if (user.subscriptionHistory) {
+      user.subscriptionHistory.forEach((entry) => {
+        if (entry.status === "active") {
+          entry.status = "expired";
+          entry.endDate = new Date();
+        }
+      });
+    }
+
     await this.userService.updateUser(user._id, {
       subscription: undefined,
+      subscriptionHistory: user.subscriptionHistory,
     });
-  }
 
+    console.log(`Subscription ${subscriptionId} deleted for user ${user._id}`);
+  }
   /**
    * Sends subscription confirmation email after a successful payment.
    */
@@ -892,14 +894,14 @@ class SubscriptionService {
       // Calculate remaining documents from all active plans
       const remainingDocsFromOldPlan = user.getRemainingDocuments();
 
-      // Prorate the document limit for the new plan (FIX: Use seconds for precision)
+      // Prorate the document limit for the new plan
       const periodStart = stripeSub.current_period_start;
       const periodEnd = stripeSub.current_period_end;
       const nowSeconds = Math.floor(Date.now() / 1000);
       const totalDuration = periodEnd - periodStart;
       const remainingDuration = periodEnd - nowSeconds;
 
-      let proratedNewDocs = newPlan.documentLimit; // Default to full amount
+      let proratedNewDocs = newPlan.documentLimit;
       if (totalDuration > 0 && remainingDuration > 0) {
         const fraction = remainingDuration / totalDuration;
         proratedNewDocs = Math.floor(fraction * newPlan.documentLimit);
@@ -930,17 +932,23 @@ class SubscriptionService {
     }
 
     // Add the new active entry
+    // FIXED: Map transitionType to valid enum values
+    let historyType;
+    if (transitionType === "top_up") {
+      historyType = "top_up";
+    } else if (transitionType === "trial_to_paid") {
+      historyType = "paid";
+    } else {
+      // transitionType === "new" should be saved as "paid"
+      historyType = "paid";
+    }
+
     const newHistoryEntry = {
-      type:
-        transitionType === "top_up"
-          ? "top_up"
-          : transitionType === "trial_to_paid"
-          ? "paid"
-          : transitionType,
+      type: historyType,
       planId: newPlan._id,
       planName: newPlan.name,
       startDate: now,
-      endDate: endDate, // Use the properly calculated end date
+      endDate: endDate,
       documentLimit: newHistoryLimit,
       documentsUsed: 0,
       status: "active",

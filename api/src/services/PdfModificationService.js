@@ -121,6 +121,7 @@ class PdfModificationService {
         const signerEmail = sig.email || sig.signedByEmail || "N/A";
         const signatureDate = new Date(sig.date).toLocaleString();
         const signatureMethod = sig.method || "Email OTP";
+        const otpCode = sig.otpCode || "N/A";
         const certificationText = "Digitally Signed by E-Sign.eu";
 
         // Calculate vertical positioning from the top of the field area
@@ -147,16 +148,16 @@ class PdfModificationService {
         currentY -= lineSpacing;
 
         console.log(`Drawing email at y=${currentY}`);
-        // Draw email
+        // Draw email with smaller font size to fit long emails
         page.drawText(`Email: ${signerEmail}`, {
           x: adjustedX + horizontalPadding,
           y: currentY,
           font: fonts.helvetica,
-          size: 9,
+          size: 7,
           color: rgb(0.3, 0.3, 0.3),
           maxWidth: originalWidth - 2 * horizontalPadding,
         });
-        currentY -= smallLineSpacing;
+        currentY -= lineSpacing;
 
         console.log(`Drawing date at y=${currentY}`);
         // Draw date
@@ -180,10 +181,22 @@ class PdfModificationService {
           color: rgb(0.3, 0.3, 0.3),
           maxWidth: originalWidth - 2 * horizontalPadding,
         });
-        currentY -= smallLineSpacing + 3; // Extra space before certification
+        currentY -= smallLineSpacing;
+
+        console.log(`Drawing OTP code at y=${currentY}`);
+        // Draw OTP code
+        page.drawText(`OTP: ${otpCode}`, {
+          x: adjustedX + horizontalPadding,
+          y: currentY,
+          font: fonts.helvetica,
+          size: 9,
+          color: rgb(0.3, 0.3, 0.3),
+          maxWidth: originalWidth - 2 * horizontalPadding,
+        });
+        currentY -= smallLineSpacing + 3;
 
         console.log(`Drawing certification text at y=${currentY}`);
-        // Draw certification text at the bottom (smaller and less prominent)
+        // Draw certification text at the bottom
         page.drawText(certificationText, {
           x: adjustedX + horizontalPadding,
           y: currentY,
@@ -195,23 +208,30 @@ class PdfModificationService {
 
         console.log(`Signature drawing completed for field ${field.id}`);
       } else if (field.type === "checkbox") {
-        const yOffset = page.getHeight() - originalY - originalHeight / 2;
+        // Center the checkbox both horizontally and vertically
+        const fieldCenterY = page.getHeight() - originalY - originalHeight / 2;
+        const checkboxSize = 14;
         const textToDraw = field.value ? "X" : "";
+
         page.drawText(textToDraw, {
-          x: adjustedX + originalWidth / 4,
-          y: yOffset,
-          font: fonts.helvetica,
-          size: 14,
+          x: adjustedX + (originalWidth - checkboxSize) / 2,
+          y: fieldCenterY - checkboxSize / 2,
+          font: fonts.helveticaBold,
+          size: checkboxSize,
           color: rgb(0, 0, 0),
         });
       } else {
-        const yOffset = page.getHeight() - originalY - originalHeight / 2;
+        // Center text vertically in the field
+        const fontSize = 10;
+        const textHeight = fonts.helvetica.heightAtSize(fontSize);
+        const fieldCenterY = page.getHeight() - originalY - originalHeight / 2;
         const textToDraw = field.value.toString();
+
         page.drawText(textToDraw, {
           x: adjustedX + horizontalPadding,
-          y: yOffset,
+          y: fieldCenterY - textHeight / 2,
           font: fonts.helvetica,
-          size: 10,
+          size: fontSize,
           color: rgb(0, 0, 0),
           maxWidth: originalWidth - 2 * horizontalPadding,
         });
@@ -285,7 +305,7 @@ class PdfModificationService {
       const smallLineSpacing = 9;
 
       // Start from the top of the field and work downward
-      let currentY = fieldTop - 6; // Small padding from top
+      let currentY = fieldTop - 6;
 
       // Draw "REJECTED" header
       page.drawText("REJECTED", {
@@ -360,7 +380,6 @@ class PdfModificationService {
     const pages = pdfDoc.getPages();
     const uiScale = 1.5;
     const horizontalPadding = 4 / uiScale;
-    const verticalPadding = 12 / uiScale;
 
     for (const field of pkg.fields) {
       const page = pages[field.page - 1];
@@ -385,11 +404,16 @@ class PdfModificationService {
         opacity: 0.05,
       });
 
+      // Center the label text vertically in the field
+      const fontSize = 8;
+      const textHeight = fonts.helvetica.heightAtSize(fontSize);
+      const fieldCenterY = yOffset + originalHeight / 2;
+
       page.drawText(field.label, {
         x: originalX + horizontalPadding,
-        y: yOffset + originalHeight - verticalPadding,
+        y: fieldCenterY - textHeight / 2,
         font: fonts.helvetica,
-        size: 8,
+        size: fontSize,
         color: rgb(0.2, 0.2, 0.2),
       });
     }

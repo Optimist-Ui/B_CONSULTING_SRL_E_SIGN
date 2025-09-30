@@ -24,6 +24,7 @@
         "@types/node": "^16.11.64",
         "axios": "^1.8.2",
         "formik": "^2.4.6",
+        "framer-motion": "^12.23.22",
         "mantine-datatable": "^1.8.8",
         "nanoid": "^5.1.5",
         "pdfjs-dist": "^4.4.168",
