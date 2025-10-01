@@ -24,7 +24,6 @@ const SigningDrawer: React.FC = () => {
     const [timer, setTimer] = useState(60);
 
     // Get current user's signature method from package data
-    console.log(packageData?.currentUser);
     const currentUserSignatureMethod = packageData?.currentUser?.signatureMethod;
 
     // Reset local state when drawer closes or flow restarts

@@ -1252,14 +1252,25 @@ class PackageService {
 
     // 3. Delegate to the PDF Modification service to generate the file
     const pdfBuffer = await this.pdfModifier.generatePdf(pkg, participantId);
+    // 4. ✅ IMPROVED: Prepare a proper file name using the package name
+    let sanitizedName = pkg.name
+      .trim()
+      .replace(/[<>:"/\\|?*\x00-\x1F]/g, "") // Remove invalid filename characters
+      .replace(/\s+/g, "_") // Replace spaces with underscore
+      .substring(0, 80); // Limit to 80 chars to leave room for suffix
 
-    // 4. Prepare the file name
-    const sanitizedName = pkg.name.replace(/[^a-z0-9]/gi, "_").toLowerCase();
-    const fileName = `${sanitizedName}_${pkg.status.toLowerCase()}.pdf`;
+    // Fallback if name becomes empty after sanitization
+    if (!sanitizedName || sanitizedName.length === 0) {
+      sanitizedName = "document";
+    }
+
+    const statusSuffix = pkg.status.toLowerCase();
+    const timestamp = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
+
+    const fileName = `${sanitizedName}_${statusSuffix}_${timestamp}.pdf`;
 
     return { pdfBuffer, fileName };
   }
-
   async revokePackage(packageId, userId, reason, ip) {
     const pkg = await this.Package.findOne({
       _id: packageId,
@@ -1638,8 +1649,8 @@ class PackageService {
   /**
    * Sends notifications when a package is completed.
    * This includes:
-   * 1. A completion notification for ALL participants.
-   * 2. A "Please leave a review" notification for eligible roles.
+   * 1. A completion notification for ALL PARTICIPANTS (excluding initiator).
+   * 2. A special completion notification for the INITIATOR with dashboard link.
    * @private
    */
   async _sendCompletionNotifications(pkg, initiatorName) {
@@ -1655,7 +1666,6 @@ class PackageService {
             participantId: user.id,
             email: user.contactEmail,
             name: user.contactName,
-            // --- MODIFICATION: Store the role for the review eligibility check
             role: user.role,
           });
         }
@@ -1669,58 +1679,32 @@ class PackageService {
           participantId: receiver.id,
           email: receiver.contactEmail,
           name: receiver.contactName,
-          // --- MODIFICATION: Assign a 'Receiver' role
           role: "Receiver",
         });
       }
     });
 
-    // Ensure the package owner is on the list
-    if (packageOwner && !allRecipients.has(packageOwner.email)) {
-      allRecipients.set(packageOwner.email, {
-        participantId: packageOwner._id.toString(),
-        email: packageOwner.email,
-        name: initiatorName,
-        // --- MODIFICATION: The owner has the 'Initiator' role
-        role: "Initiator",
-      });
-    }
-
-    // --- MODIFICATION: Define roles eligible for a review request
-    const rolesEligibleForReview = [
-      "Initiator",
-      "Signer",
-      "Approver",
-      "FormFiller",
-    ];
-
-    // Now, loop through the unique recipients and send notifications
+    // Send completion notifications to all PARTICIPANTS (not initiator)
     for (const recipient of allRecipients.values()) {
       const universalAccessLink = `${process.env.CLIENT_URL}/package/${pkg._id}/participant/${recipient.participantId}`;
 
-      // 1. Send the standard completion notification to EVERYONE
       await this.EmailService.sendDocumentCompletedNotification(
         recipient.email,
         initiatorName,
         pkg.name,
         universalAccessLink
       );
+    }
 
-      // 2. Send the review request ONLY to eligible roles
-      if (rolesEligibleForReview.includes(recipient.role)) {
-        // --- MODIFICATION: Construct the specific review link
-        const reviewLink = `${process.env.CLIENT_URL}/package/${pkg._id}/participant/${recipient.participantId}/review`;
-
-        // Wait a brief moment to avoid emails being flagged as spam
-        await new Promise((resolve) => setTimeout(resolve, 200));
-
-        await this.EmailService.sendRequestForReviewEmail(
-          recipient.email,
-          recipient.name,
-          pkg.name,
-          reviewLink
-        );
-      }
+    // NEW: Send special completion notification to INITIATOR with dashboard link
+    if (packageOwner) {
+      const dashboardLink = `${process.env.CLIENT_URL}/dashboard`;
+      await this.EmailService.sendInitiatorCompletionNotification(
+        packageOwner.email,
+        initiatorName,
+        pkg.name,
+        dashboardLink
+      );
     }
   }
 
@@ -1782,10 +1766,11 @@ class PackageService {
       );
     }
   }
+
   /**
    * @private
    * Sends rejection notifications to the owner and all participants.
-   * This version generates a unique, correct access link for each recipient.
+   * Generates the correct access link based on whether the recipient is the initiator or a participant.
    */
   async _sendRejectionNotifications(
     pkg,
@@ -1803,9 +1788,10 @@ class PackageService {
       (field.assignedUsers || []).forEach((user) => {
         if (!allRecipients.has(user.contactEmail)) {
           allRecipients.set(user.contactEmail, {
-            participantId: user.id, // The unique assignment ID for the URL
+            participantId: user.id,
             name: user.contactName,
             email: user.contactEmail,
+            isOwner: false, // Mark as not owner
           });
         }
       });
@@ -1818,6 +1804,7 @@ class PackageService {
           participantId: receiver.id,
           name: receiver.contactName,
           email: receiver.contactEmail,
+          isOwner: false, // Mark as not owner
         });
       }
     });
@@ -1825,16 +1812,19 @@ class PackageService {
     // Ensure the package owner is on the list to receive the notification
     if (packageOwner && !allRecipients.has(packageOwner.email)) {
       allRecipients.set(packageOwner.email, {
-        participantId: packageOwner._id.toString(), // The owner can use their own userId to view
+        participantId: packageOwner._id.toString(),
         name: initiatorName,
         email: packageOwner.email,
+        isOwner: true, // Mark as owner
       });
     }
 
     // Loop through the unique recipients and send each a personalized notification
     for (const recipient of allRecipients.values()) {
-      // ✅ CORRECT: Generate the specific participant access link for each person.
-      const universalAccessLink = `${process.env.CLIENT_URL}/package/${pkg._id}/participant/${recipient.participantId}`;
+      // ✅ FIX: Generate different links for owner vs participants
+      const universalAccessLink = recipient.isOwner
+        ? `${process.env.CLIENT_URL}/package/${pkg._id}` // Owner link (no participant ID)
+        : `${process.env.CLIENT_URL}/package/${pkg._id}/participant/${recipient.participantId}`; // Participant link
 
       await this.EmailService.sendRejectionNotification(
         recipient.email,
@@ -1843,7 +1833,7 @@ class PackageService {
         pkg.name,
         rejectorName,
         rejectionReason,
-        universalAccessLink // Pass the correct, personalized link
+        universalAccessLink // Pass the correct link based on role
       );
     }
   }

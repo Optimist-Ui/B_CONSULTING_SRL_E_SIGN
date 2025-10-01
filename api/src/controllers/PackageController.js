@@ -398,6 +398,7 @@ class PackageController {
         );
 
       // Set headers for file download
+      res.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
       res.setHeader(
         "Content-Disposition",
         `attachment; filename="${fileName}"`
@@ -422,6 +423,7 @@ class PackageController {
           userId // Pass userId as the identifier
         );
 
+      res.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
       res.setHeader(
         "Content-Disposition",
         `attachment; filename="${fileName}"`

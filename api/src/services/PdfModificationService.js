@@ -240,7 +240,7 @@ class PdfModificationService {
   }
 
   /**
-   * Embeds rejection info onto relevant fields.
+   * Embeds rejection info onto relevant fields with proper spacing.
    */
   async embedRejectedFields(pdfDoc, pkg, fonts) {
     if (!pkg.rejectionDetails?.rejectedBy) return;
@@ -286,88 +286,89 @@ class PdfModificationService {
 
       // Get rejection details
       const rejectedBy = pkg.rejectionDetails.rejectedBy;
-      const rejectedByName =
-        rejectedBy.contactName || rejectedBy.name || "Unknown";
-      const rejectedByEmail =
-        rejectedBy.email || rejectedBy.contactEmail || "N/A";
+      const rejectedByName = rejectedBy.contactName || "Unknown";
+      const rejectedByEmail = rejectedBy.contactEmail || "N/A";
       const rejectionDate = new Date(
         pkg.rejectionDetails.rejectedAt
       ).toLocaleString();
-      const rejectionIP = pkg.rejectionDetails.rejectedIP || "N/A";
       const rejectionReason =
         pkg.rejectionDetails.reason || "No reason provided";
 
       // Calculate vertical positioning from the top of the field area
       const fieldTop = page.getHeight() - originalY;
 
-      // Define line spacing for rejection
-      const lineSpacing = 11;
-      const smallLineSpacing = 9;
+      // ✅ IMPROVED: Dynamic spacing based on field height
+      const lineHeight = Math.max(8, Math.min(11, originalHeight / 7));
 
-      // Start from the top of the field and work downward
-      let currentY = fieldTop - 6;
+      // Start from the top with proper padding
+      let currentY = fieldTop - lineHeight;
 
-      // Draw "REJECTED" header
+      // Draw "REJECTED" header (bold and prominent)
       page.drawText("REJECTED", {
         x: adjustedX + horizontalPadding,
         y: currentY,
         font: fonts.helveticaBold,
-        size: 10,
+        size: 9,
         color: rgb(0.7, 0, 0),
         maxWidth: originalWidth - 2 * horizontalPadding,
       });
-      currentY -= lineSpacing;
+      currentY -= lineHeight + 2;
 
       // Draw rejected by name
-      page.drawText(`By: ${rejectedByName}`, {
+      const byText = `By: ${rejectedByName}`;
+      page.drawText(byText, {
         x: adjustedX + horizontalPadding,
         y: currentY,
         font: fonts.helvetica,
-        size: 8,
-        color: rgb(0.6, 0, 0),
+        size: 7,
+        color: rgb(0.4, 0, 0),
         maxWidth: originalWidth - 2 * horizontalPadding,
       });
-      currentY -= smallLineSpacing;
+      currentY -= lineHeight;
 
-      // Draw rejected by email
-      page.drawText(`Email: ${rejectedByEmail}`, {
+      // Draw email (truncate if too long)
+      const maxEmailLength = Math.floor(
+        (originalWidth - 2 * horizontalPadding) / 3
+      );
+      let emailText = rejectedByEmail;
+      if (emailText.length > maxEmailLength) {
+        emailText = emailText.substring(0, maxEmailLength - 3) + "...";
+      }
+      page.drawText(`Email: ${emailText}`, {
         x: adjustedX + horizontalPadding,
         y: currentY,
         font: fonts.helvetica,
-        size: 8,
-        color: rgb(0.6, 0, 0),
+        size: 6,
+        color: rgb(0.4, 0, 0),
         maxWidth: originalWidth - 2 * horizontalPadding,
       });
-      currentY -= smallLineSpacing;
+      currentY -= lineHeight;
 
-      page.drawText(`IP: ${rejectionIP}`, {
-        x: adjustedX + horizontalPadding,
-        y: currentY,
-        font: fonts.helvetica,
-        size: 8,
-        color: rgb(0.6, 0, 0),
-        maxWidth: originalWidth - 2 * horizontalPadding,
-      });
-      currentY -= smallLineSpacing;
-
-      // Draw rejection date
+      // Draw date
       page.drawText(`Date: ${rejectionDate}`, {
         x: adjustedX + horizontalPadding,
         y: currentY,
         font: fonts.helvetica,
-        size: 8,
-        color: rgb(0.6, 0, 0),
+        size: 6,
+        color: rgb(0.4, 0, 0),
         maxWidth: originalWidth - 2 * horizontalPadding,
       });
-      currentY -= smallLineSpacing;
+      currentY -= lineHeight;
 
-      // Draw rejection reason
-      page.drawText(`Reason: ${rejectionReason}`, {
+      // Draw reason (truncate if too long)
+      const maxReasonLength = Math.floor(
+        (originalWidth - 2 * horizontalPadding) / 3
+      );
+      let reasonText = rejectionReason;
+      if (reasonText.length > maxReasonLength) {
+        reasonText = reasonText.substring(0, maxReasonLength - 3) + "...";
+      }
+      page.drawText(`Reason: ${reasonText}`, {
         x: adjustedX + horizontalPadding,
         y: currentY,
         font: fonts.helvetica,
-        size: 8,
-        color: rgb(0.6, 0, 0),
+        size: 6,
+        color: rgb(0.4, 0, 0),
         maxWidth: originalWidth - 2 * horizontalPadding,
       });
     }

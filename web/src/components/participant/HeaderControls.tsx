@@ -43,8 +43,10 @@ const HeaderControls: React.FC<HeaderControlsProps> = ({ documentName, participa
     const currentPage = useSelector((state: IRootState) => state.participant.currentPage);
     const numPages = useSelector((state: IRootState) => state.participant.numPages);
     const zoomLevel = useSelector((state: IRootState) => state.participant.zoomLevel);
-    const { packageData, uiState } = useSelector((state: IRootState) => state.participant);
-    const { isDownloading } = uiState;
+
+    // ✅ FIX: Read packageData directly from Redux instead of relying on props
+    const packageData = useSelector((state: IRootState) => state.participant.packageData);
+    const { isDownloading } = useSelector((state: IRootState) => state.participant.uiState);
 
     const [isApproverDrawerOpen, setIsApproverDrawerOpen] = useState(false);
     const [isFullscreen, setIsFullscreen] = useState(false);
@@ -53,15 +55,15 @@ const HeaderControls: React.FC<HeaderControlsProps> = ({ documentName, participa
     const canDownload = isDocumentFinalized || options.allowDownloadUnsigned;
 
     const handleDownload = async () => {
-        if (!packageData) {
-            toast.error('Package data is not available to start download.');
+        // ✅ Now packageData is always the latest from Redux
+        if (!packageData || !packageData.currentUser?.id) {
+            toast.error('Package data is not available. Please refresh the page and try again.');
             return;
         }
 
         toast.info('Preparing your document for download...');
 
         try {
-            // The thunk now handles the download internally
             await dispatch(
                 downloadPackage({
                     packageId: packageData._id,
@@ -69,7 +71,6 @@ const HeaderControls: React.FC<HeaderControlsProps> = ({ documentName, participa
                 })
             ).unwrap();
         } catch (error) {
-            // Error toast is already handled by the extra reducer
             console.error('Download failed:', error);
         }
     };

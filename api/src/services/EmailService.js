@@ -964,6 +964,43 @@ class EmailService {
   }
 
   /**
+   * NEW: Sends final completion notification to the INITIATOR with dashboard link.
+   * @param {string} initiatorEmail - The initiator's email
+   * @param {string} initiatorName - The initiator's name
+   * @param {string} packageName - The package name
+   * @param {string} dashboardLink - Link to the dashboard
+   */
+  async sendInitiatorCompletionNotification(
+    initiatorEmail,
+    initiatorName,
+    packageName,
+    dashboardLink
+  ) {
+    const msg = {
+      to: initiatorEmail,
+      from: this.fromEmail,
+      templateId: process.env.SENDGRID_INITIATOR_COMPLETION_NOTIFICATION,
+      dynamic_template_data: {
+        initiator_name: initiatorName,
+        package_name: packageName,
+        dashboard_link: dashboardLink,
+      },
+    };
+
+    try {
+      await sgMail.send(msg);
+      console.log(
+        `Completion notification sent to initiator ${initiatorEmail} for package: ${packageName}`
+      );
+    } catch (error) {
+      console.error(
+        `Error sending completion notification to ${initiatorEmail}:`,
+        error.response?.body || error
+      );
+    }
+  }
+
+  /**
    * Sends account deactivation confirmation email with reactivation link.
    */
   async sendDeactivationEmail(user, reactivationUrl) {
