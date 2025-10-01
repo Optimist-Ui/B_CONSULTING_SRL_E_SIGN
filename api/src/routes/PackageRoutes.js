@@ -22,7 +22,7 @@ const {
   verifySmsOtpValidation,
   addReceiverByParticipantValidation,
 } = require("../validations/PackageValidations");
-const { uploadPackage } = require("../middlewares/upload");
+const { uploadAndStorePackage } = require("../middlewares/upload");
 
 /**
  * @swagger
@@ -426,7 +426,7 @@ module.exports = (container) => {
    */
   router.post(
     "/upload",
-    uploadPackage,
+    uploadAndStorePackage,
     packageController.uploadPackage.bind(packageController)
   );
 

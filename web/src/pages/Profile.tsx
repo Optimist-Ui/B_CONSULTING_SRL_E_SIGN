@@ -65,14 +65,15 @@ const Profile = () => {
 
     // This is the new effect that constructs the full, correct URL
     useEffect(() => {
-        if (user?.profileImage) {
-            // Define your backend's base URL. In a real app, use an environment variable.
+        if (user?.profileImageUrl) {
+            // Use the signed URL from the backend (this is the S3 signed URL)
+            setImagePreview(user.profileImageUrl);
+        } else if (user?.profileImage) {
+            // Fallback for old users who might still have local paths
             const backendUrl = import.meta.env.VITE_BASE_URL;
-
-            // Prepend the backend URL to the relative path from the API response
             setImagePreview(`${backendUrl}${user.profileImage}`);
         } else {
-            // Fallback to the default local image if the user has no profile picture
+            // No profile image - use default
             setImagePreview('/assets/images/agent-1.png');
         }
     }, [user]);

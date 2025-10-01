@@ -121,6 +121,7 @@ const PackageCreationStepper: React.FC = () => {
                     attachment_uuid: currentPackage.attachment_uuid,
                     name: currentPackage.name,
                     fileUrl: currentPackage.fileUrl,
+                    s3Key: currentPackage.s3Key || '',
                     fields: currentPackage.fields,
                     receivers: currentPackage.receivers,
                     options: currentPackage.options,

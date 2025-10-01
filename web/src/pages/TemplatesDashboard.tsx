@@ -111,7 +111,7 @@ const TemplatesDashboard: React.FC = () => {
 
         try {
             if (currentTemplate._id) {
-                // If the template has an _id, it's an existing document. UPDATE it.
+                // UPDATE existing template (fields only)
                 await dispatch(
                     updateTemplate({
                         templateId: currentTemplate._id,
@@ -121,24 +121,29 @@ const TemplatesDashboard: React.FC = () => {
                 ).unwrap();
                 toast.success('Template updated successfully!');
             } else {
-                // If there's no _id, it's a new document. CREATE it.
+                // CREATE new template - must include s3Key
                 if (!currentTemplate.fileUrl) {
-                    // This check is more relevant for creation
                     toast.error('File URL is missing. Please upload a document.');
                     return;
                 }
+
+                if (!currentTemplate.s3Key) {
+                    toast.error('S3 key is missing. Please re-upload the document.');
+                    return;
+                }
+
                 await dispatch(
                     saveTemplate({
                         attachment_uuid: currentTemplate.attachment_uuid,
                         name: currentTemplate.name,
                         fileUrl: currentTemplate.fileUrl,
+                        s3Key: currentTemplate.s3Key, // 👈 INCLUDE S3 KEY
                         fields: currentTemplate.fields,
                     })
                 ).unwrap();
                 toast.success('Template saved successfully!');
             }
 
-            // After either action, go back to the list and refresh.
             handleBackToList();
         } catch (err: any) {
             toast.error(err.message || 'Failed to save template.');

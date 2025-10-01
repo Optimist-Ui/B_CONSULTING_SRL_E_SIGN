@@ -9,7 +9,7 @@ const {
 } = require("../validations/UserValidations");
 const validate = require("../middlewares/validate");
 const authenticateUser = require("../middlewares/authenticate");
-const { uploadProfileImage } = require("../middlewares/upload");
+const { uploadAndStoreProfileImage } = require("../middlewares/upload");
 
 /**
  * @swagger
@@ -156,7 +156,7 @@ module.exports = (container) => {
   router.put(
     "/profile",
     authenticateUser,
-    uploadProfileImage,
+    uploadAndStoreProfileImage,
     updateProfileValidation,
     validate,
     userController.updateUserProfile.bind(userController)

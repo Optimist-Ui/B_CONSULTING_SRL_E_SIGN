@@ -3,10 +3,11 @@ const crypto = require("crypto");
 const { generateToken } = require("../utils/jwtHandler");
 
 class UserService {
-  constructor({ User, emailService, stripe }) {
+  constructor({ User, emailService, stripe, s3Service }) {
     this.stripe = stripe;
     this.User = User;
     this.emailService = emailService;
+    this.s3Service = s3Service;
   }
 
   // --- UPDATED createUser METHOD ---
@@ -101,7 +102,8 @@ class UserService {
     return { message: "Email verified successfully. You can now log in." };
   }
 
-  async updateUserProfile(userId, profileData, file) {
+  // --- UPDATE USER PROFILE (WITH S3) ---
+  async updateUserProfile(userId, profileData, s3File) {
     const { firstName, lastName, phone, language, email } = profileData;
 
     const user = await this.User.findById(userId);
@@ -109,29 +111,43 @@ class UserService {
       throw new Error("User not found.");
     }
 
-    // Ensure email is not changed to one that already exists
-    if (email !== user.email) {
+    // Check if email is being changed to one that already exists
+    if (email && email !== user.email) {
       const existingUser = await this.User.findOne({ email });
       if (existingUser && existingUser._id.toString() !== userId) {
         throw new Error("This email is already in use by another account.");
       }
     }
 
-    // Update fields
-    user.firstName = firstName;
-    user.lastName = lastName;
-    user.email = email; // Allow email changes, guarded by the check above
-    user.phone = phone;
-    user.language = language;
+    // Update basic fields
+    if (firstName) user.firstName = firstName;
+    if (lastName) user.lastName = lastName;
+    if (email) user.email = email;
+    if (phone !== undefined) user.phone = phone;
+    if (language) user.language = language;
 
-    // If a new file was uploaded, update the image path
-    if (file) {
-      // Note: In production, you'd store the URL from a cloud service like S3 here
-      user.profileImage = `/public/uploads/avatars/${file.filename}`;
+    // Handle profile image upload to S3
+    if (s3File) {
+      // Delete old profile image from S3 if exists
+      if (user.s3Key) {
+        try {
+          await this.s3Service.deleteFile(user.s3Key);
+          console.log(`Deleted old profile image: ${user.s3Key}`);
+        } catch (error) {
+          console.error("Failed to delete old profile image:", error);
+          // Continue anyway - don't fail the update
+        }
+      }
+
+      // Update with new S3 information
+      user.profileImage = s3File.url; // S3 URL (for reference)
+      user.s3Key = s3File.key; // S3 key (for future deletion/updates)
     }
 
     await user.save();
-    return this._sanitizeUser(user); // Return the updated, sanitized user data
+
+    // Return sanitized user with signed URL
+    return await this._sanitizeUserWithSignedUrl(user);
   }
 
   async requestPasswordReset(email) {
@@ -348,15 +364,47 @@ class UserService {
   }
 
   _sanitizeUser(user) {
-    // This helper method is crucial and used correctly
-    const { password, ...userData } = user.toObject();
-    return userData;
+    const userObj = user.toObject();
+    delete userObj.password;
+    delete userObj.resetToken;
+    delete userObj.resetTokenExpiresAt;
+    delete userObj.verificationToken;
+    delete userObj.reactivationToken;
+    return userObj;
+  }
+
+  // --- HELPER: SANITIZE USER WITH SIGNED URL FOR PROFILE IMAGE ---
+  async _sanitizeUserWithSignedUrl(user) {
+    const sanitized = this._sanitizeUser(user);
+
+    // Generate signed URL for profile image if S3 key exists
+    if (sanitized.s3Key) {
+      try {
+        sanitized.profileImageUrl = await this.s3Service.getSignedUrl(
+          sanitized.s3Key,
+          parseInt(process.env.S3_SIGNED_URL_EXPIRY) || 3600 // 1 hour default
+        );
+      } catch (error) {
+        console.error(
+          "❌ Failed to generate signed URL for profile image:",
+          error
+        );
+        // If signed URL generation fails, use the S3 URL (won't work if bucket is private)
+        sanitized.profileImageUrl = sanitized.profileImage;
+      }
+    } else if (sanitized.profileImage) {
+      // Fallback for old users who might have local file paths
+      sanitized.profileImageUrl = sanitized.profileImage;
+    }
+
+    return sanitized;
   }
 
   async getUserProfile(userId) {
     const user = await this.User.findById(userId).select("-password");
     if (!user) throw new Error("User not found");
-    return this._sanitizeUser(user);
+
+    return await this._sanitizeUserWithSignedUrl(user);
   }
 
   async findUserByStripeCustomerId(stripeCustomerId) {

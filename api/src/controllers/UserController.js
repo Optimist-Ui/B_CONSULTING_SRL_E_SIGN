@@ -37,12 +37,12 @@ class UserController {
     try {
       const userId = req.user.id; // From authenticateUser middleware
       const profileData = req.body;
-      const file = req.file; // From upload.js (multer) middleware
+      const s3File = req.s3File; // 👈 From uploadAndStoreProfileImage middleware (S3 info)
 
       const updatedUser = await this.userService.updateUserProfile(
         userId,
         profileData,
-        file
+        s3File
       );
 
       return successResponse(res, updatedUser, "Profile updated successfully");

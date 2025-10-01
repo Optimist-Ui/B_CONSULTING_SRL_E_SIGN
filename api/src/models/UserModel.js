@@ -59,6 +59,7 @@ const userSchema = new Schema(
     phone: { type: String },
     language: { type: String, default: "en" },
     profileImage: { type: String },
+    s3Key: { type: String },
     teamId: { type: Schema.Types.ObjectId, ref: "Team", sparse: true },
     isVerified: {
       type: Boolean,
@@ -197,5 +198,15 @@ userSchema.methods.incrementDocumentUsage = function () {
 
   return false; // Should not happen if canCreateDocument is true, but for safety
 };
+
+// virtual for getting signed URL
+userSchema.virtual("profileImageUrl").get(function () {
+  // This will be populated dynamically in the service
+  return this._profileImageUrl || this.profileImage;
+});
+
+// Ensure virtuals are included when converting to JSON
+userSchema.set("toJSON", { virtuals: true });
+userSchema.set("toObject", { virtuals: true });
 
 module.exports = mongoose.model("User", userSchema);

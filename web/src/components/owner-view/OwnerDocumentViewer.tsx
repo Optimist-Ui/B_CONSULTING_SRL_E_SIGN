@@ -48,14 +48,19 @@ const OwnerDocumentViewer: React.FC<Props> = ({ packageData }) => {
         const loadPdf = async () => {
             try {
                 setIsLoading(true);
-                let correctedFileUrl = packageData.fileUrl.replace('/Uploads/templates/', '/uploads/').replace('/Uploads/', '/uploads/');
+                let fullUrl;
+                if (packageData.downloadUrl) {
+                    fullUrl = packageData.downloadUrl;
+                } else {
+                    let correctedFileUrl = packageData.fileUrl.replace('/Uploads/templates/', '/uploads/').replace('/Uploads/', '/uploads/');
 
-                // Special case: if it's templates, prepend /public
-                if (correctedFileUrl.startsWith('/uploads/templates/')) {
-                    correctedFileUrl = '/public' + correctedFileUrl;
+                    // Special case: if it's templates, prepend /public
+                    if (correctedFileUrl.startsWith('/uploads/templates/')) {
+                        correctedFileUrl = '/public' + correctedFileUrl;
+                    }
+
+                    fullUrl = `${BACKEND_URL}${correctedFileUrl.startsWith('/') ? '' : '/'}${correctedFileUrl}`;
                 }
-
-                const fullUrl = `${BACKEND_URL}${correctedFileUrl.startsWith('/') ? '' : '/'}${correctedFileUrl}`;
 
                 const response = await fetch(fullUrl, { mode: 'cors' });
                 if (!response.ok) throw new Error(`Failed to fetch PDF: ${response.statusText}`);
@@ -71,7 +76,7 @@ const OwnerDocumentViewer: React.FC<Props> = ({ packageData }) => {
             }
         };
         loadPdf();
-    }, [packageData.fileUrl]);
+    }, [packageData.fileUrl, packageData.downloadUrl]);
 
     useEffect(() => {
         const computePageInfos = async () => {

@@ -10,6 +10,7 @@ interface SavePackagePayload {
     name: string;
     attachment_uuid: string;
     fileUrl: string;
+    s3Key?: string; // 👈 ADD THIS
     fields: DocumentPackage['fields'];
     receivers: DocumentPackage['receivers'];
     options: DocumentPackage['options'];
@@ -29,14 +30,14 @@ interface UpdatePackagePayload {
 }
 
 // Re-export template thunks for document upload and template fetching
-export const uploadPackageDocument = createAsyncThunk<{ attachment_uuid: string; fileUrl: string }, File>('packages/uploadPackageDocument', async (file, { rejectWithValue }) => {
+export const uploadPackageDocument = createAsyncThunk<{ attachment_uuid: string; fileUrl: string; s3Key: string }, File>('packages/uploadPackageDocument', async (file, { rejectWithValue }) => {
     try {
         const formData = new FormData();
         formData.append('file', file);
         const response = await api.post('api/packages/upload', formData, {
             headers: { 'Content-Type': 'multipart/form-data' },
         });
-        return response.data.data; // { attachment_uuid, fileUrl }
+        return response.data.data; // { attachment_uuid, fileUrl, s3Key }
     } catch (error: any) {
         return rejectWithValue(error.response?.data?.error || 'Failed to upload package document.');
     }
@@ -73,6 +74,10 @@ export const savePackage = createAsyncThunk<DocumentPackage, SavePackagePayload>
             const response = await api.patch(`/api/packages/${_id}`, updatePayload);
             return response.data.data;
         } else {
+            // For create, ensure s3Key is provided
+            if (!payload.s3Key) {
+                throw new Error('S3 key is required for new packages.');
+            }
             // If it's not in the state, it's a new document. Create it via POST.
             // We must remove the temporary client-side ID before sending.
             delete payload._id;

@@ -10,7 +10,9 @@ export interface User {
     email: string;
     phone?: string;
     language?: string;
-    profileImage?: string;
+    profileImage?: string; // S3 URL (reference only)
+    profileImageUrl?: string;
+    s3Key?: string;
     hasHadTrial?: boolean;
 }
 

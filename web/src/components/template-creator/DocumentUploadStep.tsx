@@ -62,11 +62,24 @@ const DocumentUploadStep: React.FC = () => {
 
         try {
             let pdf: PDFDocumentProxy;
+
+            // Priority 1: Use in-memory fileData (for newly uploaded files)
             if (template.fileData && template.fileData.byteLength > 0) {
                 const clonedFileData = template.fileData.slice(0);
                 pdf = await loadPdfDocument(clonedFileData);
-            } else if (template.fileUrl && !template.fileUrl.startsWith('blob:')) {
+            }
+            // Priority 2: Use downloadUrl (signed URL from S3)
+            else if (template.downloadUrl) {
+                console.log('Fetching PDF preview from signed URL');
+                const response = await fetch(template.downloadUrl, { mode: 'cors' });
+                if (!response.ok) throw new Error(`Failed to fetch PDF: ${response.statusText}`);
+                const arrayBuffer = await response.arrayBuffer();
+                pdf = await loadPdfDocument(arrayBuffer);
+            }
+            // Priority 3: Fallback to fileUrl (for backward compatibility with local files)
+            else if (template.fileUrl && !template.fileUrl.startsWith('blob:')) {
                 const fullUrl = `${BACKEND_URL}${template.fileUrl}`;
+                console.log('Fetching PDF preview from fileUrl:', fullUrl);
                 const response = await fetch(fullUrl, { mode: 'cors' });
                 if (!response.ok) throw new Error(`Failed to fetch PDF from URL: ${response.statusText}`);
                 const arrayBuffer = await response.arrayBuffer();

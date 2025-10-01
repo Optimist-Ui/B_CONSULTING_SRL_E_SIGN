@@ -163,6 +163,7 @@ const packageSchema = new Schema(
     attachment_uuid: { type: String, required: true },
     name: { type: String, required: true, trim: true },
     fileUrl: { type: String, required: true },
+    s3Key: { type: String, required: true },
     fields: [packageFieldSchema],
     receivers: [packageReceiverSchema],
     options: { type: packageOptionsSchema, required: true },

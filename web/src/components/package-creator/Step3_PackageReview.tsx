@@ -136,7 +136,11 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
 
         const getPdfData = async () => {
             if (currentPackage.fileData?.byteLength) return currentPackage.fileData.slice(0);
-            if (currentPackage.fileUrl) {
+            if (currentPackage.downloadUrl) {
+                const response = await fetch(currentPackage.downloadUrl, { mode: 'cors' });
+                if (!response.ok) throw new Error(`Fetch failed: ${response.statusText}`);
+                return response.arrayBuffer();
+            } else if (currentPackage.fileUrl) {
                 const correctedFileUrl = currentPackage.fileUrl.startsWith('/public') ? currentPackage.fileUrl : `/public${currentPackage.fileUrl}`;
                 const fullUrl = `${BACKEND_URL}${correctedFileUrl}`;
                 const response = await fetch(fullUrl, { mode: 'cors' });
@@ -182,7 +186,7 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
             isMounted = false;
             cleanup();
         };
-    }, [currentPackage?.fileUrl, currentPackage?.fileData]);
+    }, [currentPackage?.fileUrl, currentPackage?.fileData, currentPackage?.downloadUrl]);
 
     useEffect(() => {
         if (!pdfProxyRef.current || numPages === 0 || pageInfos.length === 0 || !isCanvasReady) {

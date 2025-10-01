@@ -47,6 +47,8 @@ export interface DocumentPackage {
     attachment_uuid: string;
     name: string;
     fileUrl: string;
+    s3Key?: string;
+    downloadUrl?: string; // 👈 ADD THIS - Signed URL
     fileData?: ArrayBuffer;
     fields: PackageField[];
     receivers: PackageReceiver[];
@@ -98,6 +100,8 @@ const packageSlice = createSlice({
                 name: action.payload.name || 'Untitled Package',
                 attachment_uuid: action.payload.attachment_uuid || '',
                 fileUrl: action.payload.fileUrl || '',
+                s3Key: action.payload.s3Key || '', // 👈 ADD THIS
+                downloadUrl: action.payload.downloadUrl || '', // 👈 ADD THIS
                 fileData: action.payload.fileData || undefined,
                 templateId: action.payload.templateId || undefined,
                 fields: action.payload.fields ? action.payload.fields.map((field) => ({ ...field, assignedUsers: field.assignedUsers || [] })) : [],

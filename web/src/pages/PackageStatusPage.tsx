@@ -8,7 +8,6 @@ import PackageStatusLayout from '../components/owner-view/PackageStatusLayout';
 import { FiLoader, FiAlertTriangle } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 
-
 const FiAlertTriangleTyped = FiAlertTriangle as ComponentType<{ className?: string }>;
 const FiLoaderTyped = FiLoader as ComponentType<{ className?: string }>;
 
@@ -49,9 +48,9 @@ const PackageStatusPage: React.FC = () => {
 
     if (error && !currentPackage) {
         return (
-             <div className="min-h-screen bg-red-50 flex justify-center items-center p-4">
+            <div className="min-h-screen bg-red-50 flex justify-center items-center p-4">
                 <div className="text-center p-8 bg-white rounded-xl shadow-lg max-w-md w-full">
-                     <FiAlertTriangleTyped className="w-12 h-12 text-red-500 mx-auto mb-4" />
+                    <FiAlertTriangleTyped className="w-12 h-12 text-red-500 mx-auto mb-4" />
                     <h2 className="text-2xl font-bold text-red-700">Unable to Load Document</h2>
                     <p className="text-red-600 mt-2">{error}</p>
                 </div>

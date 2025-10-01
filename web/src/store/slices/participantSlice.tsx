@@ -54,6 +54,7 @@ export interface ParticipantPackageView {
     _id: string;
     name: string;
     fileUrl: string;
+    downloadUrl?: string;
     fileData?: ArrayBuffer;
     fields: ParticipantPackageField[];
     status: 'Draft' | 'Sent' | 'Completed' | 'Archived' | 'Rejected' | 'Revoked' | 'Expired';

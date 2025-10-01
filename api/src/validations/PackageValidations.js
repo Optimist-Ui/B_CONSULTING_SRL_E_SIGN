@@ -58,6 +58,11 @@ const createPackageValidation = [
     .optional()
     .isIn(["Draft", "Sent"])
     .withMessage('Invalid status. Must be either "Draft" or "Sent".'),
+  body("s3Key")
+    .notEmpty()
+    .withMessage("S3 key is required")
+    .isString()
+    .withMessage("S3 key must be a string"),
   body("fields")
     .isArray()
     .withMessage("Fields must be an array")

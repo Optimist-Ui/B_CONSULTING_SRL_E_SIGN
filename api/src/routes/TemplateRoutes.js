@@ -1,13 +1,13 @@
 const express = require("express");
 const authenticateUser = require("../middlewares/authenticate");
 const validate = require("../middlewares/validate");
-const { uploadTemplate } = require("../middlewares/upload");
 const {
   createTemplateValidation,
   updateTemplateValidation,
   templateIdValidation,
 } = require("../validations/TemplateValidations");
 const requireActiveSubscription = require("../middlewares/requireActiveSubscription");
+const { uploadAndStoreTemplate } = require("../middlewares/upload");
 
 /**
  * @swagger
@@ -53,7 +53,7 @@ module.exports = (container) => {
    */
   router.post(
     "/upload",
-    uploadTemplate,
+    uploadAndStoreTemplate,
     templateController.uploadTemplate.bind(templateController)
   );
 

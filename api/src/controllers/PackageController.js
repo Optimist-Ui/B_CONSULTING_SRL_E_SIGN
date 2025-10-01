@@ -9,17 +9,12 @@ class PackageController {
   async uploadPackage(req, res) {
     try {
       const userId = req.user.id;
-      const { attachment_uuid, fileUrl } = req;
-      const packageData = await this.packageService.uploadPackage(userId, {
-        attachment_uuid,
-        fileUrl,
-      });
-      successResponse(
-        res,
-        packageData,
-        "Package file uploaded successfully",
-        201
-      );
+      const s3File = req.s3File; // ✅ Extract s3File from middleware
+      if (!s3File) {
+        throw new Error("No file uploaded.");
+      }
+      const result = await this.packageService.uploadPackage(userId, s3File);
+      successResponse(res, result, "Package file uploaded successfully", 201);
     } catch (error) {
       errorResponse(res, error, "Failed to upload package file");
     }

@@ -16,7 +16,6 @@ import IconMenuTables from '../Icon/Menu/IconMenuTables';
 import { toast } from 'react-toastify';
 import { logout } from '../../store/slices/authSlice';
 import IconUsersGroup from '../Icon/IconUsersGroup';
-const backendUrl = import.meta.env.VITE_BASE_URL;
 const Header = () => {
     const navigate = useNavigate();
     const location = useLocation();
@@ -46,7 +45,6 @@ const Header = () => {
     const themeConfig = useSelector((state: IRootState) => state.themeConfig);
     const { user } = useSelector((state: IRootState) => state.auth);
     const dispatch = useDispatch();
-
  
     const { t } = useTranslation();
 
@@ -131,7 +129,7 @@ const Header = () => {
                                 button={
                                     <img
                                         className="w-9 h-9 rounded-full object-cover saturate-50 group-hover:saturate-100"
-                                        src={user?.profileImage ? `${backendUrl}${user.profileImage}` : '/assets/images/agent-1.png'}
+                                        src={user?.profileImageUrl ? `${user.profileImageUrl}` : '/assets/images/agent-1.png'}
                                         alt="userProfile"
                                     />
                                 }
@@ -142,7 +140,7 @@ const Header = () => {
                                             <div className="flex items-center px-4 py-4">
                                                 <img
                                                     className="rounded-md w-10 h-10 object-cover"
-                                                    src={user?.profileImage ? `${backendUrl}${user.profileImage}` : '/assets/images/agent-1.png'}
+                                                    src={user?.profileImageUrl ? `${user.profileImageUrl}` : '/assets/images/agent-1.png'}
                                                     alt="userProfile"
                                                 />
                                                 <div className="ltr:pl-4 rtl:pr-4">

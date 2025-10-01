@@ -3,7 +3,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { AppDispatch, IRootState } from '../../store';
-import { DocumentTemplate } from '../../store/slices/templateSlice';
 import { fetchTemplates, getTemplateById } from '../../store/thunk/templateThunks'; // Updated import
 import { uploadPackageDocument } from '../../store/thunk/packageThunks'; // Keep this import
 import { startPackageCreation, setPackageTitle, setPackageLoading, setPackageError, setCurrentPackage } from '../../store/slices/packageSlice';
@@ -50,7 +49,7 @@ const Step1_DocumentSelection: React.FC<StepProps> = ({ onNext }) => {
         }
     }, [templatesError, packageError, dispatch]);
 
-    const renderPdfPreview = useCallback(async (documentSource: { fileData?: ArrayBuffer; fileUrl?: string }) => {
+    const renderPdfPreview = useCallback(async (documentSource: { fileData?: ArrayBuffer; fileUrl?: string; downloadUrl?: string }) => {
         if (!canvasRef.current) return;
         setRenderError(null);
 
@@ -58,6 +57,11 @@ const Step1_DocumentSelection: React.FC<StepProps> = ({ onNext }) => {
             let pdf: PDFDocumentProxy;
             if (documentSource.fileData && documentSource.fileData.byteLength > 0) {
                 pdf = await loadPdfDocument(documentSource.fileData.slice(0));
+            } else if (documentSource.downloadUrl) {
+                const response = await fetch(documentSource.downloadUrl, { mode: 'cors' });
+                if (!response.ok) throw new Error(`Fetch failed: ${response.statusText}`);
+                const arrayBuffer = await response.arrayBuffer();
+                pdf = await loadPdfDocument(arrayBuffer);
             } else if (documentSource.fileUrl && !documentSource.fileUrl.startsWith('blob:')) {
                 const correctedFileUrl = documentSource.fileUrl.startsWith('/public') ? documentSource.fileUrl : `/public${documentSource.fileUrl}`;
                 const fullUrl = `${BACKEND_URL}${correctedFileUrl}`;
@@ -90,7 +94,7 @@ const Step1_DocumentSelection: React.FC<StepProps> = ({ onNext }) => {
         }),
         onSubmit: async (values) => {
             if (!currentPackage || (!currentPackage.fileUrl && !currentPackage.fileData)) {
-                toast.error('Please select a document before proceeding.');
+                toast.error('Please upload or select a document before proceeding.');
                 return;
             }
             if (currentPackage.name !== values.documentTitle) {
@@ -143,6 +147,7 @@ const Step1_DocumentSelection: React.FC<StepProps> = ({ onNext }) => {
                     name: file.name.replace(/\.pdf$/, ''),
                     attachment_uuid: resultAction.attachment_uuid,
                     fileUrl: resultAction.fileUrl,
+                    s3Key: resultAction.s3Key, // 👈 ADD THIS
                     fileData: fileData,
                     fields: [],
                     templateId: undefined,
@@ -203,18 +208,22 @@ const Step1_DocumentSelection: React.FC<StepProps> = ({ onNext }) => {
         setRenderError(null);
         try {
             const template = await dispatch(getTemplateById(templateId)).unwrap();
-            const correctedFileUrl = template.fileUrl.startsWith('/public') ? template.fileUrl : `/public${template.fileUrl}`;
-            const fullUrl = `${BACKEND_URL}${correctedFileUrl}`;
-            const response = await fetch(fullUrl, { mode: 'cors' });
-            if (!response.ok) throw new Error(`Failed to fetch template PDF: ${response.statusText}`);
-            const fileData = await response.arrayBuffer();
+            let fileData: ArrayBuffer | null = null;
+
+            if (template.downloadUrl) {
+                const response = await fetch(template.downloadUrl, { mode: 'cors' });
+                if (!response.ok) throw new Error(`Failed to fetch template PDF: ${response.statusText}`);
+                fileData = await response.arrayBuffer();
+            }
 
             dispatch(
                 startPackageCreation({
                     name: template.name,
                     attachment_uuid: template.attachment_uuid,
                     fileUrl: template.fileUrl,
-                    fileData: fileData,
+                    s3Key: template.s3Key, // 👈 ADD THIS
+                    downloadUrl: template.downloadUrl, // 👈 ADD THIS
+                    fileData: fileData || undefined,
                     templateId: template._id,
                     fields: template.fields.map((f) => ({ ...f, assignedUsers: [] })),
                 })
@@ -279,8 +288,8 @@ const Step1_DocumentSelection: React.FC<StepProps> = ({ onNext }) => {
                             </h3>
                             <div
                                 className={`
-                                    relative border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-all duration-300
-                                    ${isDragOver ? 'border-green-500 bg-green-100' : 'border-green-300 hover:border-green-500 hover:bg-green-50'}
+                                    relative border-2 border-dashed rounded-lg p-8 text-center
+                                    ${isDragOver ? 'border-green-500 bg-green-100' : 'border-gray-300 bg-gray-50'}
                                 `}
                                 onClick={() => fileInputRef.current?.click()}
                                 onDrop={handleDrop}

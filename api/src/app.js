@@ -9,6 +9,8 @@ dotenv.config();
 
 const container = require("./config/container");
 const swaggerSpec = require("./config/swaggerConfig");
+const injectContainer = require("./middlewares/containerMiddleware");
+
 const userRoutes = require("./routes/UserRoutes")(container); // Pass container
 const packageRoutes = require("./routes/PackageRoutes")(container);
 const contactRoutes = require("./routes/ContactRoutes")(container);
@@ -25,12 +27,15 @@ const clientURL = process.env.CLIENT_URL || "http://localhost:5173";
 app.use(cors({ origin: clientURL, credentials: true }));
 app.use(helmet({ crossOriginResourcePolicy: false }));
 
-app.use('/api/webhooks/stripe', webhookRoutes);
-
+app.use("/api/webhooks/stripe", webhookRoutes);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// 👇 Inject container into all requests (IMPORTANT for S3 upload middleware)
+app.use(injectContainer(container));
+
+// Static files and docs
 app.use("/public", express.static(path.join(__dirname, "public")));
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 

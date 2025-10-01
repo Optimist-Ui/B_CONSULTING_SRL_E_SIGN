@@ -12,6 +12,7 @@ class PackageService {
     smsService,
     pdfModificationService,
     packageEventEmitter,
+    s3Service,
   }) {
     this.Package = Package;
     this.Contact = Contact;
@@ -22,17 +23,26 @@ class PackageService {
     this.SmsService = smsService;
     this.pdfModifier = pdfModificationService;
     this.packageEventEmitter = packageEventEmitter;
+    this.s3Service = s3Service; // 👈 ADD THIS
   }
 
-  async uploadPackage(userId, { attachment_uuid, fileUrl }) {
+  async uploadPackage(userId, s3File) {
+    if (!s3File) {
+      throw new Error("No file uploaded.");
+    }
     const existingPackage = await this.Package.findOne({
       ownerId: userId,
-      attachment_uuid,
+      attachment_uuid: s3File.attachment_uuid,
     });
     if (existingPackage) {
       throw new Error("A package with this attachment UUID already exists.");
     }
-    return { attachment_uuid, fileUrl };
+    return {
+      attachment_uuid: s3File.attachment_uuid,
+      originalFileName: s3File.originalName,
+      fileUrl: s3File.url, // S3 URL
+      s3Key: s3File.key, // ✅ S3 key for operations
+    };
   }
 
   async createPackage(userId, packageData) {
@@ -46,6 +56,7 @@ class PackageService {
       templateId,
       customMessage,
       status,
+      s3Key,
     } = packageData;
 
     if (templateId) {
@@ -66,6 +77,10 @@ class PackageService {
           "Attachment UUID and file URL must match the selected template."
         );
       }
+    }
+
+    if (!s3Key) {
+      throw new Error("S3 key is required to create a package.");
     }
 
     const allContactIds = [
@@ -92,6 +107,7 @@ class PackageService {
       attachment_uuid,
       name,
       fileUrl,
+      s3Key,
       fields,
       receivers,
       options,
@@ -170,6 +186,27 @@ class PackageService {
         this.Package.countDocuments(query),
       ]);
 
+      // 👈 ADD THIS - Generate signed URLs for all packages
+      const packagesWithSignedUrls = await Promise.all(
+        packages.map(async (pkg) => {
+          if (pkg.s3Key) {
+            try {
+              pkg.downloadUrl = await this.s3Service.getSignedUrl(
+                pkg.s3Key,
+                3600 // 1 hour
+              );
+            } catch (error) {
+              console.error(
+                `Failed to generate signed URL for package ${pkg._id}:`,
+                error
+              );
+              pkg.downloadUrl = pkg.fileUrl; // Fallback
+            }
+          }
+          return pkg;
+        })
+      );
+
       // 3. Transform the raw DB data into the exact format the frontend expects
       const transformedDocuments = await this._transformPackagesForFrontend(
         packages
@@ -195,12 +232,32 @@ class PackageService {
       _id: packageId,
       ownerId: userId,
     }).populate("templateId", "name attachment_uuid fileUrl");
+
     if (!packageData) {
       throw new Error(
         "Package not found or you do not have permission to view it."
       );
     }
-    return packageData;
+
+    const packageObj = packageData.toObject();
+
+    // 👈 ADD THIS - Generate signed URL for downloading
+    if (packageData.s3Key) {
+      try {
+        packageObj.downloadUrl = await this.s3Service.getSignedUrl(
+          packageData.s3Key,
+          3600 // 1 hour
+        );
+      } catch (error) {
+        console.error(
+          `Failed to generate signed URL for package ${packageData._id}:`,
+          error
+        );
+        packageObj.downloadUrl = packageData.fileUrl; // Fallback
+      }
+    }
+
+    return packageObj;
   }
 
   async updatePackage(userId, packageId, updateData) {
@@ -220,6 +277,8 @@ class PackageService {
     delete safeUpdateData.ownerId;
     delete safeUpdateData._id;
     delete safeUpdateData.templateId;
+    delete safeUpdateData.s3Key; // 👈 Don't allow S3 key updates
+    delete safeUpdateData.fileUrl; // 👈 Don't allow file URL updates
 
     if (safeUpdateData.fields || safeUpdateData.receivers) {
       const allContactIds = [
@@ -273,6 +332,19 @@ class PackageService {
       await this._sendInitialNotifications(packageData, senderName);
     }
 
+    // 👈 ADD THIS - Return with signed URL
+    const packageObj = packageData.toObject();
+    if (packageData.s3Key) {
+      try {
+        packageObj.downloadUrl = await this.s3Service.getSignedUrl(
+          packageData.s3Key,
+          3600
+        );
+      } catch (error) {
+        console.error("Failed to generate signed URL:", error);
+      }
+    }
+
     return packageData;
   }
 
@@ -287,17 +359,14 @@ class PackageService {
       );
     }
 
-    if (!packageData.templateId) {
-      const cleanRelativePath = packageData.fileUrl
-        .replace("/Uploads/", "/uploads/")
-        .replace("/public/uploads/", "/uploads/")
-        .replace(/^\/uploads\//, "uploads/");
-
-      const filePath = path.join(__dirname, "../..", cleanRelativePath);
+    // 👈 ADD THIS - Delete file from S3
+    if (packageData.s3Key) {
       try {
-        await fs.unlink(filePath);
-      } catch (err) {
-        console.error("Failed to delete file:", err);
+        await this.s3Service.deleteFile(packageData.s3Key);
+        console.log(`Deleted package file from S3: ${packageData.s3Key}`);
+      } catch (error) {
+        console.error("Failed to delete package file from S3:", error);
+        // Continue with DB deletion even if S3 deletion fails
       }
     }
 
@@ -362,6 +431,22 @@ class PackageService {
       "firstName lastName email"
     );
     const packageForParticipant = pkg.toObject();
+
+    // 👈 ADD THIS - Generate signed URL for downloading
+    if (pkg.s3Key) {
+      try {
+        packageForParticipant.downloadUrl = await this.s3Service.getSignedUrl(
+          pkg.s3Key,
+          3600 // 1 hour
+        );
+      } catch (error) {
+        console.error(
+          `Failed to generate signed URL for package ${pkg._id}:`,
+          error
+        );
+        packageForParticipant.downloadUrl = pkg.fileUrl; // Fallback
+      }
+    }
 
     // Step 4. Process fields to add necessary frontend data
     packageForParticipant.fields = pkg.fields.map((field) => {

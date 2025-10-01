@@ -101,6 +101,11 @@ const Step2_FieldAssignment: React.FC<StepProps> = ({ onNext, onPrevious }) => {
                 let pdf: PDFDocumentProxy;
                 if (currentPackage.fileData && currentPackage.fileData.byteLength > 0) {
                     pdf = await loadPdfDocument(currentPackage.fileData.slice(0));
+                } else if (currentPackage.downloadUrl) {
+                    const response = await fetch(currentPackage.downloadUrl, { mode: 'cors' });
+                    if (!response.ok) throw new Error(`Failed to fetch PDF: ${response.statusText}`);
+                    const arrayBuffer = await response.arrayBuffer();
+                    pdf = await loadPdfDocument(arrayBuffer);
                 } else if (currentPackage.fileUrl && !currentPackage.fileUrl.startsWith('blob:')) {
                     const correctedFileUrl = currentPackage.fileUrl.startsWith('/public') ? currentPackage.fileUrl : `/public${currentPackage.fileUrl}`;
                     const fullUrl = `${BACKEND_URL}${correctedFileUrl}`;
@@ -110,7 +115,7 @@ const Step2_FieldAssignment: React.FC<StepProps> = ({ onNext, onPrevious }) => {
                     pdf = await loadPdfDocument(arrayBuffer);
                 } else if (currentPackage.fileUrl?.startsWith('blob:')) {
                     const response = await fetch(currentPackage.fileUrl);
-                    if (!response.ok) throw new Error(`Failed to fetch blob PDF: ${response.statusText}`);
+                    if (!response.ok) throw new Error(`Fetch failed for blob: ${response.statusText}`);
                     const arrayBuffer = await response.arrayBuffer();
                     pdf = await loadPdfDocument(arrayBuffer);
                 } else {
@@ -161,10 +166,6 @@ const Step2_FieldAssignment: React.FC<StepProps> = ({ onNext, onPrevious }) => {
                 for (let i = 1; i <= numPages; i++) {
                     const canvas = canvasRefs.current[i - 1]?.current;
                     if (canvas) {
-                        const context = canvas.getContext('2d');
-                        if (context) {
-                            context.clearRect(0, 0, canvas.width, canvas.height);
-                        }
                         const task = await renderPdfPageToCanvas(pdfInstance, i, canvas, pageInfos[i - 1].scale);
                         renderTasks.current.push({ page: i, task });
                     }
