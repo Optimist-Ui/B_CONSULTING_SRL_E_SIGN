@@ -19,6 +19,7 @@ const subscriptionRoutes = require("./routes/SubscriptionRoutes")(container);
 const paymentMethodRoutes = require("./routes/PaymentMethodRoutes")(container);
 const webhookRoutes = require("./routes/WebhookRoutes")(container);
 const reviewRoutes = require("./routes/ReviewRoutes")(container);
+const chatbotRoutes = require("./routes/ChatbotRoutes")(container);
 
 const app = express();
 
@@ -47,6 +48,7 @@ app.use("/api/templates", templateRoutes);
 app.use("/api/plans", subscriptionRoutes);
 app.use("/api/reviews", reviewRoutes);
 app.use("/api/payment-methods", paymentMethodRoutes);
+app.use("/api/chatbot", chatbotRoutes);
 
 const cronService = container.resolve("cronService");
 cronService.initialize(container);

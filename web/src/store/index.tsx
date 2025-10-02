@@ -11,6 +11,8 @@ import planReducer from './slices/planSlice';
 import paymentMethodReducer from './slices/paymentMethodSlice';
 import subscriptionReducer from './slices/subscriptionSlice';
 import reviewReducer from './slices/reviewSlice';
+import chatbotReducer from './slices/chatbotSlice';
+
 import api, { setupInterceptors } from '../utils/api';
 
 const rootReducer = combineReducers({
@@ -26,6 +28,7 @@ const rootReducer = combineReducers({
     paymentMethods: paymentMethodReducer,
     subscription: subscriptionReducer,
     reviews: reviewReducer,
+    chatbot: chatbotReducer,
 });
 
 const store = configureStore({
