@@ -79,14 +79,14 @@ jobs:
         uses: appleboy/ssh-action@v1.0.0
         env:
           AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
-          AWS_REGION: ${{ env.AWS_REGION }}
-          AWS_ACCESS_KEY_ID: ${{ env.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ env.AWS_SECRET_ACCESS_KEY }}
-          OPENAI_API_KEY: ${{ env.OPENAI_API_KEY }}
-          OPENAI_MODEL: ${{ env.OPENAI_MODEL }}
-          OPENAI_MAX_TOKENS: ${{ env.OPENAI_MAX_TOKENS }}
-          CHATBOT_CONFIDENCE_THRESHOLD: ${{ env.CHATBOT_CONFIDENCE_THRESHOLD }}
-          CHATBOT_MAX_HISTORY: ${{ env.CHATBOT_MAX_HISTORY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_MODEL: ${{ secrets.OPENAI_MODEL }}
+          OPENAI_MAX_TOKENS: ${{ secrets.OPENAI_MAX_TOKENS }}
+          CHATBOT_CONFIDENCE_THRESHOLD: ${{ secrets.CHATBOT_CONFIDENCE_THRESHOLD }}
+          CHATBOT_MAX_HISTORY: ${{ secrets.CHATBOT_MAX_HISTORY }}
           IMAGE_URI: ${{ env.IMAGE_URI }}
           CONTAINER_NAME: ${{ env.CONTAINER_NAME }}
           HOST_PORT: ${{ env.HOST_PORT }}
