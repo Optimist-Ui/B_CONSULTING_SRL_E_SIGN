@@ -528,7 +528,7 @@ const PackageFieldRenderer: React.FC<PackageFieldRendererProps> = ({ field, isSe
                                                 e.stopPropagation();
                                                 onRemoveUser(field.id, assignee.id);
                                             }}
-                                            className="opacity-0 group-hover:opacity-100 transition-opacity ml-1 hover:text-red-300 hover:scale-125"
+                                            className="transition-opacity ml-1 hover:text-red-300 hover:scale-125"
                                         >
                                             <FiXTyped className="w-3 h-3" />
                                         </button>

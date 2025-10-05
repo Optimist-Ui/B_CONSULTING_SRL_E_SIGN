@@ -45,6 +45,19 @@ const InteractiveField: React.FC<InteractiveFieldProps> = ({ field, value, rejec
         }
     }, [value, field.type]);
 
+    // Determine field size category for responsive styling
+    const getFieldSizeCategory = () => {
+        const area = field.width * field.height;
+        if (area < 3000) return 'tiny'; // Very small fields
+        if (area < 6000) return 'small';
+        if (area < 12000) return 'medium';
+        return 'large';
+    };
+
+    const sizeCategory = getFieldSizeCategory();
+    const isTinyField = sizeCategory === 'tiny';
+    const isSmallField = sizeCategory === 'small' || sizeCategory === 'tiny';
+
     // Get assigned user details for display
     const getAssignedUserInfo = () => {
         if (field.assignedUsers && field.assignedUsers.length > 0) {
@@ -69,7 +82,6 @@ const InteractiveField: React.FC<InteractiveFieldProps> = ({ field, value, rejec
     // Check if this field is assigned to the person who rejected the package
     const isAssignedToRejecter = () => {
         if (!rejectionDetails || packageStatus !== 'Rejected') return false;
-
         return field.assignedUsers.some((user) => user.contactEmail === rejectionDetails.rejectedBy.contactEmail || user.contactId === rejectionDetails.rejectedBy.contactId);
     };
 
@@ -129,24 +141,24 @@ const InteractiveField: React.FC<InteractiveFieldProps> = ({ field, value, rejec
     };
 
     const getFieldIcon = () => {
+        const iconSize = isTinyField ? 'w-2.5 h-2.5' : 'w-3 h-3';
         switch (field.type) {
             case 'text':
-                return <FiFileTextTyped className="w-3 h-3 text-blue-600" />;
+                return <FiFileTextTyped className={`${iconSize} text-blue-600`} />;
             case 'date':
-                return <FiCalendarTyped className="w-3 h-3 text-purple-600" />;
+                return <FiCalendarTyped className={`${iconSize} text-purple-600`} />;
             case 'textarea':
-                return <FiFileTextTyped className="w-3 h-3 text-blue-600" />;
+                return <FiFileTextTyped className={`${iconSize} text-blue-600`} />;
             case 'checkbox':
-                return value ? <FiCheckSquareTyped className="w-3 h-3 text-green-600" /> : <FiSquareTyped className="w-3 h-3 text-gray-500" />;
+                return value ? <FiCheckSquareTyped className={`${iconSize} text-green-600`} /> : <FiSquareTyped className={`${iconSize} text-gray-500`} />;
             case 'signature':
-                return <FaSignatureTyped className="w-3 h-3 text-indigo-600" />;
+                return <FaSignatureTyped className={`${iconSize} text-indigo-600`} />;
             default:
-                return <FiFileTextTyped className="w-3 h-3 text-gray-500" />;
+                return <FiFileTextTyped className={`${iconSize} text-gray-500`} />;
         }
     };
 
     const getFieldColor = () => {
-        // If this field is assigned to the rejecter, use red colors
         if (isAssignedToRejecter()) {
             return {
                 editing: 'border-red-400 bg-red-50/80 focus-within:border-red-500 focus-within:ring-red-200',
@@ -199,6 +211,13 @@ const InteractiveField: React.FC<InteractiveFieldProps> = ({ field, value, rejec
     const canBeFinalized = ['text', 'textarea', 'date'].includes(field.type);
     const showRejectionDetails = isAssignedToRejecter();
 
+    // Responsive header padding and text sizes
+    const headerPadding = isTinyField ? 'px-1 py-0.5' : isSmallField ? 'px-1.5 py-0.5' : 'px-2 py-1';
+    const labelTextSize = isTinyField ? 'text-[9px]' : isSmallField ? 'text-[10px]' : 'text-xs';
+    const userTextSize = isTinyField ? 'text-[7px]' : isSmallField ? 'text-[8px]' : 'text-[10px]';
+    const contentPadding = isTinyField ? 'p-0.5' : isSmallField ? 'p-1' : 'px-3 py-2';
+    const contentTextSize = isTinyField ? 'text-[10px]' : isSmallField ? 'text-xs' : 'text-sm';
+
     // Show rejection details for interactive fields assigned to the rejecter
     if (showRejectionDetails && packageStatus === 'Rejected') {
         return (
@@ -207,32 +226,30 @@ const InteractiveField: React.FC<InteractiveFieldProps> = ({ field, value, rejec
                 className="bg-red-50/80 border-2 border-red-400 rounded-lg shadow-sm backdrop-blur-sm flex flex-col overflow-hidden hover:shadow-md transition-all duration-200"
                 title={`Field rejected by ${rejectionDetails!.rejectedBy.contactName}: ${rejectionDetails!.reason}`}
             >
-                <div className="flex items-center justify-between px-2 py-1 bg-red-100/60 rounded-t-md border-b border-red-300 flex-shrink-0">
-                    <div className="flex items-center gap-1 min-w-0 flex-1">
-                        <FiXCircleTyped className="w-3 h-3 text-red-600 flex-shrink-0" />
-                        <span className="text-xs font-semibold text-red-700 truncate leading-tight">
+                <div className={`flex items-center justify-between ${headerPadding} bg-red-100/60 rounded-t-md border-b border-red-300 flex-shrink-0`}>
+                    <div className="flex items-center gap-0.5 min-w-0 flex-1">
+                        <FiXCircleTyped className={`${isTinyField ? 'w-2.5 h-2.5' : 'w-3 h-3'} text-red-600 flex-shrink-0`} />
+                        <span className={`${labelTextSize} font-semibold text-red-700 truncate leading-tight`}>
                             {field.label}
                             {field.required && <span className="text-red-500 ml-0.5">*</span>}
                         </span>
                     </div>
-                    <div className="flex items-center gap-1">
-                        <FiAlertTriangleTyped className="w-3 h-3 text-red-600" />
-                    </div>
+                    <FiAlertTriangleTyped className={`${isTinyField ? 'w-2.5 h-2.5' : 'w-3 h-3'} text-red-600 flex-shrink-0`} />
                 </div>
-                <div className="flex-grow flex flex-col p-2 min-h-0">
-                    <div className="flex items-center gap-1 mb-1">
-                        <FiXCircleTyped className="w-4 h-4 text-red-600 flex-shrink-0" />
-                        <span className="text-xs font-bold text-red-700 uppercase tracking-wider">Document Rejected</span>
+                <div className={`flex-grow flex flex-col ${contentPadding} min-h-0`}>
+                    <div className="flex items-center gap-0.5 mb-0.5">
+                        <FiXCircleTyped className="w-3 h-3 text-red-600 flex-shrink-0" />
+                        <span className={`${labelTextSize} font-bold text-red-700 uppercase tracking-wider`}>Rejected</span>
                     </div>
-                    <div className="text-xs text-red-700 space-y-1">
-                        <p className="font-semibold truncate">By: {rejectionDetails!.rejectedBy.contactName}</p>
-                        {rejectionDetails!.rejectedIP && <p className="text-red-600 text-[10px]">IP: {rejectionDetails!.rejectedIP}</p>}
-                        <p className="text-red-600 text-[10px]">{new Date(rejectionDetails!.rejectedAt).toLocaleString()}</p>
+                    <div className={`${userTextSize} text-red-700 space-y-0.5`}>
+                        <p className="font-semibold truncate">{rejectionDetails!.rejectedBy.contactName}</p>
+                        {!isTinyField && rejectionDetails!.rejectedIP && <p className="text-red-600">IP: {rejectionDetails!.rejectedIP}</p>}
+                        <p className="text-red-600">{new Date(rejectionDetails!.rejectedAt).toLocaleString()}</p>
                     </div>
-                    {rejectionDetails!.reason && (
-                        <div className="mt-1 flex-grow">
-                            <p className="text-[10px] text-red-600 font-medium mb-0.5">Reason:</p>
-                            <p className="text-xs text-red-700 leading-tight break-words">{rejectionDetails!.reason}</p>
+                    {rejectionDetails!.reason && !isTinyField && (
+                        <div className="mt-0.5 flex-grow">
+                            <p className={`${userTextSize} text-red-600 font-medium mb-0.5`}>Reason:</p>
+                            <p className={`${labelTextSize} text-red-700 leading-tight break-words line-clamp-2`}>{rejectionDetails!.reason}</p>
                         </div>
                     )}
                 </div>
@@ -243,26 +260,28 @@ const InteractiveField: React.FC<InteractiveFieldProps> = ({ field, value, rejec
     if (canBeFinalized && !isEditing) {
         return (
             <div style={baseStyles} className={`${colors.finalized} border-2 rounded-lg shadow-sm backdrop-blur-sm transition-all duration-200 hover:shadow-md`}>
-                <div className="flex items-center justify-between px-3 py-1.5 bg-white/40 rounded-t-md border-b border-green-200">
-                    <div className="flex items-center gap-2 min-w-0 flex-1">
+                <div className={`flex items-center justify-between ${headerPadding} bg-white/40 rounded-t-md border-b border-green-200`}>
+                    <div className="flex items-center gap-1 min-w-0 flex-1">
                         {getFieldIcon()}
                         <div className="flex flex-col min-w-0 flex-1">
-                            <span className="text-xs font-semibold text-slate-700 truncate">
-                                {field.label} {field.required && <span className="text-red-500 ml-1">*</span>}
+                            <span className={`${labelTextSize} font-semibold text-slate-700 truncate`}>
+                                {field.label} {field.required && <span className="text-red-500 ml-0.5">*</span>}
                             </span>
-                            <div className="flex items-center gap-1">
-                                <FiUserTyped className="w-2.5 h-2.5 text-green-600" />
-                                <span className="text-[10px] text-green-700 font-medium truncate">{assignedUserInfo.name}</span>
-                            </div>
+                            {!isTinyField && (
+                                <div className="flex items-center gap-0.5">
+                                    <FiUserTyped className="w-2 h-2 text-green-600" />
+                                    <span className={`${userTextSize} text-green-700 font-medium truncate`}>{assignedUserInfo.name}</span>
+                                </div>
+                            )}
                         </div>
                     </div>
-                    <button onClick={() => setIsEditing(true)} className="p-1.5 rounded-md hover:bg-green-200/60 transition-colors group" title="Edit field">
-                        <FiEdit3Typed className="w-3.5 h-3.5 text-green-700 group-hover:text-green-800" />
+                    <button onClick={() => setIsEditing(true)} className={`${isTinyField ? 'p-0.5' : 'p-1'} rounded-md hover:bg-green-200/60 transition-colors group`} title="Edit field">
+                        <FiEdit3Typed className={`${isTinyField ? 'w-2.5 h-2.5' : 'w-3 h-3'} text-green-700 group-hover:text-green-800`} />
                     </button>
                 </div>
-                <div className="px-3 py-2 flex-grow">
-                    <div className="text-sm font-medium text-slate-800 break-words">
-                        {field.type === 'textarea' ? <div className="whitespace-pre-wrap">{value.toString()}</div> : <div className="truncate">{value.toString()}</div>}
+                <div className={`${contentPadding} flex-grow overflow-hidden`}>
+                    <div className={`${contentTextSize} font-medium text-slate-800 break-words`}>
+                        {field.type === 'textarea' ? <div className="whitespace-pre-wrap line-clamp-3">{value.toString()}</div> : <div className="truncate">{value.toString()}</div>}
                     </div>
                 </div>
             </div>
@@ -277,30 +296,32 @@ const InteractiveField: React.FC<InteractiveFieldProps> = ({ field, value, rejec
                     style={baseStyles}
                     className={`${colors.editing} border-2 rounded-lg shadow-sm backdrop-blur-sm transition-all duration-200 focus-within:ring-2 focus-within:ring-opacity-50 focus-within:shadow-md`}
                 >
-                    <div className="flex items-center justify-between px-3 py-1.5 bg-white/40 rounded-t-md border-b border-current border-opacity-20">
-                        <div className="flex items-center gap-2 min-w-0 flex-1">
+                    <div className={`flex items-center justify-between ${headerPadding} bg-white/40 rounded-t-md border-b border-current border-opacity-20`}>
+                        <div className="flex items-center gap-1 min-w-0 flex-1">
                             {getFieldIcon()}
                             <div className="flex flex-col min-w-0 flex-1">
-                                <span className="text-xs font-semibold text-slate-700 truncate">
-                                    {field.label} {field.required && <span className="text-red-500 ml-1">*</span>}
+                                <span className={`${labelTextSize} font-semibold text-slate-700 truncate`}>
+                                    {field.label} {field.required && <span className="text-red-500 ml-0.5">*</span>}
                                 </span>
-                                <div className="flex items-center gap-1">
-                                    <FiUserTyped className="w-2.5 h-2.5 text-slate-500" />
-                                    <span className="text-[10px] text-slate-600 font-medium truncate">{assignedUserInfo.name}</span>
-                                </div>
+                                {!isTinyField && (
+                                    <div className="flex items-center gap-0.5">
+                                        <FiUserTyped className="w-2 h-2 text-slate-500" />
+                                        <span className={`${userTextSize} text-slate-600 font-medium truncate`}>{assignedUserInfo.name}</span>
+                                    </div>
+                                )}
                             </div>
                         </div>
-                        <button onClick={handleFinalize} className={`${colors.button} text-white p-1.5 rounded-md transition-colors shadow-sm hover:shadow-md`} title="Save field">
-                            <FiSaveTyped className="w-3.5 h-3.5" />
+                        <button onClick={handleFinalize} className={`${colors.button} text-white ${isTinyField ? 'p-0.5' : 'p-1'} rounded-md transition-colors shadow-sm`} title="Save field">
+                            <FiSaveTyped className={`${isTinyField ? 'w-2.5 h-2.5' : 'w-3 h-3'}`} />
                         </button>
                     </div>
-                    <div className="px-3 py-2 flex-grow">
+                    <div className={`${contentPadding} flex-grow`}>
                         <input
                             type={field.type}
                             placeholder={field.placeholder}
                             value={localValue ?? ''}
                             onChange={handleLocalChange}
-                            className="w-full h-full bg-transparent border-none outline-none text-sm font-medium text-slate-800 placeholder-slate-400"
+                            className={`w-full h-full bg-transparent border-none outline-none ${contentTextSize} font-medium text-slate-800 placeholder-slate-400`}
                         />
                     </div>
                 </div>
@@ -312,29 +333,31 @@ const InteractiveField: React.FC<InteractiveFieldProps> = ({ field, value, rejec
                     style={baseStyles}
                     className={`${colors.editing} border-2 rounded-lg shadow-sm backdrop-blur-sm transition-all duration-200 focus-within:ring-2 focus-within:ring-opacity-50 focus-within:shadow-md flex flex-col`}
                 >
-                    <div className="flex items-center justify-between px-3 py-1.5 bg-white/40 rounded-t-md border-b border-current border-opacity-20 flex-shrink-0">
-                        <div className="flex items-center gap-2 min-w-0 flex-1">
+                    <div className={`flex items-center justify-between ${headerPadding} bg-white/40 rounded-t-md border-b border-current border-opacity-20 flex-shrink-0`}>
+                        <div className="flex items-center gap-1 min-w-0 flex-1">
                             {getFieldIcon()}
                             <div className="flex flex-col min-w-0 flex-1">
-                                <span className="text-xs font-semibold text-slate-700 truncate">
-                                    {field.label} {field.required && <span className="text-red-500 ml-1">*</span>}
+                                <span className={`${labelTextSize} font-semibold text-slate-700 truncate`}>
+                                    {field.label} {field.required && <span className="text-red-500 ml-0.5">*</span>}
                                 </span>
-                                <div className="flex items-center gap-1">
-                                    <FiUserTyped className="w-2.5 h-2.5 text-slate-500" />
-                                    <span className="text-[10px] text-slate-600 font-medium truncate">{assignedUserInfo.name}</span>
-                                </div>
+                                {!isTinyField && (
+                                    <div className="flex items-center gap-0.5">
+                                        <FiUserTyped className="w-2 h-2 text-slate-500" />
+                                        <span className={`${userTextSize} text-slate-600 font-medium truncate`}>{assignedUserInfo.name}</span>
+                                    </div>
+                                )}
                             </div>
                         </div>
-                        <button onClick={handleFinalize} className={`${colors.button} text-white p-1.5 rounded-md transition-colors shadow-sm hover:shadow-md`} title="Save field">
-                            <FiSaveTyped className="w-3.5 h-3.5" />
+                        <button onClick={handleFinalize} className={`${colors.button} text-white ${isTinyField ? 'p-0.5' : 'p-1'} rounded-md transition-colors shadow-sm`} title="Save field">
+                            <FiSaveTyped className={`${isTinyField ? 'w-2.5 h-2.5' : 'w-3 h-3'}`} />
                         </button>
                     </div>
-                    <div className="px-3 py-2 flex-grow">
+                    <div className={`${contentPadding} flex-grow`}>
                         <textarea
                             placeholder={field.placeholder}
                             value={localValue}
                             onChange={handleLocalChange}
-                            className="w-full h-full bg-transparent border-none outline-none resize-none text-sm font-medium text-slate-800 placeholder-slate-400"
+                            className={`w-full h-full bg-transparent border-none outline-none resize-none ${contentTextSize} font-medium text-slate-800 placeholder-slate-400`}
                         />
                     </div>
                 </div>
@@ -346,17 +369,19 @@ const InteractiveField: React.FC<InteractiveFieldProps> = ({ field, value, rejec
                     style={baseStyles}
                     className={`${colors.editing} border-2 rounded-lg shadow-sm backdrop-blur-sm cursor-pointer transition-all duration-200 hover:shadow-md flex flex-col overflow-hidden`}
                 >
-                    <div className="flex items-center justify-between px-2 py-1 bg-white/40 rounded-t-md border-b border-current border-opacity-20 flex-shrink-0">
-                        <div className="flex items-center gap-1 min-w-0 flex-1">
+                    <div className={`flex items-center justify-between ${headerPadding} bg-white/40 rounded-t-md border-b border-current border-opacity-20 flex-shrink-0`}>
+                        <div className="flex items-center gap-0.5 min-w-0 flex-1">
                             {getFieldIcon()}
                             <div className="flex flex-col min-w-0 flex-1">
-                                <span className="text-xs font-semibold text-slate-700 truncate leading-tight">
+                                <span className={`${labelTextSize} font-semibold text-slate-700 truncate leading-tight`}>
                                     {field.label} {field.required && <span className="text-red-500 ml-0.5">*</span>}
                                 </span>
-                                <div className="flex items-center gap-1">
-                                    <FiUserTyped className="w-2 h-2 text-slate-500" />
-                                    <span className="text-[9px] text-slate-600 font-medium truncate">{assignedUserInfo.name}</span>
-                                </div>
+                                {!isTinyField && (
+                                    <div className="flex items-center gap-0.5">
+                                        <FiUserTyped className="w-1.5 h-1.5 text-slate-500" />
+                                        <span className={`${userTextSize} text-slate-600 font-medium truncate`}>{assignedUserInfo.name}</span>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -365,7 +390,9 @@ const InteractiveField: React.FC<InteractiveFieldProps> = ({ field, value, rejec
                             type="checkbox"
                             checked={!!value}
                             onChange={handleCheckboxChange}
-                            className="w-5 h-5 rounded border-2 border-amber-400 text-amber-500 focus:ring-amber-200 focus:ring-2 bg-white/80 transition-all duration-200 flex-shrink-0"
+                            className={`${
+                                isTinyField ? 'w-3.5 h-3.5' : 'w-5 h-5'
+                            } rounded border-2 border-amber-400 text-amber-500 focus:ring-amber-200 focus:ring-2 bg-white/80 transition-all duration-200 flex-shrink-0`}
                         />
                     </div>
                 </label>
@@ -378,29 +405,28 @@ const InteractiveField: React.FC<InteractiveFieldProps> = ({ field, value, rejec
                 const signatureValue = value as SignatureValue;
                 return (
                     <div style={baseStyles} className="border-2 border-green-400 bg-green-50/80 rounded-lg shadow-sm backdrop-blur-sm p-2 flex flex-col justify-center overflow-hidden">
-                        <div className="flex items-center gap-2 mb-1.5 text-green-700">
-                            <FiCheckCircleTyped className="w-4 h-4 flex-shrink-0" />
-                            <h4 className="font-bold text-xs uppercase tracking-wider">Signed Digitally</h4>
+                        <div className="flex items-center gap-1 mb-1 text-green-700">
+                            <FiCheckCircleTyped className={`${isTinyField ? 'w-3 h-3' : 'w-4 h-4'} flex-shrink-0`} />
+                            <h4 className={`font-bold ${labelTextSize} uppercase tracking-wider`}>Signed</h4>
                         </div>
-                        <div className="text-xs text-slate-700 space-y-0.5 pl-1">
-                            <p className="font-semibold">{signatureValue.signedBy}</p>
-                            {signatureValue.method === 'SMS OTP' && signatureValue.phone ? (
-                                <p className="truncate text-gray-600">{signatureValue.phone}</p>
-                            ) : (
-                                <p className="truncate text-gray-600">{signatureValue.email}</p>
-                            )}
-                            {signatureValue.otpCode && <p className="text-gray-600 font-mono">OTP: {signatureValue.otpCode}</p>}
-                            <p className="text-gray-600">{new Date(signatureValue.date).toLocaleString()}</p>
+                        <div className={`${userTextSize} text-slate-700 space-y-0.5 ${isTinyField ? 'pl-0' : 'pl-1'}`}>
+                            <p className="font-semibold truncate">{signatureValue.signedBy}</p>
+                            {!isTinyField &&
+                                (signatureValue.method === 'SMS OTP' && signatureValue.phone ? (
+                                    <p className="truncate text-gray-600">{signatureValue.phone}</p>
+                                ) : (
+                                    <p className="truncate text-gray-600">{signatureValue.email}</p>
+                                ))}
+                            {!isTinyField && signatureValue.otpCode && <p className="text-gray-600 font-mono">OTP: {signatureValue.otpCode}</p>}
+                            <p className="text-gray-600 truncate">{new Date(signatureValue.date).toLocaleString()}</p>
                         </div>
-                        <p className="text-right text-[10px] text-gray-500 mt-auto pt-1 font-semibold">via {signatureValue.method || 'Email OTP'} by SignatureFlow</p>
+                        {!isTinyField && <p className={`text-right ${userTextSize} text-gray-500 mt-auto pt-0.5 font-semibold truncate`}>via {signatureValue.method || 'Email OTP'}</p>}
                     </div>
                 );
             } else {
-                // Get the signature method for this field
                 const currentUserAssignment = field.assignedUsers.find((user) => user.contactId === packageData?.currentUser?.contactId);
                 const signatureMethod = currentUserAssignment?.signatureMethod || 'Email OTP';
 
-                // Display method-specific information
                 const getSignatureMethodInfo = () => {
                     switch (signatureMethod) {
                         case 'SMS OTP':
@@ -419,7 +445,7 @@ const InteractiveField: React.FC<InteractiveFieldProps> = ({ field, value, rejec
                             };
                         case 'Both':
                             return {
-                                subtitle: 'Choose signing method',
+                                subtitle: 'Choose method',
                                 iconColor: 'text-purple-600',
                                 bgGradient: 'bg-gradient-to-br from-purple-50 to-indigo-50',
                                 borderColor: 'border-purple-300',
@@ -442,25 +468,31 @@ const InteractiveField: React.FC<InteractiveFieldProps> = ({ field, value, rejec
                         style={baseStyles}
                         className={`${methodInfo.borderColor} border-2 ${methodInfo.bgGradient} rounded-lg shadow-sm backdrop-blur-sm cursor-pointer transition-all duration-200 hover:shadow-md hover:scale-[1.01] flex flex-col group overflow-hidden`}
                     >
-                        <div className="flex items-center justify-between px-2 py-1 bg-white/40 rounded-t-md border-b border-current border-opacity-20 flex-shrink-0">
-                            <div className="flex items-center gap-1 min-w-0 flex-1">
+                        <div className={`flex items-center justify-between ${headerPadding} bg-white/40 rounded-t-md border-b border-current border-opacity-20 flex-shrink-0`}>
+                            <div className="flex items-center gap-0.5 min-w-0 flex-1">
                                 {getFieldIcon()}
                                 <div className="flex flex-col min-w-0 flex-1">
-                                    <span className="text-xs font-semibold text-slate-700 truncate leading-tight">
+                                    <span className={`${labelTextSize} font-semibold text-slate-700 truncate leading-tight`}>
                                         {field.label}
                                         {field.required && <span className="text-red-500 ml-0.5">*</span>}
                                     </span>
-                                    <div className="flex items-center gap-1">
-                                        <FiUserTyped className="w-2 h-2 text-slate-500" />
-                                        <span className="text-[9px] text-slate-600 font-medium truncate">{assignedUserInfo.name}</span>
-                                    </div>
+                                    {!isTinyField && (
+                                        <div className="flex items-center gap-0.5">
+                                            <FiUserTyped className="w-1.5 h-1.5 text-slate-500" />
+                                            <span className={`${userTextSize} text-slate-600 font-medium truncate`}>{assignedUserInfo.name}</span>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
-                            {signatureMethod && <span className="text-[10px] font-medium text-gray-600 bg-white/60 px-1.5 py-0.5 rounded-full">{signatureMethod}</span>}
+                            {!isTinyField && signatureMethod && (
+                                <span className={`${userTextSize} font-medium text-gray-600 bg-white/60 px-1 py-0.5 rounded-full whitespace-nowrap`}>{signatureMethod}</span>
+                            )}
                         </div>
-                        <div className="flex-grow flex flex-col items-center justify-center p-2 group-hover:bg-white/20 transition-colors min-h-0">
-                            <FaPenTyped className={`text-lg ${methodInfo.iconColor} mb-1 group-hover:scale-105 transition-transform flex-shrink-0`} />
-                            <span className="font-bold text-slate-800 text-xs uppercase tracking-wide text-center leading-tight">{methodInfo.subtitle}</span>
+                        <div className="flex-grow flex flex-col items-center justify-center p-1 group-hover:bg-white/20 transition-colors min-h-0">
+                            <FaPenTyped
+                                className={`${isTinyField ? 'text-sm' : 'text-lg'} ${methodInfo.iconColor} ${isTinyField ? 'mb-0' : 'mb-1'} group-hover:scale-105 transition-transform flex-shrink-0`}
+                            />
+                            <span className={`font-bold text-slate-800 ${labelTextSize} uppercase tracking-wide text-center leading-tight`}>{isTinyField ? 'Sign' : methodInfo.subtitle}</span>
                         </div>
                     </div>
                 );
@@ -469,20 +501,22 @@ const InteractiveField: React.FC<InteractiveFieldProps> = ({ field, value, rejec
         default:
             return (
                 <div style={baseStyles} className="bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg flex flex-col shadow-sm">
-                    <div className="flex items-center gap-2 px-3 py-1.5 bg-white/40 rounded-t-md border-b border-gray-300">
+                    <div className={`flex items-center gap-1 ${headerPadding} bg-white/40 rounded-t-md border-b border-gray-300`}>
                         {getFieldIcon()}
                         <div className="flex flex-col min-w-0 flex-1">
-                            <span className="text-xs font-semibold text-slate-700 truncate">
-                                {field.label} {field.required && <span className="text-red-500 ml-1">*</span>}
+                            <span className={`${labelTextSize} font-semibold text-slate-700 truncate`}>
+                                {field.label} {field.required && <span className="text-red-500 ml-0.5">*</span>}
                             </span>
-                            <div className="flex items-center gap-1">
-                                <FiUserTyped className="w-2.5 h-2.5 text-slate-500" />
-                                <span className="text-[10px] text-slate-600 font-medium truncate">{assignedUserInfo.name}</span>
-                            </div>
+                            {!isTinyField && (
+                                <div className="flex items-center gap-0.5">
+                                    <FiUserTyped className="w-2 h-2 text-slate-500" />
+                                    <span className={`${userTextSize} text-slate-600 font-medium truncate`}>{assignedUserInfo.name}</span>
+                                </div>
+                            )}
                         </div>
                     </div>
-                    <div className="flex-grow flex items-center justify-center px-3 py-2">
-                        <span className="text-xs text-gray-500 font-medium">Unsupported Field Type</span>
+                    <div className={`flex-grow flex items-center justify-center ${contentPadding}`}>
+                        <span className={`${labelTextSize} text-gray-500 font-medium`}>Unsupported</span>
                     </div>
                 </div>
             );

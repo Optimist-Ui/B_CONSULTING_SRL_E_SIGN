@@ -1,4 +1,4 @@
-// SigningDrawer.tsx
+// SigningDrawer.tsx - Updated Version with Improved UX
 import React, { useState, useEffect, ComponentType, Fragment } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Transition } from '@headlessui/react';
@@ -23,7 +23,6 @@ const SigningDrawer: React.FC = () => {
     const [otp, setOtp] = useState('');
     const [timer, setTimer] = useState(60);
 
-    // Get current user's signature method from package data
     const currentUserSignatureMethod = packageData?.currentUser?.signatureMethod;
 
     // Reset local state when drawer closes or flow restarts
@@ -63,7 +62,6 @@ const SigningDrawer: React.FC = () => {
         }
     };
 
-    // Dispatch the appropriate sendOtp thunk based on method
     const handleIdentityConfirm = async () => {
         if (!packageData || !activeSigningFieldId || !signingMethod) {
             toast.error('An error occurred. Cannot identify the document or field.');
@@ -96,14 +94,12 @@ const SigningDrawer: React.FC = () => {
                 ).unwrap();
                 toast.success('OTP sent to your phone!');
             }
-
             setTimer(60);
         } catch (err) {
             console.error('Failed to send OTP:', err);
         }
     };
 
-    // Resend the OTP
     const handleResendOtp = () => {
         const identityValue = signingMethod === 'email' ? signingEmail : signingPhone;
         if (identityValue) {
@@ -113,7 +109,6 @@ const SigningDrawer: React.FC = () => {
         }
     };
 
-    // Dispatch the appropriate verifyOtp thunk based on method
     const handleCompleteSigning = async () => {
         if (!packageData || !activeSigningFieldId || !signingMethod || otp.length < 6) {
             toast.error('An error occurred. Missing required information.');
@@ -147,8 +142,7 @@ const SigningDrawer: React.FC = () => {
         if (signingMethod === 'email') {
             return packageData?.currentUser?.contactEmail.replace(/^(.).*?@/, '$1*****@');
         } else if (signingMethod === 'sms') {
-            // Assuming phone is stored in currentUser, mask it appropriately
-            const phone = packageData?.currentUser?.contactPhone; // You might need to adjust this field
+            const phone = packageData?.currentUser?.contactPhone;
             return phone ? phone.replace(/(\d{3})\d{4}(\d{3})/, '$1****$2') : '';
         }
         return '';
@@ -157,7 +151,6 @@ const SigningDrawer: React.FC = () => {
     const goBack = () => {
         if (signingStep === 'identity') {
             if (currentUserSignatureMethod && currentUserSignatureMethod !== 'Both') {
-                // If user has a specific method assigned, close drawer instead of going to method selection
                 dispatch(setSigningDrawerOpen(false));
             } else {
                 dispatch(setSigningStep('method'));
@@ -170,24 +163,20 @@ const SigningDrawer: React.FC = () => {
         dispatch(setSigningDrawerOpen(false));
     };
 
-    // Determine if we should show method selection or go straight to identity
     const shouldShowMethodSelection = () => {
         const allowed = packageData?.currentUser?.signatureMethods ?? [];
-        return allowed.length > 1; // don’t show screen if only one (or zero)
+        return allowed.length > 1;
     };
 
-    // Auto-select method if user has specific signature method assigned
     useEffect(() => {
         if (!uiState.isSigningDrawerOpen || signingStep !== 'method') return;
         const allowed = packageData?.currentUser?.signatureMethods ?? [];
         if (allowed.length === 1) {
-            // exactly one → pick it
             const method = allowed[0].toLowerCase().includes('email') ? 'email' : 'sms';
             handleMethodSelect(method);
         }
     }, [uiState.isSigningDrawerOpen, signingStep, packageData?.currentUser?.signatureMethods]);
 
-    // UI text helpers
     const getStepTitle = () => {
         switch (signingStep) {
             case 'method':
@@ -209,9 +198,10 @@ const SigningDrawer: React.FC = () => {
                 return 'Choose a method to securely verify your identity';
             case 'identity':
                 return `For security, please enter your ${signingMethod === 'email' ? 'email address' : 'phone number'} below`;
-            case 'otp':
+            case 'otp': {
                 const contact = signingMethod === 'email' ? signingEmail : signingPhone;
                 return `We sent a 6-digit code to ${contact}. It expires in ${timer} seconds.`;
+            }
             case 'success':
                 return 'Your signature has been successfully applied to the document';
             default:
@@ -220,12 +210,7 @@ const SigningDrawer: React.FC = () => {
     };
 
     const getIdentityPlaceholder = () => {
-        if (signingMethod === 'email') {
-            return 'e.g., yourname@example.com';
-        } else if (signingMethod === 'sms') {
-            return 'e.g., +1234567890';
-        }
-        return '';
+        return signingMethod === 'email' ? 'e.g., yourname@example.com' : 'e.g., +1234567890';
     };
 
     const getIdentityValue = () => {
@@ -246,6 +231,7 @@ const SigningDrawer: React.FC = () => {
                 >
                     <div className="absolute inset-0 bg-black bg-opacity-50 backdrop-blur-sm" onClick={closeDrawer} />
                 </Transition.Child>
+
                 <div className="absolute inset-0 overflow-hidden pointer-events-none">
                     <section className="absolute inset-y-0 right-0 max-w-full flex pointer-events-auto">
                         <Transition.Child
@@ -258,8 +244,10 @@ const SigningDrawer: React.FC = () => {
                             leaveTo="translate-x-full"
                         >
                             <div className="w-screen max-w-md sm:max-w-lg">
-                                <div className="h-full flex flex-col bg-white shadow-2xl overflow-hidden">
-                                    <div className="px-4 sm:px-6 py-6 border-b border-gray-200">
+                                {/* Full height white background container */}
+                                <div className="h-full flex flex-col bg-white shadow-2xl">
+                                    {/* Fixed Header */}
+                                    <div className="px-4 sm:px-6 py-6 border-b border-gray-200 flex-shrink-0">
                                         <div className="flex items-center justify-between">
                                             <div>
                                                 <h2 className="text-lg sm:text-xl font-semibold text-[#1e293b]">{getStepTitle()}</h2>
@@ -271,144 +259,152 @@ const SigningDrawer: React.FC = () => {
                                         </div>
                                     </div>
 
-                                    <div className="flex-1 px-4 sm:px-6 py-6 overflow-y-auto">
-                                        {signingStep === 'method' && shouldShowMethodSelection() && (
-                                            <div className="space-y-4">
-                                                <button
-                                                    onClick={() => handleMethodSelect('email')}
-                                                    className="w-full flex items-center gap-4 text-left p-4 border border-gray-300 rounded-xl hover:bg-gray-50 hover:border-slate-400 font-medium transition-all duration-200 shadow-sm hover:shadow-md"
-                                                >
-                                                    <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center">
-                                                        <FiMailTyped className="w-6 h-6" />
-                                                    </div>
-                                                    <div>
-                                                        <div className="font-semibold text-[#1e293b]">One-Time Code via Email</div>
-                                                        <div className="text-sm text-gray-500">Secure verification through your email</div>
-                                                    </div>
-                                                </button>
-                                                <button
-                                                    onClick={() => handleMethodSelect('sms')}
-                                                    className="w-full flex items-center gap-4 text-left p-4 border border-gray-300 rounded-xl hover:bg-gray-50 hover:border-slate-400 font-medium transition-all duration-200 shadow-sm hover:shadow-md"
-                                                >
-                                                    <div className="w-12 h-12 bg-green-100 text-green-600 rounded-xl flex items-center justify-center">
-                                                        <FiSmartphoneTyped className="w-6 h-6" />
-                                                    </div>
-                                                    <div>
-                                                        <div className="font-semibold text-[#1e293b]">One-Time Code via SMS</div>
-                                                        <div className="text-sm text-gray-500">Secure verification through your phone</div>
-                                                    </div>
-                                                </button>
-                                            </div>
-                                        )}
-                                        {signingStep === 'identity' && signingMethod && (
-                                            <div className="space-y-6">
-                                                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-4">
-                                                    <p className="text-xs text-gray-500 mb-1">
-                                                        We will send a verification code to the {signingMethod === 'email' ? 'email address' : 'phone number'} you enter below.
-                                                    </p>
-                                                    <p className="font-semibold text-[#1e293b]">
-                                                        It must match the recipient's {signingMethod === 'email' ? 'email' : 'phone'}: {maskedContact()}
-                                                    </p>
-                                                </div>
-                                                <div>
-                                                    <label className="block text-sm font-medium text-[#1e293b] mb-2">Your {signingMethod === 'email' ? 'Email Address' : 'Phone Number'}*</label>
-                                                    <input
-                                                        type={signingMethod === 'email' ? 'email' : 'tel'}
-                                                        value={getIdentityValue()}
-                                                        onChange={(e) => handleIdentityChange(e.target.value)}
-                                                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-all duration-200"
-                                                        placeholder={getIdentityPlaceholder()}
-                                                    />
-                                                </div>
-                                            </div>
-                                        )}
-                                        {signingStep === 'otp' && (
-                                            <div className="space-y-6">
-                                                <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl p-4 text-center">
-                                                    <div className="text-2xl font-bold text-green-600 mb-1">{timer}</div>
-                                                    <div className="text-xs text-gray-600">seconds remaining</div>
-                                                </div>
-                                                <div>
-                                                    <label className="block text-sm font-medium text-[#1e293b] mb-2 text-center">Enter 6-digit verification code</label>
-                                                    <input
-                                                        type="text"
-                                                        maxLength={6}
-                                                        value={otp}
-                                                        onChange={(e) => setOtp(e.target.value)}
-                                                        className="w-full px-4 py-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-all duration-200 text-center text-2xl tracking-[0.5em] font-mono"
-                                                        placeholder="------"
-                                                    />
-                                                </div>
-                                                {timer === 0 && (
+                                    {/* Scrollable Content Area - Takes remaining space */}
+                                    <div className="flex-1 overflow-y-auto">
+                                        {/* Content positioned at top-to-center with max-width for better UX */}
+                                        <div className="px-4 sm:px-6 py-6 max-w-xl mx-auto">
+                                            {/* METHOD SELECTION STEP */}
+                                            {signingStep === 'method' && shouldShowMethodSelection() && (
+                                                <div className="space-y-4">
                                                     <button
-                                                        onClick={handleResendOtp}
-                                                        disabled={signatureLoading}
-                                                        className="w-full text-center text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors duration-200 disabled:opacity-50 disabled:cursor-wait"
+                                                        onClick={() => handleMethodSelect('email')}
+                                                        className="w-full flex items-center gap-4 text-left p-4 border border-gray-300 rounded-xl hover:bg-gray-50 hover:border-slate-400 font-medium transition-all duration-200 shadow-sm hover:shadow-md"
                                                     >
-                                                        {signatureLoading ? 'Sending...' : 'Resend verification code'}
+                                                        <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center flex-shrink-0">
+                                                            <FiMailTyped className="w-6 h-6" />
+                                                        </div>
+                                                        <div>
+                                                            <div className="font-semibold text-[#1e293b]">One-Time Code via Email</div>
+                                                            <div className="text-sm text-gray-500">Secure verification through your email</div>
+                                                        </div>
                                                     </button>
-                                                )}
-                                            </div>
-                                        )}
-                                        {signingStep === 'success' && (
-                                            <div className="flex flex-col items-center justify-center text-center py-8">
-                                                <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-6 animate-pulse">
-                                                    <FiCheckCircleTyped className="w-10 h-10" />
+                                                    <button
+                                                        onClick={() => handleMethodSelect('sms')}
+                                                        className="w-full flex items-center gap-4 text-left p-4 border border-gray-300 rounded-xl hover:bg-gray-50 hover:border-slate-400 font-medium transition-all duration-200 shadow-sm hover:shadow-md"
+                                                    >
+                                                        <div className="w-12 h-12 bg-green-100 text-green-600 rounded-xl flex items-center justify-center flex-shrink-0">
+                                                            <FiSmartphoneTyped className="w-6 h-6" />
+                                                        </div>
+                                                        <div>
+                                                            <div className="font-semibold text-[#1e293b]">One-Time Code via SMS</div>
+                                                            <div className="text-sm text-gray-500">Secure verification through your phone</div>
+                                                        </div>
+                                                    </button>
                                                 </div>
-                                                <h3 className="text-xl font-semibold text-[#1e293b] mb-3">Document Signed Successfully!</h3>
-                                                <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl p-4 mb-6">
-                                                    <p className="text-sm text-gray-600">Thank you for completing the signing process via {signingMethod === 'email' ? 'Email OTP' : 'SMS OTP'}.</p>
-                                                    <p className="text-xs text-gray-500 mt-2">All parties will be notified when the document is fully completed.</p>
-                                                </div>
-                                            </div>
-                                        )}
-                                    </div>
+                                            )}
 
-                                    <div className="px-4 sm:px-6 py-4 border-t border-gray-200 bg-gray-50">
-                                        {signingStep === 'identity' && (
-                                            <div className="flex flex-col sm:flex-row gap-3 sm:justify-end">
-                                                {shouldShowMethodSelection() && (
+                                            {/* IDENTITY VERIFICATION STEP */}
+                                            {signingStep === 'identity' && signingMethod && (
+                                                <div className="space-y-6">
+                                                    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-4">
+                                                        <p className="text-xs text-gray-500 mb-1">
+                                                            We will send a verification code to the {signingMethod === 'email' ? 'email address' : 'phone number'} you enter below.
+                                                        </p>
+                                                        <p className="font-semibold text-[#1e293b]">
+                                                            It must match the recipient's {signingMethod === 'email' ? 'email' : 'phone'}: {maskedContact()}
+                                                        </p>
+                                                    </div>
+                                                    <div>
+                                                        <label className="block text-sm font-medium text-[#1e293b] mb-2">Your {signingMethod === 'email' ? 'Email Address' : 'Phone Number'}*</label>
+                                                        <input
+                                                            type={signingMethod === 'email' ? 'email' : 'tel'}
+                                                            value={getIdentityValue()}
+                                                            onChange={(e) => handleIdentityChange(e.target.value)}
+                                                            className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-all duration-200"
+                                                            placeholder={getIdentityPlaceholder()}
+                                                        />
+                                                    </div>
+
+                                                    {/* Action Buttons - Inline with content */}
+                                                    <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                                                        {shouldShowMethodSelection() && (
+                                                            <button
+                                                                onClick={goBack}
+                                                                className="px-6 py-3 border border-gray-300 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition-all duration-200 shadow-sm"
+                                                            >
+                                                                Back
+                                                            </button>
+                                                        )}
+                                                        <button
+                                                            onClick={handleIdentityConfirm}
+                                                            disabled={!getIdentityValue() || signatureLoading}
+                                                            className="flex-1 px-6 py-3 bg-[#1e293b] text-white font-medium rounded-xl hover:bg-opacity-90 transition-all duration-200 shadow-sm hover:shadow-md disabled:bg-gray-300 disabled:cursor-not-allowed disabled:hover:shadow-sm flex items-center justify-center"
+                                                        >
+                                                            {signatureLoading ? <FiLoaderTyped className="animate-spin w-5 h-5" /> : 'Request Code'}
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {/* OTP VERIFICATION STEP */}
+                                            {signingStep === 'otp' && (
+                                                <div className="space-y-6">
+                                                    <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl p-4 text-center">
+                                                        <div className="text-2xl font-bold text-green-600 mb-1">{timer}</div>
+                                                        <div className="text-xs text-gray-600">seconds remaining</div>
+                                                    </div>
+                                                    <div>
+                                                        <label className="block text-sm font-medium text-[#1e293b] mb-2 text-center">Enter 6-digit verification code</label>
+                                                        <input
+                                                            type="text"
+                                                            maxLength={6}
+                                                            value={otp}
+                                                            onChange={(e) => setOtp(e.target.value)}
+                                                            className="w-full px-4 py-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-all duration-200 text-center text-2xl tracking-[0.5em] font-mono"
+                                                            placeholder="------"
+                                                        />
+                                                    </div>
+                                                    {timer === 0 && (
+                                                        <button
+                                                            onClick={handleResendOtp}
+                                                            disabled={signatureLoading}
+                                                            className="w-full text-center text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors duration-200 disabled:opacity-50 disabled:cursor-wait"
+                                                        >
+                                                            {signatureLoading ? 'Sending...' : 'Resend verification code'}
+                                                        </button>
+                                                    )}
+
+                                                    {/* Action Buttons - Inline with content */}
+                                                    <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                                                        <button
+                                                            onClick={goBack}
+                                                            className="px-6 py-3 border border-gray-300 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition-all duration-200 shadow-sm"
+                                                        >
+                                                            Back
+                                                        </button>
+                                                        <button
+                                                            onClick={handleCompleteSigning}
+                                                            disabled={otp.length < 6 || signatureLoading}
+                                                            className="flex-1 px-6 py-3 bg-green-600 text-white font-medium rounded-xl hover:bg-opacity-90 transition-all duration-200 shadow-sm hover:shadow-md disabled:bg-gray-300 disabled:cursor-not-allowed disabled:hover:shadow-sm flex items-center justify-center"
+                                                        >
+                                                            {signatureLoading ? <FiLoaderTyped className="animate-spin w-5 h-5" /> : 'Complete Signing'}
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {/* SUCCESS STEP */}
+                                            {signingStep === 'success' && (
+                                                <div className="flex flex-col items-center justify-center text-center">
+                                                    <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-6 animate-pulse">
+                                                        <FiCheckCircleTyped className="w-10 h-10" />
+                                                    </div>
+                                                    <h3 className="text-xl font-semibold text-[#1e293b] mb-3">Document Signed Successfully!</h3>
+                                                    <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl p-4 mb-6">
+                                                        <p className="text-sm text-gray-600">Thank you for completing the signing process via {signingMethod === 'email' ? 'Email OTP' : 'SMS OTP'}.</p>
+                                                        <p className="text-xs text-gray-500 mt-2">All parties will be notified when the document is fully completed.</p>
+                                                    </div>
+
+                                                    {/* Action Button - Inline with content */}
                                                     <button
-                                                        onClick={goBack}
-                                                        className="px-6 py-3 border border-gray-300 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition-all duration-200 shadow-sm"
+                                                        onClick={closeDrawer}
+                                                        className="w-full px-6 py-3 bg-[#1e293b] text-white font-medium rounded-xl hover:bg-opacity-90 transition-all duration-200 shadow-sm hover:shadow-md"
                                                     >
-                                                        Back
+                                                        Back to Document
                                                     </button>
-                                                )}
-                                                <button
-                                                    onClick={handleIdentityConfirm}
-                                                    disabled={!getIdentityValue() || signatureLoading}
-                                                    className="px-6 py-3 bg-[#1e293b] text-white font-medium rounded-xl hover:bg-opacity-90 transition-all duration-200 shadow-sm hover:shadow-md disabled:bg-gray-300 disabled:cursor-not-allowed disabled:hover:shadow-sm flex items-center justify-center"
-                                                >
-                                                    {signatureLoading ? <FiLoaderTyped className="animate-spin w-5 h-5" /> : 'Request Code'}
-                                                </button>
-                                            </div>
-                                        )}
-                                        {signingStep === 'otp' && (
-                                            <div className="flex flex-col sm:flex-row gap-3 sm:justify-end">
-                                                <button
-                                                    onClick={goBack}
-                                                    className="px-6 py-3 border border-gray-300 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition-all duration-200 shadow-sm"
-                                                >
-                                                    Back
-                                                </button>
-                                                <button
-                                                    onClick={handleCompleteSigning}
-                                                    disabled={otp.length < 6 || signatureLoading}
-                                                    className="px-6 py-3 bg-green-600 text-white font-medium rounded-xl hover:bg-opacity-90 transition-all duration-200 shadow-sm hover:shadow-md disabled:bg-gray-300 disabled:cursor-not-allowed disabled:hover:shadow-sm flex items-center justify-center"
-                                                >
-                                                    {signatureLoading ? <FiLoaderTyped className="animate-spin w-5 h-5" /> : 'Complete Signing'}
-                                                </button>
-                                            </div>
-                                        )}
-                                        {signingStep === 'success' && (
-                                            <button
-                                                onClick={closeDrawer}
-                                                className="w-full px-4 py-3 bg-[#1e293b] text-white font-medium rounded-xl hover:bg-opacity-90 transition-all duration-200 shadow-sm hover:shadow-md"
-                                            >
-                                                Back to Document
-                                            </button>
-                                        )}
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
                             </div>

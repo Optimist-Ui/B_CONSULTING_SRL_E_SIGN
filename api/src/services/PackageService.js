@@ -712,16 +712,22 @@ class PackageService {
     }
 
     // Save all changes to the package
-    const updatedPackage = await pkg.save();
+    await pkg.save();
 
     // Emit real-time update to initiator
     await this.emitPackageUpdate(pkg);
+
+    // ✅ FIX: Get the processed package with signed URL
+    const updatedPackageForParticipant = await this.getPackageForParticipant(
+      packageId,
+      participantId
+    );
 
     // --- THIS IS THE FIX ---
     // 3. Return the entire updated package object in the correct structure
     return {
       message: "Signature completed.",
-      package: updatedPackage, // The Redux thunk is expecting this structure
+      package: updatedPackageForParticipant, // The Redux thunk is expecting this structure
     };
     // ----------------------
   }
@@ -1304,7 +1310,7 @@ class PackageService {
   }
 
   async downloadPackageForParticipant(packageId, participantId) {
-    // 1. Fetch the package and its related data, just like in getPackageForParticipant
+    // 1. Fetch the package and its related data
     const pkg = await this.Package.findById(packageId).populate(
       "ownerId",
       "firstName lastName"
@@ -1319,9 +1325,7 @@ class PackageService {
     ];
     const participant = allAssignments.find((p) => p.id === participantId);
     if (!participant) {
-      // Allow initiator to download their own packages. A full-fledged admin/initiator download
-      // would have different logic, but this is a simple permission check.
-      const isOwner = pkg.ownerId._id.toString() === participantId; // Special case for owner download
+      const isOwner = pkg.ownerId._id.toString() === participantId;
       if (!isOwner)
         throw new Error("You are not a valid participant for this package.");
     }
@@ -1335,27 +1339,64 @@ class PackageService {
       );
     }
 
-    // 3. Delegate to the PDF Modification service to generate the file
-    const pdfBuffer = await this.pdfModifier.generatePdf(pkg, participantId);
-    // 4. ✅ IMPROVED: Prepare a proper file name using the package name
+    // 3. Download file from S3
+    if (!pkg.s3Key) {
+      throw new Error("Package file not found in S3.");
+    }
+
+    let pdfBuffer;
+    try {
+      // Get the file from S3
+      const { GetObjectCommand } = require("@aws-sdk/client-s3");
+      const command = new GetObjectCommand({
+        Bucket: this.s3Service.bucket,
+        Key: pkg.s3Key,
+      });
+
+      const response = await this.s3Service.s3.send(command);
+
+      // Convert stream to buffer
+      const chunks = [];
+      for await (const chunk of response.Body) {
+        chunks.push(chunk);
+      }
+      pdfBuffer = Buffer.concat(chunks);
+
+      console.log(`Successfully downloaded PDF from S3: ${pkg.s3Key}`);
+    } catch (error) {
+      console.error("Error downloading from S3:", error);
+      throw new Error(
+        `Failed to download package file from S3: ${error.message}`
+      );
+    }
+
+    // 4. Process the PDF with modifications (add audit trail, signatures, etc.)
+    try {
+      pdfBuffer = await this.pdfModifier.generatePdf(pkg, pdfBuffer);
+      console.log(`Successfully processed PDF with modifications`);
+    } catch (error) {
+      console.error("Error modifying PDF:", error);
+      throw new Error(`Failed to process PDF: ${error.message}`);
+    }
+
+    // 5. Prepare proper file name
     let sanitizedName = pkg.name
       .trim()
-      .replace(/[<>:"/\\|?*\x00-\x1F]/g, "") // Remove invalid filename characters
-      .replace(/\s+/g, "_") // Replace spaces with underscore
-      .substring(0, 80); // Limit to 80 chars to leave room for suffix
+      .replace(/[<>:"/\\|?*\x00-\x1F]/g, "")
+      .replace(/\s+/g, "_")
+      .substring(0, 80);
 
-    // Fallback if name becomes empty after sanitization
     if (!sanitizedName || sanitizedName.length === 0) {
       sanitizedName = "document";
     }
 
     const statusSuffix = pkg.status.toLowerCase();
-    const timestamp = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
-
+    const timestamp = new Date().toISOString().split("T")[0];
     const fileName = `${sanitizedName}_${statusSuffix}_${timestamp}.pdf`;
 
     return { pdfBuffer, fileName };
   }
+
   async revokePackage(packageId, userId, reason, ip) {
     const pkg = await this.Package.findOne({
       _id: packageId,
@@ -1639,14 +1680,20 @@ class PackageService {
     }
 
     // Save changes
-    const updatedPackage = await pkg.save();
+    await pkg.save();
 
     // Emit real-time update
     await this.emitPackageUpdate(pkg);
 
+    // ✅ FIX: Get the processed package with signed URL
+    const updatedPackageForParticipant = await this.getPackageForParticipant(
+      packageId,
+      participantId
+    );
+
     return {
       message: `Signature completed via ${method}.`,
-      package: updatedPackage,
+      package: updatedPackageForParticipant,
       signatureDetails: {
         method: method,
         signedAt: signDate.toISOString(),

@@ -5,20 +5,28 @@ const path = require("path");
 class PdfModificationService {
   constructor() {}
 
-  async generatePdf(pkg) {
-    const cleanRelativePath = pkg.fileUrl
-      .replace("/Uploads/", "/uploads/")
-      .replace("/public/uploads/", "/uploads/")
-      .replace(/^\/uploads\//, "uploads/");
+  async generatePdf(pkg, pdfBuffer = null) {
+    // If buffer is not provided, fall back to reading from filesystem (backward compatibility)
+    let existingPdfBytes;
 
-    const filePath = path.join(
-      process.cwd(),
-      "src",
-      "public",
-      cleanRelativePath
-    );
+    if (pdfBuffer) {
+      existingPdfBytes = pdfBuffer;
+    } else {
+      // Legacy fallback - reading from local filesystem
+      const cleanRelativePath = pkg.fileUrl
+        .replace("/Uploads/", "/uploads/")
+        .replace("/public/uploads/", "/uploads/")
+        .replace(/^\/uploads\//, "uploads/");
 
-    const existingPdfBytes = await fs.readFile(filePath);
+      const filePath = path.join(
+        process.cwd(),
+        "src",
+        "public",
+        cleanRelativePath
+      );
+      existingPdfBytes = await fs.readFile(filePath);
+    }
+
     const pdfDoc = await PDFDocument.load(existingPdfBytes);
 
     // Embed fonts

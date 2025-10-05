@@ -480,7 +480,7 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
                                                         return (
                                                             <div
                                                                 key={field.id}
-                                                                className={`absolute  border-2 border-dashed rounded-lg backdrop-blur-sm transition-all duration-200 ${
+                                                                className={`absolute border-2 border-dashed rounded-lg backdrop-blur-sm transition-all duration-200 ${
                                                                     isInvalid
                                                                         ? 'bg-red-500/20 border-red-500'
                                                                         : hasAssignments
@@ -497,8 +497,35 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
                                                                     <span className="truncate flex-1">{field.label}</span>
                                                                 </div>
                                                                 {showPlaceholder && (
-                                                                    <div className="flex items-center justify-center h-full  text-xs px-2 py-1">
+                                                                    <div className="flex items-center justify-center h-full text-xs px-2 py-1">
                                                                         <span className="truncate">{field.placeholder}</span>
+                                                                    </div>
+                                                                )}
+
+                                                                {/* NEW: Show assigned users with signature methods */}
+                                                                {hasAssignments && (
+                                                                    <div className="absolute -bottom-7 left-0 right-0 flex flex-wrap gap-1.5">
+                                                                        {assignedUsers.map((user, idx) => (
+                                                                            <div
+                                                                                key={user.id || idx}
+                                                                                className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-white text-[10px] font-medium shadow-sm ${
+                                                                                    user.role === 'Signer' ? 'bg-indigo-600' : user.role === 'Approver' ? 'bg-teal-600' : 'bg-orange-600'
+                                                                                }`}
+                                                                                title={`${user.contactName} - ${user.role}${
+                                                                                    user.signatureMethods ? '\nAuth: ' + user.signatureMethods.join(', ') : ''
+                                                                                }`}
+                                                                            >
+                                                                                {/* Show signature methods if available */}
+                                                                                {user.signatureMethods && user.signatureMethods.length > 0 && (
+                                                                                    <span className="inline-flex items-center gap-0.5 px-1 py-0.5 bg-white/20 rounded text-[9px] font-semibold">
+                                                                                        {user.signatureMethods.includes('Email OTP') && <span>Email</span>}
+                                                                                        {user.signatureMethods.includes('Email OTP') && user.signatureMethods.includes('SMS OTP') && <span>+</span>}
+                                                                                        {user.signatureMethods.includes('SMS OTP') && <span>SMS</span>}
+                                                                                    </span>
+                                                                                )}
+                                                                                <span className="truncate max-w-[120px]">{user.contactName}</span>
+                                                                            </div>
+                                                                        ))}
                                                                     </div>
                                                                 )}
                                                             </div>

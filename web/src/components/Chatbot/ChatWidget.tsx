@@ -1,19 +1,23 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useLocation } from 'react-router-dom'; // Add this
 import { IRootState, AppDispatch } from '../../store';
-import { toggleChatWidget, minimizeChat, maximizeChat, resetChat } from '../../store/slices/chatbotSlice';
+import { toggleChatWidget, minimizeChat, maximizeChat } from '../../store/slices/chatbotSlice';
 import { openChatAndStartSession, startChatSession } from '../../store/thunk/chatbotThunks';
 import ChatWindow from './ChatWindow';
 import HelpRequestModal from './HelpRequestModal';
 import RatingModal from './RatingModal';
 import { initializeChatSocket, disconnectChatSocket } from '../../utils/chatbotSocket';
 
+const CHATBOT_SEEN_KEY = 'chatbot_first_visit_completed';
+
 const ChatWidget: React.FC = () => {
     const dispatch = useDispatch<AppDispatch>();
+    const location = useLocation();
     const { isOpen, isMinimized, currentSession, shouldShowHelpForm, shouldShowRating } = useSelector((state: IRootState) => state.chatbot);
 
+    // Socket initialization
     useEffect(() => {
-        // Initialize socket when widget opens and session exists
         if (isOpen && currentSession?.sessionId) {
             const socket = initializeChatSocket(currentSession.sessionId, dispatch);
 
@@ -23,13 +27,32 @@ const ChatWidget: React.FC = () => {
         }
     }, [isOpen, currentSession?.sessionId, dispatch]);
 
+    // Add this new useEffect to track when chatbot opens
     useEffect(() => {
-        dispatch(openChatAndStartSession());
-    }, []);
+        const isHomepage = location.pathname === '/';
+
+        // Mark as seen when it actually opens on homepage
+        if (isOpen && isHomepage) {
+            localStorage.setItem(CHATBOT_SEEN_KEY, 'true');
+        }
+    }, [isOpen, location.pathname]);
+
+    // Auto-open logic
+    useEffect(() => {
+        const isHomepage = location.pathname === '/';
+        const hasSeenChatbot = localStorage.getItem(CHATBOT_SEEN_KEY);
+
+        if (isHomepage && !hasSeenChatbot && !isOpen) {
+            const timer = setTimeout(() => {
+                dispatch(openChatAndStartSession());
+            }, 1500);
+
+            return () => clearTimeout(timer);
+        }
+    }, [location.pathname, dispatch, isOpen]);
 
     const handleToggleWidget = async () => {
         if (!isOpen && !currentSession) {
-            // Start new session when opening for the first time
             await dispatch(startChatSession({ page: window.location.pathname }));
         }
         dispatch(toggleChatWidget());
@@ -49,7 +72,7 @@ const ChatWidget: React.FC = () => {
 
     return (
         <>
-            {/* Chat Widget Button - Fixed at bottom right */}
+            {/* Chat Widget Button */}
             {!isOpen && (
                 <button
                     onClick={handleToggleWidget}
@@ -64,8 +87,6 @@ const ChatWidget: React.FC = () => {
                             d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
                         />
                     </svg>
-
-                    {/* Notification dot - optional */}
                     <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse"></span>
                 </button>
             )}
@@ -134,10 +155,8 @@ const ChatWidget: React.FC = () => {
                 </div>
             )}
 
-            {/* Help Request Modal */}
+            {/* Modals */}
             {shouldShowHelpForm && currentSession && <HelpRequestModal sessionId={currentSession.sessionId} />}
-
-            {/* Rating Modal */}
             {shouldShowRating && currentSession && <RatingModal sessionId={currentSession.sessionId} />}
         </>
     );

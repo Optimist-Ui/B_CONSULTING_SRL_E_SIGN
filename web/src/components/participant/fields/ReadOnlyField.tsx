@@ -21,20 +21,41 @@ interface ReadOnlyFieldProps {
 }
 
 const ReadOnlyField: React.FC<ReadOnlyFieldProps> = ({ field, rejectionDetails, packageStatus }) => {
+    // Determine field size category for responsive styling
+    const getFieldSizeCategory = () => {
+        const area = field.width * field.height;
+        if (area < 3000) return 'tiny'; // Very small fields
+        if (area < 6000) return 'small';
+        if (area < 12000) return 'medium';
+        return 'large';
+    };
+
+    const sizeCategory = getFieldSizeCategory();
+    const isTinyField = sizeCategory === 'tiny';
+    const isSmallField = sizeCategory === 'small' || sizeCategory === 'tiny';
+
+    // Responsive styling variables
+    const headerPadding = isTinyField ? 'px-1 py-0.5' : isSmallField ? 'px-1.5 py-0.5' : 'px-2 py-1';
+    const labelTextSize = isTinyField ? 'text-[9px]' : isSmallField ? 'text-[10px]' : 'text-xs';
+    const userTextSize = isTinyField ? 'text-[7px]' : isSmallField ? 'text-[8px]' : 'text-[10px]';
+    const contentPadding = isTinyField ? 'p-0.5' : isSmallField ? 'p-1' : 'p-2';
+    const iconSize = isTinyField ? 'w-2.5 h-2.5' : isSmallField ? 'w-3 h-3' : 'w-4 h-4';
+    const largeIconSize = isTinyField ? 'w-3 h-3' : isSmallField ? 'w-4 h-4' : 'w-5 h-5';
+
     const getFieldIcon = () => {
         switch (field.type) {
             case 'text':
-                return <FiFileTextTyped className="w-3 h-3 text-gray-500" />;
+                return <FiFileTextTyped className={`${iconSize} text-gray-500`} />;
             case 'date':
-                return <FiCalendarTyped className="w-3 h-3 text-gray-500" />;
+                return <FiCalendarTyped className={`${iconSize} text-gray-500`} />;
             case 'textarea':
-                return <FiFileTextTyped className="w-3 h-3 text-gray-500" />;
+                return <FiFileTextTyped className={`${iconSize} text-gray-500`} />;
             case 'checkbox':
-                return field.value ? <FiSquareTyped className="w-3 h-3 text-green-500" /> : <FiSquareTyped className="w-3 h-3 text-gray-500" />;
+                return field.value ? <FiSquareTyped className={`${iconSize} text-green-500`} /> : <FiSquareTyped className={`${iconSize} text-gray-500`} />;
             case 'signature':
-                return <FaSignatureTyped className="w-3 h-3 text-gray-500" />;
+                return <FaSignatureTyped className={`${iconSize} text-gray-500`} />;
             default:
-                return <FiFileTextTyped className="w-3 h-3 text-gray-500" />;
+                return <FiFileTextTyped className={`${iconSize} text-gray-500`} />;
         }
     };
 
@@ -106,21 +127,22 @@ const ReadOnlyField: React.FC<ReadOnlyFieldProps> = ({ field, rejectionDetails, 
         const signatureValue = field.value as SignatureValue;
         return (
             <div style={baseStyles} className="border-2 border-green-400 bg-green-50/80 rounded-lg shadow-sm backdrop-blur-sm p-2 flex flex-col justify-center overflow-hidden">
-                <div className="flex items-center gap-2 mb-1.5 text-green-700">
-                    <FiCheckCircleTyped className="w-4 h-4 flex-shrink-0" />
-                    <h4 className="font-bold text-xs uppercase tracking-wider">Signed Digitally</h4>
+                <div className={`flex items-center gap-1 ${isTinyField ? 'mb-0.5' : 'mb-1'} text-green-700`}>
+                    <FiCheckCircleTyped className={`${iconSize} flex-shrink-0`} />
+                    <h4 className={`font-bold ${labelTextSize} uppercase tracking-wider`}>Signed</h4>
                 </div>
-                <div className="text-xs text-slate-700 space-y-0.5 pl-1">
-                    <p className="font-semibold">{signatureValue.signedBy}</p>
-                    {signatureValue.method === 'SMS OTP' && signatureValue.phone ? (
-                        <p className="truncate text-gray-600">{signatureValue.phone}</p>
-                    ) : (
-                        <p className="truncate text-gray-600">{signatureValue.email}</p>
-                    )}
-                    {signatureValue.otpCode && <p className="text-gray-600 font-mono">OTP: {signatureValue.otpCode}</p>}
-                    <p className="text-gray-600">{new Date(signatureValue.date).toLocaleString()}</p>
+                <div className={`${userTextSize} text-slate-700 space-y-0.5 ${isTinyField ? 'pl-0' : 'pl-1'}`}>
+                    <p className="font-semibold truncate">{signatureValue.signedBy}</p>
+                    {!isTinyField &&
+                        (signatureValue.method === 'SMS OTP' && signatureValue.phone ? (
+                            <p className="truncate text-gray-600">{signatureValue.phone}</p>
+                        ) : (
+                            <p className="truncate text-gray-600">{signatureValue.email}</p>
+                        ))}
+                    {!isTinyField && signatureValue.otpCode && <p className="text-gray-600 font-mono">OTP: {signatureValue.otpCode}</p>}
+                    <p className="text-gray-600 truncate">{new Date(signatureValue.date).toLocaleString()}</p>
                 </div>
-                <p className="text-right text-[10px] text-gray-500 mt-auto pt-1 font-semibold">via {signatureValue.method || 'Email OTP'} by SignatureFlow</p>
+                {!isTinyField && <p className={`text-right ${userTextSize} text-gray-500 mt-auto pt-0.5 font-semibold truncate`}>via {signatureValue.method || 'Email OTP'}</p>}
             </div>
         );
     }
@@ -133,37 +155,37 @@ const ReadOnlyField: React.FC<ReadOnlyFieldProps> = ({ field, rejectionDetails, 
                 className="bg-red-50/80 border-2 border-red-400 rounded-lg shadow-sm backdrop-blur-sm flex flex-col overflow-hidden hover:shadow-md transition-all duration-200"
                 title={`Field rejected by ${rejectionDetails!.rejectedBy.contactName}: ${rejectionDetails!.reason}`}
             >
-                <div className="flex items-center justify-between px-2 py-1 bg-red-100/60 rounded-t-md border-b border-red-300 flex-shrink-0">
-                    <div className="flex items-center gap-1 min-w-0 flex-1">
-                        <FiXCircleTyped className="w-3 h-3 text-red-600 flex-shrink-0" />
+                <div className={`flex items-center justify-between ${headerPadding} bg-red-100/60 rounded-t-md border-b border-red-300 flex-shrink-0`}>
+                    <div className="flex items-center gap-0.5 min-w-0 flex-1">
+                        <FiXCircleTyped className={`${iconSize} text-red-600 flex-shrink-0`} />
                         <div className="flex flex-col min-w-0 flex-1">
-                            <span className="text-xs font-semibold text-red-700 truncate leading-tight">
+                            <span className={`${labelTextSize} font-semibold text-red-700 truncate leading-tight`}>
                                 {field.label}
                                 {field.required && <span className="text-red-500 ml-0.5">*</span>}
                             </span>
-                            <div className="flex items-center gap-1">
-                                <FiUserTyped className="w-2 h-2 text-red-600" />
-                                <span className="text-[9px] text-red-700 font-medium truncate">{assignedUserInfo.contactInfo}</span>
-                            </div>
+                            {!isTinyField && (
+                                <div className="flex items-center gap-0.5">
+                                    <FiUserTyped className="w-1.5 h-1.5 text-red-600" />
+                                    <span className={`${userTextSize} text-red-700 font-medium truncate`}>{assignedUserInfo.contactInfo}</span>
+                                </div>
+                            )}
                         </div>
                     </div>
-                    <div className="flex items-center gap-1">
-                        <FiAlertTriangleTyped className="w-3 h-3 text-red-600" />
-                    </div>
+                    <FiAlertTriangleTyped className={`${iconSize} text-red-600 flex-shrink-0`} />
                 </div>
-                <div className="flex-grow flex flex-col p-2 min-h-0">
-                    <div className="flex items-center gap-1 mb-1">
-                        <FiXCircleTyped className="w-4 h-4 text-red-600 flex-shrink-0" />
-                        <span className="text-xs font-bold text-red-700 uppercase tracking-wider">Rejected</span>
+                <div className={`flex-grow flex flex-col ${contentPadding} min-h-0`}>
+                    <div className="flex items-center gap-0.5 mb-0.5">
+                        <FiXCircleTyped className={`${iconSize} text-red-600 flex-shrink-0`} />
+                        <span className={`${labelTextSize} font-bold text-red-700 uppercase tracking-wider`}>Rejected</span>
                     </div>
-                    <div className="text-xs text-red-700 space-y-1">
+                    <div className={`${userTextSize} text-red-700 space-y-0.5`}>
                         <p className="font-semibold truncate">{rejectionDetails!.rejectedBy.contactName}</p>
-                        <p className="text-red-600 text-[10px]">{new Date(rejectionDetails!.rejectedAt).toLocaleString()}</p>
+                        <p className="text-red-600 truncate">{new Date(rejectionDetails!.rejectedAt).toLocaleString()}</p>
                     </div>
-                    {rejectionDetails!.reason && (
-                        <div className="mt-1 flex-grow">
-                            <p className="text-[10px] text-red-600 font-medium mb-0.5">Reason:</p>
-                            <p className="text-xs text-red-700 leading-tight break-words">{rejectionDetails!.reason}</p>
+                    {rejectionDetails!.reason && !isTinyField && (
+                        <div className="mt-0.5 flex-grow">
+                            <p className={`${userTextSize} text-red-600 font-medium mb-0.5`}>Reason:</p>
+                            <p className={`${labelTextSize} text-red-700 leading-tight break-words line-clamp-2`}>{rejectionDetails!.reason}</p>
                         </div>
                     )}
                 </div>
@@ -178,56 +200,76 @@ const ReadOnlyField: React.FC<ReadOnlyFieldProps> = ({ field, rejectionDetails, 
             className="bg-gray-100/80 border-2 border-dashed border-gray-300 rounded-lg shadow-sm backdrop-blur-sm opacity-70 hover:opacity-80 transition-all duration-200 flex flex-col overflow-hidden"
             title={`Field for ${assignedUserInfo.name} (${assignedUserInfo.contactInfo}): ${field.label}`}
         >
-            <div className="flex items-center justify-between px-2 py-1 bg-gray-200/60 rounded-t-md border-b border-gray-300 flex-shrink-0">
-                <div className="flex items-center gap-1 min-w-0 flex-1">
+            <div className={`flex items-center justify-between ${headerPadding} bg-gray-200/60 rounded-t-md border-b border-gray-300 flex-shrink-0`}>
+                <div className="flex items-center gap-0.5 min-w-0 flex-1">
                     {getFieldIcon()}
                     <div className="flex flex-col min-w-0 flex-1">
-                        <span className="text-xs font-semibold text-gray-600 truncate leading-tight">
+                        <span className={`${labelTextSize} font-semibold text-gray-600 truncate leading-tight`}>
                             {field.label}
                             {field.required && <span className="text-gray-400 ml-0.5">*</span>}
                         </span>
-                        <div className="flex items-center gap-1">
-                            <FiUserTyped className="w-2 h-2 text-gray-500" />
-                            <span className="text-[9px] text-gray-500 font-medium truncate">{assignedUserInfo.contactInfo}</span>
-                        </div>
+                        {!isTinyField && (
+                            <div className="flex items-center gap-0.5">
+                                <FiUserTyped className="w-1.5 h-1.5 text-gray-500" />
+                                <span className={`${userTextSize} text-gray-500 font-medium truncate`}>{assignedUserInfo.contactInfo}</span>
+                            </div>
+                        )}
                     </div>
                 </div>
-                <div className="flex items-center gap-1">
-                    <FiLockTyped className="w-3 h-3 text-gray-500" />
-                </div>
+                <FiLockTyped className={`${iconSize} text-gray-500 flex-shrink-0`} />
             </div>
-            <div className="flex-grow flex flex-col items-center justify-center p-2 min-h-0">
+            <div className={`flex-grow flex flex-col items-center justify-center ${contentPadding} min-h-0`}>
                 {field.type === 'signature' ? (
                     <>
-                        <FaSignatureTyped className="text-lg text-gray-400 mb-1" />
-                        <span className="text-xs text-gray-500 font-medium text-center leading-tight">Signature Field</span>
-                        <span className="text-[10px] text-gray-400 text-center leading-tight mt-0.5 truncate max-w-full">{assignedUserInfo.name}</span>
+                        <FaSignatureTyped className={`${largeIconSize} text-gray-400 ${isTinyField ? 'mb-0' : 'mb-0.5'} flex-shrink-0`} />
+                        {!isTinyField && (
+                            <>
+                                <span className={`${labelTextSize} text-gray-500 font-medium text-center leading-tight`}>Signature Field</span>
+                                <span className={`${userTextSize} text-gray-400 text-center leading-tight mt-0.5 truncate max-w-full`}>{assignedUserInfo.name}</span>
+                            </>
+                        )}
                     </>
                 ) : field.type === 'checkbox' ? (
                     <>
-                        <FiSquareTyped className="w-5 h-5 text-gray-400 mb-1" />
-                        <span className="text-xs text-gray-500 font-medium text-center leading-tight">Checkbox</span>
-                        <span className="text-[10px] text-gray-400 text-center leading-tight mt-0.5 truncate max-w-full">{assignedUserInfo.name}</span>
+                        <FiSquareTyped className={`${largeIconSize} text-gray-400 ${isTinyField ? 'mb-0' : 'mb-0.5'} flex-shrink-0`} />
+                        {!isTinyField && (
+                            <>
+                                <span className={`${labelTextSize} text-gray-500 font-medium text-center leading-tight`}>Checkbox</span>
+                                <span className={`${userTextSize} text-gray-400 text-center leading-tight mt-0.5 truncate max-w-full`}>{assignedUserInfo.name}</span>
+                            </>
+                        )}
                     </>
                 ) : field.type === 'textarea' ? (
                     <div className="w-full h-full flex items-center justify-center">
                         <div className="flex flex-col items-center">
-                            <FiFileTextTyped className="w-4 h-4 text-gray-400 mb-1" />
-                            <span className="text-xs text-gray-500 font-medium text-center leading-tight">Text Area</span>
-                            <span className="text-[10px] text-gray-400 text-center leading-tight mt-0.5 truncate max-w-full">{assignedUserInfo.name}</span>
+                            <FiFileTextTyped className={`${largeIconSize} text-gray-400 ${isTinyField ? 'mb-0' : 'mb-0.5'} flex-shrink-0`} />
+                            {!isTinyField && (
+                                <>
+                                    <span className={`${labelTextSize} text-gray-500 font-medium text-center leading-tight`}>Text Area</span>
+                                    <span className={`${userTextSize} text-gray-400 text-center leading-tight mt-0.5 truncate max-w-full`}>{assignedUserInfo.name}</span>
+                                </>
+                            )}
                         </div>
                     </div>
                 ) : field.type === 'date' ? (
                     <>
-                        <FiCalendarTyped className="w-4 h-4 text-gray-400 mb-1" />
-                        <span className="text-xs text-gray-500 font-medium text-center leading-tight">Date Field</span>
-                        <span className="text-[10px] text-gray-400 text-center leading-tight mt-0.5 truncate max-w-full">{assignedUserInfo.name}</span>
+                        <FiCalendarTyped className={`${largeIconSize} text-gray-400 ${isTinyField ? 'mb-0' : 'mb-0.5'} flex-shrink-0`} />
+                        {!isTinyField && (
+                            <>
+                                <span className={`${labelTextSize} text-gray-500 font-medium text-center leading-tight`}>Date Field</span>
+                                <span className={`${userTextSize} text-gray-400 text-center leading-tight mt-0.5 truncate max-w-full`}>{assignedUserInfo.name}</span>
+                            </>
+                        )}
                     </>
                 ) : (
                     <>
-                        <FiFileTextTyped className="w-4 h-4 text-gray-400 mb-1" />
-                        <span className="text-xs text-gray-500 font-medium text-center leading-tight">Text Field</span>
-                        <span className="text-[10px] text-gray-400 text-center leading-tight mt-0.5 truncate max-w-full">{assignedUserInfo.name}</span>
+                        <FiFileTextTyped className={`${largeIconSize} text-gray-400 ${isTinyField ? 'mb-0' : 'mb-0.5'} flex-shrink-0`} />
+                        {!isTinyField && (
+                            <>
+                                <span className={`${labelTextSize} text-gray-500 font-medium text-center leading-tight`}>Text Field</span>
+                                <span className={`${userTextSize} text-gray-400 text-center leading-tight mt-0.5 truncate max-w-full`}>{assignedUserInfo.name}</span>
+                            </>
+                        )}
                     </>
                 )}
             </div>
