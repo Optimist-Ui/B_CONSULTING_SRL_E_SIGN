@@ -235,14 +235,44 @@ class PdfModificationService {
         const fieldCenterY = page.getHeight() - originalY - originalHeight / 2;
         const textToDraw = field.value.toString();
 
-        page.drawText(textToDraw, {
-          x: adjustedX + horizontalPadding,
-          y: fieldCenterY - textHeight / 2,
-          font: fonts.helvetica,
-          size: fontSize,
-          color: rgb(0, 0, 0),
-          maxWidth: originalWidth - 2 * horizontalPadding,
-        });
+        // Find who filled this field
+        const filledBy = field.assignedUsers.find((au) => au.signed);
+
+        if (filledBy) {
+          // Draw the value
+          page.drawText(textToDraw, {
+            x: adjustedX + horizontalPadding,
+            y: fieldCenterY - textHeight / 2,
+            font: fonts.helvetica,
+            size: fontSize,
+            color: rgb(0, 0, 0),
+            maxWidth: originalWidth - 2 * horizontalPadding,
+          });
+
+          // Draw a small "filled by" indicator below the value if there's space
+          const indicatorFontSize = 6;
+          const indicatorText = `Filled by: ${filledBy.contactName}`;
+          const indicatorY = page.getHeight() - originalY - originalHeight + 3;
+
+          page.drawText(indicatorText, {
+            x: adjustedX + horizontalPadding,
+            y: indicatorY,
+            font: fonts.helveticaOblique,
+            size: indicatorFontSize,
+            color: rgb(0.5, 0.5, 0.5),
+            maxWidth: originalWidth - 2 * horizontalPadding,
+          });
+        } else {
+          // Fallback if no filled by info (shouldn't happen in completed status)
+          page.drawText(textToDraw, {
+            x: adjustedX + horizontalPadding,
+            y: fieldCenterY - textHeight / 2,
+            font: fonts.helvetica,
+            size: fontSize,
+            color: rgb(0, 0, 0),
+            maxWidth: originalWidth - 2 * horizontalPadding,
+          });
+        }
       }
     }
   }
@@ -434,127 +464,620 @@ class PdfModificationService {
   createAuditTrail(pkg) {
     const formatDate = (dateString) => new Date(dateString).toLocaleString();
 
-    let audit = `Document Name: ${pkg.name}\n`;
-    audit += `Document ID: ${pkg._id}\n`;
-    audit += `Status: ${pkg.status}\n\n`;
+    let audit = {
+      header: {
+        documentName: pkg.name,
+        documentId: pkg._id,
+        status: pkg.status,
+        createdAt: formatDate(pkg.createdAt),
+        createdBy: `${pkg.ownerId.firstName} ${pkg.ownerId.lastName}`,
+      },
+      timeline: [],
+      reassignments: [],
+    };
 
-    audit += `TIMELINE\n`;
-    audit += `--------------------------------------------------\n`;
-    audit += `- Document created at ${formatDate(pkg.createdAt)} by ${
-      pkg.ownerId.firstName
-    } ${pkg.ownerId.lastName}\n`;
-
+    // Collect signed events with OTP codes - ONLY FOR SIGNATURE FIELDS
     const signedEvents = pkg.fields
+      .filter((f) => f.type === "signature") // Only include signature fields
       .flatMap((f) => f.assignedUsers)
       .filter((au) => au.signed)
-      .map((au) => ({ ...au.toObject(), eventType: "signed" }));
+      .map((au) => {
+        const fieldData = pkg.fields.find((field) =>
+          field.assignedUsers.some(
+            (u) => u._id.toString() === au._id.toString()
+          )
+        );
+        const otpCode = fieldData?.value?.otpCode || au.otpCode || "N/A";
+        const method = fieldData?.value?.method || au.method || "Email OTP";
 
+        return {
+          type: "signed",
+          contactName: au.contactName,
+          role: au.role,
+          signedAt: au.signedAt,
+          signedIP: au.signedIP,
+          method: method,
+          otpCode: otpCode,
+        };
+      });
+
+    // NEW: Collect form filled events - ONLY FOR NON-SIGNATURE FIELDS
+    const formFilledEvents = pkg.fields
+      .filter((f) => f.type !== "signature" && f.value) // Exclude signature fields
+      .flatMap((f) =>
+        f.assignedUsers
+          .filter((au) => au.signed)
+          .map((au) => ({
+            type: "formFilled",
+            contactName: au.contactName,
+            role: au.role,
+            fieldLabel: f.label,
+            fieldType: f.type,
+            fieldValue: f.value,
+            filledAt: au.signedAt,
+            filledIP: au.signedIP,
+          }))
+      );
+
+    // Sort all events chronologically
     const allEvents = [...signedEvents].sort(
       (a, b) => new Date(a.signedAt) - new Date(b.signedAt)
     );
 
-    allEvents.forEach((event) => {
-      audit += `- ${event.contactName} (${event.role}) signed at ${formatDate(
-        event.signedAt
-      )} (IP: ${event.signedIP})\n`;
-    });
+    const allFormEvents = [...formFilledEvents].sort(
+      (a, b) => new Date(a.filledAt) - new Date(b.filledAt)
+    );
 
+    audit.timeline = allEvents;
+    audit.formTimeline = allFormEvents; // Add form timeline
+
+    // Add rejection details if applicable
     if (pkg.status === "Rejected" && pkg.rejectionDetails?.rejectedBy) {
-      audit += `- Document REJECTED by ${
-        pkg.rejectionDetails.rejectedBy.contactName
-      } at ${formatDate(pkg.rejectionDetails.rejectedAt)}\n`;
-      audit += `  Reason: ${pkg.rejectionDetails.reason} (IP: ${pkg.rejectionDetails.rejectedIP})\n`;
+      audit.rejection = {
+        rejectedBy: pkg.rejectionDetails.rejectedBy.contactName,
+        rejectedAt: formatDate(pkg.rejectionDetails.rejectedAt),
+        reason: pkg.rejectionDetails.reason,
+        rejectedIP: pkg.rejectionDetails.rejectedIP,
+      };
     }
 
+    // Add revocation details if applicable
     if (pkg.status === "Revoked" && pkg.revocationDetails?.revokedBy) {
-      audit += `- Document REVOKED by ${
-        pkg.revocationDetails.revokedBy.name
-      } at ${formatDate(pkg.revocationDetails.revokedAt)}\n`;
-      const reason = pkg.revocationDetails.reason || "No reason provided.";
-      audit += ` Reason: ${reason}\n`;
+      audit.revocation = {
+        revokedBy: pkg.revocationDetails.revokedBy.name,
+        revokedAt: formatDate(pkg.revocationDetails.revokedAt),
+        reason: pkg.revocationDetails.reason || "No reason provided.",
+      };
     }
 
+    // Add reassignment history
     if (pkg.reassignmentHistory?.length > 0) {
-      audit += `\nREASSIGNMENTS\n`;
-      audit += `--------------------------------------------------\n`;
-      pkg.reassignmentHistory.forEach((r) => {
-        audit += `- ${formatDate(r.reassignedAt)}: ${
-          r.reassignedBy.contactName
-        } reassigned to ${r.reassignedTo.contactName}\n`;
-      });
+      audit.reassignments = pkg.reassignmentHistory.map((r) => ({
+        reassignedAt: formatDate(r.reassignedAt),
+        reassignedBy: r.reassignedBy.contactName,
+        reassignedTo: r.reassignedTo.contactName,
+      }));
     }
 
     return audit;
   }
 
-  /**
-   * Adds a professional, branded audit trail page with proper spacing.
-   */
   async addAuditTrailPage(pdfDoc, pkg, fonts, logoImage) {
-    const text = this.createAuditTrail(pkg);
+    const audit = this.createAuditTrail(pkg);
     const page = pdfDoc.addPage();
     const { width, height } = page.getSize();
     const margin = 50;
     let currentY = height - margin;
 
-    // Add Logo if available
+    // Add Logo centered at the top
     if (logoImage) {
-      const logoDims = logoImage.scale(0.25);
+      const logoDims = logoImage.scale(0.3);
+      const logoX = (width - logoDims.width) / 2;
       page.drawImage(logoImage, {
-        x: margin,
+        x: logoX,
         y: currentY - logoDims.height,
         width: logoDims.width,
         height: logoDims.height,
       });
-      currentY -= logoDims.height + 20;
+      currentY -= logoDims.height + 30;
     }
 
-    // Add Header
+    // Add Header - Centered
     const headerText = "Audit Certificate of Completion";
-    const headerSize = 22;
+    const headerSize = 24;
+    const headerWidth = fonts.helveticaBold.widthOfTextAtSize(
+      headerText,
+      headerSize
+    );
     page.drawText(headerText, {
-      x: margin,
+      x: (width - headerWidth) / 2,
       y: currentY,
       font: fonts.helveticaBold,
       size: headerSize,
       color: rgb(0.1, 0.1, 0.1),
     });
-    currentY -= headerSize + 20;
+    currentY -= headerSize + 10;
+
+    // Add subtitle
+    const subtitleText = "Complete Transaction History";
+    const subtitleSize = 11;
+    const subtitleWidth = fonts.helvetica.widthOfTextAtSize(
+      subtitleText,
+      subtitleSize
+    );
+    page.drawText(subtitleText, {
+      x: (width - subtitleWidth) / 2,
+      y: currentY,
+      font: fonts.helvetica,
+      size: subtitleSize,
+      color: rgb(0.4, 0.4, 0.4),
+    });
+    currentY -= 30;
 
     // Add dividing line
     page.drawLine({
       start: { x: margin, y: currentY },
       end: { x: width - margin, y: currentY },
-      thickness: 1,
-      color: rgb(0.8, 0.8, 0.8),
+      thickness: 2,
+      color: rgb(0.2, 0.2, 0.2),
+    });
+    currentY -= 25;
+
+    // Document Information Section
+    page.drawText("DOCUMENT INFORMATION", {
+      x: margin,
+      y: currentY,
+      font: fonts.helveticaBold,
+      size: 12,
+      color: rgb(0.1, 0.1, 0.1),
     });
     currentY -= 20;
 
-    // Split audit text into lines for wrapping
-    const auditLines = text.split("\n");
-    const fontSize = 10;
-    const lineHeight = 15;
-    const maxWidth = width - 2 * margin;
+    const infoLines = [
+      `Document Name: ${audit.header.documentName}`,
+      `Document ID: ${audit.header.documentId}`,
+      `Status: ${audit.header.status}`,
+      `Created: ${audit.header.createdAt}`,
+      `Created By: ${audit.header.createdBy}`,
+    ];
 
-    for (const line of auditLines) {
-      if (currentY < margin) {
+    for (const line of infoLines) {
+      page.drawText(line, {
+        x: margin + 10,
+        y: currentY,
+        font: fonts.helvetica,
+        size: 10,
+        color: rgb(0.3, 0.3, 0.3),
+      });
+      currentY -= 15;
+    }
+
+    currentY -= 15;
+
+    // Timeline Section
+    page.drawText("SIGNATURE TIMELINE", {
+      x: margin,
+      y: currentY,
+      font: fonts.helveticaBold,
+      size: 12,
+      color: rgb(0.1, 0.1, 0.1),
+    });
+    currentY -= 5;
+
+    // Draw section underline
+    page.drawLine({
+      start: { x: margin, y: currentY },
+      end: { x: margin + 150, y: currentY },
+      thickness: 1,
+      color: rgb(0.7, 0.7, 0.7),
+    });
+    currentY -= 20;
+
+    // Timeline entries with icons
+    for (const event of audit.timeline) {
+      if (currentY < margin + 80) {
         // Add new page if running out of space
         const newPage = pdfDoc.addPage();
         currentY = height - margin;
         page = newPage;
       }
 
-      page.drawText(line, {
-        x: margin,
+      // Draw checkmark icon (using filled circle)
+      page.drawCircle({
+        x: margin + 6,
+        y: currentY + 4,
+        size: 5,
+        color: rgb(0.2, 0.7, 0.2),
+      });
+
+      // Draw signer name and role
+      const signerText = `${event.contactName} (${event.role})`;
+      page.drawText(signerText, {
+        x: margin + 20,
+        y: currentY,
+        font: fonts.helveticaBold,
+        size: 10,
+        color: rgb(0.1, 0.1, 0.1),
+      });
+      currentY -= 14;
+
+      // Draw date and IP
+      const dateText = `Signed: ${new Date(event.signedAt).toLocaleString()}`;
+      page.drawText(dateText, {
+        x: margin + 20,
         y: currentY,
         font: fonts.helvetica,
-        size: fontSize,
-        color: rgb(0.2, 0.2, 0.2),
-        maxWidth: maxWidth,
-        lineHeight: lineHeight,
+        size: 9,
+        color: rgb(0.4, 0.4, 0.4),
       });
-      currentY -= lineHeight;
+      currentY -= 13;
+
+      page.drawText(`IP Address: ${event.signedIP}`, {
+        x: margin + 20,
+        y: currentY,
+        font: fonts.helvetica,
+        size: 9,
+        color: rgb(0.4, 0.4, 0.4),
+      });
+      currentY -= 13;
+
+      // Draw method and OTP
+      page.drawText(`Method: ${event.method}`, {
+        x: margin + 20,
+        y: currentY,
+        font: fonts.helvetica,
+        size: 9,
+        color: rgb(0.4, 0.4, 0.4),
+      });
+      currentY -= 13;
+
+      page.drawText(`OTP Code: ${event.otpCode}`, {
+        x: margin + 20,
+        y: currentY,
+        font: fonts.helvetica,
+        size: 9,
+        color: rgb(0.4, 0.4, 0.4),
+      });
+      currentY -= 20;
     }
+
+    if (audit.formTimeline && audit.formTimeline.length > 0) {
+      if (currentY < margin + 80) {
+        const newPage = pdfDoc.addPage();
+        currentY = height - margin;
+        page = newPage;
+      }
+
+      currentY -= 10;
+      page.drawText("FORM FIELDS COMPLETED", {
+        x: margin,
+        y: currentY,
+        font: fonts.helveticaBold,
+        size: 12,
+        color: rgb(0.1, 0.1, 0.1),
+      });
+      currentY -= 5;
+
+      // Draw section underline
+      page.drawLine({
+        start: { x: margin, y: currentY },
+        end: { x: margin + 180, y: currentY },
+        thickness: 1,
+        color: rgb(0.7, 0.7, 0.7),
+      });
+      currentY -= 20;
+
+      // Form field entries
+      for (const event of audit.formTimeline) {
+        if (currentY < margin + 80) {
+          // Add new page if running out of space
+          const newPage = pdfDoc.addPage();
+          currentY = height - margin;
+          page = newPage;
+        }
+
+        // Draw checkmark icon (using filled circle)
+        page.drawCircle({
+          x: margin + 6,
+          y: currentY + 4,
+          size: 5,
+          color: rgb(0.2, 0.5, 0.7),
+        });
+
+        // Draw field label and filler name
+        const fieldText = `${event.fieldLabel} - by ${event.contactName} (${event.role})`;
+        page.drawText(fieldText, {
+          x: margin + 20,
+          y: currentY,
+          font: fonts.helveticaBold,
+          size: 10,
+          color: rgb(0.1, 0.1, 0.1),
+        });
+        currentY -= 14;
+
+        // Draw value (truncate if too long)
+        let displayValue = String(event.fieldValue);
+        if (displayValue.length > 50) {
+          displayValue = displayValue.substring(0, 50) + "...";
+        }
+        page.drawText(`Value: ${displayValue}`, {
+          x: margin + 20,
+          y: currentY,
+          font: fonts.helvetica,
+          size: 9,
+          color: rgb(0.4, 0.4, 0.4),
+        });
+        currentY -= 13;
+
+        // Draw date
+        const dateText = `Filled: ${new Date(event.filledAt).toLocaleString()}`;
+        page.drawText(dateText, {
+          x: margin + 20,
+          y: currentY,
+          font: fonts.helvetica,
+          size: 9,
+          color: rgb(0.4, 0.4, 0.4),
+        });
+        currentY -= 13;
+
+        // Draw IP
+        page.drawText(`IP Address: ${event.filledIP}`, {
+          x: margin + 20,
+          y: currentY,
+          font: fonts.helvetica,
+          size: 9,
+          color: rgb(0.4, 0.4, 0.4),
+        });
+        currentY -= 20;
+      }
+    }
+
+    // Rejection Section (if applicable)
+    if (audit.rejection) {
+      if (currentY < margin + 80) {
+        const newPage = pdfDoc.addPage();
+        currentY = height - margin;
+        page = newPage;
+      }
+
+      currentY -= 10;
+      page.drawText("REJECTION DETAILS", {
+        x: margin,
+        y: currentY,
+        font: fonts.helveticaBold,
+        size: 12,
+        color: rgb(0.8, 0, 0),
+      });
+      currentY -= 5;
+
+      page.drawLine({
+        start: { x: margin, y: currentY },
+        end: { x: margin + 150, y: currentY },
+        thickness: 1,
+        color: rgb(0.8, 0, 0),
+      });
+      currentY -= 20;
+
+      // Draw X icon (using filled circle)
+      page.drawCircle({
+        x: margin + 6,
+        y: currentY + 4,
+        size: 5,
+        color: rgb(0.8, 0, 0),
+      });
+
+      page.drawText(`Rejected by: ${audit.rejection.rejectedBy}`, {
+        x: margin + 20,
+        y: currentY,
+        font: fonts.helvetica,
+        size: 10,
+        color: rgb(0.6, 0, 0),
+      });
+      currentY -= 14;
+
+      page.drawText(`Date: ${audit.rejection.rejectedAt}`, {
+        x: margin + 20,
+        y: currentY,
+        font: fonts.helvetica,
+        size: 9,
+        color: rgb(0.6, 0, 0),
+      });
+      currentY -= 13;
+
+      page.drawText(`IP Address: ${audit.rejection.rejectedIP}`, {
+        x: margin + 20,
+        y: currentY,
+        font: fonts.helvetica,
+        size: 9,
+        color: rgb(0.6, 0, 0),
+      });
+      currentY -= 13;
+
+      page.drawText(`Reason: ${audit.rejection.reason}`, {
+        x: margin + 20,
+        y: currentY,
+        font: fonts.helvetica,
+        size: 9,
+        color: rgb(0.6, 0, 0),
+      });
+      currentY -= 20;
+    }
+
+    // Revocation Section (if applicable)
+    if (audit.revocation) {
+      if (currentY < margin + 80) {
+        const newPage = pdfDoc.addPage();
+        currentY = height - margin;
+        page = newPage;
+      }
+
+      currentY -= 10;
+      page.drawText("REVOCATION DETAILS", {
+        x: margin,
+        y: currentY,
+        font: fonts.helveticaBold,
+        size: 12,
+        color: rgb(0.8, 0, 0),
+      });
+      currentY -= 5;
+
+      page.drawLine({
+        start: { x: margin, y: currentY },
+        end: { x: margin + 150, y: currentY },
+        thickness: 1,
+        color: rgb(0.8, 0, 0),
+      });
+      currentY -= 20;
+
+      // Draw prohibition icon (circle with diagonal line)
+      page.drawCircle({
+        x: margin + 6,
+        y: currentY + 4,
+        size: 6,
+        borderColor: rgb(0.8, 0, 0),
+        borderWidth: 1.5,
+      });
+      page.drawLine({
+        start: { x: margin + 1, y: currentY + 9 },
+        end: { x: margin + 11, y: currentY - 1 },
+        thickness: 1.5,
+        color: rgb(0.8, 0, 0),
+      });
+
+      page.drawText(`Revoked by: ${audit.revocation.revokedBy}`, {
+        x: margin + 20,
+        y: currentY,
+        font: fonts.helvetica,
+        size: 10,
+        color: rgb(0.6, 0, 0),
+      });
+      currentY -= 14;
+
+      page.drawText(`Date: ${audit.revocation.revokedAt}`, {
+        x: margin + 20,
+        y: currentY,
+        font: fonts.helvetica,
+        size: 9,
+        color: rgb(0.6, 0, 0),
+      });
+      currentY -= 13;
+
+      page.drawText(`Reason: ${audit.revocation.reason}`, {
+        x: margin + 20,
+        y: currentY,
+        font: fonts.helvetica,
+        size: 9,
+        color: rgb(0.6, 0, 0),
+      });
+      currentY -= 20;
+    }
+
+    // Reassignment Section (if applicable)
+    if (audit.reassignments.length > 0) {
+      if (currentY < margin + 80) {
+        const newPage = pdfDoc.addPage();
+        currentY = height - margin;
+        page = newPage;
+      }
+
+      currentY -= 10;
+      page.drawText("REASSIGNMENT HISTORY", {
+        x: margin,
+        y: currentY,
+        font: fonts.helveticaBold,
+        size: 12,
+        color: rgb(0.1, 0.1, 0.1),
+      });
+      currentY -= 5;
+
+      page.drawLine({
+        start: { x: margin, y: currentY },
+        end: { x: margin + 170, y: currentY },
+        thickness: 1,
+        color: rgb(0.7, 0.7, 0.7),
+      });
+      currentY -= 20;
+
+      for (const reassignment of audit.reassignments) {
+        if (currentY < margin + 60) {
+          const newPage = pdfDoc.addPage();
+          currentY = height - margin;
+          page = newPage;
+        }
+
+        // Draw arrow icon (using lines)
+        page.drawLine({
+          start: { x: margin, y: currentY + 4 },
+          end: { x: margin + 12, y: currentY + 4 },
+          thickness: 2,
+          color: rgb(0.3, 0.5, 0.8),
+        });
+        // Arrow head
+        page.drawLine({
+          start: { x: margin + 12, y: currentY + 4 },
+          end: { x: margin + 8, y: currentY + 7 },
+          thickness: 2,
+          color: rgb(0.3, 0.5, 0.8),
+        });
+        page.drawLine({
+          start: { x: margin + 12, y: currentY + 4 },
+          end: { x: margin + 8, y: currentY + 1 },
+          thickness: 2,
+          color: rgb(0.3, 0.5, 0.8),
+        });
+
+        const reassignText = `${reassignment.reassignedBy} to ${reassignment.reassignedTo}`;
+        page.drawText(reassignText, {
+          x: margin + 20,
+          y: currentY,
+          font: fonts.helvetica,
+          size: 10,
+          color: rgb(0.2, 0.2, 0.2),
+        });
+        currentY -= 14;
+
+        page.drawText(`Date: ${reassignment.reassignedAt}`, {
+          x: margin + 20,
+          y: currentY,
+          font: fonts.helvetica,
+          size: 9,
+          color: rgb(0.4, 0.4, 0.4),
+        });
+        currentY -= 20;
+      }
+    }
+
+    // Add footer with certification
+    currentY = margin + 30;
+    page.drawLine({
+      start: { x: margin, y: currentY },
+      end: { x: width - margin, y: currentY },
+      thickness: 1,
+      color: rgb(0.8, 0.8, 0.8),
+    });
+    currentY -= 15;
+
+    const certText =
+      "This document has been digitally signed and is legally binding.";
+    const certWidth = fonts.helveticaOblique.widthOfTextAtSize(certText, 9);
+    page.drawText(certText, {
+      x: (width - certWidth) / 2,
+      y: currentY,
+      font: fonts.helveticaOblique,
+      size: 9,
+      color: rgb(0.5, 0.5, 0.5),
+    });
+    currentY -= 12;
+
+    const poweredText = "Powered by E-Sign.eu";
+    const poweredWidth = fonts.helvetica.widthOfTextAtSize(poweredText, 8);
+    page.drawText(poweredText, {
+      x: (width - poweredWidth) / 2,
+      y: currentY,
+      font: fonts.helvetica,
+      size: 8,
+      color: rgb(0.6, 0.6, 0.6),
+    });
   }
 
   /**

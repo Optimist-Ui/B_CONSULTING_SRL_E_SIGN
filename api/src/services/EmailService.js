@@ -663,7 +663,7 @@ class EmailService {
       dynamic_template_data: {
         user_name: userName,
         plan_name: planName,
-        plan_price: `$${amount}`,
+        plan_price: `€${amount}`,
         renewal_date: renewalDate,
         invoice_link: invoiceUrl,
         billing_portal_link: `${process.env.CLIENT_URL}/subscriptions`, // A link to your new billing page

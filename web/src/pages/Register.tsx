@@ -38,6 +38,7 @@ const Register = () => {
 
     const [flag, setFlag] = useState(locale);
     const [showPassword, setShowPassword] = useState(false);
+    const [passwordError, setPasswordError] = useState('');
 
     useEffect(() => {
         dispatch(setPageTitle('Register'));
@@ -54,6 +55,15 @@ const Register = () => {
     const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
         const { id, value } = e.target;
         setFormData({ ...formData, [id]: value });
+
+        // Validate password length
+        if (id === 'password') {
+            if (value.length > 0 && value.length < 6) {
+                setPasswordError('Password must be at least 6 characters');
+            } else {
+                setPasswordError('');
+            }
+        }
     };
 
     // This submission logic also works perfectly as formData now has the correct shape
@@ -191,7 +201,6 @@ const Register = () => {
                                         </span>
                                     </div>
                                 </div>
-
                                 <div>
                                     <label htmlFor="password">Password</label>
                                     <div className="relative text-white-dark">
@@ -209,9 +218,14 @@ const Register = () => {
                                             {showPassword ? <FaEyeSlashTyped /> : <IconEye />}
                                         </button>
                                     </div>
+                                    {passwordError && <span className="text-red-500 text-sm mt-1">{passwordError}</span>}
                                 </div>
 
-                                <button type="submit" className="btn btn-gradient !mt-6 w-full border-0 uppercase shadow-[0_10px_20px_-10px_rgba(67,97,238,0.44)]" disabled={loading}>
+                                <button
+                                    type="submit"
+                                    className="btn btn-gradient !mt-6 w-full border-0 uppercase shadow-[0_10px_20px_-10px_rgba(67,97,238,0.44)]"
+                                    disabled={loading || passwordError !== '' || formData.password.length < 6}
+                                >
                                     {loading ? <span className="animate-spin border-2 border-white border-l-transparent rounded-full w-5 h-5 ltr:mr-4 rtl:ml-4 inline-block"></span> : 'Sign Up'}
                                 </button>
                             </form>

@@ -8,13 +8,15 @@ import SearchableContactDropdown from '../common/SearchableContactDropdown';
 import AddEditContactModal from '../common/AddEditContactModal';
 import { Contact } from '../../store/slices/contactSlice';
 import { nanoid } from '@reduxjs/toolkit';
-import { FiXCircle, FiPlusCircle, FiAlertCircle } from 'react-icons/fi';
+import { FiXCircle, FiPlusCircle, FiAlertCircle, FiMail, FiSmartphone } from 'react-icons/fi';
 import { ComponentType } from 'react';
 import { toast } from 'react-toastify';
 
 const FiPlusCircleTyped = FiPlusCircle as ComponentType<{ className?: string }>;
 const FiXCircleTyped = FiXCircle as ComponentType<{ className?: string }>;
 const FiAlertCircleTyped = FiAlertCircle as ComponentType<{ className?: string }>;
+const FiMailTyped = FiMail as ComponentType<{ className?: string }>;
+const FiSmartphoneTyped = FiSmartphone as ComponentType<{ className?: string }>;
 
 interface PackageFieldPropertiesPanelProps {
     field: PackageField;
@@ -370,26 +372,28 @@ const PackageFieldPropertiesPanel: React.FC<PackageFieldPropertiesPanelProps> = 
                         </div>
 
                         {selectedRoleForAssignment === 'Signer' && (
-                            <div className="p-3 border rounded-lg bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-                                <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 block mb-2">Signature Method(s):</label>
+                            <div className="p-3 border rounded-lg bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                                <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 block mb-3">Signature Method(s):</label>
                                 <div className="space-y-2">
-                                    <label className="flex items-center text-sm gap-2 cursor-pointer">
+                                    <label className="flex items-center text-sm gap-2 cursor-pointer p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
                                         <input
                                             type="checkbox"
-                                            className="form-checkbox"
+                                            className="form-checkbox text-blue-600 focus:ring-blue-500 focus:ring-2 w-4 h-4"
                                             checked={signatureMethodsForNewSigner.includes('Email OTP')}
                                             onChange={() => handleNewSignerMethodChange('Email OTP')}
                                         />
-                                        <span>Via Email OTP</span>
+                                        <FiMailTyped className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                                        <span className="dark:text-gray-200">Via Email OTP</span>
                                     </label>
-                                    <label className="flex items-center text-sm gap-2 cursor-pointer">
+                                    <label className="flex items-center text-sm gap-2 cursor-pointer p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
                                         <input
                                             type="checkbox"
-                                            className="form-checkbox"
+                                            className="form-checkbox text-blue-600 focus:ring-blue-500 focus:ring-2 w-4 h-4"
                                             checked={signatureMethodsForNewSigner.includes('SMS OTP')}
                                             onChange={() => handleNewSignerMethodChange('SMS OTP')}
                                         />
-                                        <span>Via SMS OTP</span>
+                                        <FiSmartphoneTyped className="w-4 h-4 text-green-600 dark:text-green-400" />
+                                        <span className="dark:text-gray-200">Via SMS OTP</span>
                                     </label>
                                 </div>
                             </div>
@@ -423,24 +427,26 @@ const PackageFieldPropertiesPanel: React.FC<PackageFieldPropertiesPanelProps> = 
                                     {assignment.role === 'Signer' && (
                                         <div className="mt-2 pt-2 border-t border-gray-200 dark:border-gray-700">
                                             <label className="text-xs font-semibold text-gray-600 dark:text-gray-400 block mb-2">Allowed Methods:</label>
-                                            <div className="flex gap-4">
-                                                <label className="flex items-center text-sm gap-2 cursor-pointer">
+                                            <div className="space-y-2">
+                                                <label className="flex items-center text-sm gap-2 cursor-pointer p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
                                                     <input
                                                         type="checkbox"
-                                                        className="form-checkbox"
+                                                        className="form-checkbox text-blue-600 focus:ring-blue-500 focus:ring-2 w-4 h-4"
                                                         checked={assignment.signatureMethods?.includes('Email OTP')}
                                                         onChange={() => handleExistingUserMethodChange(assignment.id, 'Email OTP')}
                                                     />
-                                                    <span className="dark:text-gray-300">Email</span>
+                                                    <FiMailTyped className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                                                    <span className="dark:text-gray-300">Email OTP</span>
                                                 </label>
-                                                <label className="flex items-center text-sm gap-2 cursor-pointer">
+                                                <label className="flex items-center text-sm gap-2 cursor-pointer p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
                                                     <input
                                                         type="checkbox"
-                                                        className="form-checkbox"
+                                                        className="form-checkbox text-blue-600 focus:ring-blue-500 focus:ring-2 w-4 h-4"
                                                         checked={assignment.signatureMethods?.includes('SMS OTP')}
                                                         onChange={() => handleExistingUserMethodChange(assignment.id, 'SMS OTP')}
                                                     />
-                                                    <span className="dark:text-gray-300">SMS</span>
+                                                    <FiSmartphoneTyped className="w-4 h-4 text-green-600 dark:text-green-400" />
+                                                    <span className="dark:text-gray-300">SMS OTP</span>
                                                 </label>
                                             </div>
                                         </div>

@@ -1,4 +1,4 @@
-// SigningDrawer.tsx - Updated Version with Improved UX
+// SigningDrawer.tsx - Updated Version with Enter Key Support
 import React, { useState, useEffect, ComponentType, Fragment } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Transition } from '@headlessui/react';
@@ -138,6 +138,25 @@ const SigningDrawer: React.FC = () => {
         }
     };
 
+    // Handle Enter key submission for identity step
+    const handleIdentityKeyPress = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter' && !signatureLoading) {
+            e.preventDefault();
+            const identityValue = getIdentityValue();
+            if (identityValue) {
+                handleIdentityConfirm();
+            }
+        }
+    };
+
+    // Handle Enter key submission for OTP step
+    const handleOtpKeyPress = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter' && !signatureLoading && otp.length === 6) {
+            e.preventDefault();
+            handleCompleteSigning();
+        }
+    };
+
     const maskedContact = () => {
         if (signingMethod === 'email') {
             return packageData?.currentUser?.contactEmail.replace(/^(.).*?@/, '$1*****@');
@@ -164,18 +183,25 @@ const SigningDrawer: React.FC = () => {
     };
 
     const shouldShowMethodSelection = () => {
-        const allowed = packageData?.currentUser?.signatureMethods ?? [];
+        const activeField = packageData?.fields.find((f) => f.id === activeSigningFieldId);
+        const currentUserAssignment = activeField?.assignedUsers.find((user) => user.contactId === packageData?.currentUser?.contactId);
+        const allowed = currentUserAssignment?.signatureMethods ?? [];
         return allowed.length > 1;
     };
 
     useEffect(() => {
         if (!uiState.isSigningDrawerOpen || signingStep !== 'method') return;
-        const allowed = packageData?.currentUser?.signatureMethods ?? [];
+
+        // Get signature methods from the active signing field's assigned users
+        const activeField = packageData?.fields.find((f) => f.id === activeSigningFieldId);
+        const currentUserAssignment = activeField?.assignedUsers.find((user) => user.contactId === packageData?.currentUser?.contactId);
+        const allowed = currentUserAssignment?.signatureMethods ?? [];
+
         if (allowed.length === 1) {
             const method = allowed[0].toLowerCase().includes('email') ? 'email' : 'sms';
             handleMethodSelect(method);
         }
-    }, [uiState.isSigningDrawerOpen, signingStep, packageData?.currentUser?.signatureMethods]);
+    }, [uiState.isSigningDrawerOpen, signingStep, activeSigningFieldId, packageData]);
 
     const getStepTitle = () => {
         switch (signingStep) {
@@ -295,7 +321,7 @@ const SigningDrawer: React.FC = () => {
 
                                             {/* IDENTITY VERIFICATION STEP */}
                                             {signingStep === 'identity' && signingMethod && (
-                                                <div className="space-y-6">
+                                                <div className="space-y-6" onKeyPress={handleIdentityKeyPress}>
                                                     <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-4">
                                                         <p className="text-xs text-gray-500 mb-1">
                                                             We will send a verification code to the {signingMethod === 'email' ? 'email address' : 'phone number'} you enter below.
@@ -338,7 +364,7 @@ const SigningDrawer: React.FC = () => {
 
                                             {/* OTP VERIFICATION STEP */}
                                             {signingStep === 'otp' && (
-                                                <div className="space-y-6">
+                                                <div className="space-y-6" onKeyPress={handleOtpKeyPress}>
                                                     <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl p-4 text-center">
                                                         <div className="text-2xl font-bold text-green-600 mb-1">{timer}</div>
                                                         <div className="text-xs text-gray-600">seconds remaining</div>

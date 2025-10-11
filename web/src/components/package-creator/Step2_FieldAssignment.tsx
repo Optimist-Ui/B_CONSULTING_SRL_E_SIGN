@@ -18,12 +18,13 @@ import EditorToolbar from '../template-creator/EditorToolbar';
 import PackageFieldPropertiesPanel from './PackageFieldPropertiesPanel';
 import PackageFieldRenderer from './PackageFieldRenderer';
 import Swal from 'sweetalert2';
-import { FiMousePointer, FiX, FiSettings } from 'react-icons/fi';
+import { FiMousePointer, FiX, FiSettings, FiAlertCircle } from 'react-icons/fi';
 import { nanoid } from '@reduxjs/toolkit';
 
 const FiMousePointerTyped = FiMousePointer as ComponentType<{ className?: string }>;
 const FiXTyped = FiX as ComponentType<{ className?: string }>;
 const FiSettingsTyped = FiSettings as ComponentType<{ className?: string }>;
+const FiAlertCircleTyped = FiAlertCircle as ComponentType<{ className?: string }>;
 
 interface PageInfo {
     width: number;
@@ -354,6 +355,22 @@ const Step2_FieldAssignment: React.FC<StepProps> = ({ onNext, onPrevious }) => {
                 <div className="px-3 py-2 sm:p-3">
                     <EditorToolbar />
                 </div>
+                {/* Validation Warning */}
+                {currentPackage?.fields.length === 0 && (
+                    <div className="px-3 pb-3">
+                        <div className="bg-amber-50 dark:bg-amber-900/20 border-l-4 border-amber-500 p-3 rounded-r-lg">
+                            <div className="flex items-start gap-2">
+                                <FiAlertCircleTyped className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+                                <div>
+                                    <p className="text-sm font-semibold text-amber-800 dark:text-amber-300">No Fields Added Yet</p>
+                                    <p className="text-xs text-amber-700 dark:text-amber-400 mt-1">
+                                        Drag and drop fields from the toolbar above onto the document to create interactive areas for participants.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
 
             {/* Main Content */}

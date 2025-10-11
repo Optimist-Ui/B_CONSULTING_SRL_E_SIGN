@@ -87,7 +87,16 @@ const PlanSelection: React.FC<PlanSelectionProps> = ({ onCancelChange }) => {
 
     const getButtonText = (plan: Plan) => {
         if (!hasActiveSubscription) {
-            return !hasHadTrial && plan.monthlyPrice > 0 ? 'Start 14-Day Free Trial' : 'Choose Plan';
+            return !hasHadTrial && plan.monthlyPrice > 0 ? (
+                <span className="flex items-center justify-center gap-2">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    Start 14-Day Free Trial
+                </span>
+            ) : (
+                'Choose Plan'
+            );
         }
         const selectedInterval = isYearly ? 'year' : 'month';
         if (plan.name === currentPlanName) {
@@ -235,13 +244,33 @@ const PlanSelection: React.FC<PlanSelectionProps> = ({ onCancelChange }) => {
                                         Contact Sales
                                     </button>
                                 ) : (
-                                    <button
-                                        onClick={() => handleSelectPlan(plan)}
-                                        disabled={isButtonDisabled(plan)}
-                                        className={`btn w-full text-lg py-3 disabled:opacity-50 disabled:cursor-not-allowed ${plan.isPopular ? 'btn-primary' : 'btn-outline-primary'}`}
-                                    >
-                                        {getButtonText(plan)}
-                                    </button>
+                                    <>
+                                        {/* Trial Badge - Only show if eligible */}
+                                        {!hasActiveSubscription && !hasHadTrial && plan.monthlyPrice > 0 && (
+                                            <div className="mb-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white px-4 py-3 rounded-xl text-center shadow-lg">
+                                                <div className="flex items-center justify-center gap-2 font-bold text-sm">
+                                                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path
+                                                            fillRule="evenodd"
+                                                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                                            clipRule="evenodd"
+                                                        />
+                                                    </svg>
+                                                    <span>14 Days Free Trial Available</span>
+                                                </div>
+                                                <p className="text-xs mt-1 opacity-90">Valid credit card is required !</p>
+                                            </div>
+                                        )}
+                                        <button
+                                            onClick={() => handleSelectPlan(plan)}
+                                            disabled={isButtonDisabled(plan)}
+                                            className={`btn w-full text-lg py-3 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 ${
+                                                plan.isPopular ? 'btn-primary shadow-lg hover:shadow-xl' : 'btn-outline-primary'
+                                            } ${!hasActiveSubscription && !hasHadTrial && plan.monthlyPrice > 0 ? 'ring-2 ring-green-400 ring-offset-2 dark:ring-offset-gray-800' : ''}`}
+                                        >
+                                            {getButtonText(plan)}
+                                        </button>
+                                    </>
                                 )}
                             </div>
                         </div>

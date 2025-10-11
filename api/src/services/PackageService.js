@@ -850,7 +850,6 @@ class PackageService {
       ?.contactId.toString();
 
     if (!participantContactId) {
-      // This is a critical security check
       throw new Error("You are not a valid participant for this package.");
     }
 
@@ -860,29 +859,45 @@ class PackageService {
     for (const fieldId in fieldValues) {
       const field = pkg.fields.find((f) => f.id === fieldId);
 
-      // Security Check: Only update the field if it actually exists and is assigned to this user
       if (
         field &&
         field.assignedUsers.some(
           (u) => u.contactId.toString() === participantContactId
         )
       ) {
-        // --- THIS IS THE CRITICAL FIX ---
-        // Make sure we're actually setting the value on the field
+        // Set the field value
         field.value = fieldValues[fieldId];
-        // --- END OF FIX ---
 
-        // For "Approver" checkboxes, we also set the audit trail, just like for signatures
-        const approverAssignment = field.assignedUsers.find(
-          (u) =>
-            u.contactId.toString() === participantContactId &&
-            u.role === "Approver"
+        // Find the current user's assignment for this field
+        const userAssignment = field.assignedUsers.find(
+          (u) => u.contactId.toString() === participantContactId
         );
-        if (field.type === "checkbox" && approverAssignment) {
-          approverAssignment.signed = true;
-          approverAssignment.signedAt = submissionDate;
-          approverAssignment.signedMethod = "Form Submission";
-          approverAssignment.signedIP = ip;
+
+        if (userAssignment) {
+          // For "Approver" checkboxes, set the audit trail
+          if (field.type === "checkbox" && userAssignment.role === "Approver") {
+            userAssignment.signed = true;
+            userAssignment.signedAt = submissionDate;
+            userAssignment.signedMethod = "Form Submission";
+            userAssignment.signedIP = ip;
+          }
+
+          // 🔥 NEW: For "FormFiller" role, mark as signed when they fill required fields
+          if (userAssignment.role === "FormFiller" && field.required) {
+            // Check if the field has a valid value
+            const hasValidValue =
+              field.value !== undefined &&
+              field.value !== null &&
+              field.value !== "" &&
+              field.value !== false;
+
+            if (hasValidValue) {
+              userAssignment.signed = true;
+              userAssignment.signedAt = submissionDate;
+              userAssignment.signedMethod = "Form Submission";
+              userAssignment.signedIP = ip;
+            }
+          }
         }
       } else {
         console.log(`Field ${fieldId} not found or not assigned to user`);
@@ -2135,25 +2150,27 @@ class PackageService {
       contacts.map((c) => [c._id.toString(), c.phone || ""])
     );
 
-    // Helper function to determine participant status
-    const getParticipantStatus = (participant, pkg) => {
-      const contactId = participant.contactId;
-
-      // Check if this participant has completed all their assigned tasks
-      const assignedFields = pkg.fields.filter((field) =>
+    // 🔥 NEW: Helper function to determine participant status FOR A SPECIFIC ROLE
+    const getParticipantStatusForRole = (contactId, role, pkg) => {
+      // Get fields assigned to this participant with THIS SPECIFIC ROLE
+      const assignedFieldsForRole = pkg.fields.filter((field) =>
         field.assignedUsers.some(
-          (user) => user.contactId.toString() === contactId.toString()
+          (user) =>
+            user.contactId.toString() === contactId.toString() &&
+            user.role === role
         )
       );
 
-      if (assignedFields.length === 0) {
-        // No assigned fields, just a receiver
+      if (assignedFieldsForRole.length === 0) {
         return pkg.status === "Sent" ? "In Progress" : "Not Sent";
       }
 
-      const completedFields = assignedFields.filter((field) => {
+      // Check each assigned field to see if this participant completed it
+      const completedFields = assignedFieldsForRole.filter((field) => {
         const userAssignment = field.assignedUsers.find(
-          (user) => user.contactId.toString() === contactId.toString()
+          (user) =>
+            user.contactId.toString() === contactId.toString() &&
+            user.role === role
         );
 
         if (!userAssignment) return false;
@@ -2168,7 +2185,22 @@ class PackageService {
           return userAssignment.signed === true;
         }
 
-        // For other field types (text, textarea, date, etc.), check if value exists
+        // For FormFiller role on required fields, check the signed flag
+        if (userAssignment.role === "FormFiller" && field.required) {
+          return userAssignment.signed === true;
+        }
+
+        // For non-required FormFiller fields, check if value exists
+        if (userAssignment.role === "FormFiller" && !field.required) {
+          return (
+            field.value !== undefined &&
+            field.value !== null &&
+            field.value !== "" &&
+            field.value !== false
+          );
+        }
+
+        // For other cases, check if value exists
         return (
           field.value !== undefined &&
           field.value !== null &&
@@ -2177,8 +2209,8 @@ class PackageService {
         );
       });
 
-      // Determine status based on completion
-      if (completedFields.length === assignedFields.length) {
+      // Determine status based on completion FOR THIS ROLE
+      if (completedFields.length === assignedFieldsForRole.length) {
         return "Completed";
       } else if (pkg.status === "Sent") {
         return "In Progress";
@@ -2218,21 +2250,45 @@ class PackageService {
       // Transform the grouped participant data into the final 'RoleDetail' structure
       const roleDetails = { formFillers: [], approvers: [], signers: [] };
       participants.forEach((p) => {
-        const roleDetail = {
-          user: {
-            id: p.contactId,
-            name: p.contactName,
-            email: p.contactEmail,
-            phone: contactPhoneMap.get(p.contactId) || "",
-          },
-          // Use the improved status determination logic
-          status: getParticipantStatus(p, pkg),
-          lastUpdated: p.signedAt ? new Date(p.signedAt).toISOString() : "",
-        };
+        // 🔥 CRITICAL FIX: Create separate roleDetail for EACH role with role-specific status
+        if (p.roles.has("FormFiller")) {
+          roleDetails.formFillers.push({
+            user: {
+              id: p.contactId,
+              name: p.contactName,
+              email: p.contactEmail,
+              phone: contactPhoneMap.get(p.contactId) || "",
+            },
+            status: getParticipantStatusForRole(p.contactId, "FormFiller", pkg),
+            lastUpdated: p.signedAt ? new Date(p.signedAt).toISOString() : "",
+          });
+        }
 
-        if (p.roles.has("FormFiller")) roleDetails.formFillers.push(roleDetail);
-        if (p.roles.has("Approver")) roleDetails.approvers.push(roleDetail);
-        if (p.roles.has("Signer")) roleDetails.signers.push(roleDetail);
+        if (p.roles.has("Approver")) {
+          roleDetails.approvers.push({
+            user: {
+              id: p.contactId,
+              name: p.contactName,
+              email: p.contactEmail,
+              phone: contactPhoneMap.get(p.contactId) || "",
+            },
+            status: getParticipantStatusForRole(p.contactId, "Approver", pkg),
+            lastUpdated: p.signedAt ? new Date(p.signedAt).toISOString() : "",
+          });
+        }
+
+        if (p.roles.has("Signer")) {
+          roleDetails.signers.push({
+            user: {
+              id: p.contactId,
+              name: p.contactName,
+              email: p.contactEmail,
+              phone: contactPhoneMap.get(p.contactId) || "",
+            },
+            status: getParticipantStatusForRole(p.contactId, "Signer", pkg),
+            lastUpdated: p.signedAt ? new Date(p.signedAt).toISOString() : "",
+          });
+        }
       });
 
       // Handle notification-only receivers

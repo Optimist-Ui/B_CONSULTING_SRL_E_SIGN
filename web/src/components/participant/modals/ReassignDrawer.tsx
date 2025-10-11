@@ -128,6 +128,25 @@ const ReassignDrawer: React.FC = () => {
         }
     };
 
+    // Handle Enter key submission for add step
+    const handleAddStepKeyPress = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter' && !reassignmentLoading) {
+            e.preventDefault();
+            const { email, firstName, lastName } = reassignFormData;
+            if (email.trim() && firstName.trim() && lastName.trim()) {
+                handleCreateContact();
+            }
+        }
+    };
+
+    // Handle Enter key submission for confirm step
+    const handleConfirmStepKeyPress = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter' && !reassignmentLoading && reassignFormData.reason.trim()) {
+            e.preventDefault();
+            handlePerformReassignment();
+        }
+    };
+
     const renderSelectStep = () => (
         <div className="space-y-6">
             <div className="relative">
@@ -140,7 +159,7 @@ const ReassignDrawer: React.FC = () => {
                     className="w-full px-4 py-3 pl-12 border border-gray-300 rounded-xl focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-all duration-200 shadow-sm"
                 />
             </div>
-            <div className="flex-1 overflow-y-auto -mr-6 pr-4 space-y-4">
+            <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
                 {reassignmentLoading ? (
                     <div className="flex items-center justify-center py-10 bg-gradient-to-r from-gray-50 to-slate-50 border border-gray-200 rounded-xl">
                         <FiLoaderTyped className="animate-spin w-6 h-6 text-[#1e293b] mr-2" />
@@ -154,7 +173,7 @@ const ReassignDrawer: React.FC = () => {
                             className="w-full flex items-center justify-between p-4 border border-gray-300 rounded-xl hover:bg-gray-50 hover:border-slate-400 transition-all duration-200 shadow-sm hover:shadow-md"
                         >
                             <div className="flex items-center gap-4">
-                                <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center">
+                                <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center flex-shrink-0">
                                     <FiUserPlusTyped className="w-6 h-6" />
                                 </div>
                                 <div className="text-left">
@@ -174,11 +193,19 @@ const ReassignDrawer: React.FC = () => {
                     </div>
                 )}
             </div>
+
+            {/* Action Button - Inline with content */}
+            <button
+                onClick={() => dispatch(setReassignStep('add'))}
+                className="w-full px-4 py-3 bg-[#1e293b] text-white font-medium rounded-xl hover:bg-opacity-90 transition-all duration-200 shadow-sm hover:shadow-md flex items-center justify-center"
+            >
+                <FiUserPlusTyped className="w-5 h-5 mr-2" /> Add New Contact
+            </button>
         </div>
     );
 
     const renderAddStep = () => (
-        <div className="space-y-6">
+        <div className="space-y-6" onKeyPress={handleAddStepKeyPress}>
             <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-4">
                 <p className="text-sm text-gray-600">Enter the details of the new contact to whom you want to reassign your responsibility.</p>
             </div>
@@ -225,11 +252,28 @@ const ReassignDrawer: React.FC = () => {
                     className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-all duration-200 shadow-sm"
                 />
             </div>
+
+            {/* Action Buttons - Inline with content */}
+            <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                <button
+                    onClick={() => dispatch(setReassignStep('select'))}
+                    className="px-6 py-3 border border-gray-300 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition-all duration-200 shadow-sm"
+                >
+                    Back
+                </button>
+                <button
+                    onClick={handleCreateContact}
+                    disabled={reassignmentLoading || !reassignFormData.email.trim() || !reassignFormData.firstName.trim() || !reassignFormData.lastName.trim()}
+                    className="flex-1 px-6 py-3 bg-[#1e293b] text-white font-medium rounded-xl hover:bg-opacity-90 transition-all duration-200 shadow-sm hover:shadow-md disabled:bg-gray-300 disabled:cursor-not-allowed disabled:hover:shadow-sm flex items-center justify-center"
+                >
+                    {reassignmentLoading ? <FiLoaderTyped className="animate-spin w-5 h-5" /> : 'Create and Select Contact'}
+                </button>
+            </div>
         </div>
     );
 
     const renderConfirmStep = () => (
-        <div className="space-y-6">
+        <div className="space-y-6" onKeyPress={handleConfirmStepKeyPress}>
             <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-4">
                 <p className="text-sm text-gray-600 mb-2">You are about to reassign your responsibility to the following contact. This action cannot be undone.</p>
                 <p className="font-semibold text-[#1e293b] text-lg">
@@ -247,11 +291,28 @@ const ReassignDrawer: React.FC = () => {
                     placeholder="Please provide a brief reason..."
                 />
             </div>
+
+            {/* Action Buttons - Inline with content */}
+            <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                <button
+                    onClick={() => dispatch(setReassignStep('select'))}
+                    className="px-6 py-3 border border-gray-300 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition-all duration-200 shadow-sm"
+                >
+                    Back
+                </button>
+                <button
+                    onClick={handlePerformReassignment}
+                    disabled={reassignmentLoading || !reassignFormData.reason.trim()}
+                    className="flex-1 px-6 py-3 bg-green-600 text-white font-medium rounded-xl hover:bg-opacity-90 transition-all duration-200 shadow-sm hover:shadow-md disabled:bg-gray-300 disabled:cursor-not-allowed disabled:hover:shadow-sm flex items-center justify-center"
+                >
+                    {reassignmentLoading ? <FiLoaderTyped className="animate-spin w-5 h-5" /> : 'Confirm Reassignment'}
+                </button>
+            </div>
         </div>
     );
 
     const renderSuccessStep = () => (
-        <div className="flex flex-col items-center justify-center text-center py-8">
+        <div className="flex flex-col items-center justify-center text-center">
             <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-6 animate-pulse">
                 <FiCheckCircleTyped className="w-10 h-10" />
             </div>
@@ -261,6 +322,11 @@ const ReassignDrawer: React.FC = () => {
                 <p className="font-semibold text-[#1e293b] mt-1">{selectedReassignContact?.email}</p>
                 <p className="text-xs text-gray-500 mt-2">All parties will be notified of this change.</p>
             </div>
+
+            {/* Action Button - Inline with content */}
+            <button onClick={closeDrawer} className="w-full px-6 py-3 bg-[#1e293b] text-white font-medium rounded-xl hover:bg-opacity-90 transition-all duration-200 shadow-sm hover:shadow-md">
+                Back to Document
+            </button>
         </div>
     );
 
@@ -278,6 +344,7 @@ const ReassignDrawer: React.FC = () => {
                 >
                     <div className="absolute inset-0 bg-black bg-opacity-50 backdrop-blur-sm" onClick={closeDrawer} />
                 </Transition.Child>
+
                 <div className="absolute inset-0 overflow-hidden pointer-events-none">
                     <section className="absolute inset-y-0 right-0 max-w-full flex pointer-events-auto">
                         <Transition.Child
@@ -290,8 +357,10 @@ const ReassignDrawer: React.FC = () => {
                             leaveTo="translate-x-full"
                         >
                             <div className="w-screen max-w-md sm:max-w-lg">
-                                <div className="h-full flex flex-col bg-white shadow-2xl overflow-hidden">
-                                    <div className="px-4 sm:px-6 py-6 border-b border-gray-200">
+                                {/* Full height white background container */}
+                                <div className="h-full flex flex-col bg-white shadow-2xl">
+                                    {/* Fixed Header */}
+                                    <div className="px-4 sm:px-6 py-6 border-b border-gray-200 flex-shrink-0">
                                         <div className="flex items-center justify-between">
                                             <div>
                                                 <h2 className="text-lg sm:text-xl font-semibold text-[#1e293b]">{getStepTitle()}</h2>
@@ -303,64 +372,15 @@ const ReassignDrawer: React.FC = () => {
                                         </div>
                                     </div>
 
-                                    <div className="flex-1 px-4 sm:px-6 py-6 overflow-y-auto">
-                                        {reassignStep === 'select' && renderSelectStep()}
-                                        {reassignStep === 'add' && renderAddStep()}
-                                        {reassignStep === 'confirm' && renderConfirmStep()}
-                                        {reassignStep === 'success' && renderSuccessStep()}
-                                    </div>
-
-                                    <div className="px-4 sm:px-6 py-4 border-t border-gray-200 bg-gray-50">
-                                        {reassignStep === 'select' && (
-                                            <button
-                                                onClick={() => dispatch(setReassignStep('add'))}
-                                                className="w-full px-4 py-3 bg-[#1e293b] text-white font-medium rounded-xl hover:bg-opacity-90 transition-all duration-200 shadow-sm hover:shadow-md flex items-center justify-center"
-                                            >
-                                                <FiUserPlusTyped className="w-5 h-5 mr-2" /> Add New Contact
-                                            </button>
-                                        )}
-                                        {reassignStep === 'add' && (
-                                            <div className="flex flex-col sm:flex-row gap-3 sm:justify-end">
-                                                <button
-                                                    onClick={() => dispatch(setReassignStep('select'))}
-                                                    className="px-6 py-3 border border-gray-300 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition-all duration-200 shadow-sm"
-                                                >
-                                                    <FiArrowLeftTyped className="w-5 h-5 mr-2 inline" /> Back
-                                                </button>
-                                                <button
-                                                    onClick={handleCreateContact}
-                                                    disabled={reassignmentLoading}
-                                                    className="px-6 py-3 bg-[#1e293b] text-white font-medium rounded-xl hover:bg-opacity-90 transition-all duration-200 shadow-sm hover:shadow-md disabled:bg-gray-300 disabled:cursor-not-allowed disabled:hover:shadow-sm flex items-center justify-center"
-                                                >
-                                                    {reassignmentLoading ? <FiLoaderTyped className="animate-spin w-5 h-5" /> : 'Create and Select Contact'}
-                                                </button>
-                                            </div>
-                                        )}
-                                        {reassignStep === 'confirm' && (
-                                            <div className="flex flex-col sm:flex-row gap-3 sm:justify-end">
-                                                <button
-                                                    onClick={() => dispatch(setReassignStep('select'))}
-                                                    className="px-6 py-3 border border-gray-300 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition-all duration-200 shadow-sm"
-                                                >
-                                                    Back
-                                                </button>
-                                                <button
-                                                    onClick={handlePerformReassignment}
-                                                    disabled={reassignmentLoading || !reassignFormData.reason}
-                                                    className="px-6 py-3 bg-green-600 text-white font-medium rounded-xl hover:bg-opacity-90 transition-all duration-200 shadow-sm hover:shadow-md disabled:bg-gray-300 disabled:cursor-not-allowed disabled:hover:shadow-sm flex items-center justify-center"
-                                                >
-                                                    {reassignmentLoading ? <FiLoaderTyped className="animate-spin w-5 h-5" /> : 'Confirm Reassignment'}
-                                                </button>
-                                            </div>
-                                        )}
-                                        {reassignStep === 'success' && (
-                                            <button
-                                                onClick={closeDrawer}
-                                                className="w-full px-4 py-3 bg-[#1e293b] text-white font-medium rounded-xl hover:bg-opacity-90 transition-all duration-200 shadow-sm hover:shadow-md"
-                                            >
-                                                Back to Document
-                                            </button>
-                                        )}
+                                    {/* Scrollable Content Area - Takes remaining space */}
+                                    <div className="flex-1 overflow-y-auto">
+                                        {/* Content positioned at top-to-center with max-width for better UX */}
+                                        <div className="px-4 sm:px-6 py-6 max-w-xl mx-auto">
+                                            {reassignStep === 'select' && renderSelectStep()}
+                                            {reassignStep === 'add' && renderAddStep()}
+                                            {reassignStep === 'confirm' && renderConfirmStep()}
+                                            {reassignStep === 'success' && renderSuccessStep()}
+                                        </div>
                                     </div>
                                 </div>
                             </div>

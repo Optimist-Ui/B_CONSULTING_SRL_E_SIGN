@@ -150,6 +150,10 @@ const PackageCreationStepper: React.FC = () => {
         if (activeStep === 0) {
             return !!(currentPackage.name.trim() && (currentPackage.fileUrl || currentPackage.fileData) && currentPackage.attachment_uuid);
         }
+        if (activeStep === 1) {
+            // Check if at least one field has been added to the document
+            return currentPackage.fields.length > 0;
+        }
         return true;
     };
 

@@ -50,6 +50,7 @@ const PackageFieldRenderer: React.FC<PackageFieldRendererProps> = ({ field, isSe
     const [labelInput, setLabelInput] = useState(field.label);
     const [isEditingLabel, setIsEditingLabel] = useState(false);
     const [isAddContactModalOpen, setAddContactModalOpen] = useState(false);
+    const [modalPosition, setModalPosition] = useState<{ top?: string; bottom?: string; left?: string; right?: string }>({});
 
     const { contacts } = useSelector((state: IRootState) => state.contacts);
 
@@ -104,7 +105,52 @@ const PackageFieldRenderer: React.FC<PackageFieldRendererProps> = ({ field, isSe
         }
     }, [isSignatureField]);
 
-    // Close quick assign panel when clicking outside
+    // Remove calculateModalPosition from useCallback dependencies - make it simpler
+    const calculateModalPosition = useCallback(() => {
+        if (!fieldRef.current || !containerRef.current) return {};
+
+        const fieldRect = fieldRef.current.getBoundingClientRect();
+        const containerRect = containerRef.current.getBoundingClientRect();
+
+        const modalHeight = 380;
+        const modalWidth = 320;
+        const padding = 10;
+
+        let newPosition: { top?: string; bottom?: string; left?: string; right?: string } = {};
+
+        // Calculate relative positions within the container
+        const fieldRelativeTop = fieldRect.top - containerRect.top;
+        const fieldRelativeBottom = containerRect.bottom - fieldRect.bottom;
+
+        // Vertical positioning
+        const spaceBelow = fieldRelativeBottom;
+        const spaceAbove = fieldRelativeTop;
+
+        if (spaceBelow >= modalHeight + padding) {
+            newPosition.top = `${position.y + position.height + padding}px`;
+        } else if (spaceAbove >= modalHeight + padding) {
+            newPosition.bottom = `${containerRect.height - position.y + padding}px`;
+        } else if (spaceBelow > spaceAbove) {
+            newPosition.top = `${position.y + position.height + padding}px`;
+        } else {
+            newPosition.top = `${Math.max(padding, position.y - modalHeight - padding)}px`;
+        }
+
+        // Horizontal positioning
+        const spaceRight = containerRect.right - fieldRect.right;
+
+        if (spaceRight >= modalWidth + padding) {
+            newPosition.left = `${position.x}px`;
+        } else if (position.x + modalWidth <= containerRect.width) {
+            newPosition.left = `${position.x}px`;
+        } else {
+            newPosition.left = `${Math.max(padding, containerRect.width - modalWidth - padding)}px`;
+        }
+
+        return newPosition;
+    }, [position.x, position.y, position.height, position.width, containerRef]);
+
+    // Simplified useEffect - only calculate once when modal opens
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (quickAssignRef.current && !quickAssignRef.current.contains(event.target as Node)) {
@@ -113,13 +159,21 @@ const PackageFieldRenderer: React.FC<PackageFieldRendererProps> = ({ field, isSe
         };
 
         if (showQuickAssign) {
+            // Calculate position ONCE when modal opens
+            const newPosition = calculateModalPosition();
+            setModalPosition(newPosition);
+
             document.addEventListener('mousedown', handleClickOutside);
+
+            return () => {
+                document.removeEventListener('mousedown', handleClickOutside);
+            };
         }
 
         return () => {
             document.removeEventListener('mousedown', handleClickOutside);
         };
-    }, [showQuickAssign]);
+    }, [showQuickAssign]); // Remove calculateModalPosition from dependencies!
 
     const getIconForFieldType = useCallback((type: PackageField['type']) => {
         switch (type) {
@@ -370,10 +424,11 @@ const PackageFieldRenderer: React.FC<PackageFieldRendererProps> = ({ field, isSe
                     {showQuickAssign && (
                         <div
                             ref={quickAssignRef}
-                            className="absolute z-[9999] bg-white dark:bg-gray-800 rounded-xl shadow-2xl border-2 border-blue-500 p-4 min-w-[300px] max-w-[320px]"
+                            className="absolute z-[100] bg-white dark:bg-gray-800 rounded-xl shadow-2xl border-2 border-blue-500 p-4 w-[320px]"
                             style={{
-                                left: `${Math.max(0, position.x)}px`,
-                                top: `${Math.max(10, position.y - 220)}px`,
+                                ...modalPosition,
+                                maxHeight: '380px',
+                                overflowY: 'auto',
                             }}
                             onClick={(e) => e.stopPropagation()}
                         >

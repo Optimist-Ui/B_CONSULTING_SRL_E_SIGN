@@ -163,7 +163,11 @@ const PurchaseModalContent: React.FC<PurchaseModalProps> = ({ isOpen, onClose, p
         toast.success(title);
         dispatch(invalidateStatusCache()); // Invalidate status cache for immediate UI updates
         dispatch(fetchSubscription({ forceRefresh: true })); // Re-fetch details to show management view
-        onClose();
+
+        // Perform hard reload to update subscription status across dashboard
+        setTimeout(() => {
+            window.location.reload();
+        }, 1500); // Small delay to allow toast to be visible
     };
 
     const onSuccess = () =>

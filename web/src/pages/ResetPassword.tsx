@@ -34,6 +34,7 @@ const ResetPassword = () => {
     const [phase, setPhase] = useState<Phase>('verifying');
     const [formData, setFormData] = useState({ newPassword: '', confirmPassword: '' });
     const [flag, setFlag] = useState(locale);
+    const [passwordError, setPasswordError] = useState('');
 
     // Effect to verify the token on component load
     useEffect(() => {
@@ -76,11 +77,24 @@ const ResetPassword = () => {
     };
 
     const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
-    };
+        const { name, value } = e.target;
+        setFormData({ ...formData, [name]: value });
 
+        // Validate password length
+        if (name === 'newPassword') {
+            if (value.length > 0 && value.length < 6) {
+                setPasswordError('Password must be at least 6 characters');
+            } else {
+                setPasswordError('');
+            }
+        }
+    };
     const submitForm = async (e: FormEvent) => {
         e.preventDefault();
+        if (formData.newPassword.length < 6) {
+            toast.error('Password must be at least 6 characters.');
+            return;
+        }
         if (formData.newPassword !== formData.confirmPassword) {
             toast.error('Passwords do not match.');
             return;
@@ -156,6 +170,7 @@ const ResetPassword = () => {
                                         {showPassword ? <FaEyeSlashTyped /> : <IconEye />}
                                     </button>
                                 </div>
+                                {passwordError && <span className="text-red-500 text-sm mt-1">{passwordError}</span>}
                             </div>
                             <div>
                                 <label htmlFor="confirmPassword">Confirm Password</label>
@@ -176,7 +191,7 @@ const ResetPassword = () => {
                                     </button>
                                 </div>
                             </div>
-                            <button type="submit" className="btn btn-gradient !mt-6 w-full border-0 uppercase" disabled={loading}>
+                            <button type="submit" className="btn btn-gradient !mt-6 w-full border-0 uppercase" disabled={loading || passwordError !== '' || formData.newPassword.length < 6}>
                                 {loading ? <span className="animate-spin border-2 border-white border-l-transparent rounded-full w-5 h-5 ltr:mr-4 rtl:ml-4 inline-block"></span> : 'Reset Password'}
                             </button>
                         </form>

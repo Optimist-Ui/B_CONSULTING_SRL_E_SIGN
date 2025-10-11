@@ -213,12 +213,12 @@ const ManageSubscription: React.FC<ManageSubscriptionProps> = ({ onChangePlan })
                                         {isEndingTrial ? (
                                             <>
                                                 <div className="animate-spin rounded-full h-3 w-3 sm:h-4 sm:w-4 border-b-2 border-white mr-2"></div>
-                                                Activating...
+                                                Processing…
                                             </>
                                         ) : (
                                             <>
                                                 <IconCreditCard className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
-                                                Activate Now
+                                                Start Subscription
                                             </>
                                         )}
                                     </button>
@@ -244,7 +244,7 @@ const ManageSubscription: React.FC<ManageSubscriptionProps> = ({ onChangePlan })
                         </>
                     ) : (
                         <>
-                            {subscription.cancelAtPeriodEnd? (
+                            {subscription.cancelAtPeriodEnd ? (
                                 <button
                                     onClick={handleReactivate}
                                     disabled={isReactivating}
@@ -447,7 +447,7 @@ const ManageSubscription: React.FC<ManageSubscriptionProps> = ({ onChangePlan })
                             onClick={onChangePlan}
                         >
                             <IconTrendingUp className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
-                            Top-Up
+                            Upgrade
                         </button>
                     </div>
                 </div>
