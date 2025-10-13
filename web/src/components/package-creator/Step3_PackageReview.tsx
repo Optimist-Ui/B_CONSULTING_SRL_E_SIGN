@@ -108,8 +108,16 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
 
     useEffect(() => {
         // Initialize tempExpiresAt with currentPackage.options.expiresAt
+        // Convert from UTC ISO string to local datetime-local format
         if (currentPackage?.options.expiresAt) {
-            setTempExpiresAt(currentPackage.options.expiresAt.slice(0, 16));
+            const date = new Date(currentPackage.options.expiresAt);
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+
+            setTempExpiresAt(`${year}-${month}-${day}T${hours}:${minutes}`);
         }
     }, [currentPackage?.options.expiresAt]);
 
@@ -311,7 +319,13 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
 
     const handleConfirmDate = () => {
         if (tempExpiresAt) {
-            const selectedDate = new Date(tempExpiresAt);
+            // Parse the datetime-local value and preserve the local time
+            const [datePart, timePart] = tempExpiresAt.split('T');
+            const [year, month, day] = datePart.split('-').map(Number);
+            const [hours, minutes] = timePart.split(':').map(Number);
+
+            // Create date in local timezone
+            const selectedDate = new Date(year, month - 1, day, hours, minutes);
             const now = new Date();
 
             // Check if the selected date is in the past

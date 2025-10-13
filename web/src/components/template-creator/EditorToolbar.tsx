@@ -26,26 +26,39 @@ const FieldTool: React.FC<FieldToolProps> = ({ type, label, icon }) => {
 
     return (
         <div
-            className="flex flex-col items-center p-3 w-24 h-24 justify-center dark:bg-gray-900 bg-gray-100 rounded-md border border-gray-200 cursor-grab active:cursor-grabbing hover:bg-blue-100 hover:text-blue-600 hover:border-blue-300 transition-all duration-150 text-gray-600 text-nowrap"
+            className="flex flex-col items-center justify-center 
+                       p-1.5 xs:p-2 sm:p-2.5 lg:p-3 
+                       w-12 h-12 xs:w-14 xs:h-14 sm:w-20 sm:h-20 lg:w-24 lg:h-24
+                       dark:bg-gray-900 bg-gray-100 rounded-md 
+                       border border-gray-200 
+                       cursor-grab active:cursor-grabbing 
+                       hover:bg-blue-100 hover:text-blue-600 hover:border-blue-300 
+                       transition-all duration-150 
+                       text-gray-600"
             draggable
             onDragStart={handleDragStart}
         >
-            {icon}
-            <span className="mt-2 text-sm font-semibold text-center">{label}</span>
+            <div className="text-base xs:text-lg sm:text-2xl lg:text-3xl">{icon}</div>
+            <span className="mt-0.5 xs:mt-1 sm:mt-1.5 lg:mt-2 text-[8px] xs:text-[9px] sm:text-xs lg:text-sm font-semibold text-center leading-tight whitespace-nowrap">{label}</span>
         </div>
     );
 };
 
 const EditorToolbar: React.FC = () => {
     return (
-        <div className="flex items-center justify-center gap-4 flex-wrap p-2 dark:bg-gray-900 bg-white rounded-md shadow-sm">
-            <FieldTool type="text" label="Text" icon={<BsInputCursorTextTyped className="text-3xl" />} />
-            <FieldTool type="textarea" label="Text Area" icon={<BsTextareaResizeTyped className="text-3xl" />} />
-            <FieldTool type="signature" label="Signature" icon={<FaSignatureTyped className="text-3xl" />} />
-            <FieldTool type="checkbox" label="Checkbox" icon={<IoIosCheckboxOutlineTyped className="text-3xl" />} />
-            {/* <FieldTool type="radio" label="Radio Group" icon={<IoIosRadioButtonOnTyped className="text-3xl" />} /> */}
-            {/* <FieldTool type="dropdown" label="Dropdown" icon={<FaRegListAltTyped className="text-3xl" />} /> */}
-            <FieldTool type="date" label="Date" icon={<FaRegCalendarAltTyped className="text-3xl" />} />
+        <div
+            className="flex items-center justify-center 
+                        gap-1.5 xs:gap-2 sm:gap-3 lg:gap-4 
+                        flex-wrap 
+                        p-1.5 xs:p-2 
+                        dark:bg-gray-900 bg-white 
+                        rounded-md shadow-sm"
+        >
+            <FieldTool type="text" label="Text" icon={<BsInputCursorTextTyped />} />
+            <FieldTool type="textarea" label="Text Area" icon={<BsTextareaResizeTyped />} />
+            <FieldTool type="signature" label="Signature" icon={<FaSignatureTyped />} />
+            <FieldTool type="checkbox" label="Checkbox" icon={<IoIosCheckboxOutlineTyped />} />
+            <FieldTool type="date" label="Date" icon={<FaRegCalendarAltTyped />} />
         </div>
     );
 };

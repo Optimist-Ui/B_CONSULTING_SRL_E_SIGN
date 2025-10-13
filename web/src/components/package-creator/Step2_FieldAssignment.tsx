@@ -58,26 +58,6 @@ const Step2_FieldAssignment: React.FC<StepProps> = ({ onNext, onPrevious }) => {
     const wasManuallyClosedRef = useRef(false);
 
     const selectedField = currentPackage?.fields.find((field) => field.id === selectedFieldId);
-    const prevSelectedFieldIdRef = useRef<string | null>(null);
-
-    // Auto-open panel only when a NEW field is selected on DESKTOP (not mobile)
-    useEffect(() => {
-        const isNewFieldSelection = selectedFieldId && selectedFieldId !== prevSelectedFieldIdRef.current;
-
-        // Only auto-open on desktop (lg breakpoint and above)
-        if (isNewFieldSelection && window.innerWidth >= 1024 && !isResizing) {
-            const timer = setTimeout(() => {
-                setIsPropertiesPanelOpen(true);
-            }, 100);
-            prevSelectedFieldIdRef.current = selectedFieldId;
-            return () => clearTimeout(timer);
-        }
-
-        // Update ref even if not opening panel
-        if (selectedFieldId !== prevSelectedFieldIdRef.current) {
-            prevSelectedFieldIdRef.current = selectedFieldId;
-        }
-    }, [selectedFieldId, isResizing]);
 
     useEffect(() => {
         if (numPages > 0) {
@@ -272,9 +252,7 @@ const Step2_FieldAssignment: React.FC<StepProps> = ({ onNext, onPrevious }) => {
                 if (result.isConfirmed) {
                     dispatch(deleteFieldFromCurrentPackage(fieldId));
                     toast.success('Field deleted.');
-                    if (window.innerWidth < 1024) {
-                        setIsPropertiesPanelOpen(false);
-                    }
+                    setIsPropertiesPanelOpen(false);
                 }
             });
         },
@@ -351,7 +329,7 @@ const Step2_FieldAssignment: React.FC<StepProps> = ({ onNext, onPrevious }) => {
     return (
         <div className="h-[calc(100vh-12rem)] sm:h-[calc(100vh-10rem)] flex flex-col bg-gray-50 dark:bg-gray-900">
             {/* Sticky Toolbar */}
-            <div className="flex-shrink-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm sticky top-0 z-30">
+            <div className="flex-shrink-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm sticky top-0 ">
                 <div className="px-3 py-2 sm:p-3">
                     <EditorToolbar />
                 </div>
@@ -376,7 +354,7 @@ const Step2_FieldAssignment: React.FC<StepProps> = ({ onNext, onPrevious }) => {
             {/* Main Content */}
             <div className="flex flex-1 min-h-0 relative">
                 {/* PDF Viewer */}
-                <div className={`flex-1 overflow-auto bg-gray-100 dark:bg-gray-900 transition-all duration-300 ${isPropertiesPanelOpen ? 'hidden lg:block' : 'block'}`}>
+                <div className={`flex-1 overflow-auto bg-gray-100 dark:bg-gray-900 transition-all duration-300 ${isPropertiesPanelOpen ? 'mr-[25vw]' : ''}`}>
                     <div className="p-3 sm:p-4 lg:p-6">
                         <div className="flex justify-center">
                             <div className="space-y-4 sm:space-y-6 pb-8 w-full max-w-full">
@@ -430,15 +408,14 @@ const Step2_FieldAssignment: React.FC<StepProps> = ({ onNext, onPrevious }) => {
                 {/* Properties Panel */}
                 <div
                     className={`
-                        fixed lg:relative inset-0 lg:inset-auto
-                        w-full lg:w-80 xl:w-96
+                        fixed right-0 top-0 h-full w-[25vw]
                         flex-shrink-0 flex flex-col
                         bg-white dark:bg-gray-800
                         border-l border-gray-200 dark:border-gray-700
-                        shadow-2xl lg:shadow-none
-                        z-40 lg:z-0
+                        shadow-2xl
+                        z-40
                         transform transition-transform duration-300 ease-in-out
-                        ${isPropertiesPanelOpen ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'}
+                        ${isPropertiesPanelOpen ? 'translate-x-0' : 'translate-x-full'}
                     `}
                 >
                     {/* Panel Header */}
@@ -452,7 +429,7 @@ const Step2_FieldAssignment: React.FC<StepProps> = ({ onNext, onPrevious }) => {
                                 <p className="text-xs text-gray-600 dark:text-gray-400">Configure field settings</p>
                             </div>
                         </div>
-                        <button onClick={closePropertiesPanel} className="lg:hidden p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors" aria-label="Close properties panel">
+                        <button onClick={closePropertiesPanel} className="p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors" aria-label="Close properties panel">
                             <FiXTyped className="w-5 h-5 text-gray-600 dark:text-gray-400" />
                         </button>
                     </div>
@@ -475,18 +452,25 @@ const Step2_FieldAssignment: React.FC<StepProps> = ({ onNext, onPrevious }) => {
                     </div>
                 </div>
 
-                {/* Floating Action Button - Mobile Only */}
+                {/* Floating Action Button */}
                 {selectedField && !isPropertiesPanelOpen && (
                     <button
                         onClick={() => {
-                            wasManuallyClosedRef.current = false; // Reset flag when opening via button
+                            wasManuallyClosedRef.current = false;
                             setIsPropertiesPanelOpen(true);
                         }}
-                        className="lg:hidden fixed bottom-6 right-6 z-50 w-14 h-14 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-full shadow-2xl flex items-center justify-center transition-all duration-200 transform hover:scale-110 active:scale-95"
+                        className="fixed top-1/2 -translate-y-1/2 right-4 sm:right-20 z-50 
+               w-12 h-12 sm:w-14 sm:h-14 
+               bg-gradient-to-r from-blue-600 to-indigo-600 
+               hover:from-blue-700 hover:to-indigo-700 
+               text-white rounded-full shadow-2xl 
+               flex items-center justify-center 
+               transition-all duration-200 
+               transform hover:scale-110 active:scale-95"
                         aria-label="Open field properties"
                     >
-                        <FiSettingsTyped className="w-6 h-6" />
-                        <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full border-2 border-white"></span>
+                        <FiSettingsTyped className="w-5 h-5 sm:w-6 sm:h-6" />
+                        <span className="absolute -top-1 -right-1 w-3 h-3 sm:w-4 sm:h-4 bg-red-500 rounded-full border-2 border-white"></span>
                     </button>
                 )}
             </div>

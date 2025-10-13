@@ -164,44 +164,45 @@ const PackageCreationStepper: React.FC = () => {
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
             {/* Header with Stepper */}
-            <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-40">
-                <div className="max-w-6xl mx-auto px-4 py-6 ">
-                    <div className="text-center mb-6">
-                        <h1 className="text-2xl font-semibold text-gray-900 dark:text-white mb-2">Create Document Package</h1>
-                        <p className="text-gray-600 dark:text-gray-400 text-sm">Configure your document for signature collection</p>
+            <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0">
+                <div className="max-w-6xl mx-auto px-2 sm:px-4 py-2 sm:py-3">
+                    {/* Compact Title - Hidden on mobile */}
+                    <div className="text-center mb-2 hidden sm:block">
+                        <h1 className="text-sm sm:text-base md:text-lg font-semibold text-gray-900 dark:text-white">Create Package</h1>
                     </div>
 
                     {/* Progress Steps */}
-                    <div className="flex justify-center">
-                        <div className="flex items-center space-x-8">
+                    <div className="flex justify-center overflow-x-auto">
+                        <div className="flex items-center space-x-2 sm:space-x-4 md:space-x-6 min-w-max px-2">
                             {steps.map((step, index) => (
                                 <React.Fragment key={index}>
                                     <div className="flex items-center">
                                         <div
                                             className={`
-                        w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium 
-                        transition-colors duration-200 cursor-pointer
+                        w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center text-xs font-medium 
+                        transition-colors duration-200 cursor-pointer flex-shrink-0
                         ${activeStep >= index ? 'bg-blue-600 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-500 hover:bg-gray-300 dark:hover:bg-gray-600'}
                       `}
                                             onClick={() => {
                                                 if (index <= activeStep) dispatch(setPackageActiveStep(index));
                                             }}
                                         >
-                                            {activeStep > index ? <FiCheckTyped className="w-4 h-4" /> : index + 1}
+                                            {activeStep > index ? <FiCheckTyped className="w-3 h-3 sm:w-4 sm:h-4" /> : index + 1}
                                         </div>
                                         <span
                                             className={`
-                      ml-3 text-sm font-medium
+                      ml-1.5 sm:ml-2 text-xs sm:text-sm font-medium whitespace-nowrap
                       ${activeStep >= index ? 'text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400'}
                     `}
                                         >
-                                            {step.label}
+                                            <span className="hidden md:inline">{step.label}</span>
+                                            <span className="md:hidden">{index === 0 ? 'Select' : index === 1 ? 'Assign' : 'Review'}</span>
                                         </span>
                                     </div>
                                     {index < steps.length - 1 && (
                                         <div
                                             className={`
-                      w-16 h-px 
+                      w-8 sm:w-12 md:w-16 h-px flex-shrink-0
                       ${activeStep > index ? 'bg-blue-600' : 'bg-gray-300 dark:bg-gray-600'}
                     `}
                                         />
@@ -212,7 +213,7 @@ const PackageCreationStepper: React.FC = () => {
                     </div>
                 </div>
             </div>
-
+            
             {/* Main Content with Fixed Left Actions */}
             <div className="relative">
                 {/* Content with left padding to avoid overlap */}

@@ -180,10 +180,10 @@ const Login = () => {
                                     {loading ? <span className="animate-spin border-2 border-white border-l-transparent rounded-full w-5 h-5 ltr:mr-4 rtl:ml-4 inline-block"></span> : 'Sign In'}
                                 </button>
                             </form>
-                            <div className="text-center mt-7 dark:text-white">
-                                Don't have an account? 
-                                <Link to="/register" className="uppercase text-primary underline transition hover:text-black dark:hover:text-white">
-                                    SIGN UP
+                            <div className="text-center mt-4 text-sm font-medium text-gray-700 dark:text-gray-300">
+                                Don't have an account?{' '}
+                                <Link to="/register" className="text-primary font-semibold hover:underline hover:text-primary-dark dark:hover:text-primary-light transition-colors">
+                                    Sign Up
                                 </Link>
                             </div>
                         </div>

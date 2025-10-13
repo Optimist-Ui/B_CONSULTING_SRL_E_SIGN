@@ -1,6 +1,7 @@
 const express = require("express");
 const authenticateUser = require("../middlewares/authenticate");
 const requireActiveSubscription = require("../middlewares/requireActiveSubscription");
+const checkPackageExpiry = require("../middlewares/checkPackageExpiry");
 const validate = require("../middlewares/validate");
 const {
   createPackageValidation,
@@ -60,6 +61,7 @@ module.exports = (container) => {
     "/participant/:packageId/:participantId",
     getPackageForParticipantValidation,
     validate,
+    checkPackageExpiry,
     packageController.getPackageForParticipant.bind(packageController)
   );
 
@@ -87,6 +89,7 @@ module.exports = (container) => {
     "/participant/:packageId/:participantId/send-otp",
     sendOtpValidation,
     validate,
+    checkPackageExpiry,
     packageController.sendOTP.bind(packageController)
   );
 
@@ -115,6 +118,7 @@ module.exports = (container) => {
     "/participant/:packageId/:participantId/verify-otp",
     verifyOtpValidation,
     validate,
+    checkPackageExpiry,
     packageController.verifyOTP.bind(packageController)
   );
 
@@ -140,6 +144,7 @@ module.exports = (container) => {
     "/participant/:packageId/:participantId/send-sms-otp",
     sendSmsOtpValidation,
     validate,
+    checkPackageExpiry,
     packageController.sendSmsOTP.bind(packageController)
   );
 
@@ -168,6 +173,7 @@ module.exports = (container) => {
     "/participant/:packageId/:participantId/verify-sms-otp",
     verifySmsOtpValidation,
     validate,
+    checkPackageExpiry,
     packageController.verifySmsOTP.bind(packageController)
   );
 
@@ -197,6 +203,7 @@ module.exports = (container) => {
     "/participant/:packageId/:participantId/submit-fields",
     submitFieldsValidation,
     validate,
+    checkPackageExpiry,
     packageController.submitFields.bind(packageController)
   );
 
@@ -224,6 +231,7 @@ module.exports = (container) => {
     "/participant/:packageId/:participantId/reject",
     rejectPackageValidation,
     validate,
+    checkPackageExpiry,
     packageController.rejectPackage.bind(packageController)
   );
 
@@ -250,6 +258,7 @@ module.exports = (container) => {
     "/participant/:packageId/:participantId/reassignment/register-contact",
     registerReassignmentContactValidation,
     validate,
+    checkPackageExpiry,
     packageController.registerReassignmentContact.bind(packageController)
   );
 
@@ -273,6 +282,7 @@ module.exports = (container) => {
     "/participant/:packageId/:participantId/reassignment/contacts",
     listReassignmentContactsValidation,
     validate,
+    checkPackageExpiry,
     packageController.listReassignmentContacts.bind(packageController)
   );
 
@@ -298,6 +308,7 @@ module.exports = (container) => {
     "/participant/:packageId/:participantId/reassignment/perform",
     performReassignmentValidation,
     validate,
+    checkPackageExpiry,
     packageController.performReassignment.bind(packageController)
   );
 
@@ -323,6 +334,7 @@ module.exports = (container) => {
     "/participant/:packageId/:participantId/add-receiver",
     addReceiverByParticipantValidation,
     validate,
+    checkPackageExpiry,
     packageController.addReceiverByParticipant.bind(packageController)
   );
 
@@ -346,6 +358,7 @@ module.exports = (container) => {
     "/participant/:packageId/:participantId/enhanced",
     getPackageForParticipantValidation,
     validate,
+    checkPackageExpiry,
     packageController.getPackageForParticipantWithReassignment.bind(
       packageController
     )
@@ -371,6 +384,7 @@ module.exports = (container) => {
     "/participant/:packageId/:participantId/reassignment/eligibility",
     checkReassignmentEligibilityValidation,
     validate,
+    checkPackageExpiry,
     packageController.checkReassignmentEligibility.bind(packageController)
   );
 
@@ -396,6 +410,7 @@ module.exports = (container) => {
     "/participant/:packageId/:participantId/download",
     getPackageForParticipantValidation,
     validate,
+    checkPackageExpiry,
     packageController.downloadPackage.bind(packageController)
   );
 
@@ -529,6 +544,7 @@ module.exports = (container) => {
     authenticateUser,
     manualReminderValidation,
     validate,
+    checkPackageExpiry,
     packageController.sendManualReminder.bind(packageController)
   );
 
@@ -606,6 +622,7 @@ module.exports = (container) => {
     .patch(
       updatePackageValidation,
       validate,
+      checkPackageExpiry,
       packageController.updatePackage.bind(packageController)
     )
     /**

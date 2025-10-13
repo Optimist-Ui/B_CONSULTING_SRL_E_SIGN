@@ -230,10 +230,10 @@ const Register = () => {
                                 </button>
                             </form>
 
-                            <div className="text-center mt-7 dark:text-white">
-                                Already have an account? 
-                                <Link to="/login" className="uppercase text-primary underline transition hover:text-black dark:hover:text-white">
-                                    SIGN IN
+                            <div className="text-center mt-4 text-sm font-medium text-gray-700 dark:text-gray-300">
+                                Already have an account?{' '}
+                                <Link to="/login" className="text-primary font-semibold hover:underline hover:text-primary-dark dark:hover:text-primary-light transition-colors">
+                                    Sign In
                                 </Link>
                             </div>
                         </div>

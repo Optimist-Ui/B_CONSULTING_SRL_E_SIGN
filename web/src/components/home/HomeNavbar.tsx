@@ -184,6 +184,13 @@ const HomeNavbar: React.FC = () => {
                                     FAQ
                                     <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-blue-400 group-hover:w-full transition-all duration-200"></span>
                                 </button>
+                                <button
+                                    onClick={() => navigate('/terms-of-use')}
+                                    className="text-gray-300 hover:text-blue-400 px-3 py-2 text-sm lg:text-base font-medium transition-colors duration-200 relative group"
+                                >
+                                    Terms & Privacy
+                                    <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-blue-400 group-hover:w-full transition-all duration-200"></span>
+                                </button>
                             </div>
                         </div>
 
@@ -224,6 +231,15 @@ const HomeNavbar: React.FC = () => {
                                 className="text-gray-300 hover:text-blue-400 hover:bg-slate-700/50 block px-3 py-2 text-base font-medium w-full text-left rounded-md transition-all duration-200"
                             >
                                 FAQ
+                            </button>
+                            <button
+                                onClick={() => {
+                                    navigate('/terms-of-use');
+                                    setIsMenuOpen(false);
+                                }}
+                                className="text-gray-300 hover:text-blue-400 hover:bg-slate-700/50 block px-3 py-2 text-base font-medium w-full text-left rounded-md transition-all duration-200"
+                            >
+                                Terms & Privacy
                             </button>
                             <div className="border-t border-slate-700/50 my-2"></div>
                             {renderMobileAuthButtons()}

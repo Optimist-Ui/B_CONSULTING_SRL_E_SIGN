@@ -108,9 +108,18 @@ const packageOptionsSchema = new Schema({
     ],
     default: null,
   },
+  //Track if expiry reminder has been sent
+  expiryReminderSentAt: { type: Date },
   sendAutomaticReminders: { type: Boolean, default: false },
   firstReminderDays: { type: Number },
   repeatReminderDays: { type: Number },
+  //Track automatic reminder history
+  automaticRemindersSent: [
+    {
+      sentAt: { type: Date, required: true },
+      recipientCount: { type: Number, required: true },
+    },
+  ],
   allowDownloadUnsigned: { type: Boolean, default: true },
   allowReassign: { type: Boolean, default: true },
   allowReceiversToAdd: { type: Boolean, default: true },
@@ -181,6 +190,8 @@ const packageSchema = new Schema(
       ],
       default: "Draft",
     },
+    // Track when package was sent (for automatic reminders)
+    sentAt: { type: Date },
     rejectionDetails: {
       rejectedBy: {
         contactId: { type: Schema.Types.ObjectId, ref: "Contact" },
@@ -208,5 +219,54 @@ const packageSchema = new Schema(
   },
   { timestamps: true }
 );
+// Add validation method to schema
+packageOptionsSchema.methods.canSendExpiryReminder = function () {
+  // Must have expiry enabled
+  if (
+    !this.expiresAt ||
+    !this.sendExpirationReminders ||
+    !this.reminderPeriod
+  ) {
+    return false;
+  }
+
+  // Must not have been sent already
+  if (this.expiryReminderSentAt) {
+    return false;
+  }
+
+  // Must not be expired
+  if (new Date() >= this.expiresAt) {
+    return false;
+  }
+
+  return true;
+};
+
+packageOptionsSchema.methods.canSendAutomaticReminder = function () {
+  if (!this.sendAutomaticReminders || !this.firstReminderDays) {
+    return false;
+  }
+
+  // Must not be expired (if expiry is set)
+  if (this.expiresAt && new Date() >= this.expiresAt) {
+    return false;
+  }
+
+  return true;
+};
+
+// Add index for cron job performance
+packageSchema.index({
+  "options.expiresAt": 1,
+  status: 1,
+  "options.expiryReminderSentAt": 1,
+});
+
+packageSchema.index({
+  status: 1,
+  sentAt: 1,
+  "options.sendAutomaticReminders": 1,
+});
 
 module.exports = mongoose.model("Package", packageSchema);
