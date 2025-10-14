@@ -137,7 +137,7 @@ const HomeNavbar: React.FC = () => {
                     <div className="flex items-center justify-between h-16 lg:h-20">
                         {/* Logo - left Side */}
                         <div className="flex-shrink-0 cursor-pointer" onClick={scrollToTop}>
-                            <div className="flex items-center space-x-2">
+                            {/* <div className="flex items-center space-x-2">
                                 <div className="w-8 h-8 lg:w-10 lg:h-10 bg-gradient-to-br from-blue-400 to-blue-600 rounded-lg flex items-center justify-center">
                                     <svg className="w-5 h-5 lg:w-6 lg:h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
                                         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z" />
@@ -150,7 +150,8 @@ const HomeNavbar: React.FC = () => {
                                 <span className="text-xl lg:text-2xl font-bold text-white">
                                     E<span className="text-blue-400">-Sign</span>
                                 </span>
-                            </div>
+                            </div> */}
+                            <img src="/logo-white.png" alt="logo" className='w-36' />
                         </div>
 
                         {/* Desktop Navigation - right Side */}

@@ -20,15 +20,15 @@ const options = {
         description: "Local Development server",
       },
       {
-        url: "https://api-dev.e-sign.eu.com/",
+        url: "https://api-dev.i-sign.eu/",
         description: "Development server",
       },
       {
-        url: "https://api-uat.e-sign.eu.com",
+        url: "https://api-uat.i-sign.eu",
         description: "UAT server",
       },
       {
-        url: "https://api.e-sign.eu.com",
+        url: "https://api.i-sign.eu",
         description: "Production server",
       },
     ],

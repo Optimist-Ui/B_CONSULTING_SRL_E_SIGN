@@ -130,7 +130,7 @@ class PdfModificationService {
         const signatureDate = new Date(sig.date).toLocaleString();
         const signatureMethod = sig.method || "Email OTP";
         const otpCode = sig.otpCode || "N/A";
-        const certificationText = "Digitally Signed by E-Sign.eu";
+        const certificationText = "Digitally Signed by I-Sign.eu";
 
         // Calculate vertical positioning from the top of the field area
         const fieldTop = page.getHeight() - originalY;
@@ -564,7 +564,7 @@ class PdfModificationService {
 
   async addAuditTrailPage(pdfDoc, pkg, fonts, logoImage) {
     const audit = this.createAuditTrail(pkg);
-    const page = pdfDoc.addPage();
+    let page = pdfDoc.addPage();
     const { width, height } = page.getSize();
     const margin = 50;
     let currentY = height - margin;
@@ -1069,7 +1069,7 @@ class PdfModificationService {
     });
     currentY -= 12;
 
-    const poweredText = "Powered by E-Sign.eu";
+    const poweredText = "Powered by I-Sign.eu";
     const poweredWidth = fonts.helvetica.widthOfTextAtSize(poweredText, 8);
     page.drawText(poweredText, {
       x: (width - poweredWidth) / 2,

@@ -6,7 +6,7 @@ class ReviewController {
     this.reviewService = reviewService;
   }
 
-  // Works without req.user
+  // Works without req.user      
   async checkEligibility(req, res) {
     try {
       const { participantId, packageId } = req.params;

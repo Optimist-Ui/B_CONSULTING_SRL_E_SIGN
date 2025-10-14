@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 
 const TermsAndPrivacy = () => {
     const [activeTab, setActiveTab] = useState('terms');
@@ -8,8 +9,10 @@ const TermsAndPrivacy = () => {
             <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
                 {/* Header */}
                 <div className="text-center mb-8">
-                    <h1 className="text-3xl font-bold text-blue-900 mb-2">E-sign.eu</h1>
-                    <p className="text-gray-600">Professional Electronic Signature Platform</p>
+                    <Link to={'/'}>
+                        <h1 className="text-3xl font-bold text-blue-900 mb-2">I-sign.eu</h1>
+                    </Link>
+                        <p className="text-gray-600">Professional Electronic Signature Platform</p>
                 </div>
 
                 {/* Tab Navigation */}
@@ -48,8 +51,8 @@ const TermsAndPrivacy = () => {
                                     <h3 className="text-xl font-semibold text-blue-900 mb-4">1. Introduction</h3>
                                     <p className="text-gray-700 leading-relaxed">
                                         These Sites and Services Terms and Conditions (the "Terms" or "General Terms") govern your access to and use of the{' '}
-                                        <a href="https://e-signs.eu" target="_blank" rel="noopener noreferrer" className="text-blue-900 hover:underline font-medium">
-                                            e-signs.eu
+                                        <a href="https://i-sign.eu" target="_blank" rel="noopener noreferrer" className="text-blue-900 hover:underline font-medium">
+                                            i-signs.eu
                                         </a>{' '}
                                         websites, products, and services (collectively, the "Site" or "Services"). By using our Site or Services, you agree to be bound by these Terms, whether on
                                         behalf of yourself or a business you represent.
@@ -65,30 +68,30 @@ const TermsAndPrivacy = () => {
                                     <ul className="list-disc list-inside text-gray-700 space-y-2 ml-4">
                                         <li>
                                             <strong>Website Visitors</strong> — Individuals accessing{' '}
-                                            <a href="https://e-signs.eu" target="_blank" rel="noopener noreferrer" className="text-blue-900 hover:underline font-medium">
-                                                e-signs.eu
+                                            <a href="https://i-sign.eu" target="_blank" rel="noopener noreferrer" className="text-blue-900 hover:underline font-medium">
+                                                i-signs.eu
                                             </a>{' '}
                                             and related websites.
                                         </li>
                                         <li>
                                             <strong>Customers</strong> — Organizations or individuals subscribing to or licensing{' '}
-                                            <a href="https://e-signs.eu" target="_blank" rel="noopener noreferrer" className="text-blue-900 hover:underline font-medium">
-                                                e-signs.eu
+                                            <a href="https://i-sign.eu" target="_blank" rel="noopener noreferrer" className="text-blue-900 hover:underline font-medium">
+                                                i-signs.eu
                                             </a>{' '}
                                             Services.
                                         </li>
                                         <li>
                                             <strong>Users</strong> — Individuals using{' '}
-                                            <a href="https://e-signs.eu" target="_blank" rel="noopener noreferrer" className="text-blue-900 hover:underline font-medium">
-                                                e-signs.eu
+                                            <a href="https://i-sign.eu" target="_blank" rel="noopener noreferrer" className="text-blue-900 hover:underline font-medium">
+                                                i-signs.eu
                                             </a>{' '}
                                             Services under a Customer account (including authorized employees or agents).
                                         </li>
                                     </ul>
                                     <p className="text-gray-700 leading-relaxed mt-3">
                                         If you are a Customer and have entered into a separate Service Agreement or Corporate Contract with{' '}
-                                        <a href="https://e-signs.eu" target="_blank" rel="noopener noreferrer" className="text-blue-900 hover:underline font-medium">
-                                            e-signs.eu
+                                        <a href="https://i-sign.eu" target="_blank" rel="noopener noreferrer" className="text-blue-900 hover:underline font-medium">
+                                            i-signs.eu
                                         </a>
                                         , those terms will prevail to the extent they conflict with these Terms. These Terms are designed for business and professional use; consumer protections under
                                         applicable law may apply separately.
@@ -121,8 +124,8 @@ const TermsAndPrivacy = () => {
                                             <h4 className="font-medium text-gray-900 mb-2">5.1 Eligibility to Use</h4>
                                             <p className="text-gray-700 leading-relaxed mb-3">
                                                 By accessing or using the{' '}
-                                                <a href="https://e-signs.eu" target="_blank" rel="noopener noreferrer" className="text-blue-900 hover:underline font-medium">
-                                                    e-signs.eu
+                                                <a href="https://i-sign.eu" target="_blank" rel="noopener noreferrer" className="text-blue-900 hover:underline font-medium">
+                                                    i-signs.eu
                                                 </a>{' '}
                                                 Site or Services, you represent and warrant that:
                                             </p>
@@ -140,8 +143,8 @@ const TermsAndPrivacy = () => {
                                             <p className="text-gray-700 leading-relaxed mt-3">
                                                 You acknowledge that you may not use the Site or Services if you do not meet these eligibility requirements, or if your access has previously been
                                                 suspended or terminated by{' '}
-                                                <a href="https://e-signs.eu" target="_blank" rel="noopener noreferrer" className="text-blue-900 hover:underline font-medium">
-                                                    e-signs.eu
+                                                <a href="https://i-sign.eu" target="_blank" rel="noopener noreferrer" className="text-blue-900 hover:underline font-medium">
+                                                    i-signs.eu
                                                 </a>{' '}
                                                 for violations of these Terms.
                                             </p>
@@ -153,8 +156,8 @@ const TermsAndPrivacy = () => {
                                     <h3 className="text-xl font-semibold text-blue-900 mb-4">6. Contact Information</h3>
                                     <p className="text-gray-700 leading-relaxed">
                                         For questions about these terms, please contact us at{' '}
-                                        <a href="mailto:legal@e-sign.eu" className="text-blue-900 hover:underline font-medium">
-                                            legal@e-sign.eu
+                                        <a href="mailto:legal@i-sign.eu" className="text-blue-900 hover:underline font-medium">
+                                            legal@i-sign.eu
                                         </a>{' '}
                                         or through our support portal.
                                     </p>
@@ -261,7 +264,7 @@ const TermsAndPrivacy = () => {
                                 <section>
                                     <h3 className="text-xl font-semibold text-blue-900 mb-4">9. Contact Us</h3>
                                     <p className="text-gray-700 leading-relaxed">
-                                        For privacy-related questions or to exercise your rights, contact our Data Protection Officer at privacy@e-sign.eu. For EU residents, you may also contact your
+                                        For privacy-related questions or to exercise your rights, contact our Data Protection Officer at privacy@i-sign.eu. For EU residents, you may also contact your
                                         local data protection authority.
                                     </p>
                                 </section>
@@ -279,11 +282,11 @@ const TermsAndPrivacy = () => {
 
                 {/* Footer */}
                 <div className="text-center mt-8 text-gray-500 text-sm">
-                    <p>© 2024 E-sign.eu - Professional Electronic Signature Platform</p>
+                    <p>© 2024 I-sign.eu - Professional Electronic Signature Platform</p>
                     <p className="mt-2">
                         For support, contact us at{' '}
-                        <a href="mailto:support@e-sign.eu" className="text-blue-900 hover:underline">
-                            support@e-sign.eu
+                        <a href="mailto:support@i-sign.eu" className="text-blue-900 hover:underline">
+                            support@i-sign.eu
                         </a>
                     </p>
                 </div>
