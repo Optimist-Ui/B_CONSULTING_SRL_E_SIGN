@@ -27,8 +27,7 @@ const Register = () => {
     const { rtlClass, locale, languageList } = useSelector((state: IRootState) => state.themeConfig);
     const isRtl = rtlClass === 'rtl';
 
-    // --- UPDATED STATE ---
-    // Component state now uses firstName and lastName to match the API and Redux Thunk
+    // Component state
     const [formData, setFormData] = useState({
         firstName: '',
         lastName: '',
@@ -39,9 +38,11 @@ const Register = () => {
     const [flag, setFlag] = useState(locale);
     const [showPassword, setShowPassword] = useState(false);
     const [passwordError, setPasswordError] = useState('');
+    const [isVisible, setIsVisible] = useState(false);
 
     useEffect(() => {
         dispatch(setPageTitle('Register'));
+        setIsVisible(true);
     }, [dispatch]);
 
     // Handlers
@@ -51,7 +52,6 @@ const Register = () => {
         dispatch(toggleRTL(newFlag.toLowerCase() === 'ae' ? 'rtl' : 'ltr'));
     };
 
-    // This generic handler works perfectly with the new state structure
     const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
         const { id, value } = e.target;
         setFormData({ ...formData, [id]: value });
@@ -66,13 +66,11 @@ const Register = () => {
         }
     };
 
-    // This submission logic also works perfectly as formData now has the correct shape
     const submitForm = async (e: FormEvent) => {
         e.preventDefault();
         try {
             const resultAction = await dispatch(signupUser(formData)).unwrap();
             toast.success(resultAction.message || 'Registration successful!');
-            // Redirect the user to a page telling them to check their email.
             navigate('/pending-verification');
         } catch (error: any) {
             toast.error(error || 'Registration failed. Please try again.');
@@ -80,164 +78,257 @@ const Register = () => {
     };
 
     return (
-        <div>
-            <div className="absolute inset-0">
-                <img src="/assets/images/auth/bg-gradient.png" alt="image" className="h-full w-full object-cover" />
+        <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-blue-900 flex items-center justify-center px-4 py-8 relative overflow-hidden">
+            {/* Animated background elements */}
+            <div className="absolute inset-0 overflow-hidden">
+                <div className="absolute top-20 left-10 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
+                <div className="absolute bottom-20 right-10 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '700ms' }}></div>
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-cyan-500/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1000ms' }}></div>
             </div>
-            <div className="relative flex min-h-screen items-center justify-center bg-[url(/assets/images/auth/map.png)] bg-cover bg-center bg-no-repeat px-6 py-10 dark:bg-[#060818] sm:px-16">
-                <img src="/assets/images/auth/coming-soon-object1.png" alt="image" className="absolute left-0 top-1/2 h-full max-h-[893px] -translate-y-1/2" />
-                <img src="/assets/images/auth/coming-soon-object2.png" alt="image" className="absolute left-24 top-0 h-40 md:left-[30%]" />
-                <img src="/assets/images/auth/coming-soon-object3.png" alt="image" className="absolute right-0 top-0 h-[300px]" />
-                <img src="/assets/images/auth/polygon-object.svg" alt="image" className="absolute bottom-0 end-[28%]" />
-                <div className="relative flex w-full max-w-[1502px] flex-col justify-between overflow-hidden rounded-md bg-white/60 backdrop-blur-lg dark:bg-black/50 lg:min-h-[758px] lg:flex-row lg:gap-10 xl:gap-0">
-                    <div className="relative hidden w-full items-center justify-center bg-[linear-gradient(225deg,rgba(239,18,98,1)_0%,rgba(67,97,238,1)_100%)] p-5 lg:inline-flex lg:max-w-[835px] xl:-ms-28 ltr:xl:skew-x-[14deg] rtl:xl:skew-x-[-14deg]">
-                        <div className="absolute inset-y-0 w-8 from-primary/10 via-transparent to-transparent ltr:-right-10 ltr:bg-gradient-to-r rtl:-left-10 rtl:bg-gradient-to-l xl:w-16 ltr:xl:-right-20 rtl:xl:-left-20"></div>
-                        <div className="ltr:xl:-skew-x-[14deg] rtl:xl:skew-x-[14deg]">
-                            <Link to="/" className="w-48 block lg:w-72 ms-10">
-                                <img src="/logo-white.png" alt="Logo" className="w-full" />
-                            </Link>
-                            <div className="mt-24 hidden w-full max-w-[430px] lg:block">
-                                <img src="/assets/images/auth/register.svg" alt="Cover Image" className="w-full" />
+
+            {/* Floating particles */}
+            <div className="absolute top-1/4 left-1/4 w-2 h-2 bg-blue-400/40 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+            <div className="absolute top-3/4 right-1/4 w-3 h-3 bg-purple-400/40 rounded-full animate-bounce" style={{ animationDelay: '500ms' }}></div>
+            <div className="absolute bottom-1/4 left-1/3 w-2 h-2 bg-cyan-400/40 rounded-full animate-bounce" style={{ animationDelay: '700ms' }}></div>
+
+            <div className="relative w-full max-w-6xl mx-auto">
+                <div className="grid lg:grid-cols-2 gap-8 items-center">
+                    {/* Left side - Branding */}
+                    <div className={`hidden lg:block transition-all duration-1000 transform ${isVisible ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0'}`}>
+                        <div className="bg-white/5 backdrop-blur-xl rounded-3xl p-12 border border-white/10 shadow-2xl">
+                            <div className="space-y-8">
+                                <div>
+                                    <Link to="/" className="block">
+                                        <h2 className="text-5xl font-bold text-white mb-4">Welcome to</h2>
+                                        <h1 className="text-6xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">i-sign.eu</h1>
+                                    </Link>
+                                </div>
+
+                                <p className="text-xl text-gray-300 leading-relaxed">Join thousands of businesses that trust our platform for secure electronic signatures.</p>
+
+                                {/* Feature highlights */}
+                                <div className="space-y-4 pt-8">
+                                    {[
+                                        { icon: '🚀', title: 'Quick Setup', desc: 'Get started in minutes' },
+                                        { icon: '🔐', title: 'Secure & Compliant', desc: 'Industry-standard security' },
+                                        { icon: '💼', title: 'Business Ready', desc: 'Enterprise features included' },
+                                    ].map((feature, index) => (
+                                        <div
+                                            key={index}
+                                            className="flex items-center gap-4 bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-white/10 hover:bg-white/10 transition-all duration-300 hover:scale-105 transform"
+                                        >
+                                            <div className="text-3xl">{feature.icon}</div>
+                                            <div>
+                                                <h3 className="text-white font-semibold">{feature.title}</h3>
+                                                <p className="text-gray-400 text-sm">{feature.desc}</p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div className="relative flex w-full flex-col items-center justify-center gap-6 px-4 pb-16 pt-6 sm:px-6 lg:max-w-[667px]">
-                        <div className="flex w-full max-w-[440px] items-center gap-2 lg:absolute lg:end-6 lg:top-6 lg:max-w-full">
-                            <Link to="/" className="w-8 block lg:hidden">
-                                <img src="/assets/images/logo.svg" alt="Logo" className="mx-auto w-10" />
-                            </Link>
-                            <div className="dropdown ms-auto w-max">
-                                <Dropdown
-                                    offset={[0, 8]}
-                                    placement={`${isRtl ? 'bottom-start' : 'bottom-end'}`}
-                                    btnClassName="flex items-center gap-2.5 rounded-lg border border-white-dark/30 bg-white px-2 py-1.5 text-white-dark hover:border-primary hover:text-primary dark:bg-black"
-                                    button={
-                                        <>
-                                            <div>
-                                                <img src={`/assets/images/flags/${flag.toUpperCase()}.svg`} alt="image" className="h-5 w-5 rounded-full object-cover" />
-                                            </div>
-                                            <div className="text-base font-bold uppercase">{flag}</div>
-                                            <span className="shrink-0">
-                                                <IconCaretDown />
-                                            </span>
-                                        </>
-                                    }
-                                >
-                                    <ul className="!px-2 text-dark dark:text-white-dark grid grid-cols-2 gap-2 font-semibold dark:text-white-light/90 w-[280px]">
-                                        {languageList.map((item: any) => (
-                                            <li key={item.code}>
-                                                <button
-                                                    type="button"
-                                                    className={`flex w-full hover:text-primary rounded-lg ${flag === item.code ? 'bg-primary/10 text-primary' : ''}`}
-                                                    onClick={() => setLocale(item.code)}
-                                                >
-                                                    <img src={`/assets/images/flags/${item.code.toUpperCase()}.svg`} alt="flag" className="w-5 h-5 object-cover rounded-full" />
-                                                    <span className="ltr:ml-3 rtl:mr-3">{item.name}</span>
-                                                </button>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </Dropdown>
-                            </div>
-                        </div>
-                        <div className="w-full max-w-[440px] lg:mt-16">
-                            <div className="mb-10">
-                                <h1 className="text-3xl font-extrabold uppercase !leading-snug text-primary md:text-4xl">Sign Up</h1>
-                                <p className="text-base font-bold leading-normal text-white-dark">Enter your details to register</p>
+
+                    {/* Right side - Register Form */}
+                    <div className={`transition-all duration-1000 delay-300 transform ${isVisible ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'}`}>
+                        <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-8 md:p-12 border border-white/20 shadow-2xl">
+                            {/* Header */}
+                            <div className="flex justify-between items-start mb-8">
+                                <div>
+                                    <h2 className="text-3xl md:text-4xl font-bold text-white mb-2">Sign Up</h2>
+                                    <p className="text-gray-300">Create your account to get started.</p>
+                                </div>
+
+                                {/* Language Dropdown */}
+                                <div className="dropdown ms-auto w-max">
+                                    <Dropdown
+                                        offset={[0, 8]}
+                                        placement={`${isRtl ? 'bottom-start' : 'bottom-end'}`}
+                                        btnClassName="flex items-center gap-2 bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg px-3 py-2 text-white transition-all duration-300"
+                                        button={
+                                            <>
+                                                <div>
+                                                    <img src={`/assets/images/flags/${flag.toUpperCase()}.svg`} alt="flag" className="h-5 w-5 rounded-full object-cover" />
+                                                </div>
+                                                <div className="text-sm font-medium uppercase">{flag}</div>
+                                                <span className="shrink-0">
+                                                    <IconCaretDown />
+                                                </span>
+                                            </>
+                                        }
+                                    >
+                                        <ul className="!px-2 text-dark dark:text-white-dark grid grid-cols-2 gap-2 font-semibold dark:text-white-light/90 w-[280px]">
+                                            {languageList.map((item: any) => (
+                                                <li key={item.code}>
+                                                    <button
+                                                        type="button"
+                                                        className={`flex w-full hover:text-primary rounded-lg p-2 ${flag === item.code ? 'bg-primary/10 text-primary' : ''}`}
+                                                        onClick={() => setLocale(item.code)}
+                                                    >
+                                                        <img src={`/assets/images/flags/${item.code.toUpperCase()}.svg`} alt="flag" className="w-5 h-5 object-cover rounded-full" />
+                                                        <span className="ltr:ml-3 rtl:mr-3">{item.name}</span>
+                                                    </button>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </Dropdown>
+                                </div>
                             </div>
 
-                            {/* --- UPDATED FORM --- */}
-                            <form className="space-y-5 dark:text-white" onSubmit={submitForm}>
-                                <div>
-                                    <label htmlFor="firstName">First Name</label>
-                                    <div className="relative text-white-dark">
+                            {/* Mobile Logo */}
+                            <div className="lg:hidden text-center mb-8">
+                                <Link to="/">
+                                    <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">i-sign.eu</h1>
+                                </Link>
+                            </div>
+
+                            {/* Form */}
+                            <form onSubmit={submitForm} className="space-y-5">
+                                {/* First Name Input */}
+                                <div className="space-y-2">
+                                    <label htmlFor="firstName" className="text-white font-medium block">
+                                        First Name
+                                    </label>
+                                    <div className="relative group">
                                         <input
                                             id="firstName"
                                             type="text"
-                                            placeholder="Enter First Name"
-                                            className="form-input ps-10 placeholder:text-white-dark"
+                                            placeholder="Enter your first name"
+                                            className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 pl-12 text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all duration-300"
                                             value={formData.firstName}
                                             onChange={handleChange}
                                             required
                                         />
-                                        <span className="absolute end-4 top-1/2 -translate-y-1/2">
+                                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-400 transition-colors duration-300">
                                             <IconUser fill={true} />
                                         </span>
                                     </div>
                                 </div>
 
-                                <div>
-                                    <label htmlFor="lastName">Last Name</label>
-                                    <div className="relative text-white-dark">
+                                {/* Last Name Input */}
+                                <div className="space-y-2">
+                                    <label htmlFor="lastName" className="text-white font-medium block">
+                                        Last Name
+                                    </label>
+                                    <div className="relative group">
                                         <input
                                             id="lastName"
                                             type="text"
-                                            placeholder="Enter Last Name"
-                                            className="form-input ps-10 placeholder:text-white-dark"
+                                            placeholder="Enter your last name"
+                                            className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 pl-12 text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all duration-300"
                                             value={formData.lastName}
                                             onChange={handleChange}
                                             required
                                         />
-                                        <span className="absolute end-4 top-1/2 -translate-y-1/2">
+                                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-400 transition-colors duration-300">
                                             <IconUser fill={true} />
                                         </span>
                                     </div>
                                 </div>
 
-                                <div>
-                                    <label htmlFor="email">Email</label>
-                                    <div className="relative text-white-dark">
+                                {/* Email Input */}
+                                <div className="space-y-2">
+                                    <label htmlFor="email" className="text-white font-medium block">
+                                        Email Address
+                                    </label>
+                                    <div className="relative group">
                                         <input
                                             id="email"
                                             type="email"
-                                            placeholder="Enter Email"
-                                            className="form-input ps-10 placeholder:text-white-dark"
+                                            placeholder="Enter your email"
+                                            className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 pl-12 text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all duration-300"
                                             value={formData.email}
                                             onChange={handleChange}
                                             required
                                         />
-                                        <span className="absolute end-4 top-1/2 -translate-y-1/2">
+                                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-400 transition-colors duration-300">
                                             <IconMail fill={true} />
                                         </span>
                                     </div>
                                 </div>
-                                <div>
-                                    <label htmlFor="password">Password</label>
-                                    <div className="relative text-white-dark">
+
+                                {/* Password Input */}
+                                <div className="space-y-2">
+                                    <label htmlFor="password" className="text-white font-medium block">
+                                        Password
+                                    </label>
+                                    <div className="relative group">
                                         <input
                                             id="password"
                                             type={showPassword ? 'text' : 'password'}
-                                            placeholder="Enter Password"
-                                            className="form-input ps-10 placeholder:text-white-dark"
+                                            placeholder="Create a password (min. 6 characters)"
+                                            className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 pl-12 pr-12 text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all duration-300"
                                             value={formData.password}
                                             onChange={handleChange}
                                             required
                                         />
-                                        {/* Eye Icon Button */}
-                                        <button type="button" className="absolute end-4 top-1/2 -translate-y-1/2" onClick={() => setShowPassword(!showPassword)}>
-                                            {showPassword ? <FaEyeSlashTyped /> : <IconEye />}
+                                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-400 transition-colors duration-300">
+                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth={2}
+                                                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                                                />
+                                            </svg>
+                                        </span>
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowPassword(!showPassword)}
+                                            className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors duration-300"
+                                        >
+                                            {showPassword ? <FaEyeSlashTyped className="w-5 h-5" /> : <IconEye />}
                                         </button>
                                     </div>
-                                    {passwordError && <span className="text-red-500 text-sm mt-1">{passwordError}</span>}
+                                    {passwordError && (
+                                        <p className="text-red-400 text-sm mt-1 flex items-center gap-1">
+                                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                                <path
+                                                    fillRule="evenodd"
+                                                    d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                                                    clipRule="evenodd"
+                                                />
+                                            </svg>
+                                            {passwordError}
+                                        </p>
+                                    )}
                                 </div>
 
+                                {/* Submit Button */}
                                 <button
                                     type="submit"
-                                    className="btn btn-gradient !mt-6 w-full border-0 uppercase shadow-[0_10px_20px_-10px_rgba(67,97,238,0.44)]"
                                     disabled={loading || passwordError !== '' || formData.password.length < 6}
+                                    className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-semibold py-3 rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-blue-500/25 transform disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-2 mt-6"
                                 >
-                                    {loading ? <span className="animate-spin border-2 border-white border-l-transparent rounded-full w-5 h-5 ltr:mr-4 rtl:ml-4 inline-block"></span> : 'Sign Up'}
+                                    {loading ? (
+                                        <>
+                                            <span className="animate-spin border-2 border-white border-l-transparent rounded-full w-5 h-5 inline-block"></span>
+                                            <span>Creating Account...</span>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <span>Create Account</span>
+                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                            </svg>
+                                        </>
+                                    )}
                                 </button>
                             </form>
 
-                            <div className="text-center mt-4 text-sm font-medium text-gray-700 dark:text-gray-300">
-                                Already have an account?{' '}
-                                <Link to="/login" className="text-primary font-semibold hover:underline hover:text-primary-dark dark:hover:text-primary-light transition-colors">
-                                    Sign In
-                                </Link>
+                            {/* Sign In Link */}
+                            <div className="mt-8 text-center">
+                                <p className="text-gray-300">
+                                    Already have an account?{' '}
+                                    <Link to="/login" className="text-blue-400 hover:text-blue-300 font-semibold transition-colors duration-300">
+                                        Sign In
+                                    </Link>
+                                </p>
                             </div>
+
+                            {/* Footer */}
+                            <div className="mt-8 pt-6 border-t border-white/10 text-center text-sm text-gray-400">© {new Date().getFullYear()} i-sign.eu. All Rights Reserved.</div>
                         </div>
-                        <p className="absolute bottom-6 w-full text-center dark:text-white">© {new Date().getFullYear()}. E-sign All Rights Reserved.</p>
                     </div>
                 </div>
             </div>
