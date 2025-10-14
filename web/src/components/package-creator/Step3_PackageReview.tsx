@@ -106,6 +106,14 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
         return Math.floor(timeUntilExpiryMs / (1000 * 60 * 60 * 24));
     }, [currentPackage?.options.expiresAt]);
 
+    const maxRepeatReminderDays = useMemo(() => {
+        const firstDays = currentPackage?.options.firstReminderDays;
+        if (firstDays) {
+            return firstDays;
+        }
+        return maxFirstReminderDays;
+    }, [currentPackage?.options.firstReminderDays, maxFirstReminderDays]);
+
     useEffect(() => {
         // Initialize tempExpiresAt with currentPackage.options.expiresAt
         // Convert from UTC ISO string to local datetime-local format
@@ -269,6 +277,15 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
         }
         // Also use optional chaining in the dependency array for full type safety.
     }, [maxFirstReminderDays, currentPackage?.options?.firstReminderDays, dispatch]);
+
+    useEffect(() => {
+        const repeatDays = currentPackage?.options?.repeatReminderDays;
+        const maxRepeat = currentPackage?.options.firstReminderDays || maxFirstReminderDays;
+        if (repeatDays && repeatDays > maxRepeat) {
+            dispatch(updatePackageOptions({ repeatReminderDays: null }));
+            toast.info('The follow-up reminder interval was reset as it is no longer valid.', { autoClose: 6000 });
+        }
+    }, [currentPackage?.options?.repeatReminderDays, currentPackage?.options.firstReminderDays, maxFirstReminderDays, dispatch]);
 
     useEffect(() => {
         if (error) {
@@ -705,18 +722,24 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
                                         <label className="font-semibold flex items-center gap-2">
                                             <FiBellTyped /> Expiration Reminders
                                         </label>
-                                        <label className="flex items-center dark:bg-gray-900 text-sm gap-3 p-2 rounded-md hover:bg-gray-50">
+                                        {!currentPackage.options.expiresAt && (
+                                            <p className="text-xs text-amber-700 p-2 bg-amber-50 dark:bg-gray-800 rounded-md">
+                                                Please set a package expiration date first to enable expiration reminders.
+                                            </p>
+                                        )}
+                                        <label className={`flex items-center dark:bg-gray-900 text-sm gap-3 p-2 rounded-md hover:bg-gray-50 ${!currentPackage.options.expiresAt ? 'opacity-40' : ''}`}>
                                             <input
                                                 type="checkbox"
                                                 className="mr-2 rounded"
                                                 checked={currentPackage.options.sendExpirationReminders}
                                                 onChange={(e) => handleOptionsChange({ sendExpirationReminders: e.target.checked })}
+                                                disabled={!currentPackage.options.expiresAt}
                                             />
                                             Send Expiration Reminders
                                         </label>
                                         <div
                                             className={`space-y-4 pl-8 border-l-2 ml-2 transition-opacity ${
-                                                !currentPackage.options.sendExpirationReminders ? 'opacity-40 pointer-events-none' : 'opacity-100'
+                                                !currentPackage.options.sendExpirationReminders || !currentPackage.options.expiresAt ? 'opacity-40 pointer-events-none' : 'opacity-100'
                                             }`}
                                         >
                                             <div>
@@ -725,17 +748,15 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
                                                     className="w-full dark:bg-gray-900 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100"
                                                     value={currentPackage.options.reminderPeriod || ''}
                                                     onChange={(e) => handleOptionsChange({ reminderPeriod: e.target.value || null })}
-                                                    disabled={!currentPackage.options.sendExpirationReminders || availableReminderOptions.length === 0}
+                                                    disabled={!currentPackage.options.sendExpirationReminders || !currentPackage.options.expiresAt || availableReminderOptions.length === 0}
                                                 >
                                                     <option value="">Select reminder timing</option>
-                                                    {/* We now map over the dynamically filtered list */}
                                                     {availableReminderOptions.map((option) => (
                                                         <option key={option.value} value={option.value}>
                                                             {option.label}
                                                         </option>
                                                     ))}
                                                 </select>
-                                                {/* This helper text appears when the expiration is too soon for any reminders */}
                                                 {currentPackage?.options.sendExpirationReminders && availableReminderOptions.length === 0 && currentPackage?.options.expiresAt && (
                                                     <p className="text-xs text-amber-700 mt-2 p-2 dark:bg-gray-900 bg-amber-50 rounded-md">
                                                         The expiration date is too soon for any reminder options. Please set a later date to enable reminders.
@@ -748,22 +769,26 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
                                         <label className="font-semibold flex items-center gap-2">
                                             <FiRepeatTyped /> Automatic Reminders
                                         </label>
-                                        <label className="flex items-center dark:bg-gray-900 text-sm gap-3 p-2 rounded-md hover:bg-gray-50">
+                                        {!currentPackage.options.expiresAt && (
+                                            <p className="text-xs text-amber-700 p-2 bg-amber-50 dark:bg-gray-800 rounded-md">
+                                                Please set a package expiration date first to enable automatic reminders.
+                                            </p>
+                                        )}
+                                        <label className={`flex items-center dark:bg-gray-900 text-sm gap-3 p-2 rounded-md hover:bg-gray-50 ${!currentPackage.options.expiresAt ? 'opacity-40' : ''}`}>
                                             <input
                                                 type="checkbox"
                                                 className="mr-2 rounded"
                                                 checked={currentPackage.options.sendAutomaticReminders}
                                                 onChange={(e) => handleOptionsChange({ sendAutomaticReminders: e.target.checked })}
+                                                disabled={!currentPackage.options.expiresAt}
                                             />
                                             Enable Automatic Reminders
                                         </label>
-                                        {/* 
-        This block is now disabled/faded if reminders are toggled off
-        OR if the expiration date is too soon (maxFirstReminderDays < 1)
-    */}
                                         <div
                                             className={`space-y-4 pl-8 border-l-2 ml-2 transition-opacity ${
-                                                !currentPackage.options.sendAutomaticReminders || maxFirstReminderDays < 1 ? 'opacity-40 pointer-events-none' : 'opacity-100'
+                                                !currentPackage.options.sendAutomaticReminders || !currentPackage.options.expiresAt || maxFirstReminderDays < 1
+                                                    ? 'opacity-40 pointer-events-none'
+                                                    : 'opacity-100'
                                             }`}
                                         >
                                             <div>
@@ -772,19 +797,17 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
                                                     <input
                                                         type="number"
                                                         min="1"
-                                                        // Add the 'max' attribute to enforce the limit
                                                         max={maxFirstReminderDays}
                                                         className="w-20 px-2 py-1 border dark:bg-gray-900 border-gray-300 rounded text-sm disabled:bg-gray-100"
                                                         value={currentPackage.options.firstReminderDays || ''}
                                                         onChange={(e) => {
-                                                            // Prevent user from typing a value larger than the max
                                                             let value = parseInt(e.target.value);
                                                             if (value > maxFirstReminderDays) {
                                                                 value = maxFirstReminderDays;
                                                             }
                                                             handleOptionsChange({ firstReminderDays: value || null });
                                                         }}
-                                                        disabled={!currentPackage.options.sendAutomaticReminders || maxFirstReminderDays < 1}
+                                                        disabled={!currentPackage.options.sendAutomaticReminders || !currentPackage.options.expiresAt || maxFirstReminderDays < 1}
                                                     />
                                                     days before expiration
                                                 </div>
@@ -796,18 +819,22 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
                                                     <input
                                                         type="number"
                                                         min="1"
+                                                        max={maxRepeatReminderDays}
                                                         className="w-20 px-2 py-1  dark:bg-gray-900 border border-gray-300 rounded text-sm disabled:bg-gray-100"
                                                         value={currentPackage.options.repeatReminderDays || ''}
-                                                        onChange={(e) => handleOptionsChange({ repeatReminderDays: parseInt(e.target.value) || null })}
-                                                        disabled={!currentPackage.options.sendAutomaticReminders || maxFirstReminderDays < 1}
+                                                        onChange={(e) => {
+                                                            let value = parseInt(e.target.value);
+                                                            if (value > maxRepeatReminderDays) {
+                                                                value = maxRepeatReminderDays;
+                                                            }
+                                                            handleOptionsChange({ repeatReminderDays: value || null });
+                                                        }}
+                                                        disabled={!currentPackage.options.sendAutomaticReminders || !currentPackage.options.expiresAt || maxFirstReminderDays < 1}
                                                     />
                                                     days
                                                 </div>
                                             </div>
                                         </div>
-                                        {/* 
-        This helper text appears to guide the user when the option is unavailable
-    */}
                                         {currentPackage.options.sendAutomaticReminders && maxFirstReminderDays < 1 && currentPackage.options.expiresAt && (
                                             <div className="pl-8 ml-2">
                                                 <p className="text-xs text-amber-700 dark:bg-gray-900 mt-2 p-2 bg-amber-50 rounded-md">
