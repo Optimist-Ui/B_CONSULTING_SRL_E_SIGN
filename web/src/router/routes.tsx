@@ -147,6 +147,11 @@ const routes = [
         layout: 'blank',
     },
     {
+        path: '/help',
+        element: <EnterpriseContact />,
+        layout: 'blank',
+    },
+    {
         path: '/cookie-policy',
         element: <CookiePolicyPage />,
         layout: 'blank',

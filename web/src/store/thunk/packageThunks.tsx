@@ -60,32 +60,29 @@ export const savePackage = createAsyncThunk<DocumentPackage, SavePackagePayload>
             }
         }
 
-        const { packages } = (getState() as IRootState).packages;
-        const isExistingInStore = packages.some((p) => p._id === packageData._id);
-
         const payload = { ...packageData };
-
-        // Remove the 'saveAsTemplate' flag as it's a frontend-only concern
         delete payload.saveAsTemplate;
 
-        if (isExistingInStore) {
-            // If the package exists in our state, it's a real document. Update it via PATCH.
+        // 🔥 IMPROVED DETECTION LOGIC
+        // Check if this is an existing package (has MongoDB ObjectId)
+        const isExistingPackage = payload._id && /^[a-f\d]{24}$/i.test(payload._id);
+
+        if (isExistingPackage) {
+            // Update existing package
             const { _id, ...updatePayload } = payload;
             const response = await api.patch(`/api/packages/${_id}`, updatePayload);
             return response.data.data;
         } else {
-            // For create, ensure s3Key is provided
+            // Create new package
             if (!payload.s3Key) {
                 throw new Error('S3 key is required for new packages.');
             }
-            // If it's not in the state, it's a new document. Create it via POST.
-            // We must remove the temporary client-side ID before sending.
-            delete payload._id;
+            delete payload._id; // Remove temp ID
             const response = await api.post('/api/packages', payload);
             return response.data.data;
         }
     } catch (error: any) {
-        return rejectWithValue(error.response?.data?.error || 'Failed to save package.');
+        return rejectWithValue(error.response?.data?.error || error.message || 'Failed to save package.');
     }
 });
 

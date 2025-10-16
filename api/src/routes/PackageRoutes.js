@@ -3,6 +3,7 @@ const authenticateUser = require("../middlewares/authenticate");
 const requireActiveSubscription = require("../middlewares/requireActiveSubscription");
 const checkPackageExpiry = require("../middlewares/checkPackageExpiry");
 const validate = require("../middlewares/validate");
+const ipExtractorMiddleware = require("../middlewares/ipExtractorMiddleware");
 const {
   createPackageValidation,
   updatePackageValidation,
@@ -36,7 +37,7 @@ module.exports = (container) => {
   const packageController = container.resolve("packageController");
 
   // --- PUBLIC ROUTES FOR PARTICIPANTS ---
-
+  router.use(ipExtractorMiddleware);
   /**
    * @swagger
    * /api/packages/participant/{packageId}/{participantId}:

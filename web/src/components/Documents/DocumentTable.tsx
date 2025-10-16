@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { ComponentType, useMemo, useState } from 'react';
 import { useReactTable, getCoreRowModel, getSortedRowModel, flexRender, createColumnHelper, ColumnDef } from '@tanstack/react-table';
 import IconMenuDocumentation from '../Icon/Menu/IconMenuDocumentation';
 import IconBell from '../Icon/IconBell';
@@ -16,7 +16,9 @@ import { Document, ParticipantDetail, User } from '../../store/slices/documentSl
 import ConfirmationModal from '../common/ConfirmationModal';
 import { useNavigate } from 'react-router-dom';
 import IconEye from '../Icon/IconEye';
+import { FiEdit3 } from 'react-icons/fi';
 
+const FiEdit3Typed = FiEdit3 as ComponentType<{ className?: string }>;
 interface DocumentTableProps {
     documents: Document[];
     loading: boolean;
@@ -68,21 +70,6 @@ const DocumentTable: React.FC<DocumentTableProps> = ({ documents, loading, expan
                 return 'bg-gray-500 text-white';
         }
     };
-
-    const getStatusDotColor = (status: string): string => {
-        switch (status) {
-            case 'Completed':
-            case 'AllCompleted':
-                return 'bg-green-500';
-            case 'Rejected':
-            case 'AllRejected':
-                return 'bg-red-500';
-            default:
-                return 'bg-gray-500';
-        }
-    };
-
-    type StatusCountKeys = 'Completed' | 'In Progress' | 'Waiting' | 'Not Sent' | 'Rejected';
 
     const renderSingleStatusDot = (members: (ParticipantDetail | User)[]): JSX.Element => {
         // Defines the order and color for tooltip parts
@@ -246,6 +233,17 @@ const DocumentTable: React.FC<DocumentTableProps> = ({ documents, loading, expan
                                         View Details
                                     </button>
                                 </li>
+                                {row.original.status === 'Draft' && (
+                                    <li>
+                                        <button
+                                            className="w-full flex items-center px-3 py-2 text-sm hover:bg-primary hover:text-white"
+                                            onClick={() => navigate(`/add-document?draft=${row.original.id}`)}
+                                        >
+                                            <FiEdit3Typed className="w-4 h-4 mr-2" />
+                                            Continue Editing
+                                        </button>
+                                    </li>
+                                )}
                                 {/* <li>
                                     <button className="w-full flex items-center px-3 py-2 text-sm hover:bg-primary hover:text-white" onClick={() => onViewHistory(row.original.id)}>
                                         <IconClock className="w-4 h-4 mr-2" />

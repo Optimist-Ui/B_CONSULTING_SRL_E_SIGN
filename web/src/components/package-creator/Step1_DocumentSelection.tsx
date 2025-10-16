@@ -34,6 +34,7 @@ const Step1_DocumentSelection: React.FC<StepProps> = ({ onNext }) => {
 
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const renderingRef = useRef(false);
 
     useEffect(() => {
         if (templates.length === 0) {
@@ -50,7 +51,9 @@ const Step1_DocumentSelection: React.FC<StepProps> = ({ onNext }) => {
     }, [templatesError, packageError, dispatch]);
 
     const renderPdfPreview = useCallback(async (documentSource: { fileData?: ArrayBuffer; fileUrl?: string; downloadUrl?: string }) => {
-        if (!canvasRef.current) return;
+        if (!canvasRef.current || renderingRef.current) return; // 🔥 ADD rendering check
+
+        renderingRef.current = true; // 🔥 SET flag
         setRenderError(null);
 
         try {
@@ -75,16 +78,22 @@ const Step1_DocumentSelection: React.FC<StepProps> = ({ onNext }) => {
                 const arrayBuffer = await response.arrayBuffer();
                 pdf = await loadPdfDocument(arrayBuffer);
             } else {
+                renderingRef.current = false; // 🔥 RESET flag
                 return;
             }
-            await renderPdfPageToCanvas(pdf, 1, canvasRef.current, 0.8);
+
+            if (canvasRef.current) {
+                // 🔥 CHECK again before rendering
+                await renderPdfPageToCanvas(pdf, 1, canvasRef.current, 0.8);
+            }
         } catch (error: any) {
             console.error('Error rendering PDF preview:', error);
             setRenderError(`Failed to render PDF preview: ${error.message}`);
-            toast.error(`Failed to render PDF preview: ${error.message}`);
+            // 🔥 REMOVE toast from here to prevent duplicate errors
+        } finally {
+            renderingRef.current = false; // 🔥 ALWAYS reset flag
         }
     }, []);
-
     const formik = useFormik({
         initialValues: {
             documentTitle: currentPackage?.name || '',
@@ -118,8 +127,15 @@ const Step1_DocumentSelection: React.FC<StepProps> = ({ onNext }) => {
     useEffect(() => {
         if (currentPackage) {
             setSelectedTemplateId(currentPackage.templateId || null);
-            if (currentPackage.fileData || currentPackage.fileUrl) {
-                renderPdfPreview(currentPackage);
+
+            // 🔥 FIX: Only render if canvas is mounted AND we have document data
+            if ((currentPackage.fileData || currentPackage.fileUrl || currentPackage.downloadUrl) && canvasRef.current) {
+                // Small delay to ensure canvas is fully mounted
+                setTimeout(() => {
+                    if (canvasRef.current) {
+                        renderPdfPreview(currentPackage);
+                    }
+                }, 100);
             }
         } else {
             formik.resetForm();
@@ -129,7 +145,7 @@ const Step1_DocumentSelection: React.FC<StepProps> = ({ onNext }) => {
                 context?.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
             }
         }
-    }, [currentPackage, renderPdfPreview]);
+    }, [currentPackage]); // 🔥 REMOVE renderPdfPreview from dependencies to prevent loops
 
     const handleFileChange = async (file: File) => {
         if (!file || file.type !== 'application/pdf') {

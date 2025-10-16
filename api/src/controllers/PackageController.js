@@ -150,7 +150,7 @@ class PackageController {
     try {
       const { packageId, participantId } = req.params;
       const { fieldId, otp } = req.body;
-      const ip = req.ip; // For audit
+      const ip = req.clientIp; // For audit
       const result = await this.packageService.verifyOTP(
         packageId,
         participantId,
@@ -186,7 +186,7 @@ class PackageController {
     try {
       const { packageId, participantId } = req.params;
       const { fieldId, otp } = req.body;
-      const ip = req.ip;
+      const ip = req.clientIp;
 
       const result = await this.packageService.verifySmsOTP(
         packageId,
@@ -205,7 +205,7 @@ class PackageController {
     try {
       const { packageId, participantId } = req.params;
       const { fieldValues } = req.body;
-      const ip = req.ip; // For the audit trail
+      const ip = req.clientIp; // For the audit trail
 
       const result = await this.packageService.submitFields(
         packageId,
@@ -228,7 +228,7 @@ class PackageController {
     try {
       const { packageId, participantId } = req.params;
       const { reason } = req.body;
-      const ip = req.ip;
+      const ip = req.clientIp;
 
       const result = await this.packageService.rejectPackage(
         packageId,
@@ -251,7 +251,7 @@ class PackageController {
     try {
       const { packageId, participantId } = req.params;
       const contactData = req.body;
-      const ip = req.ip;
+      const ip = req.clientIp;
 
       const result = await this.packageService.registerReassignmentContact(
         packageId,
@@ -300,7 +300,7 @@ class PackageController {
     try {
       const { packageId, participantId } = req.params;
       const { newContactId, reason } = req.body;
-      const ip = req.ip;
+      const ip = req.clientIp;
 
       const result = await this.packageService.performReassignment(
         packageId,
@@ -435,7 +435,7 @@ class PackageController {
       const userId = req.user.id; // From authenticate middleware
       const { packageId } = req.params;
       const { reason } = req.body;
-      const ip = req.ip;
+      const ip = req.clientIp;
 
       const updatedPackage = await this.packageService.revokePackage(
         packageId,
@@ -474,7 +474,7 @@ class PackageController {
     try {
       const { packageId, participantId } = req.params;
       const { newContactId } = req.body;
-      const ip = req.ip;
+      const ip = req.clientIp;
 
       const result = await this.packageService.addReceiverByParticipant(
         packageId,

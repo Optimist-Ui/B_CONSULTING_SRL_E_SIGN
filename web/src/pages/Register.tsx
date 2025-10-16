@@ -2,8 +2,10 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { IRootState, AppDispatch } from '../store';
 import { setPageTitle, toggleRTL } from '../store/slices/themeConfigSlice';
-import { useEffect, useState, FormEvent, ChangeEvent, ComponentType } from 'react';
+import { useEffect, useState, ComponentType } from 'react';
 import { toast } from 'react-toastify';
+import { Formik, Form, Field, ErrorMessage } from 'formik';
+import * as Yup from 'yup';
 
 // Redux Imports for Authentication
 import { signupUser } from '../store/thunk/authThunks';
@@ -18,6 +20,22 @@ import IconEye from '../components/Icon/IconEye';
 import { FaEyeSlash } from 'react-icons/fa';
 const FaEyeSlashTyped = FaEyeSlash as ComponentType<{ className?: string }>;
 
+// Validation Schema
+const validationSchema = Yup.object().shape({
+    firstName: Yup.string()
+        .min(2, 'First name must be at least 2 characters')
+        .max(50, 'First name cannot exceed 50 characters')
+        .matches(/^[a-zA-Z\s'-]+$/, 'Only letters, spaces, hyphens, and apostrophes allowed')
+        .required('First name is required'),
+    lastName: Yup.string()
+        .min(2, 'Last name must be at least 2 characters')
+        .max(50, 'Last name cannot exceed 50 characters')
+        .matches(/^[a-zA-Z\s'-]+$/, 'Only letters, spaces, hyphens, and apostrophes allowed')
+        .required('Last name is required'),
+    email: Yup.string().email('Invalid email format').max(100, 'Email cannot exceed 100 characters').required('Email is required'),
+    password: Yup.string().min(6, 'Password must be at least 6 characters').max(128, 'Password cannot exceed 128 characters').required('Password is required'),
+});
+
 const Register = () => {
     const dispatch: AppDispatch = useDispatch();
     const navigate = useNavigate();
@@ -28,17 +46,17 @@ const Register = () => {
     const isRtl = rtlClass === 'rtl';
 
     // Component state
-    const [formData, setFormData] = useState({
+    const [flag, setFlag] = useState(locale);
+    const [showPassword, setShowPassword] = useState(false);
+    const [isVisible, setIsVisible] = useState(false);
+
+    // Initial form values
+    const initialValues = {
         firstName: '',
         lastName: '',
         email: '',
         password: '',
-    });
-
-    const [flag, setFlag] = useState(locale);
-    const [showPassword, setShowPassword] = useState(false);
-    const [passwordError, setPasswordError] = useState('');
-    const [isVisible, setIsVisible] = useState(false);
+    };
 
     useEffect(() => {
         dispatch(setPageTitle('Register'));
@@ -52,28 +70,15 @@ const Register = () => {
         dispatch(toggleRTL(newFlag.toLowerCase() === 'ae' ? 'rtl' : 'ltr'));
     };
 
-    const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-        const { id, value } = e.target;
-        setFormData({ ...formData, [id]: value });
-
-        // Validate password length
-        if (id === 'password') {
-            if (value.length > 0 && value.length < 6) {
-                setPasswordError('Password must be at least 6 characters');
-            } else {
-                setPasswordError('');
-            }
-        }
-    };
-
-    const submitForm = async (e: FormEvent) => {
-        e.preventDefault();
+    const handleSubmit = async (values: typeof initialValues, { setSubmitting }: any) => {
         try {
-            const resultAction = await dispatch(signupUser(formData)).unwrap();
+            const resultAction = await dispatch(signupUser(values)).unwrap();
             toast.success(resultAction.message || 'Registration successful!');
             navigate('/pending-verification');
         } catch (error: any) {
             toast.error(error || 'Registration failed. Please try again.');
+        } finally {
+            setSubmitting(false);
         }
     };
 
@@ -182,139 +187,163 @@ const Register = () => {
                                 </Link>
                             </div>
 
-                            {/* Form */}
-                            <form onSubmit={submitForm} className="space-y-5">
-                                {/* First Name Input */}
-                                <div className="space-y-2">
-                                    <label htmlFor="firstName" className="text-white font-medium block">
-                                        First Name
-                                    </label>
-                                    <div className="relative group">
-                                        <input
-                                            id="firstName"
-                                            type="text"
-                                            placeholder="Enter your first name"
-                                            className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 pl-12 text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all duration-300"
-                                            value={formData.firstName}
-                                            onChange={handleChange}
-                                            required
-                                        />
-                                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-400 transition-colors duration-300">
-                                            <IconUser fill={true} />
-                                        </span>
-                                    </div>
-                                </div>
-
-                                {/* Last Name Input */}
-                                <div className="space-y-2">
-                                    <label htmlFor="lastName" className="text-white font-medium block">
-                                        Last Name
-                                    </label>
-                                    <div className="relative group">
-                                        <input
-                                            id="lastName"
-                                            type="text"
-                                            placeholder="Enter your last name"
-                                            className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 pl-12 text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all duration-300"
-                                            value={formData.lastName}
-                                            onChange={handleChange}
-                                            required
-                                        />
-                                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-400 transition-colors duration-300">
-                                            <IconUser fill={true} />
-                                        </span>
-                                    </div>
-                                </div>
-
-                                {/* Email Input */}
-                                <div className="space-y-2">
-                                    <label htmlFor="email" className="text-white font-medium block">
-                                        Email Address
-                                    </label>
-                                    <div className="relative group">
-                                        <input
-                                            id="email"
-                                            type="email"
-                                            placeholder="Enter your email"
-                                            className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 pl-12 text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all duration-300"
-                                            value={formData.email}
-                                            onChange={handleChange}
-                                            required
-                                        />
-                                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-400 transition-colors duration-300">
-                                            <IconMail fill={true} />
-                                        </span>
-                                    </div>
-                                </div>
-
-                                {/* Password Input */}
-                                <div className="space-y-2">
-                                    <label htmlFor="password" className="text-white font-medium block">
-                                        Password
-                                    </label>
-                                    <div className="relative group">
-                                        <input
-                                            id="password"
-                                            type={showPassword ? 'text' : 'password'}
-                                            placeholder="Create a password (min. 6 characters)"
-                                            className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 pl-12 pr-12 text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all duration-300"
-                                            value={formData.password}
-                                            onChange={handleChange}
-                                            required
-                                        />
-                                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-400 transition-colors duration-300">
-                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path
-                                                    strokeLinecap="round"
-                                                    strokeLinejoin="round"
-                                                    strokeWidth={2}
-                                                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                            {/* Formik Form */}
+                            <Formik initialValues={initialValues} validationSchema={validationSchema} onSubmit={handleSubmit}>
+                                {({ errors, touched, isSubmitting }) => (
+                                    <Form className="space-y-5">
+                                        {/* First Name Input */}
+                                        <div className="space-y-2">
+                                            <label htmlFor="firstName" className="text-white font-medium block">
+                                                First Name
+                                            </label>
+                                            <div className="relative group">
+                                                <Field
+                                                    id="firstName"
+                                                    name="firstName"
+                                                    type="text"
+                                                    placeholder="Enter your first name"
+                                                    maxLength={50}
+                                                    className={`w-full bg-white/10 border ${
+                                                        errors.firstName && touched.firstName ? 'border-red-400' : 'border-white/20'
+                                                    } rounded-xl px-4 py-3 pl-12 text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 ${
+                                                        errors.firstName && touched.firstName ? 'focus:ring-red-400' : 'focus:ring-blue-400'
+                                                    } focus:border-transparent transition-all duration-300`}
                                                 />
-                                            </svg>
-                                        </span>
+                                                <span
+                                                    className={`absolute left-4 top-1/2 -translate-y-1/2 ${
+                                                        errors.firstName && touched.firstName ? 'text-red-400' : 'text-gray-400 group-focus-within:text-blue-400'
+                                                    } transition-colors duration-300`}
+                                                >
+                                                    <IconUser fill={true} />
+                                                </span>
+                                            </div>
+                                            <ErrorMessage name="firstName" component="p" className="text-red-400 text-sm mt-1 flex items-center gap-1" />
+                                        </div>
+
+                                        {/* Last Name Input */}
+                                        <div className="space-y-2">
+                                            <label htmlFor="lastName" className="text-white font-medium block">
+                                                Last Name
+                                            </label>
+                                            <div className="relative group">
+                                                <Field
+                                                    id="lastName"
+                                                    name="lastName"
+                                                    type="text"
+                                                    placeholder="Enter your last name"
+                                                    maxLength={50}
+                                                    className={`w-full bg-white/10 border ${
+                                                        errors.lastName && touched.lastName ? 'border-red-400' : 'border-white/20'
+                                                    } rounded-xl px-4 py-3 pl-12 text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 ${
+                                                        errors.lastName && touched.lastName ? 'focus:ring-red-400' : 'focus:ring-blue-400'
+                                                    } focus:border-transparent transition-all duration-300`}
+                                                />
+                                                <span
+                                                    className={`absolute left-4 top-1/2 -translate-y-1/2 ${
+                                                        errors.lastName && touched.lastName ? 'text-red-400' : 'text-gray-400 group-focus-within:text-blue-400'
+                                                    } transition-colors duration-300`}
+                                                >
+                                                    <IconUser fill={true} />
+                                                </span>
+                                            </div>
+                                            <ErrorMessage name="lastName" component="p" className="text-red-400 text-sm mt-1 flex items-center gap-1" />
+                                        </div>
+
+                                        {/* Email Input */}
+                                        <div className="space-y-2">
+                                            <label htmlFor="email" className="text-white font-medium block">
+                                                Email Address
+                                            </label>
+                                            <div className="relative group">
+                                                <Field
+                                                    id="email"
+                                                    name="email"
+                                                    type="email"
+                                                    placeholder="Enter your email"
+                                                    maxLength={100}
+                                                    className={`w-full bg-white/10 border ${
+                                                        errors.email && touched.email ? 'border-red-400' : 'border-white/20'
+                                                    } rounded-xl px-4 py-3 pl-12 text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 ${
+                                                        errors.email && touched.email ? 'focus:ring-red-400' : 'focus:ring-blue-400'
+                                                    } focus:border-transparent transition-all duration-300`}
+                                                />
+                                                <span
+                                                    className={`absolute left-4 top-1/2 -translate-y-1/2 ${
+                                                        errors.email && touched.email ? 'text-red-400' : 'text-gray-400 group-focus-within:text-blue-400'
+                                                    } transition-colors duration-300`}
+                                                >
+                                                    <IconMail fill={true} />
+                                                </span>
+                                            </div>
+                                            <ErrorMessage name="email" component="p" className="text-red-400 text-sm mt-1 flex items-center gap-1" />
+                                        </div>
+
+                                        {/* Password Input */}
+                                        <div className="space-y-2">
+                                            <label htmlFor="password" className="text-white font-medium block">
+                                                Password
+                                            </label>
+                                            <div className="relative group">
+                                                <Field
+                                                    id="password"
+                                                    name="password"
+                                                    type={showPassword ? 'text' : 'password'}
+                                                    placeholder="Create a password (min. 6 characters)"
+                                                    maxLength={128}
+                                                    className={`w-full bg-white/10 border ${
+                                                        errors.password && touched.password ? 'border-red-400' : 'border-white/20'
+                                                    } rounded-xl px-4 py-3 pl-12 pr-12 text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 ${
+                                                        errors.password && touched.password ? 'focus:ring-red-400' : 'focus:ring-blue-400'
+                                                    } focus:border-transparent transition-all duration-300`}
+                                                />
+                                                <span
+                                                    className={`absolute left-4 top-1/2 -translate-y-1/2 ${
+                                                        errors.password && touched.password ? 'text-red-400' : 'text-gray-400 group-focus-within:text-blue-400'
+                                                    } transition-colors duration-300`}
+                                                >
+                                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path
+                                                            strokeLinecap="round"
+                                                            strokeLinejoin="round"
+                                                            strokeWidth={2}
+                                                            d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                                                        />
+                                                    </svg>
+                                                </span>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setShowPassword(!showPassword)}
+                                                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors duration-300"
+                                                >
+                                                    {showPassword ? <FaEyeSlashTyped className="w-5 h-5" /> : <IconEye />}
+                                                </button>
+                                            </div>
+                                            <ErrorMessage name="password" component="p" className="text-red-400 text-sm mt-1 flex items-center gap-1" />
+                                        </div>
+
+                                        {/* Submit Button */}
                                         <button
-                                            type="button"
-                                            onClick={() => setShowPassword(!showPassword)}
-                                            className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors duration-300"
+                                            type="submit"
+                                            disabled={loading || isSubmitting}
+                                            className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-semibold py-3 rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-blue-500/25 transform disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-2 mt-6"
                                         >
-                                            {showPassword ? <FaEyeSlashTyped className="w-5 h-5" /> : <IconEye />}
+                                            {loading || isSubmitting ? (
+                                                <>
+                                                    <span className="animate-spin border-2 border-white border-l-transparent rounded-full w-5 h-5 inline-block"></span>
+                                                    <span>Creating Account...</span>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <span>Create Account</span>
+                                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                                    </svg>
+                                                </>
+                                            )}
                                         </button>
-                                    </div>
-                                    {passwordError && (
-                                        <p className="text-red-400 text-sm mt-1 flex items-center gap-1">
-                                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                                <path
-                                                    fillRule="evenodd"
-                                                    d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
-                                                    clipRule="evenodd"
-                                                />
-                                            </svg>
-                                            {passwordError}
-                                        </p>
-                                    )}
-                                </div>
-
-                                {/* Submit Button */}
-                                <button
-                                    type="submit"
-                                    disabled={loading || passwordError !== '' || formData.password.length < 6}
-                                    className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-semibold py-3 rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-blue-500/25 transform disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-2 mt-6"
-                                >
-                                    {loading ? (
-                                        <>
-                                            <span className="animate-spin border-2 border-white border-l-transparent rounded-full w-5 h-5 inline-block"></span>
-                                            <span>Creating Account...</span>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <span>Create Account</span>
-                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                                            </svg>
-                                        </>
-                                    )}
-                                </button>
-                            </form>
+                                    </Form>
+                                )}
+                            </Formik>
 
                             {/* Sign In Link */}
                             <div className="mt-8 text-center">

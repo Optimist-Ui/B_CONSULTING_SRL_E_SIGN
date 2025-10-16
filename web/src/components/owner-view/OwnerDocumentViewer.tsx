@@ -215,7 +215,13 @@ const OwnerDocumentViewer: React.FC<Props> = ({ packageData }) => {
                                 {packageData.fields
                                     .filter((f) => f.page === pageNumber)
                                     .map((field) => (
-                                        <StatusFieldRenderer key={field.id} field={field} currentScale={scale} baseScale={BASE_SCALE} />
+                                        <StatusFieldRenderer
+                                            key={field.id}
+                                            field={field}
+                                            currentScale={scale}
+                                            baseScale={BASE_SCALE}
+                                            packageStatus={packageData.status} // 👈 ADD THIS
+                                        />
                                     ))}
                             </div>
                         </div>

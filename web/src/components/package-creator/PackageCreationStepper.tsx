@@ -57,7 +57,10 @@ const PackageCreationStepper: React.FC = () => {
             dispatch(clearPackageState());
         }
     };
-
+    const extractTemplateId = (templateId: string | { _id: string; [key: string]: any } | undefined): string | undefined => {
+        if (!templateId) return undefined;
+        return typeof templateId === 'object' ? templateId._id : templateId;
+    };
     const handleSaveDraft = async () => {
         if (!currentPackage) {
             toast.error('No package to save.');
@@ -67,7 +70,17 @@ const PackageCreationStepper: React.FC = () => {
         try {
             await dispatch(
                 savePackage({
-                    ...currentPackage,
+                    _id: currentPackage._id, // 🔥 ADD THIS - Include for updates
+                    attachment_uuid: currentPackage.attachment_uuid,
+                    name: currentPackage.name,
+                    fileUrl: currentPackage.fileUrl,
+                    s3Key: currentPackage.s3Key,
+                    fields: currentPackage.fields,
+                    receivers: currentPackage.receivers,
+                    options: currentPackage.options,
+                    // 🔥 FIX: Extract templateId string from object if present
+                    templateId: extractTemplateId(currentPackage.templateId), // currentPackage.templateId,
+                    customMessage: currentPackage.customMessage,
                     status: 'Draft',
                 })
             ).unwrap();
@@ -118,6 +131,7 @@ const PackageCreationStepper: React.FC = () => {
         try {
             await dispatch(
                 savePackage({
+                    _id: currentPackage._id, // 🔥 ADD THIS - Include for updates
                     attachment_uuid: currentPackage.attachment_uuid,
                     name: currentPackage.name,
                     fileUrl: currentPackage.fileUrl,
@@ -125,7 +139,8 @@ const PackageCreationStepper: React.FC = () => {
                     fields: currentPackage.fields,
                     receivers: currentPackage.receivers,
                     options: currentPackage.options,
-                    templateId: currentPackage.templateId,
+                    // 🔥 FIX: Extract templateId string from object if present
+                    templateId: extractTemplateId(currentPackage.templateId), // currentPackage.templateId,
                     customMessage: currentPackage.customMessage,
                     status: 'Sent',
                     saveAsTemplate: false,
@@ -161,6 +176,8 @@ const PackageCreationStepper: React.FC = () => {
         return true;
     };
 
+    const isEditingDraft = currentPackage?._id && /^[a-f\d]{24}$/i.test(currentPackage._id);
+
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
             {/* Header with Stepper */}
@@ -168,7 +185,7 @@ const PackageCreationStepper: React.FC = () => {
                 <div className="max-w-6xl mx-auto px-2 sm:px-4 py-2 sm:py-3">
                     {/* Compact Title - Hidden on mobile */}
                     <div className="text-center mb-2 hidden sm:block">
-                        <h1 className="text-sm sm:text-base md:text-lg font-semibold text-gray-900 dark:text-white">Create Package</h1>
+                        <h1 className="text-sm sm:text-base md:text-lg font-semibold text-gray-900 dark:text-white">{isEditingDraft ? 'Edit Draft Package' : 'Create Package'}</h1>
                     </div>
 
                     {/* Progress Steps */}
@@ -213,7 +230,7 @@ const PackageCreationStepper: React.FC = () => {
                     </div>
                 </div>
             </div>
-            
+
             {/* Main Content with Fixed Left Actions */}
             <div className="relative">
                 {/* Content with left padding to avoid overlap */}

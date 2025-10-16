@@ -1,4 +1,4 @@
-// src/pages/auth/ReactivateAccount.tsx (new component, similar to VerifyEmail)
+// src/pages/auth/ReactivateAccount.tsx
 import { useEffect, useState, useRef } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
@@ -17,11 +17,13 @@ const ReactivateAccount = () => {
 
     const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
     const [message, setMessage] = useState('');
+    const [isVisible, setIsVisible] = useState(false);
 
     const effectRan = useRef(false);
 
     useEffect(() => {
         dispatch(setPageTitle('Reactivating Account...'));
+        setIsVisible(true);
 
         if (effectRan.current === true) {
             return;
@@ -33,7 +35,7 @@ const ReactivateAccount = () => {
                 .then((response) => {
                     setStatus('success');
                     setMessage(response.message || 'Account reactivated successfully! You may now log in.');
-                    setTimeout(() => navigate('/login'), 3000); // Optional auto-redirect
+                    setTimeout(() => navigate('/login'), 3000);
                 })
                 .catch((error) => {
                     setStatus('error');
@@ -54,34 +56,62 @@ const ReactivateAccount = () => {
             case 'loading':
                 return (
                     <div className="flex flex-col items-center justify-center text-center">
-                        <span className="animate-spin border-4 border-transparent border-l-primary rounded-full w-14 h-14 mb-5"></span>
-                        <h2 className="text-xl font-bold mb-4 dark:text-white">Reactivating Account...</h2>
-                        <p className="text-white-dark">Please wait, we are reactivating your account.</p>
+                        <div className="relative mb-8">
+                            <div className="animate-spin border-4 border-blue-500/30 border-t-blue-500 rounded-full w-16 h-16"></div>
+                            <div className="absolute inset-0 flex items-center justify-center">
+                                <div className="w-10 h-10 bg-blue-500/20 rounded-full animate-pulse"></div>
+                            </div>
+                        </div>
+                        <h2 className="text-3xl font-bold mb-4 text-white">Reactivating Account</h2>
+                        <p className="text-gray-300 text-lg">Please wait while we reactivate your account...</p>
+                        <div className="mt-6 flex gap-1">
+                            <span className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
+                            <span className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
+                            <span className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
+                        </div>
                     </div>
                 );
             case 'success':
                 return (
                     <div className="flex flex-col items-center justify-center text-center">
-                        <div className="text-green-500 mb-5">
-                            <IconCircleCheck className="w-16 h-16" />
+                        <div className="mb-8 relative">
+                            <div className="absolute inset-0 bg-green-500/20 rounded-full blur-2xl animate-pulse"></div>
+                            <div className="relative text-green-400">
+                                <IconCircleCheck className="w-20 h-20" />
+                            </div>
                         </div>
-                        <h2 className="text-xl font-bold mb-4 dark:text-white">Account Reactivated!</h2>
-                        <p className="text-white-dark mb-6">{message}</p>
-                        <Link to="/login" className="btn btn-gradient !mt-6 w-full border-0 uppercase">
-                            Proceed to Login
+                        <h2 className="text-3xl font-bold mb-4 text-white">Account Reactivated!</h2>
+                        <p className="text-gray-300 text-lg mb-8 max-w-md">{message}</p>
+                        <Link
+                            to="/login"
+                            className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-green-500/25 transform flex items-center justify-center gap-2"
+                        >
+                            <span>Proceed to Login</span>
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                            </svg>
                         </Link>
                     </div>
                 );
             case 'error':
                 return (
                     <div className="flex flex-col items-center justify-center text-center">
-                        <div className="text-danger mb-5">
-                            <IconXCircle className="w-16 h-16" />
+                        <div className="mb-8 relative">
+                            <div className="absolute inset-0 bg-red-500/20 rounded-full blur-2xl animate-pulse"></div>
+                            <div className="relative text-red-400">
+                                <IconXCircle className="w-20 h-20" />
+                            </div>
                         </div>
-                        <h2 className="text-xl font-bold mb-4 text-danger">Reactivation Failed</h2>
-                        <p className="text-white-dark mb-6">{message}</p>
-                        <Link to="/login" className="btn btn-gradient !mt-6 w-full border-0 uppercase">
-                            Back to Login
+                        <h2 className="text-3xl font-bold mb-4 text-red-400">Reactivation Failed</h2>
+                        <p className="text-gray-300 text-lg mb-8 max-w-md">{message}</p>
+                        <Link
+                            to="/login"
+                            className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-blue-500/25 transform flex items-center justify-center gap-2"
+                        >
+                            <span>Back to Login</span>
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                            </svg>
                         </Link>
                     </div>
                 );
@@ -91,30 +121,73 @@ const ReactivateAccount = () => {
     };
 
     return (
-        <div>
-            <div className="absolute inset-0">
-                <img src="/assets/images/auth/bg-gradient.png" alt="image" className="h-full w-full object-cover" />
+        <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-blue-900 flex items-center justify-center px-4 py-8 relative overflow-hidden">
+            {/* Animated background elements */}
+            <div className="absolute inset-0 overflow-hidden">
+                <div className="absolute top-20 left-10 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
+                <div className="absolute bottom-20 right-10 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '700ms' }}></div>
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-cyan-500/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1000ms' }}></div>
             </div>
-            <div className="relative flex min-h-screen items-center justify-center bg-[url(/assets/images/auth/map.png)] bg-cover bg-center bg-no-repeat px-6 py-10 dark:bg-[#060818] sm:px-16">
-                <img src="/assets/images/auth/coming-soon-object1.png" alt="image" className="absolute left-0 top-1/2 h-full max-h-[893px] -translate-y-1/2" />
-                <img src="/assets/images/auth/coming-soon-object2.png" alt="image" className="absolute left-24 top-0 h-40 md:left-[30%]" />
-                <img src="/assets/images/auth/coming-soon-object3.png" alt="image" className="absolute right-0 top-0 h-[300px]" />
-                <img src="/assets/images/auth/polygon-object.svg" alt="image" className="absolute bottom-0 end-[28%]" />
-                <div className="relative flex w-full max-w-[1502px] flex-col justify-between overflow-hidden rounded-md bg-white/60 backdrop-blur-lg dark:bg-black/50 lg:min-h-[758px] lg:flex-row lg:gap-10 xl:gap-0">
-                    <div className="relative hidden w-full items-center justify-center bg-[linear-gradient(225deg,rgba(239,18,98,1)_0%,rgba(67,97,238,1)_100%)] p-5 lg:inline-flex lg:max-w-[835px] xl:-ms-28 ltr:xl:skew-x-[14deg] rtl:xl:skew-x-[-14deg]">
-                        <div className="absolute inset-y-0 w-8 from-primary/10 via-transparent to-transparent ltr:-right-10 ltr:bg-gradient-to-r rtl:-left-10 rtl:bg-gradient-to-l xl:w-16 ltr:xl:-right-20 rtl:xl:-left-20"></div>
-                        <div className="ltr:xl:-skew-x-[14deg] rtl:xl:skew-x-[14deg]">
-                            <Link to="/" className="w-48 block lg:w-72 ms-10">
-                                <img src="/assets/images/auth/logo-white.svg" alt="Logo" className="w-full" />
-                            </Link>
-                            <div className="mt-24 hidden w-full max-w-[430px] lg:block">
-                                <img src="/assets/images/auth/reset-password.svg" alt="Cover Image" className="w-full" />
+
+            {/* Floating particles */}
+            <div className="absolute top-1/4 left-1/4 w-2 h-2 bg-blue-400/40 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+            <div className="absolute top-3/4 right-1/4 w-3 h-3 bg-purple-400/40 rounded-full animate-bounce" style={{ animationDelay: '500ms' }}></div>
+            <div className="absolute bottom-1/4 left-1/3 w-2 h-2 bg-cyan-400/40 rounded-full animate-bounce" style={{ animationDelay: '700ms' }}></div>
+
+            <div className="relative w-full max-w-6xl mx-auto">
+                <div className="grid lg:grid-cols-2 gap-8 items-center">
+                    {/* Left side - Branding */}
+                    <div className={`hidden lg:block transition-all duration-1000 transform ${isVisible ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0'}`}>
+                        <div className="bg-white/5 backdrop-blur-xl rounded-3xl p-12 border border-white/10 shadow-2xl">
+                            <div className="space-y-8">
+                                <div>
+                                    <Link to="/" className="block">
+                                        <h2 className="text-5xl font-bold text-white mb-4">Welcome to</h2>
+                                        <h1 className="text-6xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">i-sign.eu</h1>
+                                    </Link>
+                                </div>
+
+                                <p className="text-xl text-gray-300 leading-relaxed">Reactivate your account and continue using our secure electronic signature platform.</p>
+
+                                {/* Feature highlights */}
+                                <div className="space-y-4 pt-8">
+                                    {[
+                                        { icon: '🔄', title: 'Quick Reactivation', desc: 'Instant account recovery' },
+                                        { icon: '🔒', title: 'Secure Process', desc: 'Protected verification' },
+                                        { icon: '✓', title: 'Data Preserved', desc: 'All your documents safe' },
+                                    ].map((feature, index) => (
+                                        <div
+                                            key={index}
+                                            className="flex items-center gap-4 bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-white/10 hover:bg-white/10 transition-all duration-300 hover:scale-105 transform"
+                                        >
+                                            <div className="text-3xl">{feature.icon}</div>
+                                            <div>
+                                                <h3 className="text-white font-semibold">{feature.title}</h3>
+                                                <p className="text-gray-400 text-sm">{feature.desc}</p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div className="relative flex w-full flex-col items-center justify-center gap-6 px-4 pb-16 pt-6 sm:px-6 lg:max-w-[667px]">
-                        <div className="w-full max-w-[440px] lg:mt-16">{renderContent()}</div>
-                        <p className="absolute bottom-6 w-full text-center dark:text-white">© {new Date().getFullYear()}. E-sign All Rights Reserved.</p>
+
+                    {/* Right side - Reactivation Status */}
+                    <div className={`transition-all duration-1000 delay-300 transform ${isVisible ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'}`}>
+                        <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-8 md:p-12 border border-white/20 shadow-2xl">
+                            {/* Mobile Logo */}
+                            <div className="lg:hidden text-center mb-8">
+                                <Link to="/">
+                                    <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">i-sign.eu</h1>
+                                </Link>
+                            </div>
+
+                            {/* Content */}
+                            <div className="min-h-[400px] flex items-center justify-center">{renderContent()}</div>
+
+                            {/* Footer */}
+                            <div className="mt-8 pt-6 border-t border-white/10 text-center text-sm text-gray-400">© {new Date().getFullYear()} i-sign.eu. All Rights Reserved.</div>
+                        </div>
                     </div>
                 </div>
             </div>

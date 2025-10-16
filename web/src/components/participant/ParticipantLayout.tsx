@@ -204,7 +204,7 @@ const ParticipantLayout: React.FC<ParticipantLayoutProps> = ({ packageData }) =>
                         {isSidebarOpen ? <FiXTyped className="w-5 h-5" /> : <FiMenuTyped className="w-5 h-5" />}
                     </button>
 
-                    <div className="font-bold text-lg sm:text-xl text-[#1e293b]">SignatureFlow</div>
+                    <div className="font-bold text-lg sm:text-xl text-[#1e293b]">I-Sign.eu</div>
                 </div>
 
                 <div className="flex items-center gap-3 sm:gap-4 text-gray-600">
