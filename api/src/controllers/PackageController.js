@@ -1,24 +1,20 @@
 const { successResponse, errorResponse } = require("../utils/responseHandler");
 
 class PackageController {
-  constructor({ packageService }) {
+  constructor({ packageService, userService }) {
     this.packageService = packageService;
+    this.userService = userService;
   }
 
   async uploadPackage(req, res) {
     try {
       const userId = req.user.id;
-      const { attachment_uuid, fileUrl } = req;
-      const packageData = await this.packageService.uploadPackage(userId, {
-        attachment_uuid,
-        fileUrl,
-      });
-      successResponse(
-        res,
-        packageData,
-        "Package file uploaded successfully",
-        201
-      );
+      const s3File = req.s3File; // ✅ Extract s3File from middleware
+      if (!s3File) {
+        throw new Error("No file uploaded.");
+      }
+      const result = await this.packageService.uploadPackage(userId, s3File);
+      successResponse(res, result, "Package file uploaded successfully", 201);
     } catch (error) {
       errorResponse(res, error, "Failed to upload package file");
     }
@@ -27,10 +23,19 @@ class PackageController {
   async createPackage(req, res) {
     try {
       const userId = req.user.id;
+      const user = req.userWithSubscription;
       const packageData = await this.packageService.createPackage(
         userId,
         req.body
       );
+
+      if (user.subscription.planId.documentLimit !== -1) {
+        const newCount = user.documentsCreatedThisMonth + 1;
+        await this.userService.updateUser(user.id, {
+          documentsCreatedThisMonth: newCount,
+        });
+      }
+
       successResponse(res, packageData, "Package created successfully", 201);
     } catch (error) {
       errorResponse(res, error, "Failed to create package");
@@ -145,7 +150,7 @@ class PackageController {
     try {
       const { packageId, participantId } = req.params;
       const { fieldId, otp } = req.body;
-      const ip = req.ip; // For audit
+      const ip = req.clientIp; // For audit
       const result = await this.packageService.verifyOTP(
         packageId,
         participantId,
@@ -181,7 +186,7 @@ class PackageController {
     try {
       const { packageId, participantId } = req.params;
       const { fieldId, otp } = req.body;
-      const ip = req.ip;
+      const ip = req.clientIp;
 
       const result = await this.packageService.verifySmsOTP(
         packageId,
@@ -200,7 +205,7 @@ class PackageController {
     try {
       const { packageId, participantId } = req.params;
       const { fieldValues } = req.body;
-      const ip = req.ip; // For the audit trail
+      const ip = req.clientIp; // For the audit trail
 
       const result = await this.packageService.submitFields(
         packageId,
@@ -223,7 +228,7 @@ class PackageController {
     try {
       const { packageId, participantId } = req.params;
       const { reason } = req.body;
-      const ip = req.ip;
+      const ip = req.clientIp;
 
       const result = await this.packageService.rejectPackage(
         packageId,
@@ -246,7 +251,7 @@ class PackageController {
     try {
       const { packageId, participantId } = req.params;
       const contactData = req.body;
-      const ip = req.ip;
+      const ip = req.clientIp;
 
       const result = await this.packageService.registerReassignmentContact(
         packageId,
@@ -295,7 +300,7 @@ class PackageController {
     try {
       const { packageId, participantId } = req.params;
       const { newContactId, reason } = req.body;
-      const ip = req.ip;
+      const ip = req.clientIp;
 
       const result = await this.packageService.performReassignment(
         packageId,
@@ -388,6 +393,7 @@ class PackageController {
         );
 
       // Set headers for file download
+      res.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
       res.setHeader(
         "Content-Disposition",
         `attachment; filename="${fileName}"`
@@ -412,6 +418,7 @@ class PackageController {
           userId // Pass userId as the identifier
         );
 
+      res.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
       res.setHeader(
         "Content-Disposition",
         `attachment; filename="${fileName}"`
@@ -428,7 +435,7 @@ class PackageController {
       const userId = req.user.id; // From authenticate middleware
       const { packageId } = req.params;
       const { reason } = req.body;
-      const ip = req.ip;
+      const ip = req.clientIp;
 
       const updatedPackage = await this.packageService.revokePackage(
         packageId,
@@ -460,6 +467,25 @@ class PackageController {
       successResponse(res, result, result.message);
     } catch (error) {
       errorResponse(res, error, "Failed to send reminders.");
+    }
+  }
+
+  async addReceiverByParticipant(req, res) {
+    try {
+      const { packageId, participantId } = req.params;
+      const { newContactId } = req.body;
+      const ip = req.clientIp;
+
+      const result = await this.packageService.addReceiverByParticipant(
+        packageId,
+        participantId,
+        newContactId,
+        ip
+      );
+
+      successResponse(res, result, "New receiver added successfully");
+    } catch (error) {
+      errorResponse(res, error, "Failed to add new receiver");
     }
   }
 }

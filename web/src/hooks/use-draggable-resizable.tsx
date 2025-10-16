@@ -9,14 +9,25 @@ interface Position {
 
 type DragOrResizeType = 'drag' | 'top' | 'right' | 'bottom' | 'left' | 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | null;
 
+// Step 1: Update the interface to accept the new optional props
 interface UseDraggableResizableProps {
     initialPosition: Position;
     onUpdate: (fieldId: string, newPosition: Position) => void;
     containerRef: React.RefObject<HTMLElement>;
     snapToGrid?: number;
+    onResizeStart?: () => void;
+    onResizeEnd?: () => void;
 }
 
-export const useDraggableResizable = ({ initialPosition, onUpdate, containerRef, snapToGrid = 1 }: UseDraggableResizableProps) => {
+export const useDraggableResizable = ({
+    initialPosition,
+    onUpdate,
+    containerRef,
+    snapToGrid = 1,
+    // Step 2: Destructure the new props
+    onResizeStart,
+    onResizeEnd,
+}: UseDraggableResizableProps) => {
     const [isDraggingOrResizing, setIsDraggingOrResizing] = useState<DragOrResizeType>(null);
     const [position, setPosition] = useState<Position>(initialPosition);
     const startState = useRef<{ x: number; y: number; width: number; height: number; mouseX: number; mouseY: number } | null>(null);
@@ -26,35 +37,29 @@ export const useDraggableResizable = ({ initialPosition, onUpdate, containerRef,
         fieldIdRef.current = fieldId;
     }, []);
 
-    // Effect to sync local state with parent props, but only when not actively dragging.
     useEffect(() => {
         if (!isDraggingOrResizing) {
             setPosition(initialPosition);
         }
     }, [initialPosition, isDraggingOrResizing]);
 
-    // Utility to snap values to a grid and constrain them within the container
     const normalizePosition = useCallback(
         (p: Position): Position => {
             if (!containerRef.current) return p;
 
             const { width: containerWidth, height: containerHeight } = containerRef.current.getBoundingClientRect();
 
-            // Ensure width/height don't become negative or too small
             const newWidthUnsnapped = Math.max(20, p.width);
             const newHeightUnsnapped = Math.max(20, p.height);
 
-            // Constrain position within the container bounds
             const x = Math.max(0, Math.min(p.x, containerWidth - newWidthUnsnapped));
             const y = Math.max(0, Math.min(p.y, containerHeight - newHeightUnsnapped));
 
-            // Snap all values to the grid
             const newX = Math.round(x / snapToGrid) * snapToGrid;
             const newY = Math.round(y / snapToGrid) * snapToGrid;
             const newWidth = Math.round(newWidthUnsnapped / snapToGrid) * snapToGrid;
             const newHeight = Math.round(newHeightUnsnapped / snapToGrid) * snapToGrid;
 
-            // Final check to ensure the element doesn't go out of bounds after snapping
             return {
                 x: Math.min(newX, containerWidth - newWidth),
                 y: Math.min(newY, containerHeight - newHeight),
@@ -71,8 +76,13 @@ export const useDraggableResizable = ({ initialPosition, onUpdate, containerRef,
             e.preventDefault();
             setIsDraggingOrResizing(type);
             startState.current = { ...position, mouseX: e.clientX, mouseY: e.clientY };
+
+            // Step 3: Call onResizeStart if the action is a resize
+            if (type !== 'drag') {
+                onResizeStart?.(); // Use optional chaining
+            }
         },
-        [position]
+        [position, onResizeStart] // Add onResizeStart to dependency array
     );
 
     const handleMouseMove = useCallback(
@@ -84,7 +94,7 @@ export const useDraggableResizable = ({ initialPosition, onUpdate, containerRef,
             const dx = e.clientX - mouseX;
             const dy = e.clientY - mouseY;
 
-            let newPos: Position = { ...position }; // Start with current position
+            let newPos: Position = { ...position };
 
             switch (isDraggingOrResizing) {
                 case 'drag':
@@ -126,8 +136,6 @@ export const useDraggableResizable = ({ initialPosition, onUpdate, containerRef,
                     newPos.width = startPos.width + dx;
                     break;
             }
-
-            // Update the local state for immediate visual feedback. No Redux update here.
             setPosition(newPos);
         },
         [isDraggingOrResizing, position]
@@ -135,20 +143,21 @@ export const useDraggableResizable = ({ initialPosition, onUpdate, containerRef,
 
     const handleMouseUp = useCallback(() => {
         if (isDraggingOrResizing) {
-            // Apply final snapping and constraints to the current position
+            const wasResizing = isDraggingOrResizing !== 'drag';
             const finalPosition = normalizePosition(position);
 
-            // Sync local state to the final snapped/constrained values
             setPosition(finalPosition);
-
-            // Dispatch ONE update to Redux with the final position
             onUpdate(fieldIdRef.current, finalPosition);
 
-            // Reset dragging state
             setIsDraggingOrResizing(null);
             startState.current = null;
+
+            // Step 4: Call onResizeEnd if the action was a resize
+            if (wasResizing) {
+                onResizeEnd?.(); // Use optional chaining
+            }
         }
-    }, [isDraggingOrResizing, position, onUpdate, normalizePosition]);
+    }, [isDraggingOrResizing, position, onUpdate, normalizePosition, onResizeEnd]); // Add onResizeEnd to dependency array
 
     useEffect(() => {
         document.addEventListener('mousemove', handleMouseMove);

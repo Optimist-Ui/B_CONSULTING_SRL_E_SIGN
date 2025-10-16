@@ -22,13 +22,15 @@ const SearchableContactDropdown: React.FC<SearchableContactDropdownProps> = ({ c
     const [searchTerm, setSearchTerm] = useState('');
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null); // Ref for click-outside detection
+    const fetchedOnce = useRef(false);
 
     // Fetch contacts when the component mounts if the contacts list is empty in Redux
     useEffect(() => {
-        if (contacts.length === 0 && !contactsLoading && !contactsError) {
-            dispatch(fetchContacts({})); // Fetch all contacts (or pass a search term if needed)
+        if (!fetchedOnce.current && !contactsLoading && !contactsError) {
+            fetchedOnce.current = true; // block every future call
+            dispatch(fetchContacts({})); // empty search = all contacts
         }
-    }, [dispatch, contacts.length, contactsLoading, contactsError]);
+    }, [dispatch, contactsLoading, contactsError]);
 
     // Update searchTerm if selectedContact changes from outside (e.g., initial load or parent clearing)
     useEffect(() => {

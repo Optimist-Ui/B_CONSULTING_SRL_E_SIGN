@@ -8,8 +8,11 @@ class TemplateController {
   async uploadTemplate(req, res) {
     try {
       const userId = req.user.id;
-      const file = req.file; // From multer middleware
-      const result = await this.templateService.uploadTemplate(userId, file);
+      const s3File = req.s3File;
+      if (!s3File) {
+        throw new Error("No file uploaded.");
+      }
+      const result = await this.templateService.uploadTemplate(userId, s3File);
       successResponse(res, result, "File uploaded successfully", 201);
     } catch (error) {
       errorResponse(res, error, "Failed to upload file");

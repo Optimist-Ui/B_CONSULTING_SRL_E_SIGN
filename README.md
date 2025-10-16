@@ -64,9 +64,9 @@ Copy
 1. `git push <branch>` triggers Amplify.
 2. Builds React with environment variables per branch.
 3. Deploys to:
-   - `dev.e-sign.eu.com`
-   - `uat.e-sign.eu.com`
-   - `e-sign.eu.com`
+   - `dev.i-sign.eu`
+   - `uat.i-sign.eu`
+   - `i-sign.eu`
 
 ---
 
@@ -74,9 +74,9 @@ Copy
 
 | Environment | Backend API Endpoint | Frontend URL |
 |-------------|-----------------------|--------------|
-| **dev**     | https://api-dev.e-sign.eu.com | https://dev.e-sign.eu.com |
-| **uat**     | https://api-uat.e-sign.eu.com | https://uat.e-sign.eu.com |
-| **prod**    | https://api.e-sign.eu.com     | https://e-sign.eu.com     |
+| **dev**     | https://api-dev.i-sign.eu | https://dev.i-sign.eu |
+| **uat**     | https://api-uat.i-sign.eu | https://uat.i-sign.eu |
+| **prod**    | https://api.i-sign.eu     | https://i-sign.eu     |
 
 ---
 
@@ -125,7 +125,7 @@ Copy
 ## 🧪 Local Dev Quick-Start
 
 ```bash
-# 1. Backend environment
+# 1. Backend environments
 cp api/.env.example api/.env
 # 2. Start everything
 docker compose up --build

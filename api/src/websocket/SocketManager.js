@@ -1,4 +1,5 @@
-// websocket/SocketManager.js (Updated: Removed per-package rooms; use user-specific rooms only. Simplified handlers as dynamic package joins are not needed; initiator joins their own user room on connection.)
+// api/src/websocket/SocketManager.js - FIXED VERSION
+
 const { Server } = require("socket.io");
 const jwt = require("jsonwebtoken");
 
@@ -15,18 +16,28 @@ class SocketManager {
       },
     });
 
-    // Authentication middleware
+    // ✅ UPDATED: Optional authentication middleware
     this.io.use((socket, next) => {
       const token = socket.handshake.auth.token;
+
+      // If no token, allow connection but mark as anonymous
       if (!token) {
-        return next(new Error("Authentication error: No token provided"));
+        socket.user = null; // Anonymous user
+        socket.isAnonymous = true;
+        return next();
       }
+
+      // If token exists, verify it
       try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         socket.user = decoded;
+        socket.isAnonymous = false;
         next();
       } catch (err) {
-        next(new Error("Authentication error: Invalid token"));
+        // Invalid token - still allow connection but mark as anonymous
+        socket.user = null;
+        socket.isAnonymous = true;
+        next();
       }
     });
 
@@ -37,25 +48,64 @@ class SocketManager {
 
   setupSocketHandlers() {
     this.io.on("connection", (socket) => {
-      console.log(`User connected: ${socket.user.id} (socket: ${socket.id})`);
+      const userIdentifier = socket.user?.id || socket.id;
+      const userType = socket.isAnonymous ? "Anonymous" : "Authenticated";
 
-      // Automatically join the user's personal room
-      const userRoom = `user_${socket.user.id}`;
-      socket.join(userRoom);
-      console.log(`Socket ${socket.id} joined user room: ${userRoom}`);
+      console.log(
+        `${userType} user connected: ${userIdentifier} (socket: ${socket.id})`
+      );
+
+      // ✅ Only join user room if authenticated
+      if (!socket.isAnonymous && socket.user) {
+        const userRoom = `user_${socket.user.id}`;
+        socket.join(userRoom);
+        console.log(`Socket ${socket.id} joined user room: ${userRoom}`);
+      } else if (socket.isAnonymous) {
+        // Anonymous users can only use chatbot features
+        console.log(`Anonymous user ${socket.id} - chatbot access only`);
+      }
+
+      // ✅ Handle joining chat session rooms (for chatbot)
+      socket.on("join_chat_session", (sessionId) => {
+        if (!sessionId) return;
+
+        const chatRoom = `chat_${sessionId}`;
+        socket.join(chatRoom);
+        console.log(`Socket ${socket.id} joined chat room: ${chatRoom}`);
+
+        socket.emit("chat_session_joined", {
+          sessionId,
+          timestamp: new Date().toISOString(),
+        });
+      });
+
+      // ✅ Handle leaving chat session rooms
+      socket.on("leave_chat_session", (sessionId) => {
+        if (!sessionId) return;
+
+        const chatRoom = `chat_${sessionId}`;
+        socket.leave(chatRoom);
+        console.log(`Socket ${socket.id} left chat room: ${chatRoom}`);
+      });
 
       // Handle disconnection
       socket.on("disconnect", () => {
         console.log(
-          `User disconnected: ${socket.user.id} (socket: ${socket.id})`
+          `User disconnected: ${userIdentifier} (socket: ${socket.id})`
         );
       });
     });
   }
 
-  // Emit package updates to the owner's user room
+  // Emit package updates to the owner's user room (existing functionality)
   emitPackageUpdate(ownerId, updateData) {
     if (!this.io) return;
+
+    // Safety check: ownerId must be valid
+    if (!ownerId) {
+      console.warn("emitPackageUpdate called without ownerId");
+      return;
+    }
 
     const roomName = `user_${ownerId}`;
     console.log(
@@ -66,6 +116,27 @@ class SocketManager {
     this.io.to(roomName).emit("package_updated", {
       timestamp: new Date().toISOString(),
       ...updateData,
+    });
+  }
+
+  // ✅ NEW: Emit to specific chat room
+  emitToChatRoom(sessionId, eventName, data) {
+    if (!this.io) return;
+
+    const roomName = `chat_${sessionId}`;
+    this.io.to(roomName).emit(eventName, {
+      timestamp: new Date().toISOString(),
+      ...data,
+    });
+  }
+
+  // ✅ NEW: Broadcast to all connected sockets
+  broadcastToAll(eventName, data) {
+    if (!this.io) return;
+
+    this.io.emit(eventName, {
+      timestamp: new Date().toISOString(),
+      ...data,
     });
   }
 }

@@ -23,12 +23,13 @@ interface ReassignActionParams {
 interface CreateContactParams {
     packageId: string;
     participantId: string;
-    contactData: Omit<ReassignFormData, 'reason'>; // Send everything except the reason
+    contactData: Omit<ReassignFormData, 'reason'>;
 }
 
-interface DownloadPayload {
-    blob: Blob;
-    fileName: string;
+interface AddReceiverParams {
+    packageId: string;
+    participantId: string;
+    newContactId: string;
 }
 
 /**
@@ -37,7 +38,6 @@ interface DownloadPayload {
 export const fetchPackageForParticipant = createAsyncThunk<ParticipantPackageView, FetchParams>('participant/fetchPackage', async ({ packageId, participantId }, { rejectWithValue }) => {
     try {
         const response = await api.get(`/api/packages/participant/${packageId}/${participantId}`);
-        console.log(response);
         return response.data.data;
     } catch (error: any) {
         return rejectWithValue(error.response?.data?.error || 'Failed to load document.');
@@ -49,7 +49,7 @@ export const submitParticipantFields = createAsyncThunk(
     async ({ packageId, participantId, fieldValues }: { packageId: string; participantId: string; fieldValues: { [key: string]: any } }, { rejectWithValue }) => {
         try {
             const response = await api.post(`/api/packages/participant/${packageId}/${participantId}/submit-fields`, { fieldValues });
-            return response.data.data; // Expects { message, package }
+            return response.data.data;
         } catch (error: any) {
             return rejectWithValue(error.response?.data?.error || 'Failed to submit your changes.');
         }
@@ -61,9 +61,8 @@ export const submitParticipantFields = createAsyncThunk(
  */
 export const rejectPackage = createAsyncThunk('participant/rejectPackage', async ({ packageId, participantId, reason }: RejectParams, { rejectWithValue }) => {
     try {
-        // The second argument to api.post is the request body.
         const response = await api.post(`/api/packages/participant/${packageId}/${participantId}/reject`, { reason });
-        return response.data.data; // Expects { message, package }
+        return response.data.data;
     } catch (error: any) {
         return rejectWithValue(error.response?.data?.error || 'Failed to reject the document.');
     }
@@ -87,7 +86,7 @@ export const fetchReassignmentContacts = createAsyncThunk<ReassignmentContact[],
 export const createContactForReassignment = createAsyncThunk('participant/createReassignmentContact', async ({ packageId, participantId, contactData }: CreateContactParams, { rejectWithValue }) => {
     try {
         const response = await api.post(`/api/packages/participant/${packageId}/${participantId}/reassignment/register-contact`, contactData);
-        return response.data; // Expects { success, message, data: { contact } }
+        return response.data;
     } catch (error: any) {
         return rejectWithValue(error.response?.data?.error || 'Failed to create contact.');
     }
@@ -99,24 +98,26 @@ export const createContactForReassignment = createAsyncThunk('participant/create
 export const performReassignment = createAsyncThunk('participant/performReassignment', async ({ packageId, participantId, newContactId, reason }: ReassignActionParams, { rejectWithValue }) => {
     try {
         const response = await api.post(`/api/packages/participant/${packageId}/${participantId}/reassignment/perform`, { newContactId, reason });
-        return response.data.message; // Just need the success message
+        return response.data.message;
     } catch (error: any) {
         return rejectWithValue(error.response?.data?.error || 'Failed to reassign document.');
     }
 });
 
 /**
- * Fetches the finalized/current state of the package PDF from the server.
+ * Downloads the package PDF. This thunk only manages loading state.
+ * The actual blob handling is done in the component to avoid storing
+ * non-serializable data in Redux.
  */
-export const downloadPackage = createAsyncThunk<DownloadPayload, FetchParams>('participant/downloadPackage', async ({ packageId, participantId }, { rejectWithValue }) => {
+export const downloadPackage = createAsyncThunk<void, FetchParams>('participant/downloadPackage', async ({ packageId, participantId }, { rejectWithValue }) => {
     try {
         const response = await api.get(`/api/packages/participant/${packageId}/${participantId}/download`, {
-            responseType: 'blob', // IMPORTANT: This tells Axios to handle the binary file data correctly
+            responseType: 'blob',
         });
 
         // Extract filename from the Content-Disposition header
         const contentDisposition = response.headers['content-disposition'];
-        let fileName = 'document.pdf'; // a sensible default
+        let fileName = 'document.pdf';
         if (contentDisposition) {
             const fileNameMatch = contentDisposition.match(/filename="(.+)"/);
             if (fileNameMatch && fileNameMatch.length > 1) {
@@ -124,14 +125,38 @@ export const downloadPackage = createAsyncThunk<DownloadPayload, FetchParams>('p
             }
         }
 
-        return { blob: response.data, fileName };
+        // Trigger download directly in the thunk
+        const blob = response.data;
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        a.remove();
+
+        // Return void - no data stored in Redux
+        return;
     } catch (error: any) {
-        // Since the response might be a blob on error, we need a special way to read the error message
         if (error.response && error.response.data instanceof Blob) {
             const errorMessage = await error.response.data.text();
             const errorJson = JSON.parse(errorMessage);
             return rejectWithValue(errorJson.error || 'Failed to download the document.');
         }
         return rejectWithValue(error.response?.data?.error || 'Failed to download the document.');
+    }
+});
+
+/**
+ * Allows a participant to add a new receiver to the package.
+ */
+export const addReceiverByParticipant = createAsyncThunk('participant/addReceiver', async ({ packageId, participantId, newContactId }: AddReceiverParams, { rejectWithValue }) => {
+    try {
+        const response = await api.post(`/api/packages/participant/${packageId}/${participantId}/add-receiver`, { newContactId });
+        return response.data;
+    } catch (error: any) {
+        return rejectWithValue(error.response?.data?.error || 'Failed to add the new receiver.');
     }
 });

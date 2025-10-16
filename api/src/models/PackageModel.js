@@ -11,16 +11,42 @@ const assignedUserSchema = new Schema({
     enum: ["Signer", "FormFiller", "Approver"],
     required: true,
   },
-  signatureMethod: {
-    type: String,
-    enum: ["Email OTP", "SMS OTP"],
+  signatureMethods: {
+    type: [
+      {
+        type: String,
+        enum: ["Email OTP", "SMS OTP"],
+      },
+    ],
+    default: undefined,
     required: function () {
       return this.role === "Signer";
     },
+    validate: [
+      {
+        validator: function (methods) {
+          if (this.role === "Signer") {
+            return Array.isArray(methods) && methods.length > 0;
+          }
+          return true;
+        },
+        message: "Signers must have at least one signature method.",
+      },
+      {
+        validator: function (methods) {
+          if (Array.isArray(methods)) {
+            return new Set(methods).size === methods.length;
+          }
+          return true;
+        },
+        message: "Signature methods cannot contain duplicates.",
+      },
+    ],
   },
   signed: { type: Boolean, default: false },
   signedAt: { type: Date },
   signedMethod: { type: String },
+  signedWithOtp: { type: String },
   signedIP: { type: String },
 });
 
@@ -82,11 +108,21 @@ const packageOptionsSchema = new Schema({
     ],
     default: null,
   },
+  //Track if expiry reminder has been sent
+  expiryReminderSentAt: { type: Date },
   sendAutomaticReminders: { type: Boolean, default: false },
   firstReminderDays: { type: Number },
   repeatReminderDays: { type: Number },
+  //Track automatic reminder history
+  automaticRemindersSent: [
+    {
+      sentAt: { type: Date, required: true },
+      recipientCount: { type: Number, required: true },
+    },
+  ],
   allowDownloadUnsigned: { type: Boolean, default: true },
   allowReassign: { type: Boolean, default: true },
+  allowReceiversToAdd: { type: Boolean, default: true },
 });
 
 // New schema for auditing reassignments
@@ -112,6 +148,23 @@ const reassignmentHistorySchema = new Schema({
   reassignedIP: { type: String },
 });
 
+const receiverHistorySchema = new Schema({
+  addedBy: {
+    // The participant who added the new receiver
+    participantId: { type: String, required: true },
+    contactName: { type: String, required: true },
+    contactEmail: { type: String, required: true },
+  },
+  newReceiver: {
+    // The contact who was added
+    contactId: { type: Schema.Types.ObjectId, ref: "Contact", required: true },
+    contactName: { type: String, required: true },
+    contactEmail: { type: String, required: true },
+  },
+  addedAt: { type: Date, default: Date.now },
+  addedIP: { type: String },
+});
+
 const packageSchema = new Schema(
   {
     ownerId: { type: Schema.Types.ObjectId, ref: "User", required: true },
@@ -119,9 +172,11 @@ const packageSchema = new Schema(
     attachment_uuid: { type: String, required: true },
     name: { type: String, required: true, trim: true },
     fileUrl: { type: String, required: true },
+    s3Key: { type: String, required: true },
     fields: [packageFieldSchema],
     receivers: [packageReceiverSchema],
     options: { type: packageOptionsSchema, required: true },
+    customMessage: { type: String, trim: true },
     status: {
       type: String,
       enum: [
@@ -135,6 +190,8 @@ const packageSchema = new Schema(
       ],
       default: "Draft",
     },
+    // Track when package was sent (for automatic reminders)
+    sentAt: { type: Date },
     rejectionDetails: {
       rejectedBy: {
         contactId: { type: Schema.Types.ObjectId, ref: "Contact" },
@@ -158,8 +215,58 @@ const packageSchema = new Schema(
 
     // Add reassignment history tracking
     reassignmentHistory: [reassignmentHistorySchema],
+    receiverHistory: [receiverHistorySchema],
   },
   { timestamps: true }
 );
+// Add validation method to schema
+packageOptionsSchema.methods.canSendExpiryReminder = function () {
+  // Must have expiry enabled
+  if (
+    !this.expiresAt ||
+    !this.sendExpirationReminders ||
+    !this.reminderPeriod
+  ) {
+    return false;
+  }
+
+  // Must not have been sent already
+  if (this.expiryReminderSentAt) {
+    return false;
+  }
+
+  // Must not be expired
+  if (new Date() >= this.expiresAt) {
+    return false;
+  }
+
+  return true;
+};
+
+packageOptionsSchema.methods.canSendAutomaticReminder = function () {
+  if (!this.sendAutomaticReminders || !this.firstReminderDays) {
+    return false;
+  }
+
+  // Must not be expired (if expiry is set)
+  if (this.expiresAt && new Date() >= this.expiresAt) {
+    return false;
+  }
+
+  return true;
+};
+
+// Add index for cron job performance
+packageSchema.index({
+  "options.expiresAt": 1,
+  status: 1,
+  "options.expiryReminderSentAt": 1,
+});
+
+packageSchema.index({
+  status: 1,
+  sentAt: 1,
+  "options.sendAutomaticReminders": 1,
+});
 
 module.exports = mongoose.model("Package", packageSchema);

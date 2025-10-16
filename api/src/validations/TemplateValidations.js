@@ -17,6 +17,11 @@ const createTemplateValidation = [
     .withMessage("File URL is required")
     .isString()
     .withMessage("File URL must be a string"),
+  body("s3Key") //  ADD THIS
+    .notEmpty()
+    .withMessage("S3 key is required")
+    .isString()
+    .withMessage("S3 key must be a string"),
   body("fields")
     .isArray()
     .withMessage("Fields must be an array")

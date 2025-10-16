@@ -51,22 +51,29 @@ const Contacts = () => {
     }, [dispatch, search]);
 
     const ContactSchema = Yup.object().shape({
-        firstName: Yup.string().required('First name is required'),
-        lastName: Yup.string().required('Last name is required'),
-        email: Yup.string().email('Invalid email format').required('Email is required'),
+        firstName: Yup.string().required('First name is required').min(2, 'First name must be at least 2 characters').max(50, 'First name cannot exceed 50 characters'),
+
+        lastName: Yup.string().required('Last name is required').min(2, 'Last name must be at least 2 characters').max(50, 'Last name cannot exceed 50 characters'),
+
+        email: Yup.string().email('Invalid email format').required('Email is required').max(254, 'Email cannot exceed 254 characters'),
+
         phone: Yup.string()
+            .max(25, 'Phone number seems too long')
             .test('is-valid-phone', 'Invalid phone number', (value) => !value || isValidPhoneNumber(value || ''))
             .nullable(),
+
         language: Yup.object().nullable().required('Language is required'),
-        title: Yup.string().optional(),
+
+        title: Yup.string().optional().min(2, 'Title must be at least 2 characters').max(100, 'Title cannot exceed 100 characters'),
+
         customFields: Yup.array().of(
             Yup.object().shape({
                 key: Yup.string().when('value', {
                     is: (val: string) => val && val.length > 0,
-                    then: (schema) => schema.required('Field name is required'),
+                    then: (schema) => schema.required('Field name is required').min(2, 'Field name must be at least 2 characters').max(50, 'Field name cannot exceed 50 characters'),
                     otherwise: (schema) => schema.optional(),
                 }),
-                value: Yup.string().optional(),
+                value: Yup.string().optional().max(255, 'Value cannot exceed 255 characters'),
             })
         ),
     });
@@ -84,8 +91,10 @@ const Contacts = () => {
             return acc;
         }, {});
 
+        const fullFirstName = values.titlePrefix ? `${values.titlePrefix} ${values.firstName}`.trim() : values.firstName;
+
         const contactData: CreateContactArgs = {
-            firstName: values.firstName,
+            firstName: fullFirstName,
             lastName: values.lastName,
             email: values.email,
             phone: values.phone,
@@ -266,6 +275,7 @@ const Contacts = () => {
                                     <div className="p-5">
                                         <Formik
                                             initialValues={{
+                                                titlePrefix: '',
                                                 firstName: editContact?.firstName || '',
                                                 lastName: editContact?.lastName || '',
                                                 email: editContact?.email || '',
@@ -281,10 +291,28 @@ const Contacts = () => {
                                             {({ setFieldValue, values }) => (
                                                 <Form>
                                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                                                        <div>
-                                                            <label htmlFor="firstName">First Name</label>
-                                                            <Field name="firstName" type="text" id="firstName" placeholder="Enter First Name" className="form-input" />
-                                                            <ErrorMessage name="firstName" component="div" className="text-danger mt-1" />
+                                                        <div className="grid grid-cols-4 gap-2">
+                                                            <div>
+                                                                <label htmlFor="titlePrefix">Title</label>
+                                                                <select
+                                                                    name="titlePrefix"
+                                                                    className="form-input"
+                                                                    value={values.titlePrefix || ''}
+                                                                    onChange={(e) => setFieldValue('titlePrefix', e.target.value)}
+                                                                >
+                                                                    <option value="">None</option>
+                                                                    <option value="Mr.">Mr.</option>
+                                                                    <option value="Mrs.">Mrs.</option>
+                                                                    <option value="Ms.">Ms.</option>
+                                                                    <option value="Dr.">Dr.</option>
+                                                                    <option value="Prof.">Prof.</option>
+                                                                </select>
+                                                            </div>
+                                                            <div className="col-span-3">
+                                                                <label htmlFor="firstName">First Name</label>
+                                                                <Field name="firstName" type="text" id="firstName" placeholder="Enter First Name" className="form-input" />
+                                                                <ErrorMessage name="firstName" component="div" className="text-danger mt-1" />
+                                                            </div>
                                                         </div>
                                                         <div>
                                                             <label htmlFor="lastName">Last Name</label>

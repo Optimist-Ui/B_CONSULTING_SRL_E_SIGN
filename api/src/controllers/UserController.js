@@ -37,12 +37,12 @@ class UserController {
     try {
       const userId = req.user.id; // From authenticateUser middleware
       const profileData = req.body;
-      const file = req.file; // From upload.js (multer) middleware
+      const s3File = req.s3File; // 👈 From uploadAndStoreProfileImage middleware (S3 info)
 
       const updatedUser = await this.userService.updateUserProfile(
         userId,
         profileData,
-        file
+        s3File
       );
 
       return successResponse(res, updatedUser, "Profile updated successfully");
@@ -115,6 +115,30 @@ class UserController {
       return successResponse(res, response, "Password changed successfully");
     } catch (error) {
       return errorResponse(res, error, "Failed to change password");
+    }
+  }
+
+  async deleteAccount(req, res) {
+    try {
+      const userId = req.user.id;
+      const result = await this.userService.deleteAccount(userId);
+      return successResponse(
+        res,
+        result,
+        "Account deactivation requested successfully"
+      );
+    } catch (error) {
+      return errorResponse(res, error, "Failed to request account deletion");
+    }
+  }
+
+  async reactivateAccount(req, res) {
+    try {
+      const { token } = req.params;
+      const result = await this.userService.reactivateAccount(token);
+      return successResponse(res, result, "Account reactivated successfully");
+    } catch (error) {
+      return errorResponse(res, error, "Failed to reactivate account");
     }
   }
 }

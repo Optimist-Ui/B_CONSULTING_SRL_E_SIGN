@@ -72,6 +72,7 @@ const AddEditContactModal: FC<AddEditContactModalProps> = ({ isOpen, onClose, co
     const dispatch: AppDispatch = useDispatch();
     const { loading } = useSelector((state: IRootState) => state.contacts);
 
+
     const handleSaveContact = async (values: any) => {
         const customFieldsObject = values.customFields.reduce((acc: { [key: string]: string }, field: { key: string; value: string }) => {
             if (field.key && field.value) {
@@ -80,8 +81,10 @@ const AddEditContactModal: FC<AddEditContactModalProps> = ({ isOpen, onClose, co
             return acc;
         }, {});
 
+        const fullFirstName = values.titlePrefix ? `${values.titlePrefix} ${values.firstName}`.trim() : values.firstName;
+
         const contactData: CreateContactArgs = {
-            firstName: values.firstName,
+            firstName: fullFirstName,
             lastName: values.lastName,
             email: values.email,
             phone: values.phone,
@@ -138,6 +141,7 @@ const AddEditContactModal: FC<AddEditContactModalProps> = ({ isOpen, onClose, co
                                 <div className="p-5">
                                     <Formik
                                         initialValues={{
+                                            titlePrefix: '',
                                             firstName: contactToEdit?.firstName || '',
                                             lastName: contactToEdit?.lastName || '',
                                             email: contactToEdit?.email || '',
@@ -154,10 +158,28 @@ const AddEditContactModal: FC<AddEditContactModalProps> = ({ isOpen, onClose, co
                                             <Form>
                                                 {/* Form fields (copied from your Contacts.tsx) */}
                                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                                                    <div>
-                                                        <label htmlFor="firstName">First Name</label>
-                                                        <Field name="firstName" type="text" id="firstName" placeholder="Enter First Name" className="form-input" />
-                                                        <ErrorMessage name="firstName" component="div" className="text-danger mt-1" />
+                                                    <div className="grid grid-cols-4 gap-2">
+                                                        <div>
+                                                            <label htmlFor="titlePrefix">Title</label>
+                                                            <select
+                                                                name="titlePrefix"
+                                                                className="form-input"
+                                                                value={values.titlePrefix || ''}
+                                                                onChange={(e) => setFieldValue('titlePrefix', e.target.value)}
+                                                            >
+                                                                <option value="">None</option>
+                                                                <option value="Mr.">Mr.</option>
+                                                                <option value="Mrs.">Mrs.</option>
+                                                                <option value="Ms.">Ms.</option>
+                                                                <option value="Dr.">Dr.</option>
+                                                                <option value="Prof.">Prof.</option>
+                                                            </select>
+                                                        </div>
+                                                        <div className="col-span-3">
+                                                            <label htmlFor="firstName">First Name</label>
+                                                            <Field name="firstName" type="text" id="firstName" placeholder="Enter First Name" className="form-input" />
+                                                            <ErrorMessage name="firstName" component="div" className="text-danger mt-1" />
+                                                        </div>
                                                     </div>
                                                     <div>
                                                         <label htmlFor="lastName">Last Name</label>
@@ -208,12 +230,7 @@ const AddEditContactModal: FC<AddEditContactModalProps> = ({ isOpen, onClose, co
                                                                 {values.customFields.map((field, index) => (
                                                                     <div key={index} className="flex items-start gap-3">
                                                                         <div className="flex-1">
-                                                                            <Field
-                                                                                name={`customFields[${index}].key`}
-                                                                                type="text"
-                                                                                className="form-input"
-                                                                                placeholder="Field Name (e.g., Company)"
-                                                                            />
+                                                                            <Field name={`customFields[${index}].key`} type="text" className="form-input" placeholder="Field Name (e.g., Company)" />
                                                                             <ErrorMessage name={`customFields[${index}].key`} component="div" className="text-danger mt-1 text-xs" />
                                                                         </div>
                                                                         <div className="flex-1">
@@ -231,7 +248,7 @@ const AddEditContactModal: FC<AddEditContactModalProps> = ({ isOpen, onClose, co
                                                         )}
                                                     </FieldArray>
                                                 </div>
-                                                
+
                                                 <div className="flex justify-end items-center mt-8">
                                                     <button type="button" className="btn btn-outline-danger" onClick={onClose}>
                                                         Cancel

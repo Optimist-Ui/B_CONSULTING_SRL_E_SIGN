@@ -5,6 +5,8 @@ import { toggleRTL, toggleTheme, toggleLocale, toggleMenu, toggleLayout, toggleA
 import { checkAuthStatus } from './store/thunk/authThunks';
 import store from './store';
 import { ToastContainer } from 'react-toastify';
+import CookieBanner from './components/cookies/CookieBanner';
+import CookiePreferencesModal from './components/cookies/CookiePreferencesModal';
 
 function App({ children }: PropsWithChildren) {
     const themeConfig = useSelector((state: IRootState) => state.themeConfig);
@@ -33,6 +35,10 @@ function App({ children }: PropsWithChildren) {
             } main-section antialiased relative font-nunito text-sm font-normal`}
         >
             {children}
+            
+            {/* Cookie Management Components */}
+            <CookieBanner />
+            <CookiePreferencesModal />
 
             <ToastContainer position="bottom-right" autoClose={3000} hideProgressBar={false} newestOnTop={false} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover theme="colored" />
         </div>

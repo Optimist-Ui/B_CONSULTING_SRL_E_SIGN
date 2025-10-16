@@ -58,14 +58,13 @@ export const loginUser = createAsyncThunk('auth/loginUser', async (credentials: 
     try {
         // Use 'api' and a relative path. The token is added automatically!
         const response = await api.post('/api/users/login', credentials);
-
         const { token, user } = response.data.data;
         localStorage.setItem('authToken', token);
         localStorage.setItem('userId', user._id);
         return { token, user };
     } catch (error: any) {
         if (error.response && error.response.data.message) {
-            return rejectWithValue(error.response.data.message);
+            return rejectWithValue(error.response.data.error);
         } else {
             return rejectWithValue(error.error);
         }
@@ -92,7 +91,7 @@ export const requestPasswordReset = createAsyncThunk('auth/requestPasswordReset'
     } catch (error: any) {
         // Use rejectWithValue to pass the API error message to the rejected action
         if (error.response && error.response.data.message) {
-            return rejectWithValue(error.response.data.message);
+            return rejectWithValue(error.response.data.error);
         }
         return rejectWithValue(error.error);
     }
@@ -177,5 +176,23 @@ export const checkAuthStatus = createAsyncThunk('auth/checkAuthStatus', async (_
     } catch (error: any) {
         // If the request fails (e.g., 401 Unauthorized), the token is invalid.
         return rejectWithValue(error.response?.data?.error || 'Invalid session.');
+    }
+});
+
+export const deleteAccount = createAsyncThunk('auth/deleteAccount', async (_, { rejectWithValue }) => {
+    try {
+        const response = await api.post('/api/users/delete-account');
+        return response.data.data;
+    } catch (error: any) {
+        return rejectWithValue(error.response?.data?.error || 'Failed to request account deletion.');
+    }
+});
+
+export const reactivateAccount = createAsyncThunk('auth/reactivateAccount', async (token: string, { rejectWithValue }) => {
+    try {
+        const response = await api.get(`/api/users/reactivate/${token}`);
+        return response.data.data;
+    } catch (error: any) {
+        return rejectWithValue(error.response?.data?.error || 'Failed to reactivate account.');
     }
 });
