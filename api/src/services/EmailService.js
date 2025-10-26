@@ -5,6 +5,7 @@ class EmailService {
   constructor() {
     sgMail.setApiKey(process.env.SENDGRID_API_KEY);
     this.fromEmail = process.env.SENDGRID_FROM_EMAIL;
+    this.adminEmail = process.env.ADMIN_EMAIL;
   }
 
   // --- WELCOME EMAIL METHOD ---
@@ -1044,6 +1045,144 @@ class EmailService {
         "Error sending reactivation confirmation email:",
         error.response?.body || error
       );
+    }
+  }
+
+  /**
+   * Sends enterprise inquiry details to admin
+   * @param {Object} inquiryData - The inquiry details
+   * @param {string} inquiryData.contactName - Name of the person submitting
+   * @param {string} inquiryData.contactEmail - Email of the person submitting
+   * @param {string} inquiryData.companyName - Company name
+   * @param {string|null} inquiryData.phoneNumber - Phone number (optional)
+   * @param {string} inquiryData.message - Inquiry message
+   */
+  async sendEnterpriseInquiry({
+    contactName,
+    contactEmail,
+    companyName,
+    phoneNumber,
+    message,
+  }) {
+    const submissionDate = new Date().toLocaleString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      timeZoneName: "short",
+    });
+
+    const msg = {
+      to: this.adminEmail, // Send to admin
+      from: this.fromEmail,
+      templateId: process.env.SENDGRID_ENTERPRISE_INQUIRY_TEMPLATE_ID,
+      dynamic_template_data: {
+        contact_name: contactName,
+        contact_email: contactEmail,
+        company_name: companyName,
+        phone_number: phoneNumber,
+        message: message,
+        submission_date: submissionDate,
+      },
+    };
+
+    try {
+      await sgMail.send(msg);
+      console.log(`Enterprise inquiry email sent to admin for ${companyName}`);
+    } catch (error) {
+      console.error(
+        `Error sending enterprise inquiry email:`,
+        error.response?.body || error
+      );
+      throw error;
+    }
+  }
+
+  /**
+   * Sends OTP for email change verification
+   * @param {string} currentEmail - User's current email
+   * @param {string} userName - User's first name
+   * @param {string} newEmail - The new email they want to change to
+   * @param {string} otpCode - The 6-digit OTP
+   */
+  async sendEmailChangeOtp(currentEmail, userName, newEmail, otpCode) {
+    const msg = {
+      to: currentEmail, // Send to CURRENT email
+      from: this.fromEmail,
+      templateId: process.env.SENDGRID_EMAIL_CHANGE_OTP_TEMPLATE_ID,
+      dynamic_template_data: {
+        user_name: userName,
+        new_email: newEmail,
+        otp_code: otpCode,
+      },
+    };
+
+    try {
+      await sgMail.send(msg);
+      console.log(`Email change OTP sent to ${currentEmail}`);
+    } catch (error) {
+      console.error(
+        `Error sending email change OTP:`,
+        error.response?.body || error
+      );
+      throw error;
+    }
+  }
+
+  /**
+   * Sends confirmation after email change
+   * @param {Object} user - User object with new email
+   */
+  async sendEmailChangeConfirmation(user) {
+    const msg = {
+      to: user.email, // Send to NEW email
+      from: this.fromEmail,
+      templateId: process.env.SENDGRID_EMAIL_CHANGE_CONFIRMATION_TEMPLATE_ID,
+      dynamic_template_data: {
+        user_name: user.firstName,
+        new_email: user.email,
+      },
+    };
+
+    try {
+      await sgMail.send(msg);
+      console.log(`Email change confirmation sent to ${user.email}`);
+    } catch (error) {
+      console.error(
+        `Error sending email change confirmation:`,
+        error.response?.body || error
+      );
+    }
+  }
+
+  /**
+   * Sends notification to old email after email change
+   * @param {string} oldEmail - The old email address
+   * @param {string} userName - User's first name
+   * @param {string} newEmail - The new email address
+   */
+  async sendEmailChangeNotification(oldEmail, userName, newEmail) {
+    const msg = {
+      to: oldEmail,
+      from: this.fromEmail,
+      templateId: process.env.SENDGRID_EMAIL_CHANGE_NOTIFICATION_TEMPLATE_ID,
+      dynamic_template_data: {
+        user_name: userName,
+        new_email: newEmail,
+        support_email: this.fromEmail,
+      },
+    };
+
+    try {
+      await sgMail.send(msg);
+      console.log(`Email change notification sent to ${oldEmail}`);
+    } catch (error) {
+      console.error(
+        `Error sending email change notification:`,
+        error.response?.body || error
+      );
+      // Don't throw - this is a courtesy notification
     }
   }
 }

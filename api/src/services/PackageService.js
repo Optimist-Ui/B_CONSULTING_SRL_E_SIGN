@@ -1,6 +1,3 @@
-const fs = require("fs").promises;
-const path = require("path");
-
 class PackageService {
   constructor({
     Package,
@@ -117,16 +114,30 @@ class PackageService {
 
     // If the package was successfully created with a 'Sent' status, send the notifications.
     if (newPackage && newPackage.status === "Sent") {
-      // ========================= CORRECTED LOGIC START =========================
-      // Fetch the user, call the new method to increment usage, and save.
+      // 🔥 NEW: Calculate credits based on unique signers
+      const { uniqueSignerCount, creditsNeeded } =
+        this._calculateDocumentCredits(newPackage);
+
+      console.log(
+        `Package has ${uniqueSignerCount} unique signer(s), consuming ${creditsNeeded} credit(s)`
+      );
+
+      // Fetch the user and increment usage by the calculated credits
       const user = await this.User.findById(userId);
       if (user) {
-        user.incrementDocumentUsage();
+        // Increment multiple times based on credits needed
+        for (let i = 0; i < creditsNeeded; i++) {
+          const success = user.incrementDocumentUsage();
+          if (!success) {
+            throw new Error(
+              `Insufficient document credits. This package requires ${creditsNeeded} credit(s) but you don't have enough remaining.`
+            );
+          }
+        }
         await user.save();
       }
-      // ========================== CORRECTED LOGIC END ==========================
 
-      const packageCreator = await this.User.findById(userId); // Re-fetch for name is fine
+      const packageCreator = await this.User.findById(userId);
       const senderName = `${packageCreator.firstName} ${packageCreator.lastName}`;
       await this._sendInitialNotifications(newPackage, senderName);
     }
@@ -277,8 +288,8 @@ class PackageService {
     delete safeUpdateData.ownerId;
     delete safeUpdateData._id;
     delete safeUpdateData.templateId;
-    delete safeUpdateData.s3Key; // 👈 Don't allow S3 key updates
-    delete safeUpdateData.fileUrl; // 👈 Don't allow file URL updates
+    delete safeUpdateData.s3Key;
+    delete safeUpdateData.fileUrl;
 
     if (safeUpdateData.fields || safeUpdateData.receivers) {
       const allContactIds = [
@@ -317,22 +328,36 @@ class PackageService {
       packageBeforeUpdate.status !== "Sent" &&
       packageData.status === "Sent"
     ) {
-      // ========================= CORRECTED LOGIC START =========================
-      // Fetch the user, call the new method to increment usage, and save.
+      // 🔥 NEW: Calculate credits based on unique signers
+      const { uniqueSignerCount, creditsNeeded } =
+        this._calculateDocumentCredits(packageData);
+
+      console.log(
+        `Package has ${uniqueSignerCount} unique signer(s), consuming ${creditsNeeded} credit(s)`
+      );
+
+      // Fetch the user and increment usage by the calculated credits
       const user = await this.User.findById(userId);
       if (user) {
-        user.incrementDocumentUsage();
+        // Increment multiple times based on credits needed
+        for (let i = 0; i < creditsNeeded; i++) {
+          const success = user.incrementDocumentUsage();
+          if (!success) {
+            throw new Error(
+              `Insufficient document credits. This package requires ${creditsNeeded} credit(s) but you don't have enough remaining.`
+            );
+          }
+        }
         await user.save();
       }
-      // ========================== CORRECTED LOGIC END ==========================
 
-      const packageCreator = await this.User.findById(userId); // Re-fetch for name is fine
+      const packageCreator = await this.User.findById(userId);
       const senderName = `${packageCreator.firstName} ${packageCreator.lastName}`;
 
       await this._sendInitialNotifications(packageData, senderName);
     }
 
-    // 👈 ADD THIS - Return with signed URL
+    // Return with signed URL
     const packageObj = packageData.toObject();
     if (packageData.s3Key) {
       try {
@@ -663,7 +688,6 @@ class PackageService {
     // --- All checks passed ---
     await this.OTP.deleteOne({ _id: otpDoc._id });
 
-    // Use .populate() to get owner email for notifications later
     const pkg = await this.Package.findById(packageId).populate(
       "ownerId",
       "email"
@@ -673,30 +697,53 @@ class PackageService {
     }
     this.checkPackageExpiry(pkg);
 
-    const field = pkg.fields.find((f) => f.id === fieldId);
-    const assignedUser = field.assignedUsers.find(
+    // 🔥 NEW LOGIC: Find the current field and participant
+    const currentField = pkg.fields.find((f) => f.id === fieldId);
+    const assignedUser = currentField.assignedUsers.find(
       (au) => au.id === participantId
     );
 
     const signDate = new Date();
+    const participantContactId = assignedUser.contactId.toString();
 
-    // 1. Update the audit trail properties
-    assignedUser.signed = true;
-    assignedUser.signedAt = signDate;
-    assignedUser.signedMethod = "Email OTP";
-    assignedUser.signedIP = ip;
-    assignedUser.signedWithOtp = otp;
+    // 🔥 NEW: Find ALL signature fields assigned to this participant
+    const allSignatureFieldsForParticipant = pkg.fields.filter(
+      (field) =>
+        field.type === "signature" &&
+        field.assignedUsers.some(
+          (user) =>
+            user.contactId.toString() === participantContactId &&
+            user.role === "Signer" &&
+            !user.signed // Only apply to unsigned fields
+        )
+    );
 
-    // --- THIS IS THE FIX ---
-    // 2. Store the signature details in the `value` property for the UI
-    field.value = {
-      signedBy: assignedUser.contactName,
-      email: assignedUser.contactEmail,
-      date: signDate.toISOString(),
-      method: "Email OTP",
-      otpCode: otp,
-    };
-    // ----------------------
+    // 🔥 Apply the signature to ALL matching fields at once
+    allSignatureFieldsForParticipant.forEach((field) => {
+      const userAssignment = field.assignedUsers.find(
+        (user) =>
+          user.contactId.toString() === participantContactId &&
+          user.role === "Signer"
+      );
+
+      if (userAssignment) {
+        // Update audit trail properties
+        userAssignment.signed = true;
+        userAssignment.signedAt = signDate;
+        userAssignment.signedMethod = "Email OTP";
+        userAssignment.signedIP = ip;
+        userAssignment.signedWithOtp = otp;
+
+        // Store signature details in field value for UI
+        field.value = {
+          signedBy: userAssignment.contactName,
+          email: userAssignment.contactEmail,
+          date: signDate.toISOString(),
+          method: "Email OTP",
+          otpCode: otp,
+        };
+      }
+    });
 
     // Check if the whole package is now completed
     if (this.isPackageCompleted(pkg)) {
@@ -705,102 +752,134 @@ class PackageService {
       const initiatorName = `${packageCreator.firstName} ${packageCreator.lastName}`;
       await this._sendCompletionNotifications(pkg, initiatorName);
     } else {
-      // --- ADD THIS BLOCK ---
-      // If not fully complete, send a progress update notification
       await this._sendActionUpdateNotification(pkg, assignedUser);
-      // --- END OF NEW BLOCK ---
     }
 
-    // Save all changes to the package
     await pkg.save();
-
-    // Emit real-time update to initiator
     await this.emitPackageUpdate(pkg);
 
-    // ✅ FIX: Get the processed package with signed URL
     const updatedPackageForParticipant = await this.getPackageForParticipant(
       packageId,
       participantId
     );
 
-    // --- THIS IS THE FIX ---
-    // 3. Return the entire updated package object in the correct structure
     return {
-      message: "Signature completed.",
-      package: updatedPackageForParticipant, // The Redux thunk is expecting this structure
+      message: `Signature completed for ${allSignatureFieldsForParticipant.length} field(s).`,
+      package: updatedPackageForParticipant,
+      fieldsSignedCount: allSignatureFieldsForParticipant.length,
     };
-    // ----------------------
   }
 
   // SMS OTP METHODS
-  async sendSmsOTP(packageId, participantId, fieldId, phone) {
-    const pkg = await this.Package.findById(packageId);
-    if (!pkg || pkg.status !== "Sent") {
-      throw new Error("Package not found or not active.");
-    }
-    this.checkPackageExpiry(pkg);
-
-    const field = pkg.fields.find(
-      (f) => f.id === fieldId && f.type === "signature"
-    );
-    if (!field) {
-      throw new Error("Signature field not found.");
-    }
-
-    const assignedUser = field.assignedUsers.find(
-      (au) => au.id === participantId
-    );
-    if (
-      !assignedUser ||
-      assignedUser.role !== "Signer" ||
-      !assignedUser.signatureMethods.includes("SMS OTP") || // <-- Change this line
-      assignedUser.signed
-    ) {
-      throw new Error(
-        "Invalid participant, this signature method is not enabled, or the signature is already completed."
-      );
-    }
-
-    // Get and validate contact phone number
-    const contact = await this.Contact.findById(assignedUser.contactId);
-    if (!contact || !contact.phone) {
-      throw new Error("Contact phone number not found.");
-    }
-
-    // Normalize phone numbers for comparison
-    const normalizePhone = (phoneNum) => phoneNum.replace(/[^\d+]/g, "");
-    if (normalizePhone(contact.phone) !== normalizePhone(phone)) {
-      throw new Error("Phone number does not match assigned participant.");
-    }
-
-    // Generate 6-digit OTP
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const expiresAt = new Date(Date.now() + 60 * 1000); // 60 seconds
-
-    // Store OTP with method identifier
-    await this.OTP.deleteMany({ packageId, fieldId, participantId });
-    await this.OTP.create({
+  async verifySmsOTP(packageId, participantId, fieldId, otp, ip) {
+    const otpDoc = await this.OTP.findOne({
       packageId,
       fieldId,
       participantId,
-      otp,
       method: "SMS OTP",
-      expiresAt,
     });
 
-    // Send SMS OTP
-    await this.SmsService.sendSignatureOtp(
-      contact.phone,
-      assignedUser.contactName,
-      pkg.name,
-      otp
+    if (!otpDoc || otpDoc.expiresAt < new Date()) {
+      throw new Error("Invalid or expired SMS OTP.");
+    }
+    if (otpDoc.attempts >= 4) {
+      await this.OTP.deleteOne({ _id: otpDoc._id });
+      throw new Error("Maximum SMS OTP attempts exceeded.");
+    }
+    if (otpDoc.otp !== otp) {
+      otpDoc.attempts += 1;
+      await otpDoc.save();
+      throw new Error("Incorrect SMS OTP.");
+    }
+
+    // Clean up OTP
+    await this.OTP.deleteOne({ _id: otpDoc._id });
+
+    const pkg = await this.Package.findById(packageId).populate(
+      "ownerId",
+      "email"
+    );
+    if (!pkg) {
+      throw new Error("Package not found after OTP verification.");
+    }
+    this.checkPackageExpiry(pkg);
+
+    // 🔥 NEW LOGIC: Find the current field and participant
+    const currentField = pkg.fields.find((f) => f.id === fieldId);
+    const assignedUser = currentField.assignedUsers.find(
+      (au) => au.id === participantId
+    );
+
+    const signDate = new Date();
+    const participantContactId = assignedUser.contactId.toString();
+
+    // 🔥 NEW: Find ALL signature fields assigned to this participant
+    const allSignatureFieldsForParticipant = pkg.fields.filter(
+      (field) =>
+        field.type === "signature" &&
+        field.assignedUsers.some(
+          (user) =>
+            user.contactId.toString() === participantContactId &&
+            user.role === "Signer" &&
+            !user.signed
+        )
+    );
+
+    // 🔥 Apply the signature to ALL matching fields at once
+    allSignatureFieldsForParticipant.forEach((field) => {
+      const userAssignment = field.assignedUsers.find(
+        (user) =>
+          user.contactId.toString() === participantContactId &&
+          user.role === "Signer"
+      );
+
+      if (userAssignment) {
+        // Update audit trail properties
+        userAssignment.signed = true;
+        userAssignment.signedAt = signDate;
+        userAssignment.signedMethod = "SMS OTP";
+        userAssignment.signedIP = ip;
+        userAssignment.signedWithOtp = otp;
+
+        // Store signature details in field value for UI
+        field.value = {
+          signedBy: userAssignment.contactName,
+          email: userAssignment.contactEmail,
+          date: signDate.toISOString(),
+          method: "SMS OTP",
+          ip: ip,
+          otpCode: otp,
+        };
+      }
+    });
+
+    // Check if package is completed
+    if (this.isPackageCompleted(pkg)) {
+      pkg.status = "Completed";
+      const packageCreator = await this.User.findById(pkg.ownerId);
+      const initiatorName = `${packageCreator.firstName} ${packageCreator.lastName}`;
+      await this._sendCompletionNotifications(pkg, initiatorName);
+    } else {
+      await this._sendActionUpdateNotification(pkg, assignedUser);
+    }
+
+    await pkg.save();
+    await this.emitPackageUpdate(pkg);
+
+    const updatedPackageForParticipant = await this.getPackageForParticipant(
+      packageId,
+      participantId
     );
 
     return {
-      message: "OTP sent to your phone.",
-      method: "SMS OTP",
-      expiresIn: 60,
-      phoneNumber: this._maskPhoneNumber(contact.phone),
+      message: `SMS OTP signature completed for ${allSignatureFieldsForParticipant.length} field(s).`,
+      package: updatedPackageForParticipant,
+      signatureDetails: {
+        method: "SMS OTP",
+        signedAt: signDate.toISOString(),
+        signedBy: assignedUser.contactName,
+        fieldsSignedCount: allSignatureFieldsForParticipant.length,
+      },
     };
   }
 
@@ -2505,6 +2584,37 @@ class PackageService {
       console.error("Failed to send action update notification:", error);
       // Do not throw an error, as the main operation (e.g., signing) was successful.
     }
+  }
+
+  /**
+   * Calculate how many document credits should be consumed based on unique signers
+   * Formula: 1 credit per 2 unique signers (rounded up)
+   * Examples: 1-2 signers = 1 credit, 3-4 signers = 2 credits, 5-6 signers = 3 credits
+   */
+  _calculateDocumentCredits(pkg) {
+    // Get all unique signer contact IDs across all signature fields
+    const uniqueSignerIds = new Set();
+
+    pkg.fields.forEach((field) => {
+      if (field.type === "signature") {
+        field.assignedUsers.forEach((user) => {
+          if (user.role === "Signer") {
+            uniqueSignerIds.add(user.contactId.toString());
+          }
+        });
+      }
+    });
+
+    const uniqueSignerCount = uniqueSignerIds.size;
+
+    // Calculate credits: 1 credit per 2 signers (rounded up)
+    // Math.ceil ensures: 1-2 signers = 1, 3-4 = 2, 5-6 = 3, etc.
+    const creditsNeeded = Math.ceil(uniqueSignerCount / 2);
+
+    return {
+      uniqueSignerCount,
+      creditsNeeded,
+    };
   }
 
   // New helper method to emit package update

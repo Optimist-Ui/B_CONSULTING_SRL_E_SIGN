@@ -45,7 +45,7 @@ const ChatWidget: React.FC = () => {
         if (isHomepage && !hasSeenChatbot && !isOpen) {
             const timer = setTimeout(() => {
                 dispatch(openChatAndStartSession());
-            }, 1500);
+            }, 5500);
 
             return () => clearTimeout(timer);
         }
@@ -93,8 +93,8 @@ const ChatWidget: React.FC = () => {
 
             {/* Chat Window */}
             {isOpen && (
-                <div className={`fixed bottom-6 right-6 z-50 transition-all duration-300 ease-out ${isMinimized ? 'w-80' : 'w-[380px] md:w-[420px]'}`}>
-                    <div className={`bg-white dark:bg-gray-900 rounded-2xl shadow-2xl overflow-hidden transition-all duration-300 ${isMinimized ? 'h-16' : 'h-[600px]'}`}>
+                <div className={`fixed bottom-6 right-6 z-50 transition-all duration-300 ease-out ${isMinimized ? 'w-80' : 'w-[350px] md:w-[380px] lg:w-[420px]'}`}>
+                    <div className={`bg-white dark:bg-gray-900 rounded-2xl shadow-2xl overflow-hidden transition-all duration-300 ${isMinimized ? 'h-16' : 'h-[550px] md:h-[580px] lg:h-[600px]'}`}>
                         {/* Header */}
                         <div className="bg-gradient-to-r from-blue-600 to-blue-700 p-4 flex items-center justify-between">
                             <div className="flex items-center gap-3">

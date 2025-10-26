@@ -76,6 +76,12 @@ const userSchema = new Schema(
     resetToken: { type: String, sparse: true },
     resetTokenExpiresAt: { type: Date, sparse: true },
 
+    // 👇 ADD THESE NEW FIELDS FOR EMAIL CHANGE
+    emailChangeOtp: { type: String, sparse: true },
+    emailChangeOtpExpiresAt: { type: Date, sparse: true },
+    pendingEmail: { type: String, sparse: true }, // Store the new email temporarily
+    emailChangeAttempts: { type: Number, default: 0 },
+
     stripeCustomerId: {
       type: String,
       unique: true,

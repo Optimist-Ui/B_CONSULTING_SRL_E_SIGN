@@ -141,6 +141,36 @@ class UserController {
       return errorResponse(res, error, "Failed to reactivate account");
     }
   }
+  async requestEmailChange(req, res) {
+    try {
+      const userId = req.user.id;
+      const { newEmail } = req.body;
+
+      const result = await this.userService.requestEmailChange(
+        userId,
+        newEmail
+      );
+      return successResponse(res, result, "OTP sent to your current email");
+    } catch (error) {
+      return errorResponse(res, error, "Failed to send OTP");
+    }
+  }
+
+  async verifyEmailChange(req, res) {
+    try {
+      const userId = req.user.id;
+      const { otp, newEmail } = req.body;
+
+      const updatedUser = await this.userService.verifyEmailChange(
+        userId,
+        otp,
+        newEmail
+      );
+      return successResponse(res, updatedUser, "Email updated successfully");
+    } catch (error) {
+      return errorResponse(res, error, "Failed to update email");
+    }
+  }
 }
 
 module.exports = UserController;

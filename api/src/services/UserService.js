@@ -111,18 +111,16 @@ class UserService {
       throw new Error("User not found.");
     }
 
-    // Check if email is being changed to one that already exists
+    // ❌ REMOVE EMAIL UPDATE FROM HERE - it should go through OTP verification
     if (email && email !== user.email) {
-      const existingUser = await this.User.findOne({ email });
-      if (existingUser && existingUser._id.toString() !== userId) {
-        throw new Error("This email is already in use by another account.");
-      }
+      throw new Error(
+        "To change your email, please use the email verification process."
+      );
     }
 
-    // Update basic fields
+    // Update basic fields (email removed)
     if (firstName) user.firstName = firstName;
     if (lastName) user.lastName = lastName;
-    if (email) user.email = email;
     if (phone !== undefined) user.phone = phone;
     if (language) user.language = language;
 
@@ -135,18 +133,14 @@ class UserService {
           console.log(`Deleted old profile image: ${user.s3Key}`);
         } catch (error) {
           console.error("Failed to delete old profile image:", error);
-          // Continue anyway - don't fail the update
         }
       }
 
-      // Update with new S3 information
-      user.profileImage = s3File.url; // S3 URL (for reference)
-      user.s3Key = s3File.key; // S3 key (for future deletion/updates)
+      user.profileImage = s3File.url;
+      user.s3Key = s3File.key;
     }
 
     await user.save();
-
-    // Return sanitized user with signed URL
     return await this._sanitizeUserWithSignedUrl(user);
   }
 
@@ -488,6 +482,136 @@ class UserService {
     } catch (error) {
       console.error(`Failed to cancel subscription for user ${userId}:`, error);
     }
+  }
+  // --- REQUEST EMAIL CHANGE WITH OTP (UPDATED - Using User Schema) ---
+  async requestEmailChange(userId, newEmail) {
+    const user = await this.User.findById(userId);
+    if (!user) {
+      throw new Error("User not found.");
+    }
+
+    // Check if new email is already in use
+    const existingUser = await this.User.findOne({ email: newEmail });
+    if (existingUser && existingUser._id.toString() !== userId) {
+      throw new Error("This email is already in use by another account.");
+    }
+
+    // Check if it's the same email
+    if (newEmail === user.email) {
+      throw new Error("This is already your current email address.");
+    }
+
+    // Generate 6-digit OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
+
+    // Store OTP and pending email in user document
+    user.emailChangeOtp = otp;
+    user.emailChangeOtpExpiresAt = expiresAt;
+    user.pendingEmail = newEmail;
+    user.emailChangeAttempts = 0; // Reset attempts
+    await user.save();
+
+    // Send OTP to CURRENT email
+    await this.emailService.sendEmailChangeOtp(
+      user.email,
+      user.firstName,
+      newEmail,
+      otp
+    );
+
+    return {
+      message: "OTP sent to your current email address.",
+      currentEmail: user.email,
+    };
+  }
+
+  // --- VERIFY EMAIL CHANGE OTP (UPDATED - Using User Schema) ---
+  async verifyEmailChange(userId, otp, newEmail) {
+    const user = await this.User.findById(userId);
+    if (!user) {
+      throw new Error("User not found.");
+    }
+
+    // Check if there's a pending email change
+    if (!user.emailChangeOtp || !user.pendingEmail) {
+      throw new Error("No pending email change request found.");
+    }
+
+    // Check if OTP is expired
+    if (
+      !user.emailChangeOtpExpiresAt ||
+      user.emailChangeOtpExpiresAt < new Date()
+    ) {
+      // Clear the expired OTP data
+      user.emailChangeOtp = undefined;
+      user.emailChangeOtpExpiresAt = undefined;
+      user.pendingEmail = undefined;
+      user.emailChangeAttempts = 0;
+      await user.save();
+      throw new Error("OTP has expired. Please request a new one.");
+    }
+
+    // Check attempts (max 5 attempts)
+    if (user.emailChangeAttempts >= 5) {
+      // Clear the OTP data after too many attempts
+      user.emailChangeOtp = undefined;
+      user.emailChangeOtpExpiresAt = undefined;
+      user.pendingEmail = undefined;
+      user.emailChangeAttempts = 0;
+      await user.save();
+      throw new Error("Too many failed attempts. Please request a new OTP.");
+    }
+
+    // Verify OTP
+    if (user.emailChangeOtp !== otp) {
+      user.emailChangeAttempts += 1;
+      await user.save();
+      const remainingAttempts = 5 - user.emailChangeAttempts;
+      throw new Error(
+        `Invalid OTP. You have ${remainingAttempts} attempt(s) remaining.`
+      );
+    }
+
+    // Verify the new email matches what was stored
+    if (user.pendingEmail !== newEmail) {
+      throw new Error("Email mismatch. Please request a new OTP.");
+    }
+
+    // Check again if new email is still available
+    const existingUser = await this.User.findOne({ email: newEmail });
+    if (existingUser && existingUser._id.toString() !== userId) {
+      throw new Error("This email is already in use by another account.");
+    }
+
+    // Update the email
+    const oldEmail = user.email;
+    user.email = newEmail;
+
+    // Clear the OTP fields
+    user.emailChangeOtp = undefined;
+    user.emailChangeOtpExpiresAt = undefined;
+    user.pendingEmail = undefined;
+    user.emailChangeAttempts = 0;
+
+    await user.save();
+
+    // Send confirmation email to NEW email
+    await this.emailService.sendEmailChangeConfirmation(user);
+
+    // Optionally: Send notification to OLD email
+    try {
+      await this.emailService.sendEmailChangeNotification(
+        oldEmail,
+        user.firstName,
+        newEmail
+      );
+    } catch (error) {
+      console.error("Failed to send notification to old email:", error);
+      // Don't fail the whole operation if notification fails
+    }
+
+    return await this._sanitizeUserWithSignedUrl(user);
   }
 }
 

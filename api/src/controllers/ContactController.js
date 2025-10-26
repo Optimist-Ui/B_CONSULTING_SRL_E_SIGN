@@ -9,7 +9,7 @@ class ContactController {
   async createContact(req, res) {
     try {
       // req.user is attached by your authentication middleware
-      const userId = req.user.id; 
+      const userId = req.user.id;
       const contact = await this.contactService.createContact(userId, req.body);
       successResponse(res, contact, "Contact created successfully", 201);
     } catch (error) {
@@ -27,24 +27,30 @@ class ContactController {
       errorResponse(res, error, "Failed to fetch contacts");
     }
   }
-  
+
   async getContactById(req, res) {
     try {
       const userId = req.user.id;
       const { contactId } = req.params;
-      const contact = await this.contactService.getContactById(userId, contactId);
+      const contact = await this.contactService.getContactById(
+        userId,
+        contactId
+      );
       successResponse(res, contact, "Contact fetched successfully");
     } catch (error) {
       errorResponse(res, error, "Failed to fetch contact");
     }
   }
 
-
   async updateContact(req, res) {
     try {
       const userId = req.user.id;
       const { contactId } = req.params;
-      const contact = await this.contactService.updateContact(userId, contactId, req.body);
+      const contact = await this.contactService.updateContact(
+        userId,
+        contactId,
+        req.body
+      );
       successResponse(res, contact, "Contact updated successfully");
     } catch (error) {
       errorResponse(res, error, "Failed to update contact");
@@ -59,6 +65,24 @@ class ContactController {
       successResponse(res, result, result.message);
     } catch (error) {
       errorResponse(res, error, "Failed to delete contact");
+    }
+  }
+
+  async submitEnterpriseInquiry(req, res) {
+    try {
+      const { name, email, company, phone, message } = req.body;
+
+      const result = await this.contactService.submitEnterpriseInquiry({
+        name,
+        email,
+        company,
+        phone,
+        message,
+      });
+
+      successResponse(res, result, "Your inquiry has been sent successfully");
+    } catch (error) {
+      errorResponse(res, error, "Failed to submit inquiry");
     }
   }
 }

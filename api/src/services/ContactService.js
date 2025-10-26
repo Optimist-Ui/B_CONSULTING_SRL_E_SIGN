@@ -1,9 +1,10 @@
 // services/ContactService.js
 
 class ContactService {
-  constructor({ Contact, User }) {
+  constructor({ Contact, User, emailService }) {
     this.Contact = Contact;
     this.User = User;
+    this.emailService = emailService;
   }
 
   async createContact(userId, contactData) {
@@ -113,6 +114,29 @@ class ContactService {
       );
     }
     return { message: "Contact deleted successfully." };
+  }
+
+  async submitEnterpriseInquiry({ name, email, company, phone, message }) {
+    try {
+      // Send email to admin
+      await this.emailService.sendEnterpriseInquiry({
+        contactName: name,
+        contactEmail: email,
+        companyName: company,
+        phoneNumber: phone || null,
+        message: message,
+      });
+
+      return {
+        success: true,
+        message: "Enterprise inquiry submitted successfully",
+      };
+    } catch (error) {
+      console.error("Error submitting enterprise inquiry:", error);
+      throw new Error(
+        "Failed to submit enterprise inquiry. Please try again later."
+      );
+    }
   }
 }
 

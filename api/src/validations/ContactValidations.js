@@ -80,8 +80,45 @@ const contactIdValidation = [
     .withMessage("A valid contact ID is required in the URL parameter."),
 ];
 
+const submitContactFormValidation = [
+  body("name")
+    .trim()
+    .notEmpty()
+    .withMessage("Name is required")
+    .isLength({ min: 2, max: 100 })
+    .withMessage("Name must be between 2 and 100 characters"),
+
+  body("email")
+    .trim()
+    .notEmpty()
+    .withMessage("Email is required")
+    .isEmail()
+    .withMessage("Please provide a valid business email"),
+
+  body("company")
+    .trim()
+    .notEmpty()
+    .withMessage("Company name is required")
+    .isLength({ min: 2, max: 200 })
+    .withMessage("Company name must be between 2 and 200 characters"),
+
+  body("phone")
+    .optional({ checkFalsy: true })
+    .trim()
+    .matches(/^[\d\s\+\-\(\)]+$/)
+    .withMessage("Please provide a valid phone number"),
+
+  body("message")
+    .trim()
+    .notEmpty()
+    .withMessage("Message is required")
+    .isLength({ min: 10, max: 2000 })
+    .withMessage("Message must be between 10 and 2000 characters"),
+];
+
 module.exports = {
   createContactValidation,
   updateContactValidation,
   contactIdValidation,
+  submitContactFormValidation,
 };
