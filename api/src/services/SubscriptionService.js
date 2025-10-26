@@ -739,65 +739,160 @@ class SubscriptionService {
   }
 
   /**
-   * Handles subscription updates from Stripe webhooks (e.g., renewals).
+   * FIXED: Handles subscription updates from Stripe webhooks.
+   * Now correctly identifies new trials vs renewals.
    */
   async handleSubscriptionUpdate(subscriptionId) {
-    const stripeSubscription = await this.stripe.subscriptions.retrieve(
-      subscriptionId
-    );
-    const user = await this.userService.findUserByStripeCustomerId(
-      stripeSubscription.customer
-    );
-    if (!user) return;
-
-    const oldPeriodStart = user.subscription.current_period_start?.getTime();
-    const newPeriodStart = new Date(
-      stripeSubscription.current_period_start * 1000
-    ).getTime();
-
-    // Check if a new billing cycle has started (renewal)
-    if (newPeriodStart > oldPeriodStart) {
-      const plan = await this.planService.findPlanById(
-        user.subscription.planId
+    try {
+      const stripeSubscription = await this.stripe.subscriptions.retrieve(
+        subscriptionId
       );
 
-      // Expire old entries
-      user.subscriptionHistory.forEach((entry) => (entry.status = "expired"));
+      const user = await this.userService.findUserByStripeCustomerId(
+        stripeSubscription.customer
+      );
 
-      // Create a new active entry for the new period
-      user.subscriptionHistory.push({
-        type: "paid",
-        planId: plan._id,
-        planName: plan.name,
-        startDate: new Date(newPeriodStart),
-        documentLimit: plan.documentLimit,
-        documentsUsed: 0,
-        status: "active",
-      });
-    }
+      if (!user) {
+        console.log(
+          `No user found for customer ${stripeSubscription.customer}`
+        );
+        return;
+      }
 
-    await this.userService.updateUser(user._id, {
-      "subscription.status": stripeSubscription.status,
-      "subscription.current_period_start": new Date(newPeriodStart),
-      "subscription.current_period_end": new Date(
+      // CRITICAL FIX: Skip webhook processing if dates are missing
+      // The creation methods handle this properly
+      if (
+        !stripeSubscription.current_period_start ||
+        !stripeSubscription.current_period_end
+      ) {
+        console.warn(
+          `Missing period dates for subscription ${subscriptionId}, skipping webhook update`
+        );
+        return;
+      }
+
+      const currentPeriodStart = new Date(
+        stripeSubscription.current_period_start * 1000
+      );
+      const currentPeriodEnd = new Date(
         stripeSubscription.current_period_end * 1000
-      ),
-      "subscription.planId":
-        (
-          await this.planService.findPlanByPriceId(
-            stripeSubscription.items.data[0].price.id
-          )
-        )?._id || user.subscription.planId,
-      "subscription.planName":
-        (
-          await this.planService.findPlanByPriceId(
-            stripeSubscription.items.data[0].price.id
-          )
-        )?.name || user.subscription.planName,
-      subscriptionHistory: user.subscriptionHistory,
-    });
-  }
+      );
 
+      // Validate dates
+      if (
+        isNaN(currentPeriodStart.getTime()) ||
+        isNaN(currentPeriodEnd.getTime())
+      ) {
+        console.error(
+          `Invalid dates from Stripe for subscription ${subscriptionId}`
+        );
+        return;
+      }
+
+      // CRITICAL FIX: Detect if this is a brand new subscription
+      const isNewSubscription =
+        !user.subscription || !user.subscription.subscriptionId;
+      const isNewTrial =
+        isNewSubscription && stripeSubscription.status === "trialing";
+
+      if (isNewTrial) {
+        console.log(
+          `New trial detected for ${subscriptionId}, skipping webhook update (already handled by createTrialSubscription)`
+        );
+        return; // Don't process - createTrialSubscription already set everything up
+      }
+
+      // CRITICAL FIX: Only consider it a renewal if:
+      // 1. User already has a subscription
+      // 2. The new period start is AFTER the old period start
+      // 3. This is not a status-only update (like trialing -> active)
+      const oldPeriodStart = user.subscription?.current_period_start?.getTime();
+      const newPeriodStart = currentPeriodStart.getTime();
+
+      const isRenewal =
+        oldPeriodStart &&
+        newPeriodStart > oldPeriodStart &&
+        user.subscription.subscriptionId === subscriptionId;
+
+      if (isRenewal) {
+        console.log(`Processing renewal for subscription ${subscriptionId}`);
+
+        const plan = await this.planService.findPlanById(
+          user.subscription.planId
+        );
+
+        if (plan) {
+          // Expire old entries
+          user.subscriptionHistory.forEach((entry) => {
+            if (entry.status === "active") {
+              entry.status = "expired";
+              entry.endDate = new Date();
+            }
+          });
+
+          // Create a new active entry for the new period
+          user.subscriptionHistory.push({
+            type: "paid",
+            planId: plan._id,
+            planName: plan.name,
+            startDate: currentPeriodStart,
+            endDate: currentPeriodEnd,
+            documentLimit: plan.documentLimit,
+            documentsUsed: 0,
+            status: "active",
+          });
+        }
+      }
+
+      // Get the current plan info
+      const currentPriceId = stripeSubscription.items?.data[0]?.price?.id;
+      let updatedPlan = null;
+
+      if (currentPriceId) {
+        updatedPlan = await this.planService.findPlanByPriceId(currentPriceId);
+      }
+
+      // Prepare update data - only update status and timestamps for non-renewals
+      const updateData = {
+        "subscription.status": stripeSubscription.status,
+        "subscription.current_period_start": currentPeriodStart,
+        "subscription.current_period_end": currentPeriodEnd,
+      };
+
+      // Only update history if we processed a renewal
+      if (isRenewal) {
+        updateData.subscriptionHistory = user.subscriptionHistory;
+      }
+
+      // Only update plan details if we found a matching plan
+      if (updatedPlan) {
+        updateData["subscription.planId"] = updatedPlan._id;
+        updateData["subscription.planName"] = updatedPlan.name;
+      }
+
+      // Handle trial_end if present
+      if (stripeSubscription.trial_end) {
+        updateData["subscription.trial_end"] = new Date(
+          stripeSubscription.trial_end * 1000
+        );
+      }
+
+      await this.userService.updateUser(user._id, updateData);
+
+      console.log(
+        `Successfully updated subscription ${subscriptionId} for user ${
+          user._id
+        } (${isRenewal ? "renewal" : "status update"})`
+      );
+    } catch (error) {
+      console.error(
+        `Error in handleSubscriptionUpdate for ${subscriptionId}:`,
+        error
+      );
+      // Don't throw - we don't want to fail the webhook
+    }
+  }
+  
   /**
    * Handles subscription cancellations that come from outside our app.
    */
