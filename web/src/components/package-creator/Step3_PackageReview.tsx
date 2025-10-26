@@ -308,7 +308,36 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
             assignedFields,
             uniqueRecipients,
             completionRate: totalFields > 0 ? Math.round((assignedFields / totalFields) * 100) : 0,
-            unassignedRequiredFields: unassignedRequiredFields, // Return the list of invalid fields
+            unassignedRequiredFields: unassignedRequiredFields,
+        };
+    };
+
+    // 🔥 NEW: Add credit calculation function
+    const calculateDocumentCredits = () => {
+        const fields = currentPackage?.fields || [];
+
+        // Get all unique signer contact IDs across all signature fields
+        const uniqueSignerIds = new Set<string>();
+
+        fields.forEach((field) => {
+            if (field.type === 'signature') {
+                (field.assignedUsers || []).forEach((user) => {
+                    if (user.role === 'Signer') {
+                        uniqueSignerIds.add(user.contactId);
+                    }
+                });
+            }
+        });
+
+        const uniqueSignerCount = uniqueSignerIds.size;
+
+        // Calculate credits: 1 credit per 2 signers (rounded up)
+        // Math.ceil ensures: 1-2 signers = 1, 3-4 = 2, 5-6 = 3, etc.
+        const creditsNeeded = uniqueSignerCount > 0 ? Math.ceil(uniqueSignerCount / 2) : 1;
+
+        return {
+            uniqueSignerCount,
+            creditsNeeded,
         };
     };
 
@@ -402,6 +431,7 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
     }
 
     const stats = getPackageStats();
+    const creditInfo = calculateDocumentCredits();
 
     const TabButton: React.FC<{ tab: ActiveTab; label: string; icon: React.ReactNode }> = ({ tab, label, icon }) => (
         <button
@@ -585,7 +615,8 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
                             {activeTab === 'summary' && (
                                 <div className="space-y-6 animate-fadeIn">
                                     <h3 className="text-xl font-bold leading-tight">{currentPackage.name}</h3>
-                                    {/* --- THIS IS THE NEW MESSAGE BLOCK --- */}
+
+                                    {/* Optional Message Block */}
                                     <div>
                                         <h4 className="font-semibold mb-2 flex items-center gap-2">
                                             <FiMessageSquareTyped />
@@ -603,6 +634,8 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
                                             />
                                         </div>
                                     </div>
+
+                                    {/* Details at a Glance */}
                                     <div>
                                         <h4 className="font-semibold mb-2">Details at a Glance</h4>
                                         <div className="p-4 dark:bg-gray-900 bg-white border rounded-lg grid grid-cols-3 gap-4 text-center">
@@ -620,6 +653,60 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
                                             </div>
                                         </div>
                                     </div>
+
+                                    {/* 🔥 NEW: Credit Usage Information */}
+                                    <div>
+                                        <h4 className="font-semibold mb-2 flex items-center gap-2">
+                                            <FiInfoTyped />
+                                            Document Credit Usage
+                                        </h4>
+                                        <div
+                                            className={`p-4 border rounded-lg ${
+                                                creditInfo.creditsNeeded === 1
+                                                    ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'
+                                                    : 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800'
+                                            }`}
+                                        >
+                                            <div className="flex items-start gap-3">
+                                                <div
+                                                    className={`flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center font-bold text-xl ${
+                                                        creditInfo.creditsNeeded === 1
+                                                            ? 'bg-green-100 dark:bg-green-800 text-green-700 dark:text-green-200'
+                                                            : 'bg-blue-100 dark:bg-blue-800 text-blue-700 dark:text-blue-200'
+                                                    }`}
+                                                >
+                                                    {creditInfo.creditsNeeded}
+                                                </div>
+                                                <div className="flex-1">
+                                                    <p className="font-semibold text-sm mb-1">
+                                                        {creditInfo.creditsNeeded === 1
+                                                            ? 'This package will use 1 document credit'
+                                                            : `This package will use ${creditInfo.creditsNeeded} document credits`}
+                                                    </p>
+                                                    <p className="text-xs text-gray-600 dark:text-gray-400">
+                                                        {creditInfo.uniqueSignerCount === 0
+                                                            ? 'No signers assigned yet'
+                                                            : creditInfo.uniqueSignerCount === 1
+                                                            ? '1 unique signer detected'
+                                                            : `${creditInfo.uniqueSignerCount} unique signers detected`}
+                                                    </p>
+                                                    <div className="mt-2 pt-2 border-t border-gray-200 dark:border-gray-700">
+                                                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                                                            💡 <span className="font-medium">Tip:</span> Each document credit covers up to 2 unique signers.
+                                                            {creditInfo.uniqueSignerCount > 2 && (
+                                                                <span>
+                                                                    {' '}
+                                                                    You have {creditInfo.uniqueSignerCount} signers, requiring {creditInfo.creditsNeeded} credits.
+                                                                </span>
+                                                            )}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Assignment Progress */}
                                     <div>
                                         <h4 className="font-semibold mb-2">Assignment Progress</h4>
                                         <div className="w-full bg-gray-200 rounded-full h-2.5">

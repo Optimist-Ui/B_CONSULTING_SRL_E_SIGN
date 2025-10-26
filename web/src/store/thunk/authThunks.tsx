@@ -40,6 +40,15 @@ interface ChangePasswordArgs {
     newPassword: string;
 }
 
+interface RequestEmailChangeArgs {
+    newEmail: string;
+}
+
+interface VerifyEmailChangeArgs {
+    otp: string;
+    newEmail: string;
+}
+
 // --- signupUser Thunk (Updated) ---
 export const signupUser = createAsyncThunk<
     { message: string }, // <-- Type for successful return
@@ -194,5 +203,25 @@ export const reactivateAccount = createAsyncThunk('auth/reactivateAccount', asyn
         return response.data.data;
     } catch (error: any) {
         return rejectWithValue(error.response?.data?.error || 'Failed to reactivate account.');
+    }
+});
+
+// --- Request Email Change Thunk ---
+export const requestEmailChange = createAsyncThunk('auth/requestEmailChange', async (emailData: RequestEmailChangeArgs, { rejectWithValue }) => {
+    try {
+        const response = await api.post('/api/users/request-email-change', emailData);
+        return response.data.data;
+    } catch (error: any) {
+        return rejectWithValue(error.response?.data?.error || 'Failed to send OTP to current email.');
+    }
+});
+
+// --- Verify Email Change OTP Thunk ---
+export const verifyEmailChange = createAsyncThunk('auth/verifyEmailChange', async (verificationData: VerifyEmailChangeArgs, { rejectWithValue }) => {
+    try {
+        const response = await api.post('/api/users/verify-email-change', verificationData);
+        return { user: response.data.data };
+    } catch (error: any) {
+        return rejectWithValue(error.response?.data?.error || 'Failed to verify OTP and update email.');
     }
 });

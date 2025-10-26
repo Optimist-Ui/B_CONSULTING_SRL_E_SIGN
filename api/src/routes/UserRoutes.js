@@ -6,6 +6,8 @@ const {
   resetPasswordValidation,
   updateProfileValidation,
   changePasswordValidation,
+  requestEmailChangeValidation,
+  verifyEmailChangeOtpValidation,
 } = require("../validations/UserValidations");
 const validate = require("../middlewares/validate");
 const authenticateUser = require("../middlewares/authenticate");
@@ -122,6 +124,78 @@ module.exports = (container) => {
    *       '401':
    *         description: Unauthorized.
    */
+
+  /**
+   * @swagger
+   * /api/users/request-email-change:
+   *   post:
+   *     tags: [Users]
+   *     summary: Request email change with OTP
+   *     description: Sends a 6-digit OTP to the current email address to verify email change request.
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             required: [newEmail]
+   *             properties:
+   *               newEmail:
+   *                 type: string
+   *                 example: newemail@example.com
+   *     responses:
+   *       '200':
+   *         description: OTP sent to current email.
+   *       '400':
+   *         description: Email already in use or validation error.
+   *       '401':
+   *         description: Unauthorized.
+   */
+  router.post(
+    "/request-email-change",
+    authenticateUser,
+    requestEmailChangeValidation,
+    validate,
+    userController.requestEmailChange.bind(userController)
+  );
+
+  /**
+   * @swagger
+   * /api/users/verify-email-change:
+   *   post:
+   *     tags: [Users]
+   *     summary: Verify email change OTP
+   *     description: Verifies the OTP and updates the user's email address.
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             required: [otp, newEmail]
+   *             properties:
+   *               otp:
+   *                 type: string
+   *                 example: "123456"
+   *               newEmail:
+   *                 type: string
+   *                 example: newemail@example.com
+   *     responses:
+   *       '200':
+   *         description: Email updated successfully.
+   *       '400':
+   *         description: Invalid or expired OTP.
+   *       '401':
+   *         description: Unauthorized.
+   */
+  router.post(
+    "/verify-email-change",
+    authenticateUser,
+    verifyEmailChangeOtpValidation,
+    validate,
+    userController.verifyEmailChange.bind(userController)
+  );
+
   router.get(
     "/profile",
     authenticateUser,

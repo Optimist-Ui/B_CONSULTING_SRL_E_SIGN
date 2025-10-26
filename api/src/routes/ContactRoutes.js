@@ -6,6 +6,7 @@ const {
   createContactValidation,
   updateContactValidation,
   contactIdValidation,
+  submitContactFormValidation,
 } = require("../validations/ContactValidations");
 
 /**
@@ -18,6 +19,42 @@ const {
 module.exports = (container) => {
   const router = express.Router();
   const contactController = container.resolve("contactController");
+
+  /**
+   * @swagger
+   * /api/contacts/enterprise-inquiry:
+   *   post:
+   *     tags: [Contact]
+   *     summary: Submit enterprise contact form
+   *     description: Sends enterprise inquiry details to admin via email
+   *     security: []
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             required: [name, email, company, message]
+   *             properties:
+   *               name: {type: string, example: "John Doe"}
+   *               email: {type: string, example: "john.doe@company.com"}
+   *               company: {type: string, example: "Acme Corporation"}
+   *               phone: {type: string, example: "+1 (123) 456-7890"}
+   *               message: {type: string, example: "We need custom enterprise features..."}
+   *     responses:
+   *       '200':
+   *         description: Contact form submitted successfully
+   *       '400':
+   *         description: Validation error
+   *       '500':
+   *         description: Failed to submit inquiry
+   */
+  router.post(
+    "/enterprise-inquiry",
+    submitContactFormValidation,
+    validate,
+    contactController.submitEnterpriseInquiry.bind(contactController)
+  );
 
   // This middleware ensures all routes in this file are protected.
   router.use(authenticateUser);
