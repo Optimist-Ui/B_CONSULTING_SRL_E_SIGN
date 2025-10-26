@@ -40,6 +40,15 @@ interface ChangePasswordArgs {
     newPassword: string;
 }
 
+interface RequestEmailChangeArgs {
+    newEmail: string;
+}
+
+interface VerifyEmailChangeArgs {
+    otp: string;
+    newEmail: string;
+}
+
 // --- signupUser Thunk (Updated) ---
 export const signupUser = createAsyncThunk<
     { message: string }, // <-- Type for successful return
@@ -58,7 +67,6 @@ export const loginUser = createAsyncThunk('auth/loginUser', async (credentials: 
     try {
         // Use 'api' and a relative path. The token is added automatically!
         const response = await api.post('/api/users/login', credentials);
-
         const { token, user } = response.data.data;
         localStorage.setItem('authToken', token);
         localStorage.setItem('userId', user._id);
@@ -177,5 +185,43 @@ export const checkAuthStatus = createAsyncThunk('auth/checkAuthStatus', async (_
     } catch (error: any) {
         // If the request fails (e.g., 401 Unauthorized), the token is invalid.
         return rejectWithValue(error.response?.data?.error || 'Invalid session.');
+    }
+});
+
+export const deleteAccount = createAsyncThunk('auth/deleteAccount', async (_, { rejectWithValue }) => {
+    try {
+        const response = await api.post('/api/users/delete-account');
+        return response.data.data;
+    } catch (error: any) {
+        return rejectWithValue(error.response?.data?.error || 'Failed to request account deletion.');
+    }
+});
+
+export const reactivateAccount = createAsyncThunk('auth/reactivateAccount', async (token: string, { rejectWithValue }) => {
+    try {
+        const response = await api.get(`/api/users/reactivate/${token}`);
+        return response.data.data;
+    } catch (error: any) {
+        return rejectWithValue(error.response?.data?.error || 'Failed to reactivate account.');
+    }
+});
+
+// --- Request Email Change Thunk ---
+export const requestEmailChange = createAsyncThunk('auth/requestEmailChange', async (emailData: RequestEmailChangeArgs, { rejectWithValue }) => {
+    try {
+        const response = await api.post('/api/users/request-email-change', emailData);
+        return response.data.data;
+    } catch (error: any) {
+        return rejectWithValue(error.response?.data?.error || 'Failed to send OTP to current email.');
+    }
+});
+
+// --- Verify Email Change OTP Thunk ---
+export const verifyEmailChange = createAsyncThunk('auth/verifyEmailChange', async (verificationData: VerifyEmailChangeArgs, { rejectWithValue }) => {
+    try {
+        const response = await api.post('/api/users/verify-email-change', verificationData);
+        return { user: response.data.data };
+    } catch (error: any) {
+        return rejectWithValue(error.response?.data?.error || 'Failed to verify OTP and update email.');
     }
 });

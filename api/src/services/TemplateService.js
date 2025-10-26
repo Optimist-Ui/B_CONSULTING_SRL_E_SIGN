@@ -1,16 +1,16 @@
 const { v4: uuidv4 } = require("uuid");
 
 class TemplateService {
-  constructor({ Template, User }) {
+  constructor({ Template, User, s3Service }) {
     this.Template = Template;
     this.User = User;
+    this.s3Service = s3Service;
   }
 
   async createTemplate(userId, templateData) {
-    const { attachment_uuid, name, fileUrl, fields } = templateData;
+    const { attachment_uuid, name, fileUrl, fields, s3Key } = templateData;
 
     // Check if attachment_uuid is unique for this user
-    // This check is good, but the database index provides the ultimate enforcement.
     const existingTemplate = await this.Template.findOne({
       ownerId: userId,
       attachment_uuid,
@@ -19,56 +19,104 @@ class TemplateService {
       throw new Error("A template with this attachment UUID already exists.");
     }
 
-    // --- THIS IS THE FIX ---
-    // The database has a unique index on a field called `docuTemplateId`.
-    // We must provide a unique value for it. The `attachment_uuid` is the perfect candidate
-    // as it's already a unique identifier for the uploaded document.
+    // Validate s3Key is provided
+    if (!s3Key) {
+      throw new Error("S3 key is required to create a template.");
+    }
+
     const newTemplate = await this.Template.create({
       ownerId: userId,
-      docuTemplateId: attachment_uuid, // Set the required unique field
+      docuTemplateId: attachment_uuid,
       attachment_uuid,
       name,
       fileUrl,
+      s3Key, // 👈 Store S3 key
       fields,
     });
+
     return newTemplate;
   }
 
+  // --- GET ALL TEMPLATES (WITH SIGNED URLS) ---
   async getTemplates(userId) {
     const templates = await this.Template.find({ ownerId: userId }).sort({
       name: 1,
     });
-    return templates;
+
+    // Generate signed URLs for all templates
+    const templatesWithSignedUrls = await Promise.all(
+      templates.map(async (template) => {
+        const templateObj = template.toObject();
+
+        if (template.s3Key) {
+          try {
+            templateObj.downloadUrl = await this.s3Service.getSignedUrl(
+              template.s3Key,
+              3600 // 1 hour
+            );
+          } catch (error) {
+            console.error(
+              `Failed to generate signed URL for template ${template._id}:`,
+              error
+            );
+            templateObj.downloadUrl = template.fileUrl; // Fallback
+          }
+        }
+
+        return templateObj;
+      })
+    );
+
+    return templatesWithSignedUrls;
   }
 
+  // --- GET TEMPLATE BY ID (WITH SIGNED URL) ---
   async getTemplateById(userId, templateId) {
     const template = await this.Template.findOne({
       _id: templateId,
       ownerId: userId,
     });
+
     if (!template) {
       throw new Error(
         "Template not found or you do not have permission to view it."
       );
     }
-    return template;
+
+    const templateObj = template.toObject();
+
+    // Generate signed URL for downloading
+    if (template.s3Key) {
+      try {
+        templateObj.downloadUrl = await this.s3Service.getSignedUrl(
+          template.s3Key,
+          3600 // 1 hour
+        );
+      } catch (error) {
+        console.error(
+          `Failed to generate signed URL for template ${template._id}:`,
+          error
+        );
+        templateObj.downloadUrl = template.fileUrl; // Fallback
+      }
+    }
+
+    return templateObj;
   }
 
   async updateTemplate(userId, templateId, updateData) {
-    // --- THIS IS THE FIX ---
-    // Defend the API by ensuring immutable fields cannot be changed.
-    // We create a copy of the incoming data to avoid side effects.
+    // Sanitize - prevent updating immutable fields
     const safeUpdateData = { ...updateData };
-
-    // Explicitly delete any fields that should never change via an update.
     delete safeUpdateData.docuTemplateId;
     delete safeUpdateData.attachment_uuid;
     delete safeUpdateData.ownerId;
     delete safeUpdateData._id;
+    delete safeUpdateData.s3Key; // 👈 Don't allow S3 key updates
+    delete safeUpdateData.fileUrl; // 👈 Don't allow file URL updates
 
     const template = await this.Template.findOneAndUpdate(
       { _id: templateId, ownerId: userId },
-      { $set: safeUpdateData }, // Use the sanitized data object
+      { $set: safeUpdateData },
       { new: true, runValidators: true }
     );
 
@@ -77,31 +125,49 @@ class TemplateService {
         "Template not found or you do not have permission to edit it."
       );
     }
-    return template;
+
+    // Return with signed URL
+    const templateObj = template.toObject();
+    if (template.s3Key) {
+      try {
+        templateObj.downloadUrl = await this.s3Service.getSignedUrl(
+          template.s3Key,
+          3600
+        );
+      } catch (error) {
+        console.error("Failed to generate signed URL:", error);
+      }
+    }
+
+    return templateObj;
   }
 
+  // --- DELETE TEMPLATE (DELETE FROM S3 TOO) ---
   async deleteTemplate(userId, templateId) {
     const template = await this.Template.findOne({
       _id: templateId,
       ownerId: userId,
     });
+
     if (!template) {
       throw new Error(
         "Template not found or you do not have permission to delete it."
       );
     }
 
-    // Optionally, delete the associated PDF file
-    const fs = require("fs").promises;
-    const path = require("path");
-    const filePath = path.join(__dirname, "../..", template.fileUrl);
-    try {
-      await fs.unlink(filePath);
-    } catch (err) {
-      console.error("Failed to delete file:", err);
+    // Delete file from S3
+    if (template.s3Key) {
+      try {
+        await this.s3Service.deleteFile(template.s3Key);
+        console.log(`Deleted template file from S3: ${template.s3Key}`);
+      } catch (error) {
+        console.error("Failed to delete template file from S3:", error);
+        // Continue with DB deletion even if S3 deletion fails
+      }
     }
 
-    const result = await this.Template.deleteOne({
+    // Delete from database
+    await this.Template.deleteOne({
       _id: templateId,
       ownerId: userId,
     });
@@ -109,18 +175,16 @@ class TemplateService {
     return { message: "Template deleted successfully." };
   }
 
-  async uploadTemplate(userId, file) {
-    if (!file) {
+  async uploadTemplate(userId, s3File) {
+    if (!s3File) {
       throw new Error("No file uploaded.");
     }
 
-    const attachment_uuid = `cs_test_${uuidv4()}`;
-    const fileUrl = `/Uploads/templates/${file.filename}`;
-
     return {
-      attachment_uuid,
-      originalFileName: file.originalname,
-      fileUrl,
+      attachment_uuid: s3File.attachment_uuid,
+      originalFileName: s3File.originalName,
+      fileUrl: s3File.url, // S3 URL
+      s3Key: s3File.key, // S3 key for future operations
     };
   }
 }

@@ -6,6 +6,13 @@ import templateReducer from './slices/templateSlice';
 import packageReducer from './slices/packageSlice';
 import participantReducer from './slices/participantSlice';
 import documentReducer from './slices/documentSlice';
+import cookieSlice from './slices/cookieSlice';
+import planReducer from './slices/planSlice';
+import paymentMethodReducer from './slices/paymentMethodSlice';
+import subscriptionReducer from './slices/subscriptionSlice';
+import reviewReducer from './slices/reviewSlice';
+import chatbotReducer from './slices/chatbotSlice';
+
 import api, { setupInterceptors } from '../utils/api';
 
 const rootReducer = combineReducers({
@@ -16,6 +23,12 @@ const rootReducer = combineReducers({
     packages: packageReducer,
     participant: participantReducer,
     documents: documentReducer,
+    cookies: cookieSlice,
+    plans: planReducer,
+    paymentMethods: paymentMethodReducer,
+    subscription: subscriptionReducer,
+    reviews: reviewReducer,
+    chatbot: chatbotReducer,
 });
 
 const store = configureStore({

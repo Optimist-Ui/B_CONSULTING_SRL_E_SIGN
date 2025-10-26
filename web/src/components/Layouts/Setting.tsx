@@ -37,7 +37,7 @@ const Setting = () => {
                             <IconX className="w-5 h-5" />
                         </button>
 
-                        <h4 className="mb-1 dark:text-white">TEMPLATE CUSTOMIZER</h4>
+                        <h4 className="mb-1 dark:text-white">DASHBOARD CUSTOMIZER</h4>
                         <p className="text-white-dark">Set preferences that will be cookied for your live preview demonstration.</p>
                     </div>
 

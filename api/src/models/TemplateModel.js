@@ -39,7 +39,8 @@ const templateSchema = new Schema(
     docuTemplateId: { type: String, required: true, unique: true },
     attachment_uuid: { type: String, required: true, unique: true },
     name: { type: String, required: true, trim: true },
-    fileUrl: { type: String, required: true },
+    fileUrl: { type: String, required: true }, // S3 URL
+    s3Key: { type: String, required: true }, // 👈 ADD THIS - S3 object key
     fields: [documentFieldSchema],
   },
   { timestamps: true }

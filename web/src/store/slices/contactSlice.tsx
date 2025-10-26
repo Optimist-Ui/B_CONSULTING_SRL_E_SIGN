@@ -20,12 +20,14 @@ export interface ContactState {
     contacts: Contact[];
     loading: boolean;
     error: string | null;
+    inquirySubmitting: boolean;
 }
 
 const initialState: ContactState = {
     contacts: [],
     loading: false,
     error: null,
+    inquirySubmitting: false,
 };
 
 const contactSlice = createSlice({

@@ -1,7 +1,16 @@
 import React, { useState, useEffect, useCallback, useRef, ComponentType } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, IRootState } from '../../store';
-import { addFieldToCurrentPackage, updateFieldInCurrentPackage, deleteFieldFromCurrentPackage, setSelectedPackageField, PackageField } from '../../store/slices/packageSlice';
+import {
+    addFieldToCurrentPackage,
+    updateFieldInCurrentPackage,
+    deleteFieldFromCurrentPackage,
+    setSelectedPackageField,
+    PackageField,
+    assignUserToField,
+    removeUserFromField,
+    AssignedUser,
+} from '../../store/slices/packageSlice';
 import { toast } from 'react-toastify';
 import { loadPdfDocument, renderPdfPageToCanvas } from '../../utils/pdf-utils';
 import { PDFDocumentProxy } from 'pdfjs-dist/types/src/display/api';
@@ -9,10 +18,13 @@ import EditorToolbar from '../template-creator/EditorToolbar';
 import PackageFieldPropertiesPanel from './PackageFieldPropertiesPanel';
 import PackageFieldRenderer from './PackageFieldRenderer';
 import Swal from 'sweetalert2';
-import { FiMousePointer } from 'react-icons/fi';
+import { FiMousePointer, FiX, FiSettings, FiAlertCircle } from 'react-icons/fi';
 import { nanoid } from '@reduxjs/toolkit';
 
 const FiMousePointerTyped = FiMousePointer as ComponentType<{ className?: string }>;
+const FiXTyped = FiX as ComponentType<{ className?: string }>;
+const FiSettingsTyped = FiSettings as ComponentType<{ className?: string }>;
+const FiAlertCircleTyped = FiAlertCircle as ComponentType<{ className?: string }>;
 
 interface PageInfo {
     width: number;
@@ -36,10 +48,14 @@ const Step2_FieldAssignment: React.FC<StepProps> = ({ onNext, onPrevious }) => {
     const [pdfInstance, setPdfInstance] = useState<PDFDocumentProxy | null>(null);
     const [pageInfos, setPageInfos] = useState<PageInfo[]>([]);
     const [pdfLoadError, setPdfLoadError] = useState<string | null>(null);
+    const [isPropertiesPanelOpen, setIsPropertiesPanelOpen] = useState(false);
+    const [isResizing, setIsResizing] = useState(false);
+
     const pageRefs = useRef<Array<React.RefObject<HTMLDivElement>>>([]);
     const canvasRefs = useRef<Array<React.RefObject<HTMLCanvasElement>>>([]);
     const isLoadingPdf = useRef(false);
     const renderTasks = useRef<Array<{ page: number; task: any }>>([]);
+    const wasManuallyClosedRef = useRef(false);
 
     const selectedField = currentPackage?.fields.find((field) => field.id === selectedFieldId);
 
@@ -66,6 +82,11 @@ const Step2_FieldAssignment: React.FC<StepProps> = ({ onNext, onPrevious }) => {
                 let pdf: PDFDocumentProxy;
                 if (currentPackage.fileData && currentPackage.fileData.byteLength > 0) {
                     pdf = await loadPdfDocument(currentPackage.fileData.slice(0));
+                } else if (currentPackage.downloadUrl) {
+                    const response = await fetch(currentPackage.downloadUrl, { mode: 'cors' });
+                    if (!response.ok) throw new Error(`Failed to fetch PDF: ${response.statusText}`);
+                    const arrayBuffer = await response.arrayBuffer();
+                    pdf = await loadPdfDocument(arrayBuffer);
                 } else if (currentPackage.fileUrl && !currentPackage.fileUrl.startsWith('blob:')) {
                     const correctedFileUrl = currentPackage.fileUrl.startsWith('/public') ? currentPackage.fileUrl : `/public${currentPackage.fileUrl}`;
                     const fullUrl = `${BACKEND_URL}${correctedFileUrl}`;
@@ -75,7 +96,7 @@ const Step2_FieldAssignment: React.FC<StepProps> = ({ onNext, onPrevious }) => {
                     pdf = await loadPdfDocument(arrayBuffer);
                 } else if (currentPackage.fileUrl?.startsWith('blob:')) {
                     const response = await fetch(currentPackage.fileUrl);
-                    if (!response.ok) throw new Error(`Failed to fetch blob PDF: ${response.statusText}`);
+                    if (!response.ok) throw new Error(`Fetch failed for blob: ${response.statusText}`);
                     const arrayBuffer = await response.arrayBuffer();
                     pdf = await loadPdfDocument(arrayBuffer);
                 } else {
@@ -85,10 +106,11 @@ const Step2_FieldAssignment: React.FC<StepProps> = ({ onNext, onPrevious }) => {
                 setPdfInstance(pdf);
                 setNumPages(pdf.numPages);
 
+                const scale = 1.5; // Fixed scale for consistent PDF size
+
                 const fetchedPageInfos: PageInfo[] = [];
                 for (let i = 1; i <= pdf.numPages; i++) {
                     const page = await pdf.getPage(i);
-                    const scale = 1.5;
                     const viewport = page.getViewport({ scale });
                     fetchedPageInfos.push({ width: viewport.width, height: viewport.height, scale });
                 }
@@ -125,10 +147,6 @@ const Step2_FieldAssignment: React.FC<StepProps> = ({ onNext, onPrevious }) => {
                 for (let i = 1; i <= numPages; i++) {
                     const canvas = canvasRefs.current[i - 1]?.current;
                     if (canvas) {
-                        const context = canvas.getContext('2d');
-                        if (context) {
-                            context.clearRect(0, 0, canvas.width, canvas.height);
-                        }
                         const task = await renderPdfPageToCanvas(pdfInstance, i, canvas, pageInfos[i - 1].scale);
                         renderTasks.current.push({ page: i, task });
                     }
@@ -157,22 +175,25 @@ const Step2_FieldAssignment: React.FC<StepProps> = ({ onNext, onPrevious }) => {
             if (!type || !pageRefs.current[pageNumber - 1]?.current) return;
 
             const getFieldDefaults = (type: PackageField['type']) => {
+                const isMobile = window.innerWidth < 768;
+                const scale = isMobile ? 0.7 : 1;
+
                 switch (type) {
                     case 'signature':
-                        return { width: 150, height: 50, label: 'Signature' };
+                        return { width: 150 * scale, height: 50 * scale, label: 'Signature' };
                     case 'textarea':
-                        return { width: 200, height: 80, label: 'Text Area', placeholder: 'Enter text...' };
+                        return { width: 200 * scale, height: 80 * scale, label: 'Text Area', placeholder: 'Enter text...' };
                     case 'checkbox':
-                        return { width: 25, height: 25, label: 'Checkbox' };
+                        return { width: 25 * scale, height: 25 * scale, label: 'Checkbox' };
                     case 'radio':
-                        return { width: 25, height: 25, label: 'Radio' };
+                        return { width: 25 * scale, height: 25 * scale, label: 'Radio' };
                     case 'date':
-                        return { width: 120, height: 35, label: 'Date Field' };
+                        return { width: 120 * scale, height: 35 * scale, label: 'Date Field' };
                     case 'dropdown':
-                        return { width: 150, height: 35, label: 'Dropdown' };
+                        return { width: 150 * scale, height: 35 * scale, label: 'Dropdown' };
                     case 'text':
                     default:
-                        return { width: 180, height: 35, label: 'Text Field', placeholder: 'Enter text here' };
+                        return { width: 180 * scale, height: 35 * scale, label: 'Text Field', placeholder: 'Enter text here' };
                 }
             };
 
@@ -192,7 +213,7 @@ const Step2_FieldAssignment: React.FC<StepProps> = ({ onNext, onPrevious }) => {
                 y,
                 width: defaults.width,
                 height: defaults.height,
-                required: false,
+                required: type === 'signature',
                 label: defaults.label,
                 placeholder: defaults.placeholder,
                 ...(type === 'radio' && { groupId: `group-${nanoid(5)}`, options: [{ value: 'option1', label: 'Option 1' }] }),
@@ -231,6 +252,7 @@ const Step2_FieldAssignment: React.FC<StepProps> = ({ onNext, onPrevious }) => {
                 if (result.isConfirmed) {
                     dispatch(deleteFieldFromCurrentPackage(fieldId));
                     toast.success('Field deleted.');
+                    setIsPropertiesPanelOpen(false);
                 }
             });
         },
@@ -239,79 +261,218 @@ const Step2_FieldAssignment: React.FC<StepProps> = ({ onNext, onPrevious }) => {
 
     const handleFieldSelect = useCallback(
         (fieldId: string | null) => {
+            // Don't change selection during resize
+            if (isResizing) return;
+
+            // If clicking the same field that's already selected, don't do anything
+            if (fieldId === selectedFieldId) return;
+
             dispatch(setSelectedPackageField(fieldId));
+        },
+        [dispatch, isResizing, selectedFieldId]
+    );
+
+    const closePropertiesPanel = () => {
+        setIsPropertiesPanelOpen(false);
+        wasManuallyClosedRef.current = true; // Mark as manually closed
+        // Delay clearing selection to allow resize to complete
+        setTimeout(() => {
+            dispatch(setSelectedPackageField(null));
+        }, 50);
+    };
+
+    const handleAssignUser = useCallback(
+        (fieldId: string, user: Omit<AssignedUser, 'id'>) => {
+            dispatch(assignUserToField({ fieldId, user }));
+        },
+        [dispatch]
+    );
+
+    const handleRemoveUser = useCallback(
+        (fieldId: string, assignmentId: string) => {
+            dispatch(removeUserFromField({ fieldId, assignmentId }));
         },
         [dispatch]
     );
 
     if (!currentPackage) {
-        return <div className="flex justify-center items-center h-full text-lg text-gray-600">Please select a document first in the previous step to start assigning fields.</div>;
+        return (
+            <div className="flex flex-col justify-center items-center h-full text-center px-4 py-8">
+                <div className="max-w-md">
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-4 text-gray-400">
+                        <FiMousePointerTyped className="w-full h-full" />
+                    </div>
+                    <h3 className="text-lg sm:text-xl font-semibold text-gray-800 dark:text-gray-200 mb-2">No Document Selected</h3>
+                    <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">Please select a document in the previous step to start assigning fields.</p>
+                </div>
+            </div>
+        );
     }
 
     if (pdfLoadError) {
         return (
-            <div className="flex flex-col justify-center items-center h-full text-lg text-red-500">
-                <p className="mb-4">{pdfLoadError}</p>
-                <button onClick={onPrevious} className="btn btn-outline-primary">
-                    Go Back
-                </button>
+            <div className="flex flex-col justify-center items-center h-full text-center px-4 py-8">
+                <div className="max-w-md">
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-4 text-red-500">
+                        <FiXTyped className="w-full h-full" />
+                    </div>
+                    <h3 className="text-lg sm:text-xl font-semibold text-red-600 dark:text-red-400 mb-2">Failed to Load PDF</h3>
+                    <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mb-4">{pdfLoadError}</p>
+                    <button onClick={onPrevious} className="btn btn-outline-primary text-sm sm:text-base px-6 py-2">
+                        Go Back
+                    </button>
+                </div>
             </div>
         );
     }
 
     return (
-        <div className="flex flex-col flex-grow overflow-hidden gap-4 h-full bg-gray-50">
-            <div className="flex-shrink-0 bg-white/80 rounded-lg shadow-md p-2">
-                <EditorToolbar />
-            </div>
-            <div className="flex flex-grow overflow-hidden gap-4">
-                <div className="flex-grow flex flex-col items-center bg-white rounded-lg shadow-md p-4 overflow-auto">
-                    <div className="pdf-viewer-pages space-y-8">
-                        {Array.from({ length: numPages }, (_, i) => i + 1).map((pageNumber) => {
-                            const pageInfo = pageInfos[pageNumber - 1];
-                            return (
-                                <div
-                                    key={`page-${pageNumber}`}
-                                    ref={pageRefs.current[pageNumber - 1]}
-                                    className="relative border border-gray-300 shadow-sm bg-white flex-shrink-0"
-                                    style={{
-                                        width: pageInfo ? `${pageInfo.width}px` : 'auto',
-                                        height: pageInfo ? `${pageInfo.height}px` : 'auto',
-                                    }}
-                                    onDrop={(e) => handleDrop(e, pageNumber)}
-                                    onDragOver={handleDragOver}
-                                    onClick={() => handleFieldSelect(null)}
-                                >
-                                    <canvas ref={canvasRefs.current[pageNumber - 1]} className="block max-w-full h-auto" />
-                                    {currentPackage?.fields
-                                        .filter((field) => field.page === pageNumber)
-                                        .map((field) => (
-                                            <PackageFieldRenderer
-                                                key={field.id}
-                                                field={field}
-                                                isSelected={selectedFieldId === field.id}
-                                                onUpdate={handleFieldUpdate}
-                                                onDelete={handleFieldDelete}
-                                                onSelect={() => handleFieldSelect(field.id)}
-                                                containerRef={pageRefs.current[pageNumber - 1]}
-                                            />
-                                        ))}
+        <div className="h-[calc(100vh-12rem)] sm:h-[calc(100vh-10rem)] flex flex-col bg-gray-50 dark:bg-gray-900">
+            {/* Sticky Toolbar */}
+            <div className="flex-shrink-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm sticky top-0 ">
+                <div className="px-3 py-2 sm:p-3">
+                    <EditorToolbar />
+                </div>
+                {/* Validation Warning */}
+                {currentPackage?.fields.length === 0 && (
+                    <div className="px-3 pb-3">
+                        <div className="bg-amber-50 dark:bg-amber-900/20 border-l-4 border-amber-500 p-3 rounded-r-lg">
+                            <div className="flex items-start gap-2">
+                                <FiAlertCircleTyped className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+                                <div>
+                                    <p className="text-sm font-semibold text-amber-800 dark:text-amber-300">No Fields Added Yet</p>
+                                    <p className="text-xs text-amber-700 dark:text-amber-400 mt-1">
+                                        Drag and drop fields from the toolbar above onto the document to create interactive areas for participants.
+                                    </p>
                                 </div>
-                            );
-                        })}
+                            </div>
+                        </div>
+                    </div>
+                )}
+            </div>
+
+            {/* Main Content */}
+            <div className="flex flex-1 min-h-0 relative">
+                {/* PDF Viewer */}
+                <div className={`flex-1 overflow-auto bg-gray-100 dark:bg-gray-900 transition-all duration-300 ${isPropertiesPanelOpen ? 'mr-[25vw]' : ''}`}>
+                    <div className="p-3 sm:p-4 lg:p-6">
+                        <div className="flex justify-center">
+                            <div className="space-y-4 sm:space-y-6 pb-8 w-full max-w-full">
+                                {Array.from({ length: numPages }, (_, i) => i + 1).map((pageNumber) => {
+                                    const pageInfo = pageInfos[pageNumber - 1];
+                                    return (
+                                        <div key={`page-${pageNumber}`} className="relative mx-auto">
+                                            {/* Page number indicator */}
+                                            <div className="absolute -top-8 left-0 text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400">
+                                                Page {pageNumber} of {numPages}
+                                            </div>
+
+                                            <div
+                                                ref={pageRefs.current[pageNumber - 1]}
+                                                className="relative border-2 border-gray-300 dark:border-gray-600 shadow-xl rounded-sm bg-white dark:bg-gray-800 mx-auto overflow-hidden"
+                                                style={{
+                                                    width: pageInfo ? `${pageInfo.width}px` : 'auto',
+                                                    height: pageInfo ? `${pageInfo.height}px` : 'auto',
+                                                }}
+                                                onDrop={(e) => handleDrop(e, pageNumber)}
+                                                onDragOver={handleDragOver}
+                                                onClick={() => handleFieldSelect(null)}
+                                            >
+                                                <canvas ref={canvasRefs.current[pageNumber - 1]} className="block w-full h-auto" />
+                                                {currentPackage?.fields
+                                                    .filter((field) => field.page === pageNumber)
+                                                    .map((field) => (
+                                                        <PackageFieldRenderer
+                                                            key={field.id}
+                                                            field={field}
+                                                            isSelected={selectedFieldId === field.id}
+                                                            onUpdate={handleFieldUpdate}
+                                                            onDelete={handleFieldDelete}
+                                                            onSelect={() => handleFieldSelect(field.id)}
+                                                            containerRef={pageRefs.current[pageNumber - 1]}
+                                                            onResizeStart={() => setIsResizing(true)}
+                                                            onResizeEnd={() => setIsResizing(false)}
+                                                            onAssignUser={handleAssignUser}
+                                                            onRemoveUser={handleRemoveUser}
+                                                        />
+                                                    ))}
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div className="w-80 flex-shrink-0 bg-white rounded-lg shadow-md p-4 overflow-y-auto">
-                    <h3 className="text-lg font-bold mb-4 border-b pb-2 border-gray-200 text-gray-900">Field Properties & Roles</h3>
-                    {selectedField ? (
-                        <PackageFieldPropertiesPanel field={selectedField} onUpdate={handleFieldUpdate} />
-                    ) : (
-                        <div className="text-center pt-10 text-gray-500">
-                            <FiMousePointerTyped className="mx-auto text-4xl mb-4 text-gray-400" />
-                            <p>Select a field to edit its properties or assign roles.</p>
+
+                {/* Properties Panel */}
+                <div
+                    className={`
+                        fixed right-0 top-0 h-full w-[25vw]
+                        flex-shrink-0 flex flex-col
+                        bg-white dark:bg-gray-800
+                        border-l border-gray-200 dark:border-gray-700
+                        shadow-2xl
+                        z-40
+                        transform transition-transform duration-300 ease-in-out
+                        ${isPropertiesPanelOpen ? 'translate-x-0' : 'translate-x-full'}
+                    `}
+                >
+                    {/* Panel Header */}
+                    <div className="flex-shrink-0 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-800 border-b border-gray-200 dark:border-gray-700 p-4 flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                                <FiSettingsTyped className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                            </div>
+                            <div>
+                                <h3 className="text-base sm:text-lg font-bold text-gray-800 dark:text-white">Field Properties</h3>
+                                <p className="text-xs text-gray-600 dark:text-gray-400">Configure field settings</p>
+                            </div>
                         </div>
-                    )}
+                        <button onClick={closePropertiesPanel} className="p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors" aria-label="Close properties panel">
+                            <FiXTyped className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+                        </button>
+                    </div>
+
+                    {/* Panel Content */}
+                    <div className="flex-1 overflow-y-auto p-4 bg-gray-50 dark:bg-gray-900">
+                        {selectedField ? (
+                            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
+                                <PackageFieldPropertiesPanel field={selectedField} onUpdate={handleFieldUpdate} />
+                            </div>
+                        ) : (
+                            <div className="flex flex-col items-center justify-center h-full text-center px-4">
+                                <div className="w-20 h-20 mb-4 text-gray-300 dark:text-gray-600">
+                                    <FiMousePointerTyped className="w-full h-full" />
+                                </div>
+                                <h4 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">No Field Selected</h4>
+                                <p className="text-sm text-gray-500 dark:text-gray-400 max-w-xs">Tap on a field in the document to edit its properties and assign users.</p>
+                            </div>
+                        )}
+                    </div>
                 </div>
+
+                {/* Floating Action Button */}
+                {selectedField && !isPropertiesPanelOpen && (
+                    <button
+                        onClick={() => {
+                            wasManuallyClosedRef.current = false;
+                            setIsPropertiesPanelOpen(true);
+                        }}
+                        className="fixed top-1/2 -translate-y-1/2 right-4 sm:right-20 z-50 
+               w-12 h-12 sm:w-14 sm:h-14 
+               bg-gradient-to-r from-blue-600 to-indigo-600 
+               hover:from-blue-700 hover:to-indigo-700 
+               text-white rounded-full shadow-2xl 
+               flex items-center justify-center 
+               transition-all duration-200 
+               transform hover:scale-110 active:scale-95"
+                        aria-label="Open field properties"
+                    >
+                        <FiSettingsTyped className="w-5 h-5 sm:w-6 sm:h-6" />
+                        <span className="absolute -top-1 -right-1 w-3 h-3 sm:w-4 sm:h-4 bg-red-500 rounded-full border-2 border-white"></span>
+                    </button>
+                )}
             </div>
         </div>
     );

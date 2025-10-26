@@ -1,6 +1,6 @@
 import { ActionReducerMapBuilder } from '@reduxjs/toolkit';
 import { ContactState } from '../slices/contactSlice';
-import { fetchContacts, createContact, updateContact, deleteContact } from '../thunk/contactThunks';
+import { fetchContacts, createContact, updateContact, deleteContact, submitEnterpriseInquiry } from '../thunk/contactThunks';
 
 export const buildContactExtraReducers = (builder: ActionReducerMapBuilder<ContactState>) => {
     builder
@@ -32,7 +32,7 @@ export const buildContactExtraReducers = (builder: ActionReducerMapBuilder<Conta
             state.loading = false;
             state.error = action.payload as string;
         })
-        
+
         // --- Update Contact Cases ---
         .addCase(updateContact.pending, (state) => {
             state.loading = true;
@@ -40,7 +40,7 @@ export const buildContactExtraReducers = (builder: ActionReducerMapBuilder<Conta
         })
         .addCase(updateContact.fulfilled, (state, action) => {
             state.loading = false;
-            const index = state.contacts.findIndex(c => c._id === action.payload._id);
+            const index = state.contacts.findIndex((c) => c._id === action.payload._id);
             if (index !== -1) {
                 state.contacts[index] = action.payload;
             }
@@ -49,7 +49,7 @@ export const buildContactExtraReducers = (builder: ActionReducerMapBuilder<Conta
             state.loading = false;
             state.error = action.payload as string;
         })
-        
+
         // --- Delete Contact Cases ---
         .addCase(deleteContact.pending, (state) => {
             state.loading = true;
@@ -57,10 +57,23 @@ export const buildContactExtraReducers = (builder: ActionReducerMapBuilder<Conta
         })
         .addCase(deleteContact.fulfilled, (state, action) => {
             state.loading = false;
-            state.contacts = state.contacts.filter(c => c._id !== action.payload.contactId);
+            state.contacts = state.contacts.filter((c) => c._id !== action.payload.contactId);
         })
         .addCase(deleteContact.rejected, (state, action) => {
             state.loading = false;
+            state.error = action.payload as string;
+        })
+        // --- Submit Enterprise Inquiry Cases ---
+        .addCase(submitEnterpriseInquiry.pending, (state) => {
+            state.inquirySubmitting = true;
+            state.error = null;
+        })
+        .addCase(submitEnterpriseInquiry.fulfilled, (state) => {
+            state.inquirySubmitting = false;
+            // No need to update contacts array for inquiry submission
+        })
+        .addCase(submitEnterpriseInquiry.rejected, (state, action) => {
+            state.inquirySubmitting = false;
             state.error = action.payload as string;
         });
 };

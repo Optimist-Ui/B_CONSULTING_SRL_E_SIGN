@@ -1,5 +1,19 @@
 import { ActionReducerMapBuilder } from '@reduxjs/toolkit';
-import { signupUser, loginUser, checkAuthStatus, requestPasswordReset, verifyResetToken, resetPassword, verifyEmail, updateUserProfile, changePassword } from '../thunk/authThunks';
+import {
+    signupUser,
+    loginUser,
+    checkAuthStatus,
+    requestPasswordReset,
+    verifyResetToken,
+    resetPassword,
+    verifyEmail,
+    updateUserProfile,
+    changePassword,
+    deleteAccount,
+    reactivateAccount,
+    requestEmailChange, // ADD THIS
+    verifyEmailChange,
+} from '../thunk/authThunks';
 import { AuthState } from '../slices/authSlice';
 
 export const buildAuthExtraReducers = (builder: ActionReducerMapBuilder<AuthState>) => {
@@ -134,5 +148,56 @@ export const buildAuthExtraReducers = (builder: ActionReducerMapBuilder<AuthStat
             state.isAuthenticated = false;
             state.user = null;
             state.token = null;
+        })
+        .addCase(deleteAccount.pending, (state) => {
+            state.loading = true;
+            state.error = null;
+        })
+        .addCase(deleteAccount.fulfilled, (state) => {
+            state.loading = false;
+            // On success, the UI will handle logout
+        })
+        .addCase(deleteAccount.rejected, (state, action) => {
+            state.loading = false;
+            state.error = action.payload as string;
+        })
+
+        .addCase(reactivateAccount.pending, (state) => {
+            state.loading = true;
+            state.error = null;
+        })
+        .addCase(reactivateAccount.fulfilled, (state) => {
+            state.loading = false;
+        })
+        .addCase(reactivateAccount.rejected, (state, action) => {
+            state.loading = false;
+            state.error = action.payload as string;
+        })
+        // --- Request Email Change Cases ---
+        .addCase(requestEmailChange.pending, (state) => {
+            state.loading = true;
+            state.error = null;
+        })
+        .addCase(requestEmailChange.fulfilled, (state) => {
+            state.loading = false;
+        })
+        .addCase(requestEmailChange.rejected, (state, action) => {
+            state.loading = false;
+            state.error = action.payload as string;
+        })
+
+        // --- Verify Email Change Cases ---
+        .addCase(verifyEmailChange.pending, (state) => {
+            state.loading = true;
+            state.error = null;
+        })
+        .addCase(verifyEmailChange.fulfilled, (state, action) => {
+            state.loading = false;
+            // Update the user in state with the new email
+            state.user = action.payload.user;
+        })
+        .addCase(verifyEmailChange.rejected, (state, action) => {
+            state.loading = false;
+            state.error = action.payload as string;
         });
 };

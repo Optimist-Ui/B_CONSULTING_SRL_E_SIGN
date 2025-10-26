@@ -7,7 +7,6 @@ import { setCurrentPage, setZoomLevel } from '../../store/slices/participantSlic
 import { downloadPackage } from '../../store/thunk/participantThunks';
 import { toast } from 'react-toastify';
 
-// Typed icons
 const FiChevronLeftTyped = FiChevronLeft as ComponentType<{ className?: string }>;
 const FiChevronRightTyped = FiChevronRight as ComponentType<{ className?: string }>;
 const FiMoreVerticalTyped = FiMoreVertical as ComponentType<{ className?: string }>;
@@ -44,46 +43,34 @@ const HeaderControls: React.FC<HeaderControlsProps> = ({ documentName, participa
     const currentPage = useSelector((state: IRootState) => state.participant.currentPage);
     const numPages = useSelector((state: IRootState) => state.participant.numPages);
     const zoomLevel = useSelector((state: IRootState) => state.participant.zoomLevel);
-    const { packageData, uiState } = useSelector((state: IRootState) => state.participant);
-    const { isDownloading } = uiState;
+
+    // ✅ FIX: Read packageData directly from Redux instead of relying on props
+    const packageData = useSelector((state: IRootState) => state.participant.packageData);
+    const { isDownloading } = useSelector((state: IRootState) => state.participant.uiState);
 
     const [isApproverDrawerOpen, setIsApproverDrawerOpen] = useState(false);
     const [isFullscreen, setIsFullscreen] = useState(false);
 
-    // +++ ADD DOWNLOAD LOGIC HERE +++
     const isDocumentFinalized = status === 'Completed' || status === 'Rejected';
     const canDownload = isDocumentFinalized || options.allowDownloadUnsigned;
 
     const handleDownload = async () => {
-        if (!packageData) {
-            toast.error('Package data is not available to start download.');
+        // ✅ Now packageData is always the latest from Redux
+        if (!packageData || !packageData.currentUser?.id) {
+            toast.error('Package data is not available. Please refresh the page and try again.');
             return;
         }
 
         toast.info('Preparing your document for download...');
 
         try {
-            const { blob, fileName } = await dispatch(
+            await dispatch(
                 downloadPackage({
                     packageId: packageData._id,
                     participantId: packageData.currentUser.id,
                 })
             ).unwrap();
-
-            // Create a temporary link to trigger the download
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.style.display = 'none';
-            a.href = url;
-            a.download = fileName;
-            document.body.appendChild(a);
-            a.click();
-            window.URL.revokeObjectURL(url);
-            a.remove();
-
-            toast.success('Download started successfully!');
         } catch (error) {
-            // Error toast is already handled by the extra reducer
             console.error('Download failed:', error);
         }
     };
@@ -256,7 +243,6 @@ const HeaderControls: React.FC<HeaderControlsProps> = ({ documentName, participa
                                             </button>
                                         )}
                                     </Menu.Item>
-                                    {/* +++ UPDATE DOWNLOAD BUTTON ITEM +++ */}
                                     <Menu.Item>
                                         {({ active }) => (
                                             <button

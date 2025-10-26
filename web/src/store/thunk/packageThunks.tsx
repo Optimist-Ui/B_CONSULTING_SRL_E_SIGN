@@ -10,11 +10,13 @@ interface SavePackagePayload {
     name: string;
     attachment_uuid: string;
     fileUrl: string;
+    s3Key?: string; // 👈 ADD THIS
     fields: DocumentPackage['fields'];
     receivers: DocumentPackage['receivers'];
     options: DocumentPackage['options'];
     templateId?: string;
     saveAsTemplate?: boolean;
+    customMessage?: string;
     status?: DocumentPackage['status'];
 }
 // Interface for updating a package
@@ -28,14 +30,14 @@ interface UpdatePackagePayload {
 }
 
 // Re-export template thunks for document upload and template fetching
-export const uploadPackageDocument = createAsyncThunk<{ attachment_uuid: string; fileUrl: string }, File>('packages/uploadPackageDocument', async (file, { rejectWithValue }) => {
+export const uploadPackageDocument = createAsyncThunk<{ attachment_uuid: string; fileUrl: string; s3Key: string }, File>('packages/uploadPackageDocument', async (file, { rejectWithValue }) => {
     try {
         const formData = new FormData();
         formData.append('file', file);
         const response = await api.post('api/packages/upload', formData, {
             headers: { 'Content-Type': 'multipart/form-data' },
         });
-        return response.data.data; // { attachment_uuid, fileUrl }
+        return response.data.data; // { attachment_uuid, fileUrl, s3Key }
     } catch (error: any) {
         return rejectWithValue(error.response?.data?.error || 'Failed to upload package document.');
     }
@@ -58,28 +60,29 @@ export const savePackage = createAsyncThunk<DocumentPackage, SavePackagePayload>
             }
         }
 
-        const { packages } = (getState() as IRootState).packages;
-        const isExistingInStore = packages.some((p) => p._id === packageData._id);
-
         const payload = { ...packageData };
-
-        // Remove the 'saveAsTemplate' flag as it's a frontend-only concern
         delete payload.saveAsTemplate;
 
-        if (isExistingInStore) {
-            // If the package exists in our state, it's a real document. Update it via PATCH.
+        // 🔥 IMPROVED DETECTION LOGIC
+        // Check if this is an existing package (has MongoDB ObjectId)
+        const isExistingPackage = payload._id && /^[a-f\d]{24}$/i.test(payload._id);
+
+        if (isExistingPackage) {
+            // Update existing package
             const { _id, ...updatePayload } = payload;
             const response = await api.patch(`/api/packages/${_id}`, updatePayload);
             return response.data.data;
         } else {
-            // If it's not in the state, it's a new document. Create it via POST.
-            // We must remove the temporary client-side ID before sending.
-            delete payload._id;
+            // Create new package
+            if (!payload.s3Key) {
+                throw new Error('S3 key is required for new packages.');
+            }
+            delete payload._id; // Remove temp ID
             const response = await api.post('/api/packages', payload);
             return response.data.data;
         }
     } catch (error: any) {
-        return rejectWithValue(error.response?.data?.error || 'Failed to save package.');
+        return rejectWithValue(error.response?.data?.error || error.message || 'Failed to save package.');
     }
 });
 
@@ -112,6 +115,20 @@ export const updatePackage = createAsyncThunk<DocumentPackage, UpdatePackagePayl
         return rejectWithValue(error.response?.data?.error || 'Failed to update package.');
     }
 });
+
+/**
+ * Fetches a single, complete package by its ID for the owner/initiator.
+ */
+export const fetchPackageForOwner = createAsyncThunk<DocumentPackage, string>('packages/fetchPackageForOwner', async (packageId, { rejectWithValue }) => {
+    try {
+        // This hits the authenticated, owner-only endpoint that returns the full package details.
+        const response = await api.get(`/api/packages/${packageId}`);
+        return response.data.data;
+    } catch (error: any) {
+        return rejectWithValue(error.response?.data?.error || 'Failed to fetch package details.');
+    }
+});
+
 // Delete package
 export const deletePackage = createAsyncThunk<{ message: string; packageId: string }, string>('packages/deletePackage', async (packageId, { rejectWithValue }) => {
     try {

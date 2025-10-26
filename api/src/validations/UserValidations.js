@@ -45,6 +45,34 @@ const changePasswordValidation = [
     .withMessage("New password must be at least 6 characters long"),
 ];
 
+const requestEmailChangeValidation = [
+  body("newEmail")
+    .trim()
+    .notEmpty()
+    .withMessage("New email is required")
+    .isEmail()
+    .withMessage("Please provide a valid email address")
+    .normalizeEmail(),
+];
+
+const verifyEmailChangeOtpValidation = [
+  body("otp")
+    .trim()
+    .notEmpty()
+    .withMessage("OTP is required")
+    .isLength({ min: 6, max: 6 })
+    .withMessage("OTP must be 6 digits")
+    .isNumeric()
+    .withMessage("OTP must contain only numbers"),
+
+  body("newEmail")
+    .trim()
+    .notEmpty()
+    .withMessage("New email is required")
+    .isEmail()
+    .withMessage("Please provide a valid email address"),
+];
+
 module.exports = {
   signupValidation,
   loginValidation,
@@ -52,4 +80,6 @@ module.exports = {
   resetPasswordValidation,
   changePasswordValidation,
   updateProfileValidation,
+  requestEmailChangeValidation,
+  verifyEmailChangeOtpValidation,
 };

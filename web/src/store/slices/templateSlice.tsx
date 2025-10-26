@@ -24,6 +24,8 @@ export interface DocumentTemplate {
     attachment_uuid: string;
     name: string;
     fileUrl: string;
+    s3Key?: string; // 👈 ADD THIS - S3 object key
+    downloadUrl?: string; // 👈 ADD THIS - Signed URL from backend
     fileData?: ArrayBuffer; // Added to store PDF data
     fields: DocumentField[];
 }

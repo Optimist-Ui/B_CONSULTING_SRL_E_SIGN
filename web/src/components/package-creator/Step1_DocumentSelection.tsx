@@ -3,10 +3,9 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { AppDispatch, IRootState } from '../../store';
-import { DocumentTemplate } from '../../store/slices/templateSlice';
 import { fetchTemplates, getTemplateById } from '../../store/thunk/templateThunks'; // Updated import
 import { uploadPackageDocument } from '../../store/thunk/packageThunks'; // Keep this import
-import { startPackageCreation, setPackageTitle, setPackageLoading, setPackageError } from '../../store/slices/packageSlice';
+import { startPackageCreation, setPackageTitle, setPackageLoading, setPackageError, setCurrentPackage } from '../../store/slices/packageSlice';
 import { loadPdfDocument, renderPdfPageToCanvas } from '../../utils/pdf-utils';
 import { PDFDocumentProxy } from 'pdfjs-dist/types/src/display/api';
 import { toast } from 'react-toastify';
@@ -35,6 +34,7 @@ const Step1_DocumentSelection: React.FC<StepProps> = ({ onNext }) => {
 
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const renderingRef = useRef(false);
 
     useEffect(() => {
         if (templates.length === 0) {
@@ -50,14 +50,21 @@ const Step1_DocumentSelection: React.FC<StepProps> = ({ onNext }) => {
         }
     }, [templatesError, packageError, dispatch]);
 
-    const renderPdfPreview = useCallback(async (documentSource: { fileData?: ArrayBuffer; fileUrl?: string }) => {
-        if (!canvasRef.current) return;
+    const renderPdfPreview = useCallback(async (documentSource: { fileData?: ArrayBuffer; fileUrl?: string; downloadUrl?: string }) => {
+        if (!canvasRef.current || renderingRef.current) return; // 🔥 ADD rendering check
+
+        renderingRef.current = true; // 🔥 SET flag
         setRenderError(null);
 
         try {
             let pdf: PDFDocumentProxy;
             if (documentSource.fileData && documentSource.fileData.byteLength > 0) {
                 pdf = await loadPdfDocument(documentSource.fileData.slice(0));
+            } else if (documentSource.downloadUrl) {
+                const response = await fetch(documentSource.downloadUrl, { mode: 'cors' });
+                if (!response.ok) throw new Error(`Fetch failed: ${response.statusText}`);
+                const arrayBuffer = await response.arrayBuffer();
+                pdf = await loadPdfDocument(arrayBuffer);
             } else if (documentSource.fileUrl && !documentSource.fileUrl.startsWith('blob:')) {
                 const correctedFileUrl = documentSource.fileUrl.startsWith('/public') ? documentSource.fileUrl : `/public${documentSource.fileUrl}`;
                 const fullUrl = `${BACKEND_URL}${correctedFileUrl}`;
@@ -71,16 +78,22 @@ const Step1_DocumentSelection: React.FC<StepProps> = ({ onNext }) => {
                 const arrayBuffer = await response.arrayBuffer();
                 pdf = await loadPdfDocument(arrayBuffer);
             } else {
+                renderingRef.current = false; // 🔥 RESET flag
                 return;
             }
-            await renderPdfPageToCanvas(pdf, 1, canvasRef.current, 0.8);
+
+            if (canvasRef.current) {
+                // 🔥 CHECK again before rendering
+                await renderPdfPageToCanvas(pdf, 1, canvasRef.current, 0.8);
+            }
         } catch (error: any) {
             console.error('Error rendering PDF preview:', error);
             setRenderError(`Failed to render PDF preview: ${error.message}`);
-            toast.error(`Failed to render PDF preview: ${error.message}`);
+            // 🔥 REMOVE toast from here to prevent duplicate errors
+        } finally {
+            renderingRef.current = false; // 🔥 ALWAYS reset flag
         }
     }, []);
-
     const formik = useFormik({
         initialValues: {
             documentTitle: currentPackage?.name || '',
@@ -90,7 +103,7 @@ const Step1_DocumentSelection: React.FC<StepProps> = ({ onNext }) => {
         }),
         onSubmit: async (values) => {
             if (!currentPackage || (!currentPackage.fileUrl && !currentPackage.fileData)) {
-                toast.error('Please select a document before proceeding.');
+                toast.error('Please upload or select a document before proceeding.');
                 return;
             }
             if (currentPackage.name !== values.documentTitle) {
@@ -114,8 +127,15 @@ const Step1_DocumentSelection: React.FC<StepProps> = ({ onNext }) => {
     useEffect(() => {
         if (currentPackage) {
             setSelectedTemplateId(currentPackage.templateId || null);
-            if (currentPackage.fileData || currentPackage.fileUrl) {
-                renderPdfPreview(currentPackage);
+
+            // 🔥 FIX: Only render if canvas is mounted AND we have document data
+            if ((currentPackage.fileData || currentPackage.fileUrl || currentPackage.downloadUrl) && canvasRef.current) {
+                // Small delay to ensure canvas is fully mounted
+                setTimeout(() => {
+                    if (canvasRef.current) {
+                        renderPdfPreview(currentPackage);
+                    }
+                }, 100);
             }
         } else {
             formik.resetForm();
@@ -125,7 +145,7 @@ const Step1_DocumentSelection: React.FC<StepProps> = ({ onNext }) => {
                 context?.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
             }
         }
-    }, [currentPackage, renderPdfPreview]);
+    }, [currentPackage]); // 🔥 REMOVE renderPdfPreview from dependencies to prevent loops
 
     const handleFileChange = async (file: File) => {
         if (!file || file.type !== 'application/pdf') {
@@ -143,6 +163,7 @@ const Step1_DocumentSelection: React.FC<StepProps> = ({ onNext }) => {
                     name: file.name.replace(/\.pdf$/, ''),
                     attachment_uuid: resultAction.attachment_uuid,
                     fileUrl: resultAction.fileUrl,
+                    s3Key: resultAction.s3Key, // 👈 ADD THIS
                     fileData: fileData,
                     fields: [],
                     templateId: undefined,
@@ -186,8 +207,16 @@ const Step1_DocumentSelection: React.FC<StepProps> = ({ onNext }) => {
     const handleTemplateSelect = async (e: React.ChangeEvent<HTMLSelectElement>) => {
         const templateId = e.target.value;
         if (!templateId) {
-            dispatch(startPackageCreation({ name: 'New Package' }));
+            // Instead of creating a new package, just clear the current one
+            dispatch(setCurrentPackage(null));
             setSelectedTemplateId(null);
+            formik.resetForm();
+
+            // Clear canvas
+            if (canvasRef.current) {
+                const context = canvasRef.current.getContext('2d');
+                context?.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+            }
             return;
         }
 
@@ -195,18 +224,22 @@ const Step1_DocumentSelection: React.FC<StepProps> = ({ onNext }) => {
         setRenderError(null);
         try {
             const template = await dispatch(getTemplateById(templateId)).unwrap();
-            const correctedFileUrl = template.fileUrl.startsWith('/public') ? template.fileUrl : `/public${template.fileUrl}`;
-            const fullUrl = `${BACKEND_URL}${correctedFileUrl}`;
-            const response = await fetch(fullUrl, { mode: 'cors' });
-            if (!response.ok) throw new Error(`Failed to fetch template PDF: ${response.statusText}`);
-            const fileData = await response.arrayBuffer();
+            let fileData: ArrayBuffer | null = null;
+
+            if (template.downloadUrl) {
+                const response = await fetch(template.downloadUrl, { mode: 'cors' });
+                if (!response.ok) throw new Error(`Failed to fetch template PDF: ${response.statusText}`);
+                fileData = await response.arrayBuffer();
+            }
 
             dispatch(
                 startPackageCreation({
                     name: template.name,
                     attachment_uuid: template.attachment_uuid,
                     fileUrl: template.fileUrl,
-                    fileData: fileData,
+                    s3Key: template.s3Key, // 👈 ADD THIS
+                    downloadUrl: template.downloadUrl, // 👈 ADD THIS
+                    fileData: fileData || undefined,
                     templateId: template._id,
                     fields: template.fields.map((f) => ({ ...f, assignedUsers: [] })),
                 })
@@ -224,18 +257,18 @@ const Step1_DocumentSelection: React.FC<StepProps> = ({ onNext }) => {
     };
 
     return (
-        <div className="p-8">
+        <div className="p-8 dark:bg-gray-900">
             <div className="max-w-6xl mx-auto">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     {/* Left Column - Document Selection */}
                     <div className="space-y-6">
                         <div>
-                            <h2 className="text-2xl font-bold text-gray-900 mb-2">Choose Document Source</h2>
-                            <p className="text-gray-600">Select an existing template or upload a new PDF document</p>
+                            <h2 className="text-2xl font-bold mb-2">Choose Document Source</h2>
+                            <p>Select an existing template or upload a new PDF document</p>
                         </div>
 
                         {/* Template Selection */}
-                        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-200">
+                        <div className="bg-gradient-to-r dark:bg-gray-900 from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-200">
                             <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
                                 <FiFileTyped className="text-blue-600" />
                                 Use Existing Template
@@ -271,8 +304,8 @@ const Step1_DocumentSelection: React.FC<StepProps> = ({ onNext }) => {
                             </h3>
                             <div
                                 className={`
-                                    relative border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-all duration-300
-                                    ${isDragOver ? 'border-green-500 bg-green-100' : 'border-green-300 hover:border-green-500 hover:bg-green-50'}
+                                    relative border-2 border-dashed rounded-lg p-8 text-center
+                                    ${isDragOver ? 'border-green-500 bg-green-100' : 'border-gray-300 bg-gray-50'}
                                 `}
                                 onClick={() => fileInputRef.current?.click()}
                                 onDrop={handleDrop}

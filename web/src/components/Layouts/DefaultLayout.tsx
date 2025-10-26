@@ -8,6 +8,7 @@ import Header from './Header';
 import Setting from './Setting';
 import Sidebar from './Sidebar';
 import Portals from '../../components/Portals';
+import ChatWidget from '../Chatbot/ChatWidget'; // NEW
 
 const DefaultLayout = ({ children }: PropsWithChildren) => {
     const themeConfig = useSelector((state: IRootState) => state.themeConfig);
@@ -100,6 +101,7 @@ const DefaultLayout = ({ children }: PropsWithChildren) => {
                         <Portals />
                     </div>
                 </div>
+                <ChatWidget />
             </div>
         </App>
     );

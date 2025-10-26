@@ -9,12 +9,14 @@ export interface UploadDocumentResponse {
     attachment_uuid: string;
     originalFileName: string;
     fileUrl: string;
+    s3Key: string;
 }
 
 export interface SaveTemplatePayload {
     name: string;
     attachment_uuid: string;
     fileUrl: string;
+    s3Key: string;
     fields: DocumentField[];
 }
 
@@ -24,6 +26,7 @@ export interface UpdateTemplatePayload {
     fields?: DocumentField[];
 }
 
+// 👇 UPDATE uploadDocument to handle s3Key
 export const uploadDocument = createAsyncThunk<UploadDocumentResponse, File>('templates/uploadDocument', async (file, { dispatch, rejectWithValue }) => {
     try {
         const formData = new FormData();
@@ -44,6 +47,7 @@ export const uploadDocument = createAsyncThunk<UploadDocumentResponse, File>('te
                 name: file.name,
                 attachment_uuid: data.attachment_uuid,
                 fileUrl: data.fileUrl,
+                s3Key: data.s3Key, // 👈 ADD THIS
                 fileData: arrayBuffer,
                 fields: [],
             })
@@ -53,12 +57,14 @@ export const uploadDocument = createAsyncThunk<UploadDocumentResponse, File>('te
             attachment_uuid: data.attachment_uuid,
             originalFileName: file.name,
             fileUrl: data.fileUrl,
+            s3Key: data.s3Key, // 👈 ADD THIS
         };
     } catch (error: any) {
         return rejectWithValue(error.response?.data?.error || 'Failed to upload document.');
     }
 });
 
+// 👇 UPDATE saveTemplate to send s3Key
 export const saveTemplate = createAsyncThunk<DocumentTemplate, SaveTemplatePayload>('templates/saveTemplate', async (templateData, { rejectWithValue }) => {
     try {
         const response = await api.post('/api/templates', templateData);
@@ -112,12 +118,11 @@ export const getTemplateById = createAsyncThunk<DocumentTemplate, string>('templ
     }
 });
 
+// 👇 UPDATE saveOrUpdateTemplateFromPackage to include s3Key
 export const saveOrUpdateTemplateFromPackage = createAsyncThunk<DocumentTemplate, DocumentPackage>('templates/saveOrUpdateFromPackage', async (packageData, { rejectWithValue }) => {
     try {
-        // Strip package-specific data (like assigned users) to create a clean template payload
         const templateFields = packageData.fields.map(({ assignedUsers, ...rest }) => rest);
 
-        // If the package was created from a template, update the existing template
         if (packageData.templateId) {
             const payload: UpdateTemplatePayload = {
                 templateId: packageData.templateId,
@@ -127,14 +132,17 @@ export const saveOrUpdateTemplateFromPackage = createAsyncThunk<DocumentTemplate
             const response = await api.patch(`/api/templates/${payload.templateId}`, payload);
             toast.success('Template updated successfully!');
             return response.data.data;
-        }
+        } else {
+            // 👇 ENSURE s3Key is included when creating new template
+            if (!packageData.s3Key) {
+                throw new Error('S3 key is required to create a template');
+            }
 
-        // Otherwise, create a new template
-        else {
             const payload: SaveTemplatePayload = {
                 name: packageData.name,
                 attachment_uuid: packageData.attachment_uuid,
                 fileUrl: packageData.fileUrl,
+                s3Key: packageData.s3Key, // 👈 ADD THIS
                 fields: templateFields,
             };
             const response = await api.post('/api/templates', payload);

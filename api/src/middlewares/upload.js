@@ -1,80 +1,9 @@
 // middlewares/uploadMiddleware.js
 const multer = require("multer");
 const path = require("path");
-const fs = require("fs").promises;
-const { v4: uuidv4 } = require("uuid");
 
-// Create a function to ensure a directory exists
-const ensureExists = async (path, mask = 0o755) => {
-  try {
-    await fs.mkdir(path, { mode: mask, recursive: true });
-  } catch (err) {
-    if (err.code !== "EEXIST") {
-      console.error("Could not create upload directory.", err);
-      throw err;
-    }
-  }
-};
-
-// Define storage configuration for profile images
-const profileImageStorage = multer.diskStorage({
-  destination: async (req, file, cb) => {
-    const uploadPath = path.join(__dirname, "../public/uploads/avatars");
-    try {
-      await ensureExists(uploadPath);
-      cb(null, uploadPath);
-    } catch (err) {
-      cb(err);
-    }
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    const filename = `${req.user.id}-${
-      file.fieldname
-    }-${uniqueSuffix}${path.extname(file.originalname)}`;
-    cb(null, filename);
-  },
-});
-
-// Define storage configuration for template PDFs
-const templateStorage = multer.diskStorage({
-  destination: async (req, file, cb) => {
-    const uploadPath = path.join(__dirname, "../public/uploads/templates");
-    try {
-      await ensureExists(uploadPath);
-      cb(null, uploadPath);
-    } catch (err) {
-      cb(err);
-    }
-  },
-  filename: (req, file, cb) => {
-    const attachment_uuid = `cs_test_${uuidv4()}`;
-    const filename = `${attachment_uuid}${path.extname(file.originalname)}`;
-    req.attachment_uuid = attachment_uuid;
-    req.fileUrl = `/public/uploads/templates/${filename}`;
-    cb(null, filename);
-  },
-});
-
-// Define storage configuration for package PDFs
-const packageStorage = multer.diskStorage({
-  destination: async (req, file, cb) => {
-    const uploadPath = path.join(__dirname, "../public/uploads/packages");
-    try {
-      await ensureExists(uploadPath);
-      cb(null, uploadPath);
-    } catch (err) {
-      cb(err);
-    }
-  },
-  filename: (req, file, cb) => {
-    const attachment_uuid = `cs_pkg_${uuidv4()}`;
-    const filename = `${attachment_uuid}${path.extname(file.originalname)}`;
-    req.attachment_uuid = attachment_uuid;
-    req.fileUrl = `/public/uploads/packages/${filename}`;
-    cb(null, filename);
-  },
-});
+// Use memory storage instead of disk storage for S3 uploads
+const memoryStorage = multer.memoryStorage();
 
 // Define file filter for images
 const imageFileFilter = (req, file, cb) => {
@@ -97,7 +26,7 @@ const pdfFileFilter = (req, file, cb) => {
 
 // Create Multer upload instance for profile images
 const uploadProfileImage = multer({
-  storage: profileImageStorage,
+  storage: memoryStorage,
   fileFilter: imageFileFilter,
   limits: {
     fileSize: 1024 * 1024 * 5, // 5MB file size limit
@@ -106,7 +35,7 @@ const uploadProfileImage = multer({
 
 // Create Multer upload instance for template PDFs
 const uploadTemplate = multer({
-  storage: templateStorage,
+  storage: memoryStorage,
   fileFilter: pdfFileFilter,
   limits: {
     fileSize: 1024 * 1024 * 10, // 10MB file size limit for PDFs
@@ -115,15 +44,94 @@ const uploadTemplate = multer({
 
 // Create Multer upload instance for package PDFs
 const uploadPackage = multer({
-  storage: packageStorage,
+  storage: memoryStorage,
   fileFilter: pdfFileFilter,
   limits: {
     fileSize: 1024 * 1024 * 10, // 10MB file size limit for PDFs
   },
 }).single("file");
 
+/**
+ * Middleware to handle S3 upload after multer processes the file
+ * This should be used after the multer middleware
+ */
+const handleS3Upload = (folder) => {
+  return async (req, res, next) => {
+    if (!req.file) {
+      return next();
+    }
+
+    try {
+      const s3Service = req.container.resolve("s3Service");
+
+      // Upload to S3
+      const result = await s3Service.uploadFile(
+        req.file.buffer,
+        req.file.originalname,
+        folder,
+        req.file.mimetype,
+        req.user?.id || null
+      );
+
+      // Attach S3 info to request for use in controllers
+      req.s3File = {
+        key: result.key,
+        url: result.url,
+        attachment_uuid: result.attachment_uuid,
+        bucket: result.bucket,
+        originalName: req.file.originalname,
+        mimeType: req.file.mimetype,
+        size: req.file.size,
+      };
+
+      // For backward compatibility with existing code
+      if (result.attachment_uuid) {
+        req.attachment_uuid = result.attachment_uuid;
+      }
+      req.fileUrl = result.url;
+      req.s3Key = result.key;
+
+      next();
+    } catch (error) {
+      console.error("S3 Upload Middleware Error:", error);
+      return res.status(500).json({
+        success: false,
+        message: "Failed to upload file to cloud storage",
+        error: error.message,
+      });
+    }
+  };
+};
+
+/**
+ * Combined middleware for profile image upload
+ */
+const uploadAndStoreProfileImage = [
+  uploadProfileImage,
+  handleS3Upload("avatars"),
+];
+
+/**
+ * Combined middleware for template PDF upload
+ */
+const uploadAndStoreTemplate = [uploadTemplate, handleS3Upload("templates")];
+
+/**
+ * Combined middleware for package PDF upload
+ */
+const uploadAndStorePackage = [uploadPackage, handleS3Upload("packages")];
+
 module.exports = {
+  // Original multer middleware (for backward compatibility)
   uploadProfileImage,
   uploadTemplate,
   uploadPackage,
+
+  // New S3-enabled middleware (use these)
+  uploadAndStoreProfileImage,
+  uploadAndStoreTemplate,
+  uploadAndStorePackage,
+
+  // Individual S3 handler (for custom use)
+  handleS3Upload,
 };

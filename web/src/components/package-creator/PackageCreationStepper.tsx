@@ -1,4 +1,5 @@
 import React, { ComponentType, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, IRootState } from '../../store';
 import Step1_DocumentSelection from './Step1_DocumentSelection';
@@ -25,6 +26,7 @@ interface StepperStepProps {
 
 const PackageCreationStepper: React.FC = () => {
     const dispatch = useDispatch<AppDispatch>();
+    const navigate = useNavigate();
     const { activeStep, currentPackage, loading, error } = useSelector((state: IRootState) => state.packages);
 
     const steps = [
@@ -55,7 +57,10 @@ const PackageCreationStepper: React.FC = () => {
             dispatch(clearPackageState());
         }
     };
-
+    const extractTemplateId = (templateId: string | { _id: string; [key: string]: any } | undefined): string | undefined => {
+        if (!templateId) return undefined;
+        return typeof templateId === 'object' ? templateId._id : templateId;
+    };
     const handleSaveDraft = async () => {
         if (!currentPackage) {
             toast.error('No package to save.');
@@ -65,12 +70,23 @@ const PackageCreationStepper: React.FC = () => {
         try {
             await dispatch(
                 savePackage({
-                    ...currentPackage, // Pass the whole currentPackage object
+                    _id: currentPackage._id, // 🔥 ADD THIS - Include for updates
+                    attachment_uuid: currentPackage.attachment_uuid,
+                    name: currentPackage.name,
+                    fileUrl: currentPackage.fileUrl,
+                    s3Key: currentPackage.s3Key,
+                    fields: currentPackage.fields,
+                    receivers: currentPackage.receivers,
+                    options: currentPackage.options,
+                    // 🔥 FIX: Extract templateId string from object if present
+                    templateId: extractTemplateId(currentPackage.templateId), // currentPackage.templateId,
+                    customMessage: currentPackage.customMessage,
                     status: 'Draft',
                 })
             ).unwrap();
             toast.success('Draft saved successfully!');
             dispatch(clearPackageState());
+            navigate('/dashboard');
         } catch (err: any) {
             toast.error(err || 'Failed to save draft.');
         }
@@ -82,10 +98,9 @@ const PackageCreationStepper: React.FC = () => {
             return;
         }
         try {
-            // Use the new thunk which handles both create and update logic
             await dispatch(saveOrUpdateTemplateFromPackage(currentPackage)).unwrap();
-            // The success toast is now handled within the thunk itself.
-            dispatch(clearPackageState()); // Go back to dashboard on success
+            dispatch(clearPackageState());
+            navigate('/dashboard');
         } catch (err: any) {
             toast.error(err || 'Failed to save as template.');
         }
@@ -116,19 +131,24 @@ const PackageCreationStepper: React.FC = () => {
         try {
             await dispatch(
                 savePackage({
+                    _id: currentPackage._id, // 🔥 ADD THIS - Include for updates
                     attachment_uuid: currentPackage.attachment_uuid,
                     name: currentPackage.name,
                     fileUrl: currentPackage.fileUrl,
+                    s3Key: currentPackage.s3Key || '',
                     fields: currentPackage.fields,
                     receivers: currentPackage.receivers,
                     options: currentPackage.options,
-                    templateId: currentPackage.templateId,
-                    status: 'Sent', // Set for confirmation
+                    // 🔥 FIX: Extract templateId string from object if present
+                    templateId: extractTemplateId(currentPackage.templateId), // currentPackage.templateId,
+                    customMessage: currentPackage.customMessage,
+                    status: 'Sent',
                     saveAsTemplate: false,
                 })
             ).unwrap();
             toast.success('Package saved and sent successfully!');
             dispatch(clearPackageState());
+            navigate('/dashboard');
         } catch (err: any) {
             toast.error(err || 'Failed to save package.');
         }
@@ -145,40 +165,65 @@ const PackageCreationStepper: React.FC = () => {
         if (activeStep === 0) {
             return !!(currentPackage.name.trim() && (currentPackage.fileUrl || currentPackage.fileData) && currentPackage.attachment_uuid);
         }
+        if (activeStep === 1) {
+            // Check if at least one field has been added to the document
+            return currentPackage.fields.length > 0;
+        }
         return true;
     };
 
     const canGoPrevious = () => {
-        return true; // Always allow going back, even from step 0 to dashboard
+        return true;
     };
 
+    const isEditingDraft = currentPackage?._id && /^[a-f\d]{24}$/i.test(currentPackage._id);
+
     return (
-        <div className="min-h-screen bg-slate-50">
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
             {/* Header with Stepper */}
-            <div className="border-b border-slate-200">
-                <div className="max-w-4xl mx-auto px-6 pt-6 pb-6">
-                    <div className="text-center mb-8">
-                        <h1 className="text-2xl font-semibold text-slate-900 mb-2">Create Document Package</h1>
-                        <p className="text-slate-600 text-sm">Configure your document for signature collection</p>
+            <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0">
+                <div className="max-w-6xl mx-auto px-2 sm:px-4 py-2 sm:py-3">
+                    {/* Compact Title - Hidden on mobile */}
+                    <div className="text-center mb-2 hidden sm:block">
+                        <h1 className="text-sm sm:text-base md:text-lg font-semibold text-gray-900 dark:text-white">{isEditingDraft ? 'Edit Draft Package' : 'Create Package'}</h1>
                     </div>
-                    <div className="flex justify-center">
-                        <div className="flex items-center">
+
+                    {/* Progress Steps */}
+                    <div className="flex justify-center overflow-x-auto">
+                        <div className="flex items-center space-x-2 sm:space-x-4 md:space-x-6 min-w-max px-2">
                             {steps.map((step, index) => (
                                 <React.Fragment key={index}>
                                     <div className="flex items-center">
                                         <div
-                                            className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-colors duration-200 cursor-pointer ${
-                                                activeStep >= index ? 'bg-slate-800 text-white' : 'bg-slate-200 text-slate-500 hover:bg-slate-300'
-                                            }`}
+                                            className={`
+                        w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center text-xs font-medium 
+                        transition-colors duration-200 cursor-pointer flex-shrink-0
+                        ${activeStep >= index ? 'bg-blue-600 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-500 hover:bg-gray-300 dark:hover:bg-gray-600'}
+                      `}
                                             onClick={() => {
                                                 if (index <= activeStep) dispatch(setPackageActiveStep(index));
                                             }}
                                         >
-                                            {activeStep > index ? <FiCheckTyped className="w-4 h-4" /> : index + 1}
+                                            {activeStep > index ? <FiCheckTyped className="w-3 h-3 sm:w-4 sm:h-4" /> : index + 1}
                                         </div>
-                                        <span className={`ml-3 text-sm font-medium ${activeStep >= index ? 'text-slate-900' : 'text-slate-500'}`}>{step.label}</span>
+                                        <span
+                                            className={`
+                      ml-1.5 sm:ml-2 text-xs sm:text-sm font-medium whitespace-nowrap
+                      ${activeStep >= index ? 'text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400'}
+                    `}
+                                        >
+                                            <span className="hidden md:inline">{step.label}</span>
+                                            <span className="md:hidden">{index === 0 ? 'Select' : index === 1 ? 'Assign' : 'Review'}</span>
+                                        </span>
                                     </div>
-                                    {index < steps.length - 1 && <div className={`w-16 h-px mx-6 ${activeStep > index ? 'bg-slate-800' : 'bg-slate-200'}`} />}
+                                    {index < steps.length - 1 && (
+                                        <div
+                                            className={`
+                      w-8 sm:w-12 md:w-16 h-px flex-shrink-0
+                      ${activeStep > index ? 'bg-blue-600' : 'bg-gray-300 dark:bg-gray-600'}
+                    `}
+                                        />
+                                    )}
                                 </React.Fragment>
                             ))}
                         </div>
@@ -186,29 +231,42 @@ const PackageCreationStepper: React.FC = () => {
                 </div>
             </div>
 
-            {/* Content with Vertical Navigation */}
-            <div className="flex min-h-[calc(100vh-220px)]">
-                <div className="flex-shrink-0 flex items-center justify-center px-4" style={{ width: '5%' }}>
-                    <div className="flex flex-col gap-4">
+            {/* Main Content with Fixed Left Actions */}
+            <div className="relative">
+                {/* Content with left padding to avoid overlap */}
+                <div className="pl-20">
+                    <CurrentStepComponent {...stepProps} />
+                </div>
+
+                {/* Fixed Action Buttons - Left Center */}
+                <div className="fixed left-1/8 top-1/2 transform -translate-y-1/2 z-50">
+                    <div className="flex flex-col items-center gap-4">
+                        {/* Previous Button */}
                         <button
                             onClick={handlePrevious}
                             disabled={loading || !canGoPrevious()}
-                            className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-200 shadow-lg ${
-                                canGoPrevious() && !loading
-                                    ? 'text-slate-700 bg-white border border-slate-300 hover:border-slate-400 hover:shadow-xl hover:-translate-y-1'
-                                    : 'text-slate-400 bg-slate-100 border border-slate-200 cursor-not-allowed'
-                            }`}
+                            className={`
+                w-12 h-12 rounded-full flex items-center justify-center transition-all duration-200 shadow-lg
+                ${
+                    canGoPrevious() && !loading
+                        ? 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500 hover:shadow-xl'
+                        : 'bg-gray-200 dark:bg-gray-800 text-gray-400 cursor-not-allowed border border-gray-200 dark:border-gray-700'
+                }
+              `}
                             title={activeStep === 0 ? 'Back to Dashboard' : 'Previous Step'}
                         >
                             <FiArrowLeftTyped className="w-5 h-5" />
                         </button>
+
+                        {/* Next/Action Buttons */}
                         {activeStep < steps.length - 1 ? (
                             <button
                                 onClick={handleNext}
                                 disabled={loading || !canGoNext()}
-                                className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-200 shadow-lg ${
-                                    canGoNext() && !loading ? 'text-white bg-slate-800 hover:bg-slate-900 hover:shadow-xl hover:-translate-y-1' : 'text-slate-400 bg-slate-200 cursor-not-allowed'
-                                }`}
+                                className={`
+                  w-12 h-12 rounded-full flex items-center justify-center transition-all duration-200 shadow-lg
+                  ${canGoNext() && !loading ? 'bg-blue-600 hover:bg-blue-700 text-white hover:shadow-xl' : 'bg-gray-300 dark:bg-gray-700 text-gray-500 cursor-not-allowed'}
+                `}
                                 title="Next Step"
                             >
                                 <FiArrowRightTyped className="w-5 h-5" />
@@ -218,7 +276,7 @@ const PackageCreationStepper: React.FC = () => {
                                 <button
                                     onClick={handleSaveDraft}
                                     disabled={loading}
-                                    className="w-12 h-12 rounded-full flex items-center justify-center transition-all duration-200 shadow-lg text-slate-700 bg-white border border-slate-300 hover:border-slate-400 hover:shadow-xl hover:-translate-y-1"
+                                    className="w-12 h-12 rounded-full flex items-center justify-center transition-all duration-200 shadow-lg bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500 hover:shadow-xl"
                                     title="Save as Draft"
                                 >
                                     <FiFileTextTyped className="w-5 h-5" />
@@ -226,7 +284,7 @@ const PackageCreationStepper: React.FC = () => {
                                 <button
                                     onClick={handleSaveAsTemplate}
                                     disabled={loading}
-                                    className="w-12 h-12 rounded-full flex items-center justify-center transition-all duration-200 shadow-lg text-white bg-blue-600 hover:bg-blue-700 hover:shadow-xl hover:-translate-y-1"
+                                    className="w-12 h-12 rounded-full flex items-center justify-center transition-all duration-200 shadow-lg bg-blue-600 hover:bg-blue-700 text-white hover:shadow-xl"
                                     title="Save as Template"
                                 >
                                     <FiLayersTyped className="w-5 h-5" />
@@ -234,11 +292,10 @@ const PackageCreationStepper: React.FC = () => {
                                 <button
                                     onClick={handleConfirmPackage}
                                     disabled={loading || !canGoNext()}
-                                    className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-200 shadow-lg ${
-                                        canGoNext() && !loading
-                                            ? 'text-white bg-emerald-600 hover:bg-emerald-700 hover:shadow-xl hover:-translate-y-1'
-                                            : 'text-slate-400 bg-slate-200 cursor-not-allowed'
-                                    }`}
+                                    className={`
+                    w-12 h-12 rounded-full flex items-center justify-center transition-all duration-200 shadow-lg
+                    ${canGoNext() && !loading ? 'bg-green-600 hover:bg-green-700 text-white hover:shadow-xl' : 'bg-gray-300 dark:bg-gray-700 text-gray-500 cursor-not-allowed'}
+                  `}
                                     title={loading ? 'Saving Package...' : 'Confirm & Send Package'}
                                 >
                                     {loading ? <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div> : <FiCheckTyped className="w-5 h-5" />}
@@ -246,9 +303,6 @@ const PackageCreationStepper: React.FC = () => {
                             </>
                         )}
                     </div>
-                </div>
-                <div className="flex-1" style={{ width: '95%' }}>
-                    <CurrentStepComponent {...stepProps} />
                 </div>
             </div>
         </div>

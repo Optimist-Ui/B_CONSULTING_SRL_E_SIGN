@@ -1,6 +1,3 @@
-const fs = require("fs").promises;
-const path = require("path");
-
 class PackageService {
   constructor({
     Package,
@@ -12,6 +9,7 @@ class PackageService {
     smsService,
     pdfModificationService,
     packageEventEmitter,
+    s3Service,
   }) {
     this.Package = Package;
     this.Contact = Contact;
@@ -22,17 +20,26 @@ class PackageService {
     this.SmsService = smsService;
     this.pdfModifier = pdfModificationService;
     this.packageEventEmitter = packageEventEmitter;
+    this.s3Service = s3Service; // 👈 ADD THIS
   }
 
-  async uploadPackage(userId, { attachment_uuid, fileUrl }) {
+  async uploadPackage(userId, s3File) {
+    if (!s3File) {
+      throw new Error("No file uploaded.");
+    }
     const existingPackage = await this.Package.findOne({
       ownerId: userId,
-      attachment_uuid,
+      attachment_uuid: s3File.attachment_uuid,
     });
     if (existingPackage) {
       throw new Error("A package with this attachment UUID already exists.");
     }
-    return { attachment_uuid, fileUrl };
+    return {
+      attachment_uuid: s3File.attachment_uuid,
+      originalFileName: s3File.originalName,
+      fileUrl: s3File.url, // S3 URL
+      s3Key: s3File.key, // ✅ S3 key for operations
+    };
   }
 
   async createPackage(userId, packageData) {
@@ -44,7 +51,9 @@ class PackageService {
       receivers,
       options,
       templateId,
+      customMessage,
       status,
+      s3Key,
     } = packageData;
 
     if (templateId) {
@@ -65,6 +74,10 @@ class PackageService {
           "Attachment UUID and file URL must match the selected template."
         );
       }
+    }
+
+    if (!s3Key) {
+      throw new Error("S3 key is required to create a package.");
     }
 
     const allContactIds = [
@@ -91,18 +104,41 @@ class PackageService {
       attachment_uuid,
       name,
       fileUrl,
+      s3Key,
       fields,
       receivers,
       options,
+      customMessage,
       status: status || "Draft",
     });
 
     // If the package was successfully created with a 'Sent' status, send the notifications.
     if (newPackage && newPackage.status === "Sent") {
+      // 🔥 NEW: Calculate credits based on unique signers
+      const { uniqueSignerCount, creditsNeeded } =
+        this._calculateDocumentCredits(newPackage);
+
+      console.log(
+        `Package has ${uniqueSignerCount} unique signer(s), consuming ${creditsNeeded} credit(s)`
+      );
+
+      // Fetch the user and increment usage by the calculated credits
+      const user = await this.User.findById(userId);
+      if (user) {
+        // Increment multiple times based on credits needed
+        for (let i = 0; i < creditsNeeded; i++) {
+          const success = user.incrementDocumentUsage();
+          if (!success) {
+            throw new Error(
+              `Insufficient document credits. This package requires ${creditsNeeded} credit(s) but you don't have enough remaining.`
+            );
+          }
+        }
+        await user.save();
+      }
+
       const packageCreator = await this.User.findById(userId);
       const senderName = `${packageCreator.firstName} ${packageCreator.lastName}`;
-
-      // This is a private helper function to avoid code duplication
       await this._sendInitialNotifications(newPackage, senderName);
     }
 
@@ -161,6 +197,27 @@ class PackageService {
         this.Package.countDocuments(query),
       ]);
 
+      // 👈 ADD THIS - Generate signed URLs for all packages
+      const packagesWithSignedUrls = await Promise.all(
+        packages.map(async (pkg) => {
+          if (pkg.s3Key) {
+            try {
+              pkg.downloadUrl = await this.s3Service.getSignedUrl(
+                pkg.s3Key,
+                3600 // 1 hour
+              );
+            } catch (error) {
+              console.error(
+                `Failed to generate signed URL for package ${pkg._id}:`,
+                error
+              );
+              pkg.downloadUrl = pkg.fileUrl; // Fallback
+            }
+          }
+          return pkg;
+        })
+      );
+
       // 3. Transform the raw DB data into the exact format the frontend expects
       const transformedDocuments = await this._transformPackagesForFrontend(
         packages
@@ -186,12 +243,32 @@ class PackageService {
       _id: packageId,
       ownerId: userId,
     }).populate("templateId", "name attachment_uuid fileUrl");
+
     if (!packageData) {
       throw new Error(
         "Package not found or you do not have permission to view it."
       );
     }
-    return packageData;
+
+    const packageObj = packageData.toObject();
+
+    // 👈 ADD THIS - Generate signed URL for downloading
+    if (packageData.s3Key) {
+      try {
+        packageObj.downloadUrl = await this.s3Service.getSignedUrl(
+          packageData.s3Key,
+          3600 // 1 hour
+        );
+      } catch (error) {
+        console.error(
+          `Failed to generate signed URL for package ${packageData._id}:`,
+          error
+        );
+        packageObj.downloadUrl = packageData.fileUrl; // Fallback
+      }
+    }
+
+    return packageObj;
   }
 
   async updatePackage(userId, packageId, updateData) {
@@ -211,6 +288,8 @@ class PackageService {
     delete safeUpdateData.ownerId;
     delete safeUpdateData._id;
     delete safeUpdateData.templateId;
+    delete safeUpdateData.s3Key;
+    delete safeUpdateData.fileUrl;
 
     if (safeUpdateData.fields || safeUpdateData.receivers) {
       const allContactIds = [
@@ -244,15 +323,51 @@ class PackageService {
       );
     }
 
+    // Check if status changed from a non-sent state to "Sent"
     if (
       packageBeforeUpdate.status !== "Sent" &&
       packageData.status === "Sent"
     ) {
+      // 🔥 NEW: Calculate credits based on unique signers
+      const { uniqueSignerCount, creditsNeeded } =
+        this._calculateDocumentCredits(packageData);
+
+      console.log(
+        `Package has ${uniqueSignerCount} unique signer(s), consuming ${creditsNeeded} credit(s)`
+      );
+
+      // Fetch the user and increment usage by the calculated credits
+      const user = await this.User.findById(userId);
+      if (user) {
+        // Increment multiple times based on credits needed
+        for (let i = 0; i < creditsNeeded; i++) {
+          const success = user.incrementDocumentUsage();
+          if (!success) {
+            throw new Error(
+              `Insufficient document credits. This package requires ${creditsNeeded} credit(s) but you don't have enough remaining.`
+            );
+          }
+        }
+        await user.save();
+      }
+
       const packageCreator = await this.User.findById(userId);
       const senderName = `${packageCreator.firstName} ${packageCreator.lastName}`;
 
-      // Call the same helper function
       await this._sendInitialNotifications(packageData, senderName);
+    }
+
+    // Return with signed URL
+    const packageObj = packageData.toObject();
+    if (packageData.s3Key) {
+      try {
+        packageObj.downloadUrl = await this.s3Service.getSignedUrl(
+          packageData.s3Key,
+          3600
+        );
+      } catch (error) {
+        console.error("Failed to generate signed URL:", error);
+      }
     }
 
     return packageData;
@@ -269,17 +384,14 @@ class PackageService {
       );
     }
 
-    if (!packageData.templateId) {
-      const cleanRelativePath = packageData.fileUrl
-        .replace("/Uploads/", "/uploads/")
-        .replace("/public/uploads/", "/uploads/")
-        .replace(/^\/uploads\//, "uploads/");
-
-      const filePath = path.join(__dirname, "../..", cleanRelativePath);
+    // 👈 ADD THIS - Delete file from S3
+    if (packageData.s3Key) {
       try {
-        await fs.unlink(filePath);
-      } catch (err) {
-        console.error("Failed to delete file:", err);
+        await this.s3Service.deleteFile(packageData.s3Key);
+        console.log(`Deleted package file from S3: ${packageData.s3Key}`);
+      } catch (error) {
+        console.error("Failed to delete package file from S3:", error);
+        // Continue with DB deletion even if S3 deletion fails
       }
     }
 
@@ -345,6 +457,22 @@ class PackageService {
     );
     const packageForParticipant = pkg.toObject();
 
+    // 👈 ADD THIS - Generate signed URL for downloading
+    if (pkg.s3Key) {
+      try {
+        packageForParticipant.downloadUrl = await this.s3Service.getSignedUrl(
+          pkg.s3Key,
+          3600 // 1 hour
+        );
+      } catch (error) {
+        console.error(
+          `Failed to generate signed URL for package ${pkg._id}:`,
+          error
+        );
+        packageForParticipant.downloadUrl = pkg.fileUrl; // Fallback
+      }
+    }
+
     // Step 4. Process fields to add necessary frontend data
     packageForParticipant.fields = pkg.fields.map((field) => {
       const fieldObj = field.toObject();
@@ -364,6 +492,10 @@ class PackageService {
             date: signer.signedAt.toISOString(),
             method: signedMethod,
           };
+          // --- Conditionally add the OTP code to the response ---
+          if (signer.signedWithOtp) {
+            signatureValue.otpCode = signer.signedWithOtp;
+          }
 
           // Conditionally add email or phone based on the method used
           if (signedMethod === "SMS OTP") {
@@ -495,10 +627,12 @@ class PackageService {
     if (
       !assignedUser ||
       assignedUser.role !== "Signer" ||
-      assignedUser.signatureMethod !== "Email OTP" ||
+      !assignedUser.signatureMethods.includes("Email OTP") || // <-- Change this line
       assignedUser.signed
     ) {
-      throw new Error("Invalid participant or signature already completed.");
+      throw new Error(
+        "Invalid participant, this signature method is not enabled, or the signature is already completed."
+      );
     }
 
     if (assignedUser.contactEmail !== email) {
@@ -554,7 +688,6 @@ class PackageService {
     // --- All checks passed ---
     await this.OTP.deleteOne({ _id: otpDoc._id });
 
-    // Use .populate() to get owner email for notifications later
     const pkg = await this.Package.findById(packageId).populate(
       "ownerId",
       "email"
@@ -564,28 +697,53 @@ class PackageService {
     }
     this.checkPackageExpiry(pkg);
 
-    const field = pkg.fields.find((f) => f.id === fieldId);
-    const assignedUser = field.assignedUsers.find(
+    // 🔥 NEW LOGIC: Find the current field and participant
+    const currentField = pkg.fields.find((f) => f.id === fieldId);
+    const assignedUser = currentField.assignedUsers.find(
       (au) => au.id === participantId
     );
 
     const signDate = new Date();
+    const participantContactId = assignedUser.contactId.toString();
 
-    // 1. Update the audit trail properties
-    assignedUser.signed = true;
-    assignedUser.signedAt = signDate;
-    assignedUser.signedMethod = "Email OTP";
-    assignedUser.signedIP = ip;
+    // 🔥 NEW: Find ALL signature fields assigned to this participant
+    const allSignatureFieldsForParticipant = pkg.fields.filter(
+      (field) =>
+        field.type === "signature" &&
+        field.assignedUsers.some(
+          (user) =>
+            user.contactId.toString() === participantContactId &&
+            user.role === "Signer" &&
+            !user.signed // Only apply to unsigned fields
+        )
+    );
 
-    // --- THIS IS THE FIX ---
-    // 2. Store the signature details in the `value` property for the UI
-    field.value = {
-      signedBy: assignedUser.contactName,
-      email: assignedUser.contactEmail,
-      date: signDate.toISOString(),
-      method: "Email OTP",
-    };
-    // ----------------------
+    // 🔥 Apply the signature to ALL matching fields at once
+    allSignatureFieldsForParticipant.forEach((field) => {
+      const userAssignment = field.assignedUsers.find(
+        (user) =>
+          user.contactId.toString() === participantContactId &&
+          user.role === "Signer"
+      );
+
+      if (userAssignment) {
+        // Update audit trail properties
+        userAssignment.signed = true;
+        userAssignment.signedAt = signDate;
+        userAssignment.signedMethod = "Email OTP";
+        userAssignment.signedIP = ip;
+        userAssignment.signedWithOtp = otp;
+
+        // Store signature details in field value for UI
+        field.value = {
+          signedBy: userAssignment.contactName,
+          email: userAssignment.contactEmail,
+          date: signDate.toISOString(),
+          method: "Email OTP",
+          otpCode: otp,
+        };
+      }
+    });
 
     // Check if the whole package is now completed
     if (this.isPackageCompleted(pkg)) {
@@ -593,92 +751,135 @@ class PackageService {
       const packageCreator = await this.User.findById(pkg.ownerId);
       const initiatorName = `${packageCreator.firstName} ${packageCreator.lastName}`;
       await this._sendCompletionNotifications(pkg, initiatorName);
+    } else {
+      await this._sendActionUpdateNotification(pkg, assignedUser);
     }
 
-    // Save all changes to the package
-    const updatedPackage = await pkg.save();
-
-    // Emit real-time update to initiator
+    await pkg.save();
     await this.emitPackageUpdate(pkg);
 
-    // --- THIS IS THE FIX ---
-    // 3. Return the entire updated package object in the correct structure
+    const updatedPackageForParticipant = await this.getPackageForParticipant(
+      packageId,
+      participantId
+    );
+
     return {
-      message: "Signature completed.",
-      package: updatedPackage, // The Redux thunk is expecting this structure
+      message: `Signature completed for ${allSignatureFieldsForParticipant.length} field(s).`,
+      package: updatedPackageForParticipant,
+      fieldsSignedCount: allSignatureFieldsForParticipant.length,
     };
-    // ----------------------
   }
 
   // SMS OTP METHODS
-  async sendSmsOTP(packageId, participantId, fieldId, phone) {
-    const pkg = await this.Package.findById(packageId);
-    if (!pkg || pkg.status !== "Sent") {
-      throw new Error("Package not found or not active.");
-    }
-    this.checkPackageExpiry(pkg);
-
-    const field = pkg.fields.find(
-      (f) => f.id === fieldId && f.type === "signature"
-    );
-    if (!field) {
-      throw new Error("Signature field not found.");
-    }
-
-    const assignedUser = field.assignedUsers.find(
-      (au) => au.id === participantId
-    );
-    if (
-      !assignedUser ||
-      assignedUser.role !== "Signer" ||
-      assignedUser.signatureMethod !== "SMS OTP" ||
-      assignedUser.signed
-    ) {
-      throw new Error(
-        "Invalid participant, wrong signature method, or signature already completed."
-      );
-    }
-
-    // Get and validate contact phone number
-    const contact = await this.Contact.findById(assignedUser.contactId);
-    if (!contact || !contact.phone) {
-      throw new Error("Contact phone number not found.");
-    }
-
-    // Normalize phone numbers for comparison
-    const normalizePhone = (phoneNum) => phoneNum.replace(/[^\d+]/g, "");
-    if (normalizePhone(contact.phone) !== normalizePhone(phone)) {
-      throw new Error("Phone number does not match assigned participant.");
-    }
-
-    // Generate 6-digit OTP
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const expiresAt = new Date(Date.now() + 60 * 1000); // 60 seconds
-
-    // Store OTP with method identifier
-    await this.OTP.deleteMany({ packageId, fieldId, participantId });
-    await this.OTP.create({
+  async verifySmsOTP(packageId, participantId, fieldId, otp, ip) {
+    const otpDoc = await this.OTP.findOne({
       packageId,
       fieldId,
       participantId,
-      otp,
       method: "SMS OTP",
-      expiresAt,
     });
 
-    // Send SMS OTP
-    await this.SmsService.sendSignatureOtp(
-      contact.phone,
-      assignedUser.contactName,
-      pkg.name,
-      otp
+    if (!otpDoc || otpDoc.expiresAt < new Date()) {
+      throw new Error("Invalid or expired SMS OTP.");
+    }
+    if (otpDoc.attempts >= 4) {
+      await this.OTP.deleteOne({ _id: otpDoc._id });
+      throw new Error("Maximum SMS OTP attempts exceeded.");
+    }
+    if (otpDoc.otp !== otp) {
+      otpDoc.attempts += 1;
+      await otpDoc.save();
+      throw new Error("Incorrect SMS OTP.");
+    }
+
+    // Clean up OTP
+    await this.OTP.deleteOne({ _id: otpDoc._id });
+
+    const pkg = await this.Package.findById(packageId).populate(
+      "ownerId",
+      "email"
+    );
+    if (!pkg) {
+      throw new Error("Package not found after OTP verification.");
+    }
+    this.checkPackageExpiry(pkg);
+
+    // 🔥 NEW LOGIC: Find the current field and participant
+    const currentField = pkg.fields.find((f) => f.id === fieldId);
+    const assignedUser = currentField.assignedUsers.find(
+      (au) => au.id === participantId
+    );
+
+    const signDate = new Date();
+    const participantContactId = assignedUser.contactId.toString();
+
+    // 🔥 NEW: Find ALL signature fields assigned to this participant
+    const allSignatureFieldsForParticipant = pkg.fields.filter(
+      (field) =>
+        field.type === "signature" &&
+        field.assignedUsers.some(
+          (user) =>
+            user.contactId.toString() === participantContactId &&
+            user.role === "Signer" &&
+            !user.signed
+        )
+    );
+
+    // 🔥 Apply the signature to ALL matching fields at once
+    allSignatureFieldsForParticipant.forEach((field) => {
+      const userAssignment = field.assignedUsers.find(
+        (user) =>
+          user.contactId.toString() === participantContactId &&
+          user.role === "Signer"
+      );
+
+      if (userAssignment) {
+        // Update audit trail properties
+        userAssignment.signed = true;
+        userAssignment.signedAt = signDate;
+        userAssignment.signedMethod = "SMS OTP";
+        userAssignment.signedIP = ip;
+        userAssignment.signedWithOtp = otp;
+
+        // Store signature details in field value for UI
+        field.value = {
+          signedBy: userAssignment.contactName,
+          email: userAssignment.contactEmail,
+          date: signDate.toISOString(),
+          method: "SMS OTP",
+          ip: ip,
+          otpCode: otp,
+        };
+      }
+    });
+
+    // Check if package is completed
+    if (this.isPackageCompleted(pkg)) {
+      pkg.status = "Completed";
+      const packageCreator = await this.User.findById(pkg.ownerId);
+      const initiatorName = `${packageCreator.firstName} ${packageCreator.lastName}`;
+      await this._sendCompletionNotifications(pkg, initiatorName);
+    } else {
+      await this._sendActionUpdateNotification(pkg, assignedUser);
+    }
+
+    await pkg.save();
+    await this.emitPackageUpdate(pkg);
+
+    const updatedPackageForParticipant = await this.getPackageForParticipant(
+      packageId,
+      participantId
     );
 
     return {
-      message: "OTP sent to your phone.",
-      method: "SMS OTP",
-      expiresIn: 60,
-      phoneNumber: this._maskPhoneNumber(contact.phone),
+      message: `SMS OTP signature completed for ${allSignatureFieldsForParticipant.length} field(s).`,
+      package: updatedPackageForParticipant,
+      signatureDetails: {
+        method: "SMS OTP",
+        signedAt: signDate.toISOString(),
+        signedBy: assignedUser.contactName,
+        fieldsSignedCount: allSignatureFieldsForParticipant.length,
+      },
     };
   }
 
@@ -709,6 +910,7 @@ class PackageService {
       fieldId,
       ip,
       "SMS OTP",
+      otp,
       otpDoc._id
     );
   }
@@ -727,7 +929,6 @@ class PackageService {
       ?.contactId.toString();
 
     if (!participantContactId) {
-      // This is a critical security check
       throw new Error("You are not a valid participant for this package.");
     }
 
@@ -737,29 +938,45 @@ class PackageService {
     for (const fieldId in fieldValues) {
       const field = pkg.fields.find((f) => f.id === fieldId);
 
-      // Security Check: Only update the field if it actually exists and is assigned to this user
       if (
         field &&
         field.assignedUsers.some(
           (u) => u.contactId.toString() === participantContactId
         )
       ) {
-        // --- THIS IS THE CRITICAL FIX ---
-        // Make sure we're actually setting the value on the field
+        // Set the field value
         field.value = fieldValues[fieldId];
-        // --- END OF FIX ---
 
-        // For "Approver" checkboxes, we also set the audit trail, just like for signatures
-        const approverAssignment = field.assignedUsers.find(
-          (u) =>
-            u.contactId.toString() === participantContactId &&
-            u.role === "Approver"
+        // Find the current user's assignment for this field
+        const userAssignment = field.assignedUsers.find(
+          (u) => u.contactId.toString() === participantContactId
         );
-        if (field.type === "checkbox" && approverAssignment) {
-          approverAssignment.signed = true;
-          approverAssignment.signedAt = submissionDate;
-          approverAssignment.signedMethod = "Form Submission";
-          approverAssignment.signedIP = ip;
+
+        if (userAssignment) {
+          // For "Approver" checkboxes, set the audit trail
+          if (field.type === "checkbox" && userAssignment.role === "Approver") {
+            userAssignment.signed = true;
+            userAssignment.signedAt = submissionDate;
+            userAssignment.signedMethod = "Form Submission";
+            userAssignment.signedIP = ip;
+          }
+
+          // 🔥 NEW: For "FormFiller" role, mark as signed when they fill required fields
+          if (userAssignment.role === "FormFiller" && field.required) {
+            // Check if the field has a valid value
+            const hasValidValue =
+              field.value !== undefined &&
+              field.value !== null &&
+              field.value !== "" &&
+              field.value !== false;
+
+            if (hasValidValue) {
+              userAssignment.signed = true;
+              userAssignment.signedAt = submissionDate;
+              userAssignment.signedMethod = "Form Submission";
+              userAssignment.signedIP = ip;
+            }
+          }
         }
       } else {
         console.log(`Field ${fieldId} not found or not assigned to user`);
@@ -772,6 +989,17 @@ class PackageService {
       const packageCreator = await this.User.findById(pkg.ownerId);
       const initiatorName = `${packageCreator.firstName} ${packageCreator.lastName}`;
       await this._sendCompletionNotifications(pkg, initiatorName);
+    } else {
+      // --- ADD THIS BLOCK ---
+      // Find the participant who acted to include their name in the notification
+      const actor = pkg.fields
+        .flatMap((f) => f.assignedUsers)
+        .find((u) => u.contactId.toString() === participantContactId);
+
+      if (actor) {
+        await this._sendActionUpdateNotification(pkg, actor);
+      }
+      // --- END OF NEW BLOCK ---
     }
 
     // Save the package with the updated field values
@@ -1045,7 +1273,7 @@ class PackageService {
           contactName: `${newContact.firstName} ${newContact.lastName}`,
           contactEmail: newContact.email,
           role: originalUser.role,
-          signatureMethod: originalUser.signatureMethod,
+          signatureMethods: originalUser.signatureMethods,
           signed: false,
         };
 
@@ -1176,7 +1404,7 @@ class PackageService {
   }
 
   async downloadPackageForParticipant(packageId, participantId) {
-    // 1. Fetch the package and its related data, just like in getPackageForParticipant
+    // 1. Fetch the package and its related data
     const pkg = await this.Package.findById(packageId).populate(
       "ownerId",
       "firstName lastName"
@@ -1191,9 +1419,7 @@ class PackageService {
     ];
     const participant = allAssignments.find((p) => p.id === participantId);
     if (!participant) {
-      // Allow initiator to download their own packages. A full-fledged admin/initiator download
-      // would have different logic, but this is a simple permission check.
-      const isOwner = pkg.ownerId._id.toString() === participantId; // Special case for owner download
+      const isOwner = pkg.ownerId._id.toString() === participantId;
       if (!isOwner)
         throw new Error("You are not a valid participant for this package.");
     }
@@ -1207,12 +1433,60 @@ class PackageService {
       );
     }
 
-    // 3. Delegate to the PDF Modification service to generate the file
-    const pdfBuffer = await this.pdfModifier.generatePdf(pkg, participantId);
+    // 3. Download file from S3
+    if (!pkg.s3Key) {
+      throw new Error("Package file not found in S3.");
+    }
 
-    // 4. Prepare the file name
-    const sanitizedName = pkg.name.replace(/[^a-z0-9]/gi, "_").toLowerCase();
-    const fileName = `${sanitizedName}_${pkg.status.toLowerCase()}.pdf`;
+    let pdfBuffer;
+    try {
+      // Get the file from S3
+      const { GetObjectCommand } = require("@aws-sdk/client-s3");
+      const command = new GetObjectCommand({
+        Bucket: this.s3Service.bucket,
+        Key: pkg.s3Key,
+      });
+
+      const response = await this.s3Service.s3.send(command);
+
+      // Convert stream to buffer
+      const chunks = [];
+      for await (const chunk of response.Body) {
+        chunks.push(chunk);
+      }
+      pdfBuffer = Buffer.concat(chunks);
+
+      console.log(`Successfully downloaded PDF from S3: ${pkg.s3Key}`);
+    } catch (error) {
+      console.error("Error downloading from S3:", error);
+      throw new Error(
+        `Failed to download package file from S3: ${error.message}`
+      );
+    }
+
+    // 4. Process the PDF with modifications (add audit trail, signatures, etc.)
+    try {
+      pdfBuffer = await this.pdfModifier.generatePdf(pkg, pdfBuffer);
+      console.log(`Successfully processed PDF with modifications`);
+    } catch (error) {
+      console.error("Error modifying PDF:", error);
+      throw new Error(`Failed to process PDF: ${error.message}`);
+    }
+
+    // 5. Prepare proper file name
+    let sanitizedName = pkg.name
+      .trim()
+      .replace(/[<>:"/\\|?*\x00-\x1F]/g, "")
+      .replace(/\s+/g, "_")
+      .substring(0, 80);
+
+    if (!sanitizedName || sanitizedName.length === 0) {
+      sanitizedName = "document";
+    }
+
+    const statusSuffix = pkg.status.toLowerCase();
+    const timestamp = new Date().toISOString().split("T")[0];
+    const fileName = `${sanitizedName}_${statusSuffix}_${timestamp}.pdf`;
 
     return { pdfBuffer, fileName };
   }
@@ -1356,6 +1630,93 @@ class PackageService {
     };
   }
 
+  /**
+   * Allows a participant with the 'Receiver' role to add another contact as a receiver.
+   */
+  async addReceiverByParticipant(packageId, participantId, newContactId, ip) {
+    const pkg = await this.Package.findById(packageId);
+    if (!pkg) {
+      throw new Error("Package not found.");
+    }
+
+    // --- PERMISSION CHECKS ---
+    if (!pkg.options.allowReceiversToAdd) {
+      throw new Error("This feature is not enabled for this package.");
+    }
+    if (pkg.status !== "Sent") {
+      throw new Error("Receivers can only be added to active packages.");
+    }
+
+    const currentParticipant = this._findParticipant(pkg, participantId);
+    if (
+      !currentParticipant ||
+      !pkg.receivers.some((r) => r.id === participantId)
+    ) {
+      throw new Error("You must be a Receiver to add other receivers.");
+    }
+
+    // --- VALIDATION CHECKS ---
+    const newContact = await this.Contact.findOne({
+      _id: newContactId,
+      ownerId: pkg.ownerId,
+    });
+    if (!newContact) {
+      throw new Error(
+        "The selected contact is invalid or not associated with the package owner."
+      );
+    }
+
+    const allParticipantContactIds = new Set([
+      ...pkg.fields.flatMap((f) =>
+        f.assignedUsers.map((u) => u.contactId.toString())
+      ),
+      ...pkg.receivers.map((r) => r.contactId.toString()),
+    ]);
+    if (allParticipantContactIds.has(newContactId)) {
+      throw new Error(
+        "The selected contact is already a participant in this package."
+      );
+    }
+
+    // --- PERFORM ACTION ---
+    const { v4: uuidv4 } = require("uuid");
+    const newReceiver = {
+      id: uuidv4(),
+      contactId: newContact._id,
+      contactName: `${newContact.firstName} ${newContact.lastName}`,
+      contactEmail: newContact.email,
+    };
+
+    pkg.receivers.push(newReceiver);
+
+    pkg.receiverHistory.push({
+      addedBy: {
+        participantId: currentParticipant.id,
+        contactName: currentParticipant.contactName,
+        contactEmail: currentParticipant.contactEmail,
+      },
+      newReceiver: {
+        contactId: newContact._id,
+        contactName: newReceiver.contactName,
+        contactEmail: newReceiver.contactEmail,
+      },
+      addedAt: new Date(),
+      addedIP: ip,
+    });
+
+    await pkg.save();
+    await this.emitPackageUpdate(pkg);
+
+    // --- SEND NOTIFICATIONS ---
+    await this._sendNewReceiverNotifications(
+      pkg,
+      currentParticipant,
+      newReceiver
+    );
+
+    return { message: "Receiver added successfully.", receiver: newReceiver };
+  }
+
   //Helpers
 
   async _completeSignature(
@@ -1364,6 +1725,7 @@ class PackageService {
     fieldId,
     ip,
     method,
+    otp,
     otpDocId
   ) {
     // Clean up OTP
@@ -1391,6 +1753,7 @@ class PackageService {
     assignedUser.signedAt = signDate;
     assignedUser.signedMethod = method;
     assignedUser.signedIP = ip;
+    assignedUser.signedWithOtp = otp;
 
     // Store signature details in field value for UI
     field.value = {
@@ -1399,6 +1762,7 @@ class PackageService {
       date: signDate.toISOString(),
       method: method,
       ip: ip, // Additional audit info
+      otpCode: otp,
     };
 
     // Check if package is completed
@@ -1410,14 +1774,20 @@ class PackageService {
     }
 
     // Save changes
-    const updatedPackage = await pkg.save();
+    await pkg.save();
 
     // Emit real-time update
     await this.emitPackageUpdate(pkg);
 
+    // ✅ FIX: Get the processed package with signed URL
+    const updatedPackageForParticipant = await this.getPackageForParticipant(
+      packageId,
+      participantId
+    );
+
     return {
       message: `Signature completed via ${method}.`,
-      package: updatedPackage,
+      package: updatedPackageForParticipant,
       signatureDetails: {
         method: method,
         signedAt: signDate.toISOString(),
@@ -1439,31 +1809,44 @@ class PackageService {
    */
   isPackageCompleted(pkg) {
     return pkg.fields.every((field) => {
-      // Skip non-required fields
-      if (!field.required) {
-        return true;
-      }
-
-      // Handle signature fields - check if all assigned users have signed
+      // Handle signature fields - ALWAYS check if assigned users have signed
+      // Signatures with assigned users must be completed regardless of required flag
       if (field.type === "signature") {
-        return field.assignedUsers.every((au) => au.signed === true);
+        // If there are assigned users, they ALL must sign
+        if (field.assignedUsers && field.assignedUsers.length > 0) {
+          return field.assignedUsers.every((au) => au.signed === true);
+        }
+        // If no assigned users and not required, consider it complete
+        return !field.required;
       }
 
-      // Handle checkbox fields with Approver role - check if signed
+      // Handle checkbox fields with Approver role
       if (field.type === "checkbox") {
         const approvers = field.assignedUsers.filter(
           (au) => au.role === "Approver"
         );
+
+        // If there are approvers, they must have signed
         if (approvers.length > 0) {
-          // If there are approvers, they must have signed
           return approvers.every((au) => au.signed === true);
         }
-        // If no approvers, just check if checkbox has a valid value
+
+        // For checkboxes without approvers, check required flag
+        if (!field.required) {
+          return true;
+        }
+
+        // Required checkbox must have a valid value
         return field.value === true;
       }
 
-      // Handle all other field types (text, textarea, date, dropdown, radio)
-      // These fields are complete if they have a valid, non-empty value
+      // For all other field types (text, textarea, date, dropdown, radio)
+      // Only check if they're required
+      if (!field.required) {
+        return true;
+      }
+
+      // Required fields must have a valid, non-empty value
       if (
         field.type === "text" ||
         field.type === "textarea" ||
@@ -1489,21 +1872,27 @@ class PackageService {
     });
   }
 
+  /**
+   * Sends notifications when a package is completed.
+   * This includes:
+   * 1. A completion notification for ALL PARTICIPANTS (excluding initiator).
+   * 2. A special completion notification for the INITIATOR with dashboard link.
+   * @private
+   */
   async _sendCompletionNotifications(pkg, initiatorName) {
     const packageOwner = await this.User.findById(pkg.ownerId);
 
-    // Create a map of all unique participants and receivers to easily access their details.
-    // We use email as the key to ensure each person is only processed once.
     const allRecipients = new Map();
 
-    // Add all action-takers (Signers, Approvers, etc.)
+    // Add all action-takers (Signer, Approver, FormFiller)
     pkg.fields.forEach((field) => {
       field.assignedUsers.forEach((user) => {
         if (!allRecipients.has(user.contactEmail)) {
           allRecipients.set(user.contactEmail, {
-            // Store the unique ID for this person's role in the package
             participantId: user.id,
             email: user.contactEmail,
+            name: user.contactName,
+            role: user.role,
           });
         }
       });
@@ -1515,29 +1904,32 @@ class PackageService {
         allRecipients.set(receiver.contactEmail, {
           participantId: receiver.id,
           email: receiver.contactEmail,
+          name: receiver.contactName,
+          role: "Receiver",
         });
       }
     });
 
-    // Ensure the package owner also gets a notification with a valid link
-    // The owner's unique ID for access purposes is simply their own userId.
-    if (packageOwner && !allRecipients.has(packageOwner.email)) {
-      allRecipients.set(packageOwner.email, {
-        participantId: packageOwner._id.toString(), // The owner can use their own ID
-        email: packageOwner.email,
-      });
-    }
-
-    // Now, loop through the unique recipients and send each one a personalized email
+    // Send completion notifications to all PARTICIPANTS (not initiator)
     for (const recipient of allRecipients.values()) {
-      // ✅ CORRECT: Generate the specific participant access link for each person.
       const universalAccessLink = `${process.env.CLIENT_URL}/package/${pkg._id}/participant/${recipient.participantId}`;
 
       await this.EmailService.sendDocumentCompletedNotification(
         recipient.email,
         initiatorName,
         pkg.name,
-        universalAccessLink // Pass the correct, personalized link
+        universalAccessLink
+      );
+    }
+
+    // NEW: Send special completion notification to INITIATOR with dashboard link
+    if (packageOwner) {
+      const dashboardLink = `${process.env.CLIENT_URL}/dashboard`;
+      await this.EmailService.sendInitiatorCompletionNotification(
+        packageOwner.email,
+        initiatorName,
+        pkg.name,
+        dashboardLink
       );
     }
   }
@@ -1583,7 +1975,8 @@ class PackageService {
         user,
         pkg,
         senderName,
-        actionUrl
+        actionUrl,
+        pkg.customMessage
       );
     }
 
@@ -1594,14 +1987,16 @@ class PackageService {
         receiver,
         pkg,
         senderName,
-        actionUrl
+        actionUrl,
+        pkg.customMessage
       );
     }
   }
+
   /**
    * @private
    * Sends rejection notifications to the owner and all participants.
-   * This version generates a unique, correct access link for each recipient.
+   * Generates the correct access link based on whether the recipient is the initiator or a participant.
    */
   async _sendRejectionNotifications(
     pkg,
@@ -1619,9 +2014,10 @@ class PackageService {
       (field.assignedUsers || []).forEach((user) => {
         if (!allRecipients.has(user.contactEmail)) {
           allRecipients.set(user.contactEmail, {
-            participantId: user.id, // The unique assignment ID for the URL
+            participantId: user.id,
             name: user.contactName,
             email: user.contactEmail,
+            isOwner: false, // Mark as not owner
           });
         }
       });
@@ -1634,6 +2030,7 @@ class PackageService {
           participantId: receiver.id,
           name: receiver.contactName,
           email: receiver.contactEmail,
+          isOwner: false, // Mark as not owner
         });
       }
     });
@@ -1641,16 +2038,19 @@ class PackageService {
     // Ensure the package owner is on the list to receive the notification
     if (packageOwner && !allRecipients.has(packageOwner.email)) {
       allRecipients.set(packageOwner.email, {
-        participantId: packageOwner._id.toString(), // The owner can use their own userId to view
+        participantId: packageOwner._id.toString(),
         name: initiatorName,
         email: packageOwner.email,
+        isOwner: true, // Mark as owner
       });
     }
 
     // Loop through the unique recipients and send each a personalized notification
     for (const recipient of allRecipients.values()) {
-      // ✅ CORRECT: Generate the specific participant access link for each person.
-      const universalAccessLink = `${process.env.CLIENT_URL}/package/${pkg._id}/participant/${recipient.participantId}`;
+      // ✅ FIX: Generate different links for owner vs participants
+      const universalAccessLink = recipient.isOwner
+        ? `${process.env.CLIENT_URL}/package/${pkg._id}` // Owner link (no participant ID)
+        : `${process.env.CLIENT_URL}/package/${pkg._id}/participant/${recipient.participantId}`; // Participant link
 
       await this.EmailService.sendRejectionNotification(
         recipient.email,
@@ -1659,7 +2059,7 @@ class PackageService {
         pkg.name,
         rejectorName,
         rejectionReason,
-        universalAccessLink // Pass the correct, personalized link
+        universalAccessLink // Pass the correct link based on role
       );
     }
   }
@@ -1829,25 +2229,27 @@ class PackageService {
       contacts.map((c) => [c._id.toString(), c.phone || ""])
     );
 
-    // Helper function to determine participant status
-    const getParticipantStatus = (participant, pkg) => {
-      const contactId = participant.contactId;
-
-      // Check if this participant has completed all their assigned tasks
-      const assignedFields = pkg.fields.filter((field) =>
+    // 🔥 NEW: Helper function to determine participant status FOR A SPECIFIC ROLE
+    const getParticipantStatusForRole = (contactId, role, pkg) => {
+      // Get fields assigned to this participant with THIS SPECIFIC ROLE
+      const assignedFieldsForRole = pkg.fields.filter((field) =>
         field.assignedUsers.some(
-          (user) => user.contactId.toString() === contactId.toString()
+          (user) =>
+            user.contactId.toString() === contactId.toString() &&
+            user.role === role
         )
       );
 
-      if (assignedFields.length === 0) {
-        // No assigned fields, just a receiver
+      if (assignedFieldsForRole.length === 0) {
         return pkg.status === "Sent" ? "In Progress" : "Not Sent";
       }
 
-      const completedFields = assignedFields.filter((field) => {
+      // Check each assigned field to see if this participant completed it
+      const completedFields = assignedFieldsForRole.filter((field) => {
         const userAssignment = field.assignedUsers.find(
-          (user) => user.contactId.toString() === contactId.toString()
+          (user) =>
+            user.contactId.toString() === contactId.toString() &&
+            user.role === role
         );
 
         if (!userAssignment) return false;
@@ -1862,7 +2264,22 @@ class PackageService {
           return userAssignment.signed === true;
         }
 
-        // For other field types (text, textarea, date, etc.), check if value exists
+        // For FormFiller role on required fields, check the signed flag
+        if (userAssignment.role === "FormFiller" && field.required) {
+          return userAssignment.signed === true;
+        }
+
+        // For non-required FormFiller fields, check if value exists
+        if (userAssignment.role === "FormFiller" && !field.required) {
+          return (
+            field.value !== undefined &&
+            field.value !== null &&
+            field.value !== "" &&
+            field.value !== false
+          );
+        }
+
+        // For other cases, check if value exists
         return (
           field.value !== undefined &&
           field.value !== null &&
@@ -1871,8 +2288,8 @@ class PackageService {
         );
       });
 
-      // Determine status based on completion
-      if (completedFields.length === assignedFields.length) {
+      // Determine status based on completion FOR THIS ROLE
+      if (completedFields.length === assignedFieldsForRole.length) {
         return "Completed";
       } else if (pkg.status === "Sent") {
         return "In Progress";
@@ -1912,21 +2329,45 @@ class PackageService {
       // Transform the grouped participant data into the final 'RoleDetail' structure
       const roleDetails = { formFillers: [], approvers: [], signers: [] };
       participants.forEach((p) => {
-        const roleDetail = {
-          user: {
-            id: p.contactId,
-            name: p.contactName,
-            email: p.contactEmail,
-            phone: contactPhoneMap.get(p.contactId) || "",
-          },
-          // Use the improved status determination logic
-          status: getParticipantStatus(p, pkg),
-          lastUpdated: p.signedAt ? new Date(p.signedAt).toISOString() : "",
-        };
+        // 🔥 CRITICAL FIX: Create separate roleDetail for EACH role with role-specific status
+        if (p.roles.has("FormFiller")) {
+          roleDetails.formFillers.push({
+            user: {
+              id: p.contactId,
+              name: p.contactName,
+              email: p.contactEmail,
+              phone: contactPhoneMap.get(p.contactId) || "",
+            },
+            status: getParticipantStatusForRole(p.contactId, "FormFiller", pkg),
+            lastUpdated: p.signedAt ? new Date(p.signedAt).toISOString() : "",
+          });
+        }
 
-        if (p.roles.has("FormFiller")) roleDetails.formFillers.push(roleDetail);
-        if (p.roles.has("Approver")) roleDetails.approvers.push(roleDetail);
-        if (p.roles.has("Signer")) roleDetails.signers.push(roleDetail);
+        if (p.roles.has("Approver")) {
+          roleDetails.approvers.push({
+            user: {
+              id: p.contactId,
+              name: p.contactName,
+              email: p.contactEmail,
+              phone: contactPhoneMap.get(p.contactId) || "",
+            },
+            status: getParticipantStatusForRole(p.contactId, "Approver", pkg),
+            lastUpdated: p.signedAt ? new Date(p.signedAt).toISOString() : "",
+          });
+        }
+
+        if (p.roles.has("Signer")) {
+          roleDetails.signers.push({
+            user: {
+              id: p.contactId,
+              name: p.contactName,
+              email: p.contactEmail,
+              phone: contactPhoneMap.get(p.contactId) || "",
+            },
+            status: getParticipantStatusForRole(p.contactId, "Signer", pkg),
+            lastUpdated: p.signedAt ? new Date(p.signedAt).toISOString() : "",
+          });
+        }
       });
 
       // Handle notification-only receivers
@@ -2002,6 +2443,178 @@ class PackageService {
         pkg.name
       );
     }
+  }
+
+  /**
+   * A private helper method to determine if a given participant can add receivers.
+   */
+  _canParticipantAddReceivers(pkg, participantId) {
+    if (!pkg.options.allowReceiversToAdd) {
+      return { canAdd: false, reason: "Feature disabled by sender." };
+    }
+    if (pkg.status !== "Sent") {
+      return { canAdd: false, reason: "Package is not currently active." };
+    }
+
+    // Check if the current user is a Receiver in the receivers list.
+    const isReceiver = pkg.receivers.some((r) => r.id === participantId);
+    if (!isReceiver) {
+      return {
+        canAdd: false,
+        reason: "Only participants with a 'Receiver' role can add others.",
+      };
+    }
+
+    return { canAdd: true };
+  }
+
+  /**
+   * Sends notifications when a new receiver is added by another participant.
+   */
+  async _sendNewReceiverNotifications(pkg, addedBy, newReceiver) {
+    const packageOwner = await this.User.findById(pkg.ownerId).select(
+      "firstName lastName email"
+    );
+    const ownerName = `${packageOwner.firstName} ${packageOwner.lastName}`;
+    const viewUrl = `${process.env.CLIENT_URL}/package/${pkg._id}/participant/${newReceiver.id}`;
+
+    // 1. Notify the new receiver
+    await this.EmailService.sendNewReceiverNotification(
+      newReceiver.contactEmail,
+      newReceiver.contactName,
+      ownerName,
+      addedBy.contactName,
+      pkg.name,
+      viewUrl
+    );
+
+    // 2. Notify the package owner
+    await this.EmailService.sendNewReceiverOwnerNotification(
+      packageOwner.email,
+      ownerName,
+      newReceiver.contactName,
+      addedBy.contactName,
+      pkg.name
+    );
+  }
+
+  /**
+   * @private
+   * Sends a progress update to the initiator when a participant completes an action,
+   * but the document is not yet fully completed.
+   */
+  async _sendActionUpdateNotification(pkg, actor) {
+    try {
+      // 1. Get the initiator (package owner)
+      const owner = await this.User.findById(pkg.ownerId).select(
+        "email firstName lastName"
+      );
+      if (!owner) return;
+
+      const initiatorName = `${owner.firstName} ${owner.lastName}`;
+      const actorName = actor.contactName;
+
+      // 2. Build a comprehensive list of all participants and their status
+      const participants = new Map();
+      pkg.fields.forEach((field) => {
+        field.assignedUsers.forEach((user) => {
+          if (!participants.has(user.contactId.toString())) {
+            participants.set(user.contactId.toString(), {
+              name: user.contactName,
+              contactId: user.contactId.toString(),
+              isComplete: false, // Default to pending
+            });
+          }
+        });
+      });
+
+      // 3. Determine the true status of each participant
+      for (const p of participants.values()) {
+        const requiredFields = pkg.fields.filter(
+          (f) =>
+            f.required &&
+            f.assignedUsers.some((u) => u.contactId.toString() === p.contactId)
+        );
+
+        // If a participant has no required fields, they are considered complete by default.
+        if (requiredFields.length === 0) {
+          p.isComplete = true;
+          continue;
+        }
+
+        // Check if all their required fields are signed/filled
+        p.isComplete = requiredFields.every((field) => {
+          const assignment = field.assignedUsers.find(
+            (u) => u.contactId.toString() === p.contactId
+          );
+          return assignment && assignment.signed; // `signed` flag indicates completion
+        });
+      }
+
+      // 4. Create HTML lists for the email template
+      const completedList = [];
+      const pendingList = [];
+
+      participants.forEach((p) => {
+        if (p.isComplete) {
+          completedList.push(`<li>✔️ ${p.name}</li>`);
+        } else {
+          pendingList.push(`<li>... ${p.name}</li>`);
+        }
+      });
+
+      const completedListHtml = `<ul>${completedList.join("")}</ul>`;
+      const pendingListHtml =
+        pendingList.length > 0
+          ? `<ul>${pendingList.join("")}</ul>`
+          : "<p>All participants have completed their actions!</p>";
+
+      // 5. Send the email
+      const actionLink = `${process.env.CLIENT_URL}/dashboard`; // Link to initiator's dashboard
+      await this.EmailService.sendParticipantActionNotification(
+        owner.email,
+        initiatorName,
+        pkg.name,
+        actorName,
+        completedListHtml,
+        pendingListHtml,
+        actionLink
+      );
+    } catch (error) {
+      console.error("Failed to send action update notification:", error);
+      // Do not throw an error, as the main operation (e.g., signing) was successful.
+    }
+  }
+
+  /**
+   * Calculate how many document credits should be consumed based on unique signers
+   * Formula: 1 credit per 2 unique signers (rounded up)
+   * Examples: 1-2 signers = 1 credit, 3-4 signers = 2 credits, 5-6 signers = 3 credits
+   */
+  _calculateDocumentCredits(pkg) {
+    // Get all unique signer contact IDs across all signature fields
+    const uniqueSignerIds = new Set();
+
+    pkg.fields.forEach((field) => {
+      if (field.type === "signature") {
+        field.assignedUsers.forEach((user) => {
+          if (user.role === "Signer") {
+            uniqueSignerIds.add(user.contactId.toString());
+          }
+        });
+      }
+    });
+
+    const uniqueSignerCount = uniqueSignerIds.size;
+
+    // Calculate credits: 1 credit per 2 signers (rounded up)
+    // Math.ceil ensures: 1-2 signers = 1, 3-4 = 2, 5-6 = 3, etc.
+    const creditsNeeded = Math.ceil(uniqueSignerCount / 2);
+
+    return {
+      uniqueSignerCount,
+      creditsNeeded,
+    };
   }
 
   // New helper method to emit package update

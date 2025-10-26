@@ -8,6 +8,7 @@ import {
     createContactForReassignment,
     performReassignment,
     downloadPackage,
+    addReceiverByParticipant,
 } from '../thunk/participantThunks';
 import { toast } from 'react-toastify';
 
@@ -34,7 +35,7 @@ export const buildParticipantExtraReducers = (builder: ActionReducerMapBuilder<P
             state.error = action.payload as string;
         })
         .addCase(submitParticipantFields.pending, (state) => {
-            state.loading = true; // Use the main loader for this
+            state.loading = true;
             state.error = null;
         })
         .addCase(submitParticipantFields.fulfilled, (state, action) => {
@@ -54,22 +55,20 @@ export const buildParticipantExtraReducers = (builder: ActionReducerMapBuilder<P
             toast.error(action.payload as string);
         })
         .addCase(rejectPackage.pending, (state) => {
-            state.loading = true; // Use the main loading state for simplicity
+            state.loading = true;
             state.error = null;
         })
         .addCase(rejectPackage.fulfilled, (state, action) => {
             state.loading = false;
-            // The API returns the updated package, so we update our state
             state.packageData = action.payload.package;
-            state.uiState.isRejectModalOpen = false; // Close modal on success
+            state.uiState.isRejectModalOpen = false;
             toast.success(action.payload.message || 'Document has been rejected.');
         })
         .addCase(rejectPackage.rejected, (state, action) => {
             state.loading = false;
             state.error = action.payload as string;
-            // Let the user know it failed
             toast.error(action.payload as string);
-        }) // Fetching the list of contacts
+        })
         .addCase(fetchReassignmentContacts.pending, (state) => {
             state.uiState.reassignmentLoading = true;
             state.uiState.reassignmentError = null;
@@ -83,15 +82,12 @@ export const buildParticipantExtraReducers = (builder: ActionReducerMapBuilder<P
             state.uiState.reassignmentError = action.payload as string;
             toast.error(action.payload as string);
         })
-
-        // Creating a new contact
         .addCase(createContactForReassignment.pending, (state) => {
             state.uiState.reassignmentLoading = true;
             state.uiState.reassignmentError = null;
         })
         .addCase(createContactForReassignment.fulfilled, (state, action) => {
             state.uiState.reassignmentLoading = false;
-            // Select the newly created contact automatically and go to the confirmation step
             state.uiState.selectedReassignContact = action.payload.data.contact;
             state.uiState.reassignStep = 'confirm';
             toast.success(action.payload.message);
@@ -101,8 +97,6 @@ export const buildParticipantExtraReducers = (builder: ActionReducerMapBuilder<P
             state.uiState.reassignmentError = action.payload as string;
             toast.error(action.payload as string);
         })
-
-        // Performing the final reassignment
         .addCase(performReassignment.pending, (state) => {
             state.uiState.reassignmentLoading = true;
             state.uiState.reassignmentError = null;
@@ -114,7 +108,7 @@ export const buildParticipantExtraReducers = (builder: ActionReducerMapBuilder<P
         })
         .addCase(performReassignment.rejected, (state, action) => {
             state.uiState.reassignmentLoading = false;
-            state.uiState.reassignStep = 'failure'; // Can add a failure screen if desired
+            state.uiState.reassignStep = 'failure';
             state.uiState.reassignmentError = action.payload as string;
             toast.error(action.payload as string);
         })
@@ -122,10 +116,26 @@ export const buildParticipantExtraReducers = (builder: ActionReducerMapBuilder<P
             state.uiState.isDownloading = true;
         })
         .addCase(downloadPackage.fulfilled, (state) => {
-            state.uiState.isDownloading = false; // Turn off on success
+            state.uiState.isDownloading = false;
+            toast.success('Download started successfully!');
         })
         .addCase(downloadPackage.rejected, (state, action) => {
-            state.uiState.isDownloading = false; // Turn off on failure
+            state.uiState.isDownloading = false;
+            toast.error(action.payload as string);
+        })
+        .addCase(addReceiverByParticipant.pending, (state) => {
+            state.uiState.addReceiverLoading = true;
+            state.uiState.addReceiverError = null;
+        })
+        .addCase(addReceiverByParticipant.fulfilled, (state, action) => {
+            state.uiState.addReceiverLoading = false;
+            state.uiState.addReceiverStep = 'success';
+            toast.success(action.payload.message);
+        })
+        .addCase(addReceiverByParticipant.rejected, (state, action) => {
+            state.uiState.addReceiverLoading = false;
+            state.uiState.addReceiverStep = 'failure';
+            state.uiState.addReceiverError = action.payload as string;
             toast.error(action.payload as string);
         });
 };

@@ -26,6 +26,14 @@ interface FetchContactsArgs {
     search?: string;
 }
 
+export interface EnterpriseInquiryArgs {
+    name: string;
+    email: string;
+    company: string;
+    phone?: string;
+    message: string;
+}
+
 // --- Thunks ---
 
 export const fetchContacts = createAsyncThunk<Contact[], FetchContactsArgs>('contacts/fetchContacts', async ({ search }, { rejectWithValue }) => {
@@ -67,5 +75,14 @@ export const deleteContact = createAsyncThunk<
         return { ...response.data, contactId };
     } catch (error: any) {
         return rejectWithValue(error.response?.data?.error || 'Failed to delete contact.');
+    }
+});
+
+export const submitEnterpriseInquiry = createAsyncThunk<{ success: boolean; message: string }, EnterpriseInquiryArgs>('contacts/submitEnterpriseInquiry', async (inquiryData, { rejectWithValue }) => {
+    try {
+        const response = await api.post('/api/contacts/enterprise-inquiry', inquiryData);
+        return response.data.data;
+    } catch (error: any) {
+        return rejectWithValue(error.response?.data?.error || 'Failed to submit inquiry.');
     }
 });

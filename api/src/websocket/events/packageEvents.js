@@ -9,6 +9,12 @@ class PackageEventEmitter {
    * @param {object} updatedDocument - The full Document object, already transformed for the UI.
    */
   emitPackageUpdated(ownerId, updatedDocument) {
+    // ✅ Validate ownerId exists
+    if (!ownerId) {
+      console.error("Cannot emit package update: ownerId is required");
+      return;
+    }
+    
     this.socketManager.emitPackageUpdate(ownerId, {
       type: "PACKAGE_UPDATED",
       // Nest the full document here. This matches what the frontend expects.

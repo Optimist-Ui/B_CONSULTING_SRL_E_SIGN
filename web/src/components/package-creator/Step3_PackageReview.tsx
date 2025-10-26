@@ -1,13 +1,13 @@
 import React, { useEffect, useMemo, useRef, useState, ComponentType } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { IRootState, AppDispatch } from '../../store';
-import { PackageField, addReceiverToPackage, removeReceiverFromPackage, updatePackageOptions } from '../../store/slices/packageSlice';
+import { PackageField, addReceiverToPackage, removeReceiverFromPackage, updatePackageOptions, setPackageCustomMessage } from '../../store/slices/packageSlice';
 import { Contact } from '../../store/slices/contactSlice';
 import SearchableContactDropdown from '../common/SearchableContactDropdown';
 import { loadPdfDocument, renderPdfPageToCanvas } from '../../utils/pdf-utils';
 import { PDFDocumentProxy, RenderTask } from 'pdfjs-dist/types/src/display/api';
 import { toast } from 'react-toastify';
-import { FiFileText, FiList, FiUsers, FiCheck, FiAlertCircle, FiEye, FiZoomIn, FiInfo, FiSettings, FiClock, FiRepeat, FiBell, FiSave } from 'react-icons/fi';
+import { FiFileText, FiList, FiUsers, FiCheck, FiAlertCircle, FiEye, FiZoomIn, FiInfo, FiSettings, FiClock, FiRepeat, FiBell, FiSave, FiMessageSquare } from 'react-icons/fi';
 import AddEditContactModal from '../common/AddEditContactModal';
 
 const BACKEND_URL = import.meta.env.VITE_BASE_URL;
@@ -25,6 +25,7 @@ const FiClockTyped = FiClock as ComponentType<{ className?: string }>;
 const FiSettingsTyped = FiSettings as ComponentType<{ className?: string }>;
 const FiInfoTyped = FiInfo as ComponentType<{ className?: string }>;
 const FiSaveTyped = FiSave as ComponentType<{ className?: string }>;
+const FiMessageSquareTyped = FiMessageSquare as ComponentType<{ className?: string }>;
 
 interface StepProps {
     onPrevious: () => void;
@@ -63,8 +64,8 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
     const reminderPeriodOptions = [
         { value: '1_hour_before', label: '1 Hour Before', durationMs: 3600000 },
         { value: '2_hours_before', label: '2 Hours Before', durationMs: 7200000 },
-        { value: '1_day_before', label: '1 Day Before', durationMs: 86400000 },
-        { value: '2_days_before', label: '2 Days Before', durationMs: 172800000 },
+        { value: '1_day_before', label: '24 Hours Before', durationMs: 86400000 },
+        { value: '2_days_before', label: '48 Hours Before', durationMs: 172800000 },
     ];
 
     const availableReminderOptions = useMemo(() => {
@@ -105,10 +106,26 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
         return Math.floor(timeUntilExpiryMs / (1000 * 60 * 60 * 24));
     }, [currentPackage?.options.expiresAt]);
 
+    const maxRepeatReminderDays = useMemo(() => {
+        const firstDays = currentPackage?.options.firstReminderDays;
+        if (firstDays) {
+            return firstDays;
+        }
+        return maxFirstReminderDays;
+    }, [currentPackage?.options.firstReminderDays, maxFirstReminderDays]);
+
     useEffect(() => {
         // Initialize tempExpiresAt with currentPackage.options.expiresAt
+        // Convert from UTC ISO string to local datetime-local format
         if (currentPackage?.options.expiresAt) {
-            setTempExpiresAt(currentPackage.options.expiresAt.slice(0, 16));
+            const date = new Date(currentPackage.options.expiresAt);
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+
+            setTempExpiresAt(`${year}-${month}-${day}T${hours}:${minutes}`);
         }
     }, [currentPackage?.options.expiresAt]);
 
@@ -135,7 +152,11 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
 
         const getPdfData = async () => {
             if (currentPackage.fileData?.byteLength) return currentPackage.fileData.slice(0);
-            if (currentPackage.fileUrl) {
+            if (currentPackage.downloadUrl) {
+                const response = await fetch(currentPackage.downloadUrl, { mode: 'cors' });
+                if (!response.ok) throw new Error(`Fetch failed: ${response.statusText}`);
+                return response.arrayBuffer();
+            } else if (currentPackage.fileUrl) {
                 const correctedFileUrl = currentPackage.fileUrl.startsWith('/public') ? currentPackage.fileUrl : `/public${currentPackage.fileUrl}`;
                 const fullUrl = `${BACKEND_URL}${correctedFileUrl}`;
                 const response = await fetch(fullUrl, { mode: 'cors' });
@@ -181,7 +202,7 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
             isMounted = false;
             cleanup();
         };
-    }, [currentPackage?.fileUrl, currentPackage?.fileData]);
+    }, [currentPackage?.fileUrl, currentPackage?.fileData, currentPackage?.downloadUrl]);
 
     useEffect(() => {
         if (!pdfProxyRef.current || numPages === 0 || pageInfos.length === 0 || !isCanvasReady) {
@@ -258,6 +279,15 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
     }, [maxFirstReminderDays, currentPackage?.options?.firstReminderDays, dispatch]);
 
     useEffect(() => {
+        const repeatDays = currentPackage?.options?.repeatReminderDays;
+        const maxRepeat = currentPackage?.options.firstReminderDays || maxFirstReminderDays;
+        if (repeatDays && repeatDays > maxRepeat) {
+            dispatch(updatePackageOptions({ repeatReminderDays: null }));
+            toast.info('The follow-up reminder interval was reset as it is no longer valid.', { autoClose: 6000 });
+        }
+    }, [currentPackage?.options?.repeatReminderDays, currentPackage?.options.firstReminderDays, maxFirstReminderDays, dispatch]);
+
+    useEffect(() => {
         if (error) {
             toast.error(error);
         }
@@ -278,7 +308,36 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
             assignedFields,
             uniqueRecipients,
             completionRate: totalFields > 0 ? Math.round((assignedFields / totalFields) * 100) : 0,
-            unassignedRequiredFields: unassignedRequiredFields, // Return the list of invalid fields
+            unassignedRequiredFields: unassignedRequiredFields,
+        };
+    };
+
+    // 🔥 NEW: Add credit calculation function
+    const calculateDocumentCredits = () => {
+        const fields = currentPackage?.fields || [];
+
+        // Get all unique signer contact IDs across all signature fields
+        const uniqueSignerIds = new Set<string>();
+
+        fields.forEach((field) => {
+            if (field.type === 'signature') {
+                (field.assignedUsers || []).forEach((user) => {
+                    if (user.role === 'Signer') {
+                        uniqueSignerIds.add(user.contactId);
+                    }
+                });
+            }
+        });
+
+        const uniqueSignerCount = uniqueSignerIds.size;
+
+        // Calculate credits: 1 credit per 2 signers (rounded up)
+        // Math.ceil ensures: 1-2 signers = 1, 3-4 = 2, 5-6 = 3, etc.
+        const creditsNeeded = uniqueSignerCount > 0 ? Math.ceil(uniqueSignerCount / 2) : 1;
+
+        return {
+            uniqueSignerCount,
+            creditsNeeded,
         };
     };
 
@@ -306,10 +365,40 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
 
     const handleConfirmDate = () => {
         if (tempExpiresAt) {
-            handleOptionsChange({ expiresAt: new Date(tempExpiresAt).toISOString() });
+            // Parse the datetime-local value and preserve the local time
+            const [datePart, timePart] = tempExpiresAt.split('T');
+            const [year, month, day] = datePart.split('-').map(Number);
+            const [hours, minutes] = timePart.split(':').map(Number);
+
+            // Create date in local timezone
+            const selectedDate = new Date(year, month - 1, day, hours, minutes);
+            const now = new Date();
+
+            // Check if the selected date is in the past
+            if (selectedDate <= now) {
+                toast.error('Expiration date cannot be in the past. Please select a future date.');
+                return;
+            }
+
+            handleOptionsChange({ expiresAt: selectedDate.toISOString() });
+
+            // Format the date for user-friendly display
+            const formatOptions: Intl.DateTimeFormatOptions = {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true,
+            };
+            const formattedDate = selectedDate.toLocaleDateString('en-US', formatOptions);
+
+            toast.success(`Package expiration set to ${formattedDate}`);
         } else {
             handleOptionsChange({ expiresAt: null });
+            toast.info('Package expiration removed - package will not expire');
         }
+
         if (dateInputRef.current) {
             dateInputRef.current.blur();
         }
@@ -320,7 +409,7 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
             <div className="flex justify-center items-center h-full">
                 <div className="text-center">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                    <p className="text-gray-600 font-medium">Loading package details...</p>
+                    <p className="font-medium">Loading package details...</p>
                 </div>
             </div>
         );
@@ -342,12 +431,13 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
     }
 
     const stats = getPackageStats();
+    const creditInfo = calculateDocumentCredits();
 
     const TabButton: React.FC<{ tab: ActiveTab; label: string; icon: React.ReactNode }> = ({ tab, label, icon }) => (
         <button
             onClick={() => setActiveTab(tab)}
             className={`flex-1 flex justify-center items-center gap-2 px-3 py-3 text-sm font-medium border-b-2 transition-all duration-200 ${
-                activeTab === tab ? 'border-indigo-500 text-indigo-600 bg-indigo-50' : 'border-transparent text-gray-500 hover:text-gray-800 hover:border-gray-300 hover:bg-gray-50'
+                activeTab === tab ? 'border-indigo-500 text-indigo-600 bg-indigo-50' : 'border-transparent hover:border-gray-300 hover:bg-gray-50'
             }`}
         >
             {icon} {label}
@@ -356,16 +446,16 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
 
     return (
         <>
-            <div className="h-full bg-gradient-to-br from-slate-50 to-blue-50 overflow-hidden flex flex-col">
+            <div className="h-full bg-gradient-to-br dark:bg-gray-900 from-slate-50 to-blue-50 overflow-hidden flex flex-col">
                 <div className="flex flex-grow overflow-hidden">
                     {/* PDF Preview */}
-                    <div className="flex-1 flex flex-col bg-white border-r border-gray-200">
+                    <div className="flex-1 flex flex-col dark:bg-gray-900 bg-white border-r border-gray-200">
                         {/* PDF Controls */}
-                        <div className="flex justify-between items-center px-4 py-3 bg-gray-50 border-b border-gray-200">
+                        <div className="flex justify-between items-center px-4 py-3 dark:bg-gray-900 bg-gray-50 border-b border-gray-200">
                             <div className="flex items-center gap-2">
-                                <FiEyeTyped className="w-5 h-5 text-gray-600" />
-                                <h3 className="font-semibold text-gray-800">Document Preview</h3>
-                                <span className="text-sm text-gray-500">
+                                <FiEyeTyped className="w-5 h-5" />
+                                <h3 className="font-semibold">Document Preview</h3>
+                                <span className="text-sm">
                                     ({numPages} {numPages === 1 ? 'page' : 'pages'})
                                 </span>
                             </div>
@@ -385,12 +475,12 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
                             {isRendering && (
                                 <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex flex-col justify-center items-center z-20">
                                     <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-600 border-t-transparent"></div>
-                                    <p className="mt-4 text-gray-700 font-semibold">Rendering Document...</p>
-                                    <p className="text-sm text-gray-500 mt-1">Please wait while we prepare your document</p>
+                                    <p className="mt-4  font-semibold">Rendering Document...</p>
+                                    <p className="text-sm mt-1">Please wait while we prepare your document</p>
                                 </div>
                             )}
 
-                            <div className="p-6">
+                            <div className="p-6 dark:bg-gray-900">
                                 <div className={`pdf-viewer-pages space-y-8 mx-auto ${viewMode === 'fit' ? 'max-w-full' : ''}`}>
                                     {Array.from({ length: numPages }, (_, index) => {
                                         const pageInfo = pageInfos[index];
@@ -407,12 +497,12 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
                                         return (
                                             <div key={`review-page-${index}`} className="relative">
                                                 <div className="flex justify-between items-center mb-3">
-                                                    <span className="text-sm font-medium text-gray-600">
+                                                    <span className="text-sm font-medium">
                                                         Page {index + 1} of {numPages}
                                                     </span>
                                                 </div>
                                                 <div
-                                                    className="relative bg-white shadow-2xl border border-gray-200 mx-auto overflow-hidden rounded-lg"
+                                                    className="relative dark:bg-gray-900 bg-white shadow-2xl border border-gray-200 mx-auto overflow-hidden rounded-lg"
                                                     style={{
                                                         width: containerWidth,
                                                         height: containerHeight,
@@ -468,8 +558,35 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
                                                                     <span className="truncate flex-1">{field.label}</span>
                                                                 </div>
                                                                 {showPlaceholder && (
-                                                                    <div className="flex items-center justify-center h-full text-gray-500 text-xs px-2 py-1">
+                                                                    <div className="flex items-center justify-center h-full text-xs px-2 py-1">
                                                                         <span className="truncate">{field.placeholder}</span>
+                                                                    </div>
+                                                                )}
+
+                                                                {/* NEW: Show assigned users with signature methods */}
+                                                                {hasAssignments && (
+                                                                    <div className="absolute -bottom-7 left-0 right-0 flex flex-wrap gap-1.5">
+                                                                        {assignedUsers.map((user, idx) => (
+                                                                            <div
+                                                                                key={user.id || idx}
+                                                                                className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-white text-[10px] font-medium shadow-sm ${
+                                                                                    user.role === 'Signer' ? 'bg-indigo-600' : user.role === 'Approver' ? 'bg-teal-600' : 'bg-orange-600'
+                                                                                }`}
+                                                                                title={`${user.contactName} - ${user.role}${
+                                                                                    user.signatureMethods ? '\nAuth: ' + user.signatureMethods.join(', ') : ''
+                                                                                }`}
+                                                                            >
+                                                                                {/* Show signature methods if available */}
+                                                                                {user.signatureMethods && user.signatureMethods.length > 0 && (
+                                                                                    <span className="inline-flex items-center gap-0.5 px-1 py-0.5 bg-white/20 rounded text-[9px] font-semibold">
+                                                                                        {user.signatureMethods.includes('Email OTP') && <span>Email</span>}
+                                                                                        {user.signatureMethods.includes('Email OTP') && user.signatureMethods.includes('SMS OTP') && <span>+</span>}
+                                                                                        {user.signatureMethods.includes('SMS OTP') && <span>SMS</span>}
+                                                                                    </span>
+                                                                                )}
+                                                                                <span className="truncate max-w-[120px]">{user.contactName}</span>
+                                                                            </div>
+                                                                        ))}
                                                                     </div>
                                                                 )}
                                                             </div>
@@ -485,7 +602,7 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
                     </div>
 
                     {/* Right Settings Panel (Tabs) */}
-                    <div className="w-96 bg-white flex flex-col shadow-xl">
+                    <div className="w-96 dark:bg-gray-900 bg-white flex flex-col shadow-xl">
                         <div className="px-3 pt-3 border-b border-gray-200">
                             <div className="flex items-center rounded-t-lg overflow-hidden">
                                 <TabButton tab="summary" label="Summary" icon={<FiInfoTyped />} />
@@ -494,29 +611,104 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
                             </div>
                         </div>
 
-                        <div className="flex-1 overflow-y-auto p-6 bg-gray-50/50">
+                        <div className="flex-1 overflow-y-auto p-6 dark:bg-gray-900 bg-gray-50/50">
                             {activeTab === 'summary' && (
                                 <div className="space-y-6 animate-fadeIn">
-                                    <h3 className="text-xl font-bold text-gray-900 leading-tight">{currentPackage.name}</h3>
+                                    <h3 className="text-xl font-bold leading-tight">{currentPackage.name}</h3>
+
+                                    {/* Optional Message Block */}
                                     <div>
-                                        <h4 className="font-semibold text-gray-700 mb-2">Details at a Glance</h4>
-                                        <div className="p-4 bg-white border rounded-lg grid grid-cols-3 gap-4 text-center">
+                                        <h4 className="font-semibold mb-2 flex items-center gap-2">
+                                            <FiMessageSquareTyped />
+                                            Optional Message for Participants
+                                        </h4>
+                                        <div className="p-4 bg-white dark:bg-gray-800 border rounded-lg">
+                                            <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
+                                                This message will be included in the initial "Action Required" email sent to all participants.
+                                            </p>
+                                            <textarea
+                                                className="w-full h-24 p-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                                placeholder="e.g., Please review and sign this document at your earliest convenience. Thank you!"
+                                                value={currentPackage.customMessage || ''}
+                                                onChange={(e) => dispatch(setPackageCustomMessage(e.target.value))}
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {/* Details at a Glance */}
+                                    <div>
+                                        <h4 className="font-semibold mb-2">Details at a Glance</h4>
+                                        <div className="p-4 dark:bg-gray-900 bg-white border rounded-lg grid grid-cols-3 gap-4 text-center">
                                             <div className="p-2">
                                                 <div className="text-2xl font-bold text-blue-600">{stats.totalFields}</div>
-                                                <div className="text-xs text-gray-500 mt-1">Fields</div>
+                                                <div className="text-xs mt-1">Fields</div>
                                             </div>
                                             <div className="p-2">
                                                 <div className="text-2xl font-bold text-green-600">{stats.uniqueRecipients}</div>
-                                                <div className="text-xs text-gray-500 mt-1">Recipients</div>
+                                                <div className="text-xs mt-1">Recipients</div>
                                             </div>
                                             <div className="p-2">
-                                                <div className="text-2xl font-bold text-gray-700">{numPages}</div>
-                                                <div className="text-xs text-gray-500 mt-1">Pages</div>
+                                                <div className="text-2xl font-bold">{numPages}</div>
+                                                <div className="text-xs mt-1">Pages</div>
                                             </div>
                                         </div>
                                     </div>
+
+                                    {/* 🔥 NEW: Credit Usage Information */}
                                     <div>
-                                        <h4 className="font-semibold text-gray-700 mb-2">Assignment Progress</h4>
+                                        <h4 className="font-semibold mb-2 flex items-center gap-2">
+                                            <FiInfoTyped />
+                                            Document Credit Usage
+                                        </h4>
+                                        <div
+                                            className={`p-4 border rounded-lg ${
+                                                creditInfo.creditsNeeded === 1
+                                                    ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'
+                                                    : 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800'
+                                            }`}
+                                        >
+                                            <div className="flex items-start gap-3">
+                                                <div
+                                                    className={`flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center font-bold text-xl ${
+                                                        creditInfo.creditsNeeded === 1
+                                                            ? 'bg-green-100 dark:bg-green-800 text-green-700 dark:text-green-200'
+                                                            : 'bg-blue-100 dark:bg-blue-800 text-blue-700 dark:text-blue-200'
+                                                    }`}
+                                                >
+                                                    {creditInfo.creditsNeeded}
+                                                </div>
+                                                <div className="flex-1">
+                                                    <p className="font-semibold text-sm mb-1">
+                                                        {creditInfo.creditsNeeded === 1
+                                                            ? 'This package will use 1 document credit'
+                                                            : `This package will use ${creditInfo.creditsNeeded} document credits`}
+                                                    </p>
+                                                    <p className="text-xs text-gray-600 dark:text-gray-400">
+                                                        {creditInfo.uniqueSignerCount === 0
+                                                            ? 'No signers assigned yet'
+                                                            : creditInfo.uniqueSignerCount === 1
+                                                            ? '1 unique signer detected'
+                                                            : `${creditInfo.uniqueSignerCount} unique signers detected`}
+                                                    </p>
+                                                    <div className="mt-2 pt-2 border-t border-gray-200 dark:border-gray-700">
+                                                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                                                            💡 <span className="font-medium">Tip:</span> Each document credit covers up to 2 unique signers.
+                                                            {creditInfo.uniqueSignerCount > 2 && (
+                                                                <span>
+                                                                    {' '}
+                                                                    You have {creditInfo.uniqueSignerCount} signers, requiring {creditInfo.creditsNeeded} credits.
+                                                                </span>
+                                                            )}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Assignment Progress */}
+                                    <div>
+                                        <h4 className="font-semibold mb-2">Assignment Progress</h4>
                                         <div className="w-full bg-gray-200 rounded-full h-2.5">
                                             <div
                                                 className={`h-2.5 rounded-full transition-all duration-500 ${
@@ -525,7 +717,7 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
                                                 style={{ width: `${stats.completionRate}%` }}
                                             ></div>
                                         </div>
-                                        <p className="text-xs text-gray-500 text-right mt-1">{stats.completionRate}% Complete</p>
+                                        <p className="text-xs text-right mt-1">{stats.completionRate}% Complete</p>
                                         {stats.unassignedRequiredFields.length > 0 && (
                                             <div className="mt-3 bg-red-50 border-l-4 border-red-500 text-red-700 p-3 rounded-r-lg">
                                                 <p className="font-bold text-sm">Action Required</p>
@@ -539,29 +731,29 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
                             {activeTab === 'recipients' && (
                                 <div className="space-y-6 animate-fadeIn">
                                     <div>
-                                        <h4 className="font-semibold text-gray-700 mb-2">Assigned Participants</h4>
-                                        <div className="space-y-2 p-3 bg-white border rounded-lg max-h-60 overflow-y-auto">
+                                        <h4 className="font-semibold mb-2">Assigned Participants</h4>
+                                        <div className="space-y-2 p-3 dark:bg-gray-900 bg-white border rounded-lg max-h-60 overflow-y-auto">
                                             {currentPackage.fields.flatMap((f) => f.assignedUsers || []).length > 0 ? (
                                                 currentPackage.fields
                                                     .flatMap((f) => f.assignedUsers || [])
                                                     .map((user, idx) => (
                                                         <div key={user.id || idx} className="p-3 bg-gray-50 rounded-md text-sm">
-                                                            <p className="font-bold text-gray-800">{user.contactName}</p>
+                                                            <p className="font-bold">{user.contactName}</p>
                                                             <p className="text-xs text-indigo-600 font-semibold">{user.role}</p>
                                                         </div>
                                                     ))
                                             ) : (
-                                                <div className="text-center text-sm text-gray-400 py-6">
-                                                    <FiUsersTyped className="mx-auto text-3xl mb-2 text-gray-300" />
+                                                <div className="text-center text-smpy-6">
+                                                    <FiUsersTyped className="mx-auto text-3xl mb-2" />
                                                     No users have been assigned to fields.
                                                 </div>
                                             )}
                                         </div>
                                     </div>
                                     <div>
-                                        <h4 className="font-semibold text-gray-700 mb-2">Notification-Only Receivers</h4>
-                                        <div className="space-y-3 p-4 bg-white border rounded-lg">
-                                            <p className="text-xs text-gray-600">Add contacts who will receive package notifications but are not required to sign.</p>
+                                        <h4 className="font-semibold mb-2">Notification-Only Receivers</h4>
+                                        <div className="space-y-3 p-4 dark:bg-gray-900 bg-white border rounded-lg">
+                                            <p className="text-xs">Add contacts who will receive package notifications but are not required to sign.</p>
                                             <SearchableContactDropdown
                                                 contacts={contacts}
                                                 selectedContact={selectedReceiver}
@@ -571,13 +763,13 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
                                             <button
                                                 onClick={handleAddReceiver}
                                                 disabled={!selectedReceiver}
-                                                className="w-full px-3 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-sm rounded-lg font-medium transition-colors duration-200"
+                                                className="w-full px-3 py-2 dark:bg-gray-900 bg-green-600 hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-sm rounded-lg font-medium transition-colors duration-200"
                                             >
                                                 Add Receiver
                                             </button>
                                             <div className="mt-4 space-y-2 max-h-32 overflow-y-auto">
                                                 {currentPackage.receivers.map((rec) => (
-                                                    <div key={rec.id} className="flex justify-between items-center text-sm p-2 bg-gray-50 rounded-md">
+                                                    <div key={rec.id} className="flex justify-between items-center text-sm p-2 bg-gray-50 dark:bg-gray-900 rounded-md">
                                                         <span className="font-medium">{rec.contactName}</span>
                                                         <button onClick={() => handleRemoveReceiver(rec.id)} className="text-red-500 hover:text-red-700 p-1 rounded-full">
                                                             ×
@@ -592,11 +784,11 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
 
                             {activeTab === 'settings' && (
                                 <div className="space-y-6 animate-fadeIn">
-                                    <div className="p-4 bg-white border rounded-lg">
-                                        <label className="font-semibold text-gray-800 flex items-center gap-2 mb-2">
+                                    <div className="p-4 dark:bg-gray-900 bg-white border rounded-lg">
+                                        <label className="font-semibold flex items-center gap-2 mb-2">
                                             <FiClockTyped /> Package Expiration
                                         </label>
-                                        <p className="text-xs text-gray-500 mb-3">Set a date and time when this package will no longer be accessible.</p>
+                                        <p className="text-xs mb-3">Set a date and time when this package will no longer be accessible.</p>
                                         <div className="flex items-center gap-2">
                                             <input
                                                 type="datetime-local"
@@ -613,124 +805,134 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
                                             </button>
                                         </div>
                                     </div>
-                                    <div className="p-4 bg-white border rounded-lg space-y-3">
-                                        <label className="font-semibold text-gray-800 flex items-center gap-2">
+                                    <div className="p-4 dark:bg-gray-900 bg-white border rounded-lg space-y-3">
+                                        <label className="font-semibold flex items-center gap-2">
                                             <FiBellTyped /> Expiration Reminders
                                         </label>
-                                        <label className="flex items-center text-sm gap-3 p-2 rounded-md hover:bg-gray-50">
+                                        {!currentPackage.options.expiresAt && (
+                                            <p className="text-xs text-amber-700 p-2 bg-amber-50 dark:bg-gray-800 rounded-md">
+                                                Please set a package expiration date first to enable expiration reminders.
+                                            </p>
+                                        )}
+                                        <label className={`flex items-center dark:bg-gray-900 text-sm gap-3 p-2 rounded-md hover:bg-gray-50 ${!currentPackage.options.expiresAt ? 'opacity-40' : ''}`}>
                                             <input
                                                 type="checkbox"
                                                 className="mr-2 rounded"
                                                 checked={currentPackage.options.sendExpirationReminders}
                                                 onChange={(e) => handleOptionsChange({ sendExpirationReminders: e.target.checked })}
+                                                disabled={!currentPackage.options.expiresAt}
                                             />
                                             Send Expiration Reminders
                                         </label>
                                         <div
                                             className={`space-y-4 pl-8 border-l-2 ml-2 transition-opacity ${
-                                                !currentPackage.options.sendExpirationReminders ? 'opacity-40 pointer-events-none' : 'opacity-100'
+                                                !currentPackage.options.sendExpirationReminders || !currentPackage.options.expiresAt ? 'opacity-40 pointer-events-none' : 'opacity-100'
                                             }`}
                                         >
                                             <div>
-                                                <label className="text-xs font-medium text-gray-500 block mb-1">Reminder Timing</label>
+                                                <label className="text-xs font-medium block mb-1">Reminder Timing</label>
                                                 <select
-                                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100"
+                                                    className="w-full dark:bg-gray-900 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100"
                                                     value={currentPackage.options.reminderPeriod || ''}
                                                     onChange={(e) => handleOptionsChange({ reminderPeriod: e.target.value || null })}
-                                                    disabled={!currentPackage.options.sendExpirationReminders || availableReminderOptions.length === 0}
+                                                    disabled={!currentPackage.options.sendExpirationReminders || !currentPackage.options.expiresAt || availableReminderOptions.length === 0}
                                                 >
                                                     <option value="">Select reminder timing</option>
-                                                    {/* We now map over the dynamically filtered list */}
                                                     {availableReminderOptions.map((option) => (
                                                         <option key={option.value} value={option.value}>
                                                             {option.label}
                                                         </option>
                                                     ))}
                                                 </select>
-                                                {/* This helper text appears when the expiration is too soon for any reminders */}
                                                 {currentPackage?.options.sendExpirationReminders && availableReminderOptions.length === 0 && currentPackage?.options.expiresAt && (
-                                                    <p className="text-xs text-amber-700 mt-2 p-2 bg-amber-50 rounded-md">
+                                                    <p className="text-xs text-amber-700 mt-2 p-2 dark:bg-gray-900 bg-amber-50 rounded-md">
                                                         The expiration date is too soon for any reminder options. Please set a later date to enable reminders.
                                                     </p>
                                                 )}
                                             </div>
                                         </div>
                                     </div>
-                                    <div className="p-4 bg-white border rounded-lg space-y-3">
-                                        <label className="font-semibold text-gray-800 flex items-center gap-2">
+                                    <div className="p-4 dark:bg-gray-900 bg-white border rounded-lg space-y-3">
+                                        <label className="font-semibold flex items-center gap-2">
                                             <FiRepeatTyped /> Automatic Reminders
                                         </label>
-                                        <label className="flex items-center text-sm gap-3 p-2 rounded-md hover:bg-gray-50">
+                                        {!currentPackage.options.expiresAt && (
+                                            <p className="text-xs text-amber-700 p-2 bg-amber-50 dark:bg-gray-800 rounded-md">
+                                                Please set a package expiration date first to enable automatic reminders.
+                                            </p>
+                                        )}
+                                        <label className={`flex items-center dark:bg-gray-900 text-sm gap-3 p-2 rounded-md hover:bg-gray-50 ${!currentPackage.options.expiresAt ? 'opacity-40' : ''}`}>
                                             <input
                                                 type="checkbox"
                                                 className="mr-2 rounded"
                                                 checked={currentPackage.options.sendAutomaticReminders}
                                                 onChange={(e) => handleOptionsChange({ sendAutomaticReminders: e.target.checked })}
+                                                disabled={!currentPackage.options.expiresAt}
                                             />
                                             Enable Automatic Reminders
                                         </label>
-                                        {/* 
-        This block is now disabled/faded if reminders are toggled off
-        OR if the expiration date is too soon (maxFirstReminderDays < 1)
-    */}
                                         <div
                                             className={`space-y-4 pl-8 border-l-2 ml-2 transition-opacity ${
-                                                !currentPackage.options.sendAutomaticReminders || maxFirstReminderDays < 1 ? 'opacity-40 pointer-events-none' : 'opacity-100'
+                                                !currentPackage.options.sendAutomaticReminders || !currentPackage.options.expiresAt || maxFirstReminderDays < 1
+                                                    ? 'opacity-40 pointer-events-none'
+                                                    : 'opacity-100'
                                             }`}
                                         >
                                             <div>
-                                                <label className="text-xs font-medium text-gray-500 block mb-1">First reminder</label>
+                                                <label className="text-xs font-medium block mb-1">First reminder</label>
                                                 <div className="flex items-center gap-2 text-sm">
                                                     <input
                                                         type="number"
                                                         min="1"
-                                                        // Add the 'max' attribute to enforce the limit
                                                         max={maxFirstReminderDays}
-                                                        className="w-20 px-2 py-1 border border-gray-300 rounded text-sm disabled:bg-gray-100"
+                                                        className="w-20 px-2 py-1 border dark:bg-gray-900 border-gray-300 rounded text-sm disabled:bg-gray-100"
                                                         value={currentPackage.options.firstReminderDays || ''}
                                                         onChange={(e) => {
-                                                            // Prevent user from typing a value larger than the max
                                                             let value = parseInt(e.target.value);
                                                             if (value > maxFirstReminderDays) {
                                                                 value = maxFirstReminderDays;
                                                             }
                                                             handleOptionsChange({ firstReminderDays: value || null });
                                                         }}
-                                                        disabled={!currentPackage.options.sendAutomaticReminders || maxFirstReminderDays < 1}
+                                                        disabled={!currentPackage.options.sendAutomaticReminders || !currentPackage.options.expiresAt || maxFirstReminderDays < 1}
                                                     />
                                                     days before expiration
                                                 </div>
                                             </div>
                                             <div>
-                                                <label className="text-xs font-medium text-gray-500 block mb-1">Follow-up reminders</label>
+                                                <label className="text-xs font-medium block mb-1">Follow-up reminders</label>
                                                 <div className="flex items-center gap-2 text-sm">
                                                     Repeat every
                                                     <input
                                                         type="number"
                                                         min="1"
-                                                        className="w-20 px-2 py-1 border border-gray-300 rounded text-sm disabled:bg-gray-100"
+                                                        max={maxRepeatReminderDays}
+                                                        className="w-20 px-2 py-1  dark:bg-gray-900 border border-gray-300 rounded text-sm disabled:bg-gray-100"
                                                         value={currentPackage.options.repeatReminderDays || ''}
-                                                        onChange={(e) => handleOptionsChange({ repeatReminderDays: parseInt(e.target.value) || null })}
-                                                        disabled={!currentPackage.options.sendAutomaticReminders || maxFirstReminderDays < 1}
+                                                        onChange={(e) => {
+                                                            let value = parseInt(e.target.value);
+                                                            if (value > maxRepeatReminderDays) {
+                                                                value = maxRepeatReminderDays;
+                                                            }
+                                                            handleOptionsChange({ repeatReminderDays: value || null });
+                                                        }}
+                                                        disabled={!currentPackage.options.sendAutomaticReminders || !currentPackage.options.expiresAt || maxFirstReminderDays < 1}
                                                     />
                                                     days
                                                 </div>
                                             </div>
                                         </div>
-                                        {/* 
-        This helper text appears to guide the user when the option is unavailable
-    */}
                                         {currentPackage.options.sendAutomaticReminders && maxFirstReminderDays < 1 && currentPackage.options.expiresAt && (
                                             <div className="pl-8 ml-2">
-                                                <p className="text-xs text-amber-700 mt-2 p-2 bg-amber-50 rounded-md">
+                                                <p className="text-xs text-amber-700 dark:bg-gray-900 mt-2 p-2 bg-amber-50 rounded-md">
                                                     The expiration date must be set to more than one day in the future to enable automatic reminders.
                                                 </p>
                                             </div>
                                         )}
                                     </div>
-                                    <div className="p-4 bg-white border rounded-lg space-y-3">
-                                        <label className="font-semibold text-gray-800">Permissions</label>
-                                        <label className="flex items-center text-sm gap-3 p-2 rounded-md hover:bg-gray-50">
+                                    <div className="p-4 dark:bg-gray-900 bg-white border rounded-lg space-y-3">
+                                        <label className="font-semibold ">Permissions</label>
+                                        <label className="flex items-center text-sm gap-3 p-2 rounded-md dark:bg-gray-900 hover:bg-gray-50">
                                             <input
                                                 type="checkbox"
                                                 className="mr-2 rounded"
@@ -739,7 +941,7 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
                                             />
                                             Allow download before signing is complete
                                         </label>
-                                        <label className="flex items-center text-sm gap-3 p-2 rounded-md hover:bg-gray-50">
+                                        <label className="flex items-center text-sm gap-3 p-2  dark:bg-gray-900 rounded-md hover:bg-gray-50">
                                             <input
                                                 type="checkbox"
                                                 className="mr-2 rounded"

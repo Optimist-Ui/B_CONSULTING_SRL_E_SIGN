@@ -53,26 +53,32 @@ const DocumentEditorStep: React.FC = () => {
                 setPageInfos([]);
                 return;
             }
-
             setPdfLoadError(null);
             isLoadingPdf.current = true;
 
             try {
                 let pdf: PDFDocumentProxy;
+
+                // Priority 1: Use in-memory fileData (for newly uploaded files)
                 if (currentTemplate.fileData && currentTemplate.fileData.byteLength > 0) {
                     const clonedFileData = currentTemplate.fileData.slice(0);
                     pdf = await loadPdfDocument(clonedFileData);
-                } else if (currentTemplate.fileUrl && !currentTemplate.fileUrl.startsWith('blob:')) {
-                    // Smartly construct the URL to avoid duplication
-                    let fileUrl = currentTemplate.fileUrl;
-                    // Normalize path: If it starts with '/public', it's already a complete server path segment.
-                    // Otherwise, assume it needs the '/public' prefix. This handles both new and old URLs.
-                    const correctedFileUrl = fileUrl.startsWith('/public') ? fileUrl : `/public${fileUrl}`;
+                }
+                // Priority 2: Use downloadUrl (signed URL from S3) for existing templates
+                else if (currentTemplate.downloadUrl) {
+                    console.log('Fetching PDF from signed URL:', currentTemplate.downloadUrl);
+                    const response = await fetch(currentTemplate.downloadUrl);
+                    if (!response.ok) throw new Error(`Failed to fetch PDF: ${response.statusText}`);
+                    const arrayBuffer = await response.arrayBuffer();
+                    pdf = await loadPdfDocument(arrayBuffer);
+                }
+                // Priority 3: Fallback to fileUrl (for backward compatibility)
+                else if (currentTemplate.fileUrl && !currentTemplate.fileUrl.startsWith('blob:')) {
+                    // Old templates might use local paths
+                    const fileUrl = currentTemplate.fileUrl;
 
-                    const fullUrl = `${BACKEND_URL}${correctedFileUrl}`;
-
-                    console.log('Fetching PDF from corrected URL:', fullUrl); // Debugging
-                    const response = await fetch(fullUrl, { mode: 'cors' });
+                    console.log('Fetching PDF from fileUrl:', fileUrl);
+                    const response = await fetch(fileUrl, { mode: 'cors' });
                     if (!response.ok) throw new Error(`Failed to fetch PDF: ${response.statusText}`);
                     const arrayBuffer = await response.arrayBuffer();
                     pdf = await loadPdfDocument(arrayBuffer);
@@ -255,12 +261,12 @@ const DocumentEditorStep: React.FC = () => {
     }
 
     return (
-        <div className="flex flex-col flex-grow overflow-hidden gap-4 h-full bg-gray-50">
-            <div className="flex-shrink-0 bg-white/80 rounded-lg shadow-md p-2">
+        <div className="flex flex-col flex-grow overflow-hidden gap-4 h-full dark:bg-gray-900 bg-gray-50">
+            <div className="flex-shrink-0 dark:bg-gray-900 bg-white/80 rounded-lg shadow-md p-2">
                 <EditorToolbar />
             </div>
-            <div className="flex flex-grow overflow-hidden gap-4">
-                <div className="flex-grow flex flex-col items-center bg-white rounded-lg shadow-md p-4 overflow-auto">
+            <div className="flex flex-grow overflow-hidden gap-4 dark:bg-gray-900">
+                <div className="flex-grow flex flex-col items-center dark:bg-gray-900 bg-white rounded-lg shadow-md p-4 overflow-auto">
                     <div className="pdf-viewer-pages space-y-8">
                         {Array.from({ length: numPages }, (_, i) => i + 1).map((pageNumber) => {
                             const pageInfo = pageInfos[pageNumber - 1];
@@ -268,7 +274,7 @@ const DocumentEditorStep: React.FC = () => {
                                 <div
                                     key={`page-${pageNumber}`}
                                     ref={pageRefs.current[pageNumber - 1]}
-                                    className="relative border border-gray-300 shadow-sm bg-white flex-shrink-0"
+                                    className="relative border dark:bg-gray-900 border-gray-300 shadow-sm bg-white flex-shrink-0"
                                     style={{
                                         width: pageInfo ? `${pageInfo.width}px` : 'auto',
                                         height: pageInfo ? `${pageInfo.height}px` : 'auto',
@@ -296,8 +302,8 @@ const DocumentEditorStep: React.FC = () => {
                         })}
                     </div>
                 </div>
-                <div className="w-72 flex-shrink-0 bg-white rounded-lg shadow-md p-4 overflow-y-auto">
-                    <h3 className="text-lg font-bold mb-4 border-b pb-2 border-gray-200 text-gray-900">Field Properties</h3>
+                <div className="w-72 flex-shrink-0 dark:bg-gray-900 bg-white rounded-lg shadow-md p-4 overflow-y-auto">
+                    <h3 className="text-lg font-bold mb-4 border-b pb-2 dark:bg-gray-900 border-gray-200">Field Properties</h3>
                     {selectedField ? (
                         <FieldPropertiesPanel field={selectedField} onUpdate={handleFieldUpdate} />
                     ) : (

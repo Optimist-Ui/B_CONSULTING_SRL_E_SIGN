@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { ComponentType, useMemo, useState } from 'react';
 import { useReactTable, getCoreRowModel, getSortedRowModel, flexRender, createColumnHelper, ColumnDef } from '@tanstack/react-table';
 import IconMenuDocumentation from '../Icon/Menu/IconMenuDocumentation';
 import IconBell from '../Icon/IconBell';
@@ -14,7 +14,11 @@ import IconPhone from '../Icon/IconPhone';
 import DocumentDetailsPanel from './DocumentDetailsPanel';
 import { Document, ParticipantDetail, User } from '../../store/slices/documentSlice';
 import ConfirmationModal from '../common/ConfirmationModal';
+import { useNavigate } from 'react-router-dom';
+import IconEye from '../Icon/IconEye';
+import { FiEdit3 } from 'react-icons/fi';
 
+const FiEdit3Typed = FiEdit3 as ComponentType<{ className?: string }>;
 interface DocumentTableProps {
     documents: Document[];
     loading: boolean;
@@ -31,9 +35,9 @@ interface DocumentTableProps {
 }
 
 const DocumentTable: React.FC<DocumentTableProps> = ({ documents, loading, expandedRows, toggleExpansion, onDownload, onNotify, onViewHistory, onReassign, onSkip, onRevoke }) => {
+    const navigate = useNavigate();
     const [isRevokeModalOpen, setIsRevokeModalOpen] = useState(false);
     const [documentToRevoke, setDocumentToRevoke] = useState<Document | null>(null);
-
     const handleRevokeClick = (document: Document) => {
         setDocumentToRevoke(document);
         setIsRevokeModalOpen(true);
@@ -67,108 +71,71 @@ const DocumentTable: React.FC<DocumentTableProps> = ({ documents, loading, expan
         }
     };
 
-    const getStatusDotColor = (status: string): string => {
-        switch (status) {
-            case 'Completed':
-            case 'AllCompleted':
-                return 'bg-green-500';
-            case 'Rejected':
-            case 'AllRejected':
-                return 'bg-red-500';
-            default:
-                return 'bg-gray-500';
-        }
-    };
-
-    type StatusCountKeys = 'Completed' | 'In Progress' | 'Waiting' | 'Not Sent' | 'Rejected';
-
     const renderSingleStatusDot = (members: (ParticipantDetail | User)[]): JSX.Element => {
-        const statusCounts: Record<StatusCountKeys, number> = {
-            Completed: 0,
-            'In Progress': 0,
-            Waiting: 0,
-            'Not Sent': 0,
-            Rejected: 0,
-        };
+        // Defines the order and color for tooltip parts
+        const statusOrder: { key: StatusCountKeys; color: string }[] = [
+            { key: 'Completed', color: 'bg-green-500' },
+            { key: 'In Progress', color: 'bg-gray-500' },
+            { key: 'Waiting', color: 'bg-gray-500' },
+            { key: 'Rejected', color: 'bg-red-500' },
+            { key: 'Not Sent', color: 'bg-gray-500' },
+        ];
 
-        members.forEach((member) => {
-            const status = ('status' in member ? member.status : 'Completed') as StatusCountKeys;
-            if (status in statusCounts) {
-                statusCounts[status]++;
-            } else {
-                statusCounts['Not Sent']++; // Fallback for unknown statuses
-            }
-        });
+        type StatusCountKeys = 'Completed' | 'In Progress' | 'Waiting' | 'Not Sent' | 'Rejected';
 
         const total = members.length;
-        const pendingCount = statusCounts['In Progress'] + statusCounts.Waiting + statusCounts['Not Sent'];
-        let dotColor: string;
         if (total === 0) {
-            dotColor = getStatusDotColor('Not Sent');
-        } else if (statusCounts.Rejected === total) {
-            dotColor = getStatusDotColor('AllRejected');
-        } else if (statusCounts.Completed === total) {
-            dotColor = getStatusDotColor('AllCompleted');
-        } else {
-            dotColor = getStatusDotColor('Not Sent');
+            return (
+                <div className="relative flex items-center group">
+                    <span className="w-3 h-3 rounded-full bg-gray-500" />
+                </div>
+            );
         }
 
-        let tooltipContent: JSX.Element;
-        if (total === 0) {
-            tooltipContent = <span className="text-gray-800 text-xs">None</span>;
-        } else if (statusCounts.Completed === total) {
-            tooltipContent = <span className="text-green-500 text-xs">✓✓</span>;
-        } else if (statusCounts.Rejected === total) {
-            tooltipContent = <span className="text-red-500 text-xs">✗</span>;
+        const statusCounts = members.reduce((acc, member) => {
+            const status = ('status' in member && member.status ? member.status : 'Not Sent') as StatusCountKeys;
+            acc[status] = (acc[status] || 0) + 1;
+            return acc;
+        }, {} as Record<StatusCountKeys, number>);
+
+        const completedCount = statusCounts.Completed || 0;
+        const rejectedCount = statusCounts.Rejected || 0;
+        const pendingCount = total - completedCount - rejectedCount;
+
+        // New logic to determine the dot color without hovering
+        let dotColor: string;
+        if (completedCount === total) {
+            dotColor = 'bg-green-500'; // All done
+        } else if (rejectedCount === total) {
+            dotColor = 'bg-red-500'; // All rejected
+        } else if (completedCount > 0 && (pendingCount > 0 || rejectedCount > 0)) {
+            dotColor = 'bg-orange-500'; // Partially completed
         } else {
-            const parts: JSX.Element[] = [];
-            if (statusCounts.Completed > 0) {
-                parts.push(
-                    <span key="completed" className="flex items-center gap-1">
-                        <span className="text-gray-800 text-xs">{statusCounts.Completed}</span>
-                        <span className="w-2 h-2 rounded-full bg-green-500" />
-                    </span>
-                );
-            }
-            if (pendingCount > 0) {
-                if (statusCounts.Completed > 0)
-                    parts.push(
-                        <span key="separator" className="text-gray-800 text-xs mx-1">
-                            -
-                        </span>
-                    );
-                parts.push(
-                    <span key="pending" className="flex items-center gap-1">
-                        <span className="text-gray-800 text-xs">{pendingCount}</span>
-                        <span className="w-2 h-2 rounded-full bg-gray-500" />
-                    </span>
-                );
-            }
-            if (statusCounts.Rejected > 0) {
-                if (statusCounts.Completed > 0 || pendingCount > 0)
-                    parts.push(
-                        <span key="separator-rejected" className="text-gray-800 text-xs mx-1">
-                            -
-                        </span>
-                    );
-                parts.push(
-                    <span key="rejected" className="flex items-center gap-1">
-                        <span className="text-gray-800 text-xs">{statusCounts.Rejected}</span>
-                        <span className="w-2 h-2 rounded-full bg-red-500" />
-                    </span>
-                );
-            }
-            tooltipContent = <div className="flex items-center gap-1">{parts}</div>;
+            dotColor = 'bg-gray-500'; // None completed yet
         }
+
+        const tooltipContent = (
+            <div className="flex items-center">
+                {statusOrder
+                    .filter((s) => statusCounts[s.key] > 0)
+                    .map((s, index, arr) => (
+                        <React.Fragment key={s.key}>
+                            <span className="flex items-center gap-1">
+                                <span className="text-gray-800 text-xs">{statusCounts[s.key]}</span>
+                                <span className={`w-2 h-2 rounded-full ${s.color}`} />
+                            </span>
+                            {index < arr.length - 1 && <span className="text-gray-800 text-xs mx-1">-</span>}
+                        </React.Fragment>
+                    ))}
+            </div>
+        );
 
         return (
             <div className="relative flex items-center group">
                 <span className={`w-3 h-3 rounded-full ${dotColor}`} />
-                {total > 0 && (
-                    <div className="absolute left-5 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-gray-200 rounded-md px-2 py-1 z-10 flex items-center pointer-events-none">
-                        {tooltipContent}
-                    </div>
-                )}
+                <div className="absolute left-5 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-gray-200 rounded-md px-2 py-1 z-10 flex items-center pointer-events-none">
+                    {tooltipContent}
+                </div>
             </div>
         );
     };
@@ -260,6 +227,23 @@ const DocumentTable: React.FC<DocumentTableProps> = ({ documents, loading, expan
                                         Notify/Reminder
                                     </button>
                                 </li>
+                                <li>
+                                    <button className="w-full flex items-center px-3 py-2 text-sm hover:bg-primary hover:text-white" onClick={() => navigate(`/package/${row.original.id}`)}>
+                                        <IconEye className="w-4 h-4 mr-2" />
+                                        View Details
+                                    </button>
+                                </li>
+                                {row.original.status === 'Draft' && (
+                                    <li>
+                                        <button
+                                            className="w-full flex items-center px-3 py-2 text-sm hover:bg-primary hover:text-white"
+                                            onClick={() => navigate(`/add-document?draft=${row.original.id}`)}
+                                        >
+                                            <FiEdit3Typed className="w-4 h-4 mr-2" />
+                                            Continue Editing
+                                        </button>
+                                    </li>
+                                )}
                                 {/* <li>
                                     <button className="w-full flex items-center px-3 py-2 text-sm hover:bg-primary hover:text-white" onClick={() => onViewHistory(row.original.id)}>
                                         <IconClock className="w-4 h-4 mr-2" />
@@ -306,11 +290,11 @@ const DocumentTable: React.FC<DocumentTableProps> = ({ documents, loading, expan
 
     return (
         <>
-            <div className="h-[70vh] overflow-y-auto rounded-md border border-gray-200">
-                <table className="w-full border-collapse bg-white">
+            <div className="h-[70vh] overflow-y-auto rounded-md border dark:bg-gray-900  border-gray-200">
+                <table className="w-full border-collapse dark:bg-gray-900 bg-white">
                     <thead>
                         {table.getHeaderGroups().map((headerGroup) => (
-                            <tr key={headerGroup.id} className="bg-gray-100">
+                            <tr key={headerGroup.id} className="bg-gray-100 dark:bg-gray-900">
                                 {headerGroup.headers.map((header) => (
                                     <th key={header.id} className="p-3 text-left font-semibold text-gray-700 text-sm whitespace-nowrap">
                                         <div className={header.column.getCanSort() ? 'cursor-pointer select-none flex items-center' : ''} onClick={header.column.getToggleSortingHandler()}>

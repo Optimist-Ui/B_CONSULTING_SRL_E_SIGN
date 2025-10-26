@@ -1,10 +1,12 @@
 import { createSlice, PayloadAction, nanoid } from '@reduxjs/toolkit';
 import { DocumentField as TemplateDocumentField } from './templateSlice';
 import { Contact } from './contactSlice';
+import { buildPackageExtraReducers } from '../extra-reducers/packageExtraReducers';
 
 // Type Definitions
-export type FieldRole = 'Signer' | 'FormFiller' | 'Approver';
+export type FieldRole = 'Signer' | 'FormFiller' | 'Approver' | 'Receiver';
 export type SignatureMethod = 'Email OTP' | 'SMS OTP' | 'Both';
+export type ConcreteSignatureMethod = 'Email OTP' | 'SMS OTP';
 
 export interface AssignedUser {
     id: string;
@@ -12,7 +14,8 @@ export interface AssignedUser {
     contactName: string;
     contactEmail: string;
     role: FieldRole;
-    signatureMethod?: SignatureMethod;
+    signatureMethods?: ConcreteSignatureMethod[];
+    signed?: boolean;
 }
 
 export interface PackageReceiver {
@@ -44,11 +47,14 @@ export interface DocumentPackage {
     attachment_uuid: string;
     name: string;
     fileUrl: string;
+    s3Key?: string;
+    downloadUrl?: string; // 👈 ADD THIS - Signed URL
     fileData?: ArrayBuffer;
     fields: PackageField[];
     receivers: PackageReceiver[];
     options: PackageOptions;
-    status: 'Draft' | 'Sent' | 'Completed' | 'Archived';
+    customMessage?: string;
+    status: 'Draft' | 'Sent' | 'Completed' | 'Archived' | 'Revoked' | 'Rejected' | 'Expired';
     createdAt?: string;
     updatedAt?: string;
 }
@@ -94,11 +100,14 @@ const packageSlice = createSlice({
                 name: action.payload.name || 'Untitled Package',
                 attachment_uuid: action.payload.attachment_uuid || '',
                 fileUrl: action.payload.fileUrl || '',
+                s3Key: action.payload.s3Key || '', // 👈 ADD THIS
+                downloadUrl: action.payload.downloadUrl || '', // 👈 ADD THIS
                 fileData: action.payload.fileData || undefined,
                 templateId: action.payload.templateId || undefined,
                 fields: action.payload.fields ? action.payload.fields.map((field) => ({ ...field, assignedUsers: field.assignedUsers || [] })) : [],
                 receivers: [],
                 options: defaultPackageOptions,
+                customMessage: '',
                 status: 'Draft',
             } as DocumentPackage;
             state.isCreatingOrEditingPackage = true;
@@ -151,7 +160,7 @@ const packageSlice = createSlice({
                     if (!exists) {
                         const newUser = { ...action.payload.user, id: nanoid() };
                         if (newUser.role !== 'Signer') {
-                            delete newUser.signatureMethod;
+                            delete newUser.signatureMethods;
                         }
                         field.assignedUsers.push(newUser);
                     }
@@ -187,6 +196,11 @@ const packageSlice = createSlice({
                 };
             }
         },
+        setPackageCustomMessage: (state, action: PayloadAction<string>) => {
+            if (state.currentPackage) {
+                state.currentPackage.customMessage = action.payload;
+            }
+        },
         setSelectedPackageField: (state, action: PayloadAction<string | null>) => {
             state.selectedFieldId = action.payload;
         },
@@ -203,6 +217,9 @@ const packageSlice = createSlice({
             state.error = action.payload;
         },
     },
+    extraReducers: (builder) => {
+        buildPackageExtraReducers(builder);
+    },
 });
 
 export const {
@@ -217,6 +234,7 @@ export const {
     addReceiverToPackage,
     removeReceiverFromPackage,
     updatePackageOptions,
+    setPackageCustomMessage,
     setSelectedPackageField,
     setPackageActiveStep,
     clearPackageState,
