@@ -43,7 +43,7 @@ const initialState = {
     navbar: localStorage.getItem('navbar') || themeConfig.navbar,
     locale: localStorage.getItem('i18nextLng') || themeConfig.locale,
     isDarkMode: false,
-    sidebar: localStorage.getItem('sidebar') || defaultState.sidebar,
+    sidebar: false,
     semidark: localStorage.getItem('semidark') || themeConfig.semidark,
     languageList: [
         { code: 'zh', name: 'Chinese' },
@@ -134,7 +134,7 @@ const themeConfigSlice = createSlice({
         },
 
         setPageTitle(state, { payload }) {
-            document.title = `${payload} | E-sign.eu - Professional Electronic Signature Platform`;
+            document.title = `${payload} | I-sign.eu - Professional Electronic Signature Platform`;
         },
     },
 });
