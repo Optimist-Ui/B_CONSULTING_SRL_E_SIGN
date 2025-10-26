@@ -151,7 +151,7 @@ const HomeNavbar: React.FC = () => {
                                     E<span className="text-blue-400">-Sign</span>
                                 </span>
                             </div> */}
-                            <img src="/logo-white.png" alt="logo" className='w-36' />
+                            <img src="/logo-white.png" alt="logo" className="w-36" />
                         </div>
 
                         {/* Desktop Navigation - right Side */}
@@ -183,6 +183,13 @@ const HomeNavbar: React.FC = () => {
                                     className="text-gray-300 hover:text-blue-400 px-3 py-2 text-sm lg:text-base font-medium transition-colors duration-200 relative group"
                                 >
                                     FAQ
+                                    <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-blue-400 group-hover:w-full transition-all duration-200"></span>
+                                </button>
+                                <button
+                                    onClick={() => navigate('/digital-signatures-guide')}
+                                    className="text-gray-300 hover:text-blue-400 px-3 py-2 text-sm lg:text-base font-medium transition-colors duration-200 relative group"
+                                >
+                                    eIDAS
                                     <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-blue-400 group-hover:w-full transition-all duration-200"></span>
                                 </button>
                                 <button

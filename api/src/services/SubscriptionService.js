@@ -103,7 +103,7 @@ class SubscriptionService {
   }
 
   /**
-   * REWRITTEN: Creates a trial and correctly initializes the subscriptionHistory.
+   * FIXED: Creates a trial subscription and lets webhooks handle the rest
    */
   async createTrialSubscription({ userId, priceId, paymentMethodId }) {
     try {
@@ -154,6 +154,7 @@ class SubscriptionService {
         invoice_settings: { default_payment_method: paymentMethodId },
       });
 
+      // Create the subscription in Stripe
       const subscription = await this.stripe.subscriptions.create({
         customer: stripeCustomerId,
         items: [{ price: priceId }],
@@ -161,10 +162,20 @@ class SubscriptionService {
         default_payment_method: paymentMethodId,
       });
 
+      // Validate Stripe response dates
+      if (!subscription.trial_start || !subscription.trial_end) {
+        throw new Error("Invalid trial dates from Stripe");
+      }
+
       const trialStartDate = new Date(subscription.trial_start * 1000);
       const trialEndDate = new Date(subscription.trial_end * 1000);
 
-      // Correctly initialize the subscription history for the trial
+      // Validate converted dates
+      if (isNaN(trialStartDate.getTime()) || isNaN(trialEndDate.getTime())) {
+        throw new Error("Failed to parse trial dates from Stripe");
+      }
+
+      // Initialize subscription history for the trial
       const trialHistory = {
         type: "trial",
         planId: plan._id,
@@ -176,6 +187,26 @@ class SubscriptionService {
         status: "active",
       };
 
+      // CRITICAL: Validate period dates before saving
+      let periodStart = trialStartDate;
+      let periodEnd = trialEndDate;
+
+      if (
+        subscription.current_period_start &&
+        subscription.current_period_end
+      ) {
+        periodStart = new Date(subscription.current_period_start * 1000);
+        periodEnd = new Date(subscription.current_period_end * 1000);
+
+        // Validate converted dates
+        if (isNaN(periodStart.getTime()) || isNaN(periodEnd.getTime())) {
+          console.warn("Invalid period dates from Stripe, using trial dates");
+          periodStart = trialStartDate;
+          periodEnd = trialEndDate;
+        }
+      }
+
+      // Update user with trial subscription
       await this.userService.updateUser(userId, {
         stripeCustomerId,
         subscription: {
@@ -183,16 +214,18 @@ class SubscriptionService {
           planId: plan._id,
           planName: plan.name,
           status: subscription.status,
-          current_period_start: trialStartDate,
-          current_period_end: trialEndDate,
+          current_period_start: periodStart,
+          current_period_end: periodEnd,
           trial_end: trialEndDate,
         },
         hasHadTrial: true,
         subscriptionHistory: [trialHistory],
       });
 
+      // Save fingerprint to prevent abuse
       await this.UsedTrialFingerprint.create({ fingerprint, usedBy: userId });
 
+      // Send trial activation email
       try {
         const formattedTrialEndDate = trialEndDate.toLocaleDateString("en-US", {
           year: "numeric",
@@ -226,7 +259,7 @@ class SubscriptionService {
   }
 
   /**
-   * FIX: Properly calculate end dates based on plan interval (monthly vs yearly)
+   * FIXED: Ends trial early and lets webhooks handle ALL history updates
    */
   async endTrialEarly(userId) {
     const user = await this.userService.findUserById(userId);
@@ -240,6 +273,7 @@ class SubscriptionService {
     }
 
     try {
+      // End the trial in Stripe - this will trigger webhooks
       const subscription = await this.stripe.subscriptions.update(
         user.subscription.subscriptionId,
         {
@@ -249,68 +283,25 @@ class SubscriptionService {
         }
       );
 
-      const plan = await this.planService.findPlanById(
-        user.subscription.planId
-      );
+      console.log(`Trial ended for subscription ${subscription.id}`);
+      console.log(`New status: ${subscription.status}`);
+      console.log(`Invoice status: ${subscription.latest_invoice?.status}`);
 
-      const stripeSubscription = await this.stripe.subscriptions.retrieve(
-        user.subscription.subscriptionId
-      );
-      const currentPriceId = stripeSubscription.items.data[0].price.id;
+      // DON'T update history here - webhook will handle it via customer.subscription.updated
 
-      const isYearly = currentPriceId === plan.yearlyPriceId;
-      const now = Date.now();
-      let calculatedEndTime;
-
-      if (isYearly) {
-        calculatedEndTime = now + 365 * 24 * 60 * 60 * 1000;
-      } else {
-        calculatedEndTime = now + 30 * 24 * 60 * 60 * 1000;
-      }
-
-      const fallbackSubscription = {
-        ...subscription,
-        current_period_start: Math.floor(now / 1000),
-        current_period_end: Math.floor(calculatedEndTime / 1000),
-      };
-
-      const updatedHistory = await this.processSubscriptionTransition(
-        user,
-        plan,
-        "trial_to_paid",
-        fallbackSubscription,
-        isYearly
-      );
-
-      const updatedSubscriptionData = {
-        subscriptionId: subscription.id,
-        planId: user.subscription.planId,
-        planName: user.subscription.planName,
-        status: subscription.status,
-        current_period_start: new Date(
-          fallbackSubscription.current_period_start * 1000
-        ),
-        current_period_end: new Date(
-          fallbackSubscription.current_period_end * 1000
-        ),
-        trial_end: subscription.trial_end
-          ? new Date(subscription.trial_end * 1000)
-          : null,
-      };
-
-      await this.userService.updateUser(user._id, {
-        subscription: updatedSubscriptionData,
-        subscriptionHistory: updatedHistory,
-      });
-
+      // Send confirmation email if payment succeeded
       const invoice = subscription.latest_invoice;
-      if (invoice && invoice.status === "paid") {
-        await this.processSubscriptionConfirmationEmail(invoice);
+      if (invoice && typeof invoice === "object" && invoice.status === "paid") {
+        try {
+          await this.processSubscriptionConfirmationEmail(invoice);
+        } catch (emailError) {
+          console.error(`Failed to send confirmation email:`, emailError);
+        }
       }
 
       return {
         message: "Your trial has ended. Your paid subscription is now active.",
-        status: "active",
+        status: subscription.status,
       };
     } catch (error) {
       console.error(`Stripe error ending trial for user ${userId}:`, error);
@@ -319,7 +310,6 @@ class SubscriptionService {
       );
     }
   }
-
   /**
    * Marks expired subscription history entries as "expired".
    */
@@ -739,8 +729,69 @@ class SubscriptionService {
   }
 
   /**
-   * FIXED: Handles subscription updates from Stripe webhooks.
-   * Now correctly identifies new trials vs renewals.
+   * Handles payment failures - prevents incomplete subscriptions from being activated
+   */
+  async handlePaymentFailure(subscriptionId, invoice) {
+    try {
+      const user = await this.userService.findUserBySubscriptionId(
+        subscriptionId
+      );
+      if (!user) {
+        console.error(`User not found for subscription: ${subscriptionId}`);
+        return;
+      }
+
+      // Get the current subscription status from Stripe
+      const stripeSubscription = await this.stripe.subscriptions.retrieve(
+        subscriptionId
+      );
+
+      console.log(
+        `Payment failed for user ${user._id}. Subscription status: ${stripeSubscription.status}`
+      );
+
+      // If subscription is incomplete or past_due, don't activate it
+      if (
+        ["incomplete", "incomplete_expired"].includes(stripeSubscription.status)
+      ) {
+        console.log(
+          `Subscription ${subscriptionId} is ${stripeSubscription.status} - not activating`
+        );
+
+        // Optionally, send a payment failure email
+        try {
+          await this.emailService.sendPaymentFailedEmail(
+            user.email,
+            user.firstName,
+            invoice.amount_due / 100,
+            invoice.currency.toUpperCase(),
+            invoice.hosted_invoice_url
+          );
+        } catch (emailError) {
+          console.error(`Failed to send payment failure email:`, emailError);
+        }
+
+        return;
+      }
+
+      // If subscription is past_due but was previously active, update status
+      if (stripeSubscription.status === "past_due" && user.subscription) {
+        await this.userService.updateUser(user._id, {
+          "subscription.status": "past_due",
+        });
+
+        console.log(`Updated user ${user._id} subscription status to past_due`);
+      }
+    } catch (error) {
+      console.error(
+        `Error handling payment failure for subscription ${subscriptionId}:`,
+        error
+      );
+    }
+  }
+
+  /**
+   * FIXED: Properly detects trial-to-paid transitions and handles history
    */
   async handleSubscriptionUpdate(subscriptionId) {
     try {
@@ -753,80 +804,111 @@ class SubscriptionService {
       );
 
       if (!user) {
-        console.log(
-          `No user found for customer ${stripeSubscription.customer}`
+        console.error(
+          `User not found for customer: ${stripeSubscription.customer}`
         );
         return;
       }
 
-      // CRITICAL FIX: Skip webhook processing if dates are missing
-      // The creation methods handle this properly
+      // CRITICAL FIX: Don't process incomplete or failed subscriptions
+      if (!["active", "trialing"].includes(stripeSubscription.status)) {
+        console.log(
+          `Skipping subscription update for ${subscriptionId} - status is ${stripeSubscription.status}`
+        );
+        return;
+      }
+
+      // Validate dates from Stripe before processing
       if (
         !stripeSubscription.current_period_start ||
         !stripeSubscription.current_period_end
       ) {
-        console.warn(
-          `Missing period dates for subscription ${subscriptionId}, skipping webhook update`
+        console.error(
+          `Invalid period dates from Stripe for subscription ${subscriptionId}`
         );
         return;
       }
 
-      const currentPeriodStart = new Date(
+      const newPeriodStart = new Date(
         stripeSubscription.current_period_start * 1000
       );
-      const currentPeriodEnd = new Date(
+      const newPeriodEnd = new Date(
         stripeSubscription.current_period_end * 1000
       );
 
-      // Validate dates
-      if (
-        isNaN(currentPeriodStart.getTime()) ||
-        isNaN(currentPeriodEnd.getTime())
-      ) {
+      // Validate that dates are valid
+      if (isNaN(newPeriodStart.getTime()) || isNaN(newPeriodEnd.getTime())) {
         console.error(
-          `Invalid dates from Stripe for subscription ${subscriptionId}`
+          `Invalid dates after conversion for subscription ${subscriptionId}`
         );
         return;
       }
 
-      // CRITICAL FIX: Detect if this is a brand new subscription
-      const isNewSubscription =
-        !user.subscription || !user.subscription.subscriptionId;
-      const isNewTrial =
-        isNewSubscription && stripeSubscription.status === "trialing";
+      // Get current subscription info from database
+      const oldStatus = user.subscription?.status;
+      const oldPeriodStart = user.subscription?.current_period_start;
+      const newStatus = stripeSubscription.status;
 
-      if (isNewTrial) {
-        console.log(
-          `New trial detected for ${subscriptionId}, skipping webhook update (already handled by createTrialSubscription)`
-        );
-        return; // Don't process - createTrialSubscription already set everything up
-      }
-
-      // CRITICAL FIX: Only consider it a renewal if:
-      // 1. User already has a subscription
-      // 2. The new period start is AFTER the old period start
-      // 3. This is not a status-only update (like trialing -> active)
-      const oldPeriodStart = user.subscription?.current_period_start?.getTime();
-      const newPeriodStart = currentPeriodStart.getTime();
-
+      const isNewSubscription = !oldPeriodStart;
+      const isTrialToPaid = oldStatus === "trialing" && newStatus === "active";
       const isRenewal =
         oldPeriodStart &&
-        newPeriodStart > oldPeriodStart &&
-        user.subscription.subscriptionId === subscriptionId;
+        newPeriodStart.getTime() > new Date(oldPeriodStart).getTime() &&
+        !isTrialToPaid; // Don't count trial-to-paid as renewal
 
-      if (isRenewal) {
-        console.log(`Processing renewal for subscription ${subscriptionId}`);
+      console.log(`Processing subscription ${subscriptionId}:`, {
+        userId: user._id,
+        oldStatus,
+        newStatus,
+        isNew: isNewSubscription,
+        isTrialToPaid,
+        isRenewal,
+      });
 
+      // Handle trial-to-paid transition
+      if (isTrialToPaid) {
         const plan = await this.planService.findPlanById(
           user.subscription.planId
         );
 
-        if (plan) {
-          // Expire old entries
+        if (plan && user.subscriptionHistory) {
+          // Mark trial as completed
+          user.subscriptionHistory.forEach((entry) => {
+            if (entry.type === "trial" && entry.status === "active") {
+              entry.status = "completed";
+              entry.endDate = newPeriodStart;
+            }
+          });
+
+          // Add paid subscription entry
+          user.subscriptionHistory.push({
+            type: "paid",
+            planId: plan._id,
+            planName: plan.name,
+            startDate: newPeriodStart,
+            endDate: newPeriodEnd,
+            documentLimit: plan.documentLimit,
+            documentsUsed: 0,
+            status: "active",
+          });
+
+          console.log(
+            `Created trial-to-paid history entry for user ${user._id}`
+          );
+        }
+      }
+      // Handle subscription renewal (new billing cycle)
+      else if (isRenewal) {
+        const plan = await this.planService.findPlanById(
+          user.subscription.planId
+        );
+
+        if (plan && user.subscriptionHistory) {
+          // Expire old active entries
           user.subscriptionHistory.forEach((entry) => {
             if (entry.status === "active") {
               entry.status = "expired";
-              entry.endDate = new Date();
+              entry.endDate = newPeriodStart;
             }
           });
 
@@ -835,64 +917,64 @@ class SubscriptionService {
             type: "paid",
             planId: plan._id,
             planName: plan.name,
-            startDate: currentPeriodStart,
-            endDate: currentPeriodEnd,
+            startDate: newPeriodStart,
+            endDate: newPeriodEnd,
             documentLimit: plan.documentLimit,
             documentsUsed: 0,
             status: "active",
           });
+
+          console.log(`Created renewal history entry for user ${user._id}`);
         }
       }
 
-      // Get the current plan info
-      const currentPriceId = stripeSubscription.items?.data[0]?.price?.id;
-      let updatedPlan = null;
-
-      if (currentPriceId) {
-        updatedPlan = await this.planService.findPlanByPriceId(currentPriceId);
-      }
-
-      // Prepare update data - only update status and timestamps for non-renewals
+      // Update subscription details
       const updateData = {
         "subscription.status": stripeSubscription.status,
-        "subscription.current_period_start": currentPeriodStart,
-        "subscription.current_period_end": currentPeriodEnd,
+        "subscription.current_period_start": newPeriodStart,
+        "subscription.current_period_end": newPeriodEnd,
       };
 
-      // Only update history if we processed a renewal
-      if (isRenewal) {
-        updateData.subscriptionHistory = user.subscriptionHistory;
-      }
-
-      // Only update plan details if we found a matching plan
-      if (updatedPlan) {
-        updateData["subscription.planId"] = updatedPlan._id;
-        updateData["subscription.planName"] = updatedPlan.name;
-      }
-
-      // Handle trial_end if present
-      if (stripeSubscription.trial_end) {
-        updateData["subscription.trial_end"] = new Date(
-          stripeSubscription.trial_end * 1000
+      // Update plan details if changed
+      const currentPriceId = stripeSubscription.items.data[0]?.price?.id;
+      if (currentPriceId) {
+        const newPlan = await this.planService.findPlanByPriceId(
+          currentPriceId
         );
+
+        if (newPlan) {
+          updateData["subscription.planId"] = newPlan._id;
+          updateData["subscription.planName"] = newPlan.name;
+        }
+      }
+
+      // Update trial_end if present
+      if (stripeSubscription.trial_end) {
+        const trialEnd = new Date(stripeSubscription.trial_end * 1000);
+        if (!isNaN(trialEnd.getTime())) {
+          updateData["subscription.trial_end"] = trialEnd;
+        }
+      }
+
+      // Include subscription history if it was updated
+      if (user.subscriptionHistory && (isTrialToPaid || isRenewal)) {
+        updateData.subscriptionHistory = user.subscriptionHistory;
       }
 
       await this.userService.updateUser(user._id, updateData);
 
       console.log(
-        `Successfully updated subscription ${subscriptionId} for user ${
-          user._id
-        } (${isRenewal ? "renewal" : "status update"})`
+        `Successfully updated subscription ${subscriptionId} for user ${user._id}`
       );
     } catch (error) {
       console.error(
         `Error in handleSubscriptionUpdate for ${subscriptionId}:`,
         error
       );
-      // Don't throw - we don't want to fail the webhook
+      throw error;
     }
   }
-  
+
   /**
    * Handles subscription cancellations that come from outside our app.
    */
