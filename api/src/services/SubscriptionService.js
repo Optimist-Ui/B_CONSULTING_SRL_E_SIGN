@@ -407,10 +407,9 @@ class SubscriptionService {
       const newPlan = await this.planService.findPlanByPriceId(priceId);
       if (!newPlan) throw new Error("Plan not found");
 
-      // FIXED: Properly check subscription status with safe navigation
       const currentStatus = user.subscription?.status;
       const isTrialToPaid = currentStatus === "trialing";
-      const isTopUp = currentStatus === "active" && !isTrialToPaid;
+      const isUpgradeOrDowngrade = currentStatus === "active" && !isTrialToPaid;
       const isFirstPurchase =
         !user.subscription || !user.subscription.subscriptionId;
 
@@ -436,125 +435,100 @@ class SubscriptionService {
       const isYearly = priceId === newPlan.yearlyPriceId;
 
       if (isTrialToPaid) {
+        // ✅ Trial to Paid - End trial and start paid subscription
         transitionType = "trial_to_paid";
         const currentSub = await this.stripe.subscriptions.retrieve(
           user.subscription.subscriptionId
         );
 
-        console.log("BEFORE TRIAL-TO-PAID UPDATE:", {
-          id: currentSub.id,
-          status: currentSub.status,
-          current_period_start: currentSub.current_period_start,
-          current_period_end: currentSub.current_period_end,
-        });
+        console.log("Converting trial to paid subscription");
 
         subscription = await this.stripe.subscriptions.update(
           user.subscription.subscriptionId,
           {
             trial_end: "now",
-            proration_behavior: "none",
+            proration_behavior: "none", // Don't prorate trial conversion
             items: [{ id: currentSub.items.data[0].id, price: priceId }],
+            cancel_at_period_end: false, // ✅ Ensure auto-renewal is enabled
             expand: ["latest_invoice"],
           }
         );
-
-        console.log("AFTER TRIAL-TO-PAID UPDATE:", {
-          id: subscription.id,
-          status: subscription.status,
-          current_period_start: subscription.current_period_start,
-          current_period_end: subscription.current_period_end,
-        });
-
-        if (
-          !subscription.current_period_start ||
-          !subscription.current_period_end
-        ) {
-          console.log(
-            "Trial-to-paid missing period dates, calculating based on plan interval..."
-          );
-
-          const now = Date.now();
-          const calculatedEndTime = isYearly
-            ? now + 365 * 24 * 60 * 60 * 1000
-            : now + 30 * 24 * 60 * 60 * 1000;
-
-          subscription = {
-            ...subscription,
-            current_period_start: Math.floor(now / 1000),
-            current_period_end: Math.floor(calculatedEndTime / 1000),
-          };
-
-          console.log("Calculated dates for trial-to-paid:", {
-            id: subscription.id,
-            status: subscription.status,
-            current_period_start: subscription.current_period_start,
-            current_period_end: subscription.current_period_end,
-            interval: isYearly ? "yearly" : "monthly",
-          });
-        }
-      } else if (isTopUp) {
-        transitionType = "top_up";
+      } else if (isUpgradeOrDowngrade) {
+        // ✅ FIXED: Upgrade/Downgrade logic with FULL payment
+        transitionType = "upgrade_downgrade";
         const currentSub = await this.stripe.subscriptions.retrieve(
           user.subscription.subscriptionId
         );
-        subscription = await this.stripe.subscriptions.update(
-          user.subscription.subscriptionId,
-          {
-            proration_behavior: "create_prorations",
-            items: [{ id: currentSub.items.data[0].id, price: priceId }],
-            expand: ["latest_invoice"],
-          }
+
+        console.log(
+          `Processing ${transitionType} from plan ${user.subscription.planName} to ${newPlan.name}`
         );
 
-        if (
-          !subscription.current_period_start ||
-          !subscription.current_period_end
-        ) {
-          console.log(
-            "Top-up missing period dates, calculating based on plan interval..."
-          );
+        // 🔥 CRITICAL FIX: Cancel current subscription and create new one
+        // This ensures the user pays the FULL new plan price
 
-          const now = Date.now();
-          const calculatedEndTime = isYearly
-            ? now + 365 * 24 * 60 * 60 * 1000
-            : now + 30 * 24 * 60 * 60 * 1000;
+        // Step 1: Cancel the current subscription at period end
+        await this.stripe.subscriptions.update(currentSub.id, {
+          cancel_at_period_end: true,
+        });
 
-          subscription = {
-            ...subscription,
-            current_period_start: Math.floor(now / 1000),
-            current_period_end: Math.floor(calculatedEndTime / 1000),
-          };
-        }
-      } else {
-        // NEW SUBSCRIPTION - First time purchase
+        // Step 2: Calculate remaining time in current period
+        const now = Math.floor(Date.now() / 1000);
+        const currentPeriodEnd = currentSub.current_period_end;
+        const remainingDays = Math.ceil((currentPeriodEnd - now) / 86400);
+
+        console.log(`Remaining days in current period: ${remainingDays}`);
+
+        // Step 3: Create NEW subscription starting immediately
+        // User will pay FULL price for the new plan
         subscription = await this.stripe.subscriptions.create({
           customer: stripeCustomerId,
           items: [{ price: priceId }],
           default_payment_method: paymentMethodId,
+          proration_behavior: "none", // ✅ No proration - charge full amount
+          cancel_at_period_end: false, // ✅ Enable auto-renewal
           expand: ["latest_invoice"],
         });
 
-        if (
-          !subscription.current_period_start ||
-          !subscription.current_period_end
-        ) {
-          console.log(
-            "New subscription missing period dates, calculating based on plan interval..."
-          );
+        console.log(`New subscription created: ${subscription.id}`);
+        console.log(
+          `User will be charged full amount: ${
+            newPlan.monthlyPrice || newPlan.yearlyPrice
+          }`
+        );
 
-          const now = Date.now();
-          const calculatedEndTime = isYearly
-            ? now + 365 * 24 * 60 * 60 * 1000
-            : now + 30 * 24 * 60 * 60 * 1000;
-
-          subscription = {
-            ...subscription,
-            current_period_start: Math.floor(now / 1000),
-            current_period_end: Math.floor(calculatedEndTime / 1000),
-          };
-        }
+        // Step 4: Calculate document limit for new subscription
+        // Give FULL document limit of new plan (no prorating)
+        transitionType = "replacement"; // Use different transition type for history
+      } else {
+        // ✅ NEW SUBSCRIPTION - First time purchase
+        subscription = await this.stripe.subscriptions.create({
+          customer: stripeCustomerId,
+          items: [{ price: priceId }],
+          default_payment_method: paymentMethodId,
+          cancel_at_period_end: false, // ✅ Enable auto-renewal by default
+          expand: ["latest_invoice"],
+        });
       }
 
+      // Ensure we have valid period dates
+      if (
+        !subscription.current_period_start ||
+        !subscription.current_period_end
+      ) {
+        const now = Date.now();
+        const calculatedEndTime = isYearly
+          ? now + 365 * 24 * 60 * 60 * 1000
+          : now + 30 * 24 * 60 * 60 * 1000;
+
+        subscription = {
+          ...subscription,
+          current_period_start: Math.floor(now / 1000),
+          current_period_end: Math.floor(calculatedEndTime / 1000),
+        };
+      }
+
+      // Process subscription history with new logic
       const updatedHistory = await this.processSubscriptionTransition(
         user,
         newPlan,
@@ -577,20 +551,18 @@ class SubscriptionService {
           : null,
       };
 
-      // FIXED: Set hasHadTrial to true on first paid purchase
       const updateData = {
         stripeCustomerId,
         subscription: updatedSubscriptionData,
         subscriptionHistory: updatedHistory,
       };
 
-      // If this is their first purchase (not a trial conversion), mark trial as used
+      // Mark trial as used on first purchase
       if (isFirstPurchase && !user.hasHadTrial) {
         updateData.hasHadTrial = true;
       }
 
       await this.userService.updateUser(user._id, updateData);
-
       const updatedUser = await this.userService.findUserById(userId);
 
       return {
@@ -598,8 +570,8 @@ class SubscriptionService {
         status: subscription.status,
         latest_invoice: subscription.latest_invoice,
         effectiveLimit: updatedUser.getTotalDocumentLimit(),
-        message: isTopUp
-          ? `Upgrade successful! You now have ${updatedUser.getRemainingDocuments()} documents available.`
+        message: isUpgradeOrDowngrade
+          ? `Plan changed successfully! You now have ${updatedUser.getRemainingDocuments()} documents available.`
           : "Subscription created successfully!",
       };
     } catch (error) {
@@ -694,9 +666,14 @@ class SubscriptionService {
     const updatedSubscription = await this.stripe.subscriptions.update(
       user.subscription.subscriptionId,
       {
-        cancel_at_period_end: false,
+        cancel_at_period_end: false, // ✅ Re-enable auto-renewal
       }
     );
+
+    // ✅ Update local database to reflect the change
+    await this.userService.updateUser(userId, {
+      "subscription.status": updatedSubscription.status,
+    });
 
     try {
       const renewalDate = new Date(
