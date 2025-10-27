@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+Disallow: /dashboard
+Disallow: /my-documents
+Disallow: /contacts
+Disallow: /profile
+Disallow: /payment-methods
+Disallow: /subscriptions
+Disallow: /add-document
+
+Sitemap: https://i-sign.eu/sitemap.xml

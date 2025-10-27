@@ -7,20 +7,34 @@ import HomeWhyChoose from '../components/home/HomeWhyChoose';
 import HomeFaq from '../components/home/HomeFaq';
 import HomeTestimonial from '../components/home/HomeTestimonial';
 import HomeFooter from '../components/home/HomeFooter';
+import { organizationSchema, softwareAppSchema, serviceSchema, faqSchema, breadcrumbSchema } from '../components/SEO/StructuredData';
+import SEOHelmet from '../components/SEO/SEOHelmet';
+import { seoConfig } from '../utils/seoConfig';
 
 const Home = () => {
-  return (
-    <div className="min-h-screen">
-      <HomeNavbar />
-      <HomeHero />
-      <HomeFeatures />
-      <HomeWhyChoose />
-      <HomePlans />
-      <HomeFaq />
-      <HomeTestimonial />
-      <HomeFooter />
-    </div>
-  );
+    return (
+        <>
+            <SEOHelmet
+                title={seoConfig.home.title}
+                description={seoConfig.home.description}
+                keywords={seoConfig.home.keywords}
+                canonical={seoConfig.home.canonical}
+                ogImage={seoConfig.home.ogImage}
+                ogType={seoConfig.home.ogType}
+                jsonLd={[organizationSchema, softwareAppSchema, serviceSchema, faqSchema, breadcrumbSchema]}
+            />
+            <div className="min-h-screen">
+                <HomeNavbar />
+                <HomeHero />
+                <HomeFeatures />
+                <HomeWhyChoose />
+                <HomePlans />
+                <HomeFaq />
+                <HomeTestimonial />
+                <HomeFooter />
+            </div>
+        </>
+    );
 };
 
 export default Home;

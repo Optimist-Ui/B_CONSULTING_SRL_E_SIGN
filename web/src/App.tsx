@@ -7,6 +7,7 @@ import store from './store';
 import { ToastContainer } from 'react-toastify';
 import CookieBanner from './components/cookies/CookieBanner';
 import CookiePreferencesModal from './components/cookies/CookiePreferencesModal';
+import { HelmetProvider } from 'react-helmet-async';
 
 function App({ children }: PropsWithChildren) {
     const themeConfig = useSelector((state: IRootState) => state.themeConfig);
@@ -29,19 +30,21 @@ function App({ children }: PropsWithChildren) {
     }, [dispatch, themeConfig.theme, themeConfig.menu, themeConfig.layout, themeConfig.rtlClass, themeConfig.animation, themeConfig.navbar, themeConfig.locale, themeConfig.semidark]);
 
     return (
-        <div
-            className={`${(store.getState().themeConfig.sidebar && 'toggle-sidebar') || ''} ${themeConfig.menu} ${themeConfig.layout} ${
-                themeConfig.rtlClass
-            } main-section antialiased relative font-nunito text-sm font-normal`}
-        >
-            {children}
-            
-            {/* Cookie Management Components */}
-            <CookieBanner />
-            <CookiePreferencesModal />
+        <HelmetProvider>
+            <div
+                className={`${(store.getState().themeConfig.sidebar && 'toggle-sidebar') || ''} ${themeConfig.menu} ${themeConfig.layout} ${
+                    themeConfig.rtlClass
+                } main-section antialiased relative font-nunito text-sm font-normal`}
+            >
+                {children}
 
-            <ToastContainer position="bottom-right" autoClose={3000} hideProgressBar={false} newestOnTop={false} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover theme="colored" />
-        </div>
+                {/* Cookie Management Components */}
+                <CookieBanner />
+                <CookiePreferencesModal />
+
+                <ToastContainer position="bottom-right" autoClose={3000} hideProgressBar={false} newestOnTop={false} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover theme="colored" />
+            </div>
+        </HelmetProvider>
     );
 }
 
