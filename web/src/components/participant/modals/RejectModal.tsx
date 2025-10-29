@@ -6,12 +6,14 @@ import { AppDispatch, IRootState } from '../../../store';
 import { setRejectModalOpen, setRejectionReason } from '../../../store/slices/participantSlice';
 import { rejectPackage } from '../../../store/thunk/participantThunks';
 import { toast } from 'react-toastify';
+import { useTranslation } from 'react-i18next';
 
 const FiXTyped = FiX as ComponentType<{ className?: string }>;
 const FiAlertTriangleTyped = FiAlertTriangle as ComponentType<{ className?: string }>;
 const FiXCircleTyped = FiXCircle as ComponentType<{ className?: string }>;
 
 const RejectModal: React.FC = () => {
+    const { t } = useTranslation();
     const dispatch = useDispatch<AppDispatch>();
     const { packageData, uiState, loading } = useSelector((state: IRootState) => state.participant);
     const { rejectionReason, isRejectModalOpen } = uiState;
@@ -25,16 +27,16 @@ const RejectModal: React.FC = () => {
     const handleSubmitRejection = async () => {
         // Basic client-side validation
         if (!rejectionReason.trim()) {
-            setValidationError('A reason for rejection is required.');
+            setValidationError(t('rejectModal.validation.emptyReason'));
             return;
         }
         if (rejectionReason.length > 500) {
-            setValidationError('Reason must be 500 characters or less.');
+            setValidationError(t('rejectModal.validation.reasonTooLong'));
             return;
         }
 
         if (!packageData || !packageData.currentUser) {
-            toast.error('Essential data is missing. Please refresh the page.');
+            toast.error(t('rejectModal.errors.missingData') as string);
             return;
         }
 
@@ -79,6 +81,7 @@ const RejectModal: React.FC = () => {
                                     onClick={handleClose}
                                     disabled={loading}
                                     className="absolute top-4 right-4 p-2 rounded-full text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-all duration-200"
+                                    title={t('rejectModal.close')}
                                 >
                                     <FiXTyped className="w-5 h-5" />
                                 </button>
@@ -88,18 +91,16 @@ const RejectModal: React.FC = () => {
                                         <FiAlertTriangleTyped className="w-8 h-8 text-red-600" />
                                     </div>
                                     <Dialog.Title as="h3" className="text-xl font-bold leading-6 text-gray-900">
-                                        Reject this Document
+                                        {t('rejectModal.title')}
                                     </Dialog.Title>
                                     <div className="mt-2">
-                                        <p className="text-sm text-gray-500">
-                                            This action is irreversible. The sender and all other participants will be notified. Please provide a clear reason for the rejection below.
-                                        </p>
+                                        <p className="text-sm text-gray-500">{t('rejectModal.description')}</p>
                                     </div>
                                 </div>
 
                                 <div className="mt-6 w-full">
                                     <label htmlFor="rejectionReason" className="block text-sm font-medium text-gray-700 mb-1">
-                                        Reason for Rejection <span className="text-red-500">*</span>
+                                        {t('rejectModal.reasonLabel')} <span className="text-red-500">*</span>
                                     </label>
                                     <textarea
                                         id="rejectionReason"
@@ -109,12 +110,12 @@ const RejectModal: React.FC = () => {
                                         className={`w-full p-3 border rounded-lg focus:ring-2 transition-all duration-200 ${
                                             validationError ? 'border-red-500 ring-red-300' : 'border-gray-300 focus:ring-[#1e293b] focus:border-[#1e293b]'
                                         }`}
-                                        placeholder="e.g., The contract details are incorrect..."
+                                        placeholder={t('rejectModal.reasonPlaceholder')}
                                         disabled={loading}
                                     />
                                     <div className="flex justify-between items-center mt-1 min-h-[1.25rem]">
                                         {validationError && <p className="text-xs text-red-600">{validationError}</p>}
-                                        <p className="text-xs text-gray-400 ml-auto">{rejectionReason.length} / 500</p>
+                                        <p className="text-xs text-gray-400 ml-auto">{t('rejectModal.characterCount', { count: rejectionReason.length })}</p>
                                     </div>
                                 </div>
 
@@ -131,12 +132,12 @@ const RejectModal: React.FC = () => {
                                                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                                                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
                                                 </svg>
-                                                Submitting...
+                                                {t('rejectModal.submitting')}
                                             </>
                                         ) : (
                                             <>
                                                 <FiXCircleTyped className="-ml-1 mr-2 h-5 w-5" />
-                                                Submit Rejection
+                                                {t('rejectModal.submit')}
                                             </>
                                         )}
                                     </button>
@@ -146,7 +147,7 @@ const RejectModal: React.FC = () => {
                                         disabled={loading}
                                         className="w-full inline-flex justify-center rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2 disabled:opacity-50 transition-all duration-200"
                                     >
-                                        Cancel
+                                        {t('rejectModal.cancel')}
                                     </button>
                                 </div>
                             </Dialog.Panel>

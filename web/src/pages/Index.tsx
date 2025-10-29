@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import IconPlus from '../components/Icon/IconPlus';
 import DocumentTable from '../components/Documents/DocumentTable';
 import TableFilters from '../components/Documents/TableFilters';
@@ -7,6 +8,7 @@ import TablePagination from '../components/Documents/TablePagination';
 import { useDocuments } from '../store/hooks/useDocuments';
 
 const Index: React.FC = () => {
+    const { t } = useTranslation();
     const {
         documents: paginatedDocuments,
         loading: actionLoading,
@@ -45,7 +47,7 @@ const Index: React.FC = () => {
     if (pageError) {
         return (
             <div className="p-6 text-center dark:bg-gray-900 bg-white rounded-lg shadow-md text-red-600">
-                <h2 className="text-xl font-bold mb-2">Could Not Load Documents</h2>
+                <h2 className="text-xl font-bold mb-2">{t('documentsDashboard.error.title')}</h2>
                 <p>{pageError}</p>
             </div>
         );
@@ -55,7 +57,7 @@ const Index: React.FC = () => {
         return (
             <div className="p-10 text-center">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-                <p className="mt-4 font-semibold text-gray-600">Loading Documents...</p>
+                <p className="mt-4 font-semibold text-gray-600">{t('documentsDashboard.loading')}</p>
             </div>
         );
     }
@@ -66,7 +68,7 @@ const Index: React.FC = () => {
                 <Link to="/add-document">
                     <button className="bg-primary text-white flex items-center px-4 py-2 rounded-md text-sm hover:bg-primary-dark transition-colors">
                         <IconPlus className="w-4 h-4 mr-2" />
-                        Upload Document
+                        {t('documentsDashboard.buttons.upload')}
                     </button>
                 </Link>
                 <TableFilters search={searchTerm} setSearch={setSearch} selectedStatus={selectedStatus} setSelectedStatus={setStatus} />

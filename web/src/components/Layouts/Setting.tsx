@@ -7,8 +7,10 @@ import IconX from '../Icon/IconX';
 import IconSun from '../Icon/IconSun';
 import IconMoon from '../Icon/IconMoon';
 import IconLaptop from '../Icon/IconLaptop';
+import { useTranslation } from 'react-i18next';
 
 const Setting = () => {
+    const { t } = useTranslation();
     const themeConfig = useSelector((state: IRootState) => state.themeConfig);
     const dispatch = useDispatch();
 
@@ -27,6 +29,7 @@ const Setting = () => {
                     type="button"
                     className="bg-primary ltr:rounded-tl-full rtl:rounded-tr-full ltr:rounded-bl-full rtl:rounded-br-full absolute ltr:-left-12 rtl:-right-12 top-0 bottom-0 my-auto w-12 h-10 flex justify-center items-center text-white cursor-pointer"
                     onClick={() => setShowCustomizer(!showCustomizer)}
+                    aria-label={t('setting.toggleCustomizer')}
                 >
                     <IconSettings className="animate-[spin_3s_linear_infinite] w-5 h-5" />
                 </button>
@@ -37,41 +40,41 @@ const Setting = () => {
                             <IconX className="w-5 h-5" />
                         </button>
 
-                        <h4 className="mb-1 dark:text-white">DASHBOARD CUSTOMIZER</h4>
-                        <p className="text-white-dark">Set preferences that will be cookied for your live preview demonstration.</p>
+                        <h4 className="mb-1 dark:text-white">{t('setting.header.title')}</h4>
+                        <p className="text-white-dark">{t('setting.header.description')}</p>
                     </div>
 
                     <div className="border border-dashed border-white-light dark:border-[#1b2e4b] rounded-md mb-3 p-3">
-                        <h5 className="mb-1 text-base dark:text-white leading-none">Color Scheme</h5>
-                        <p className="text-white-dark text-xs">Overall light or dark presentation.</p>
+                        <h5 className="mb-1 text-base dark:text-white leading-none">{t('setting.colorScheme.title')}</h5>
+                        <p className="text-white-dark text-xs">{t('setting.colorScheme.description')}</p>
                         <div className="grid grid-cols-3 gap-2 mt-3">
                             <button type="button" className={`${themeConfig.theme === 'light' ? 'btn-primary' : 'btn-outline-primary'} btn`} onClick={() => dispatch(toggleTheme('light'))}>
                                 <IconSun className="w-5 h-5 shrink-0 ltr:mr-2 rtl:ml-2" />
-                                Light
+                                {t('setting.colorScheme.light')}
                             </button>
 
                             <button type="button" className={`${themeConfig.theme === 'dark' ? 'btn-primary' : 'btn-outline-primary'} btn`} onClick={() => dispatch(toggleTheme('dark'))}>
                                 <IconMoon className="w-5 h-5 shrink-0 ltr:mr-2 rtl:ml-2" />
-                                Dark
+                                {t('setting.colorScheme.dark')}
                             </button>
 
                             <button type="button" className={`${themeConfig.theme === 'system' ? 'btn-primary' : 'btn-outline-primary'} btn`} onClick={() => dispatch(toggleTheme('system'))}>
                                 <IconLaptop className="w-5 h-5 shrink-0 ltr:mr-2 rtl:ml-2" />
-                                System
+                                {t('setting.colorScheme.system')}
                             </button>
                         </div>
                     </div>
 
                     <div className="border border-dashed border-white-light dark:border-[#1b2e4b] rounded-md mb-3 p-3">
-                        <h5 className="mb-1 text-base dark:text-white leading-none">Navigation Position</h5>
-                        <p className="text-white-dark text-xs">Select the primary navigation paradigm for your app.</p>
+                        <h5 className="mb-1 text-base dark:text-white leading-none">{t('setting.navigationPosition.title')}</h5>
+                        <p className="text-white-dark text-xs">{t('setting.navigationPosition.description')}</p>
                         <div className="grid grid-cols-3 gap-2 mt-3">
                             <button type="button" className={`${themeConfig.menu === 'horizontal' ? 'btn-primary' : 'btn-outline-primary'} btn`} onClick={() => dispatch(toggleMenu('horizontal'))}>
-                                Horizontal
+                                {t('setting.navigationPosition.horizontal')}
                             </button>
 
                             <button type="button" className={`${themeConfig.menu === 'vertical' ? 'btn-primary' : 'btn-outline-primary'} btn`} onClick={() => dispatch(toggleMenu('vertical'))}>
-                                Vertical
+                                {t('setting.navigationPosition.vertical')}
                             </button>
 
                             <button
@@ -79,7 +82,7 @@ const Setting = () => {
                                 className={`${themeConfig.menu === 'collapsible-vertical' ? 'btn-primary' : 'btn-outline-primary'} btn`}
                                 onClick={() => dispatch(toggleMenu('collapsible-vertical'))}
                             >
-                                Collapsible
+                                {t('setting.navigationPosition.collapsible')}
                             </button>
                         </div>
                         <div className="mt-5 text-primary">
@@ -90,46 +93,46 @@ const Setting = () => {
                                     checked={themeConfig.semidark === true || themeConfig.semidark === 'true'}
                                     onChange={(e) => dispatch(toggleSemidark(e.target.checked))}
                                 />
-                                <span>Semi Dark (Sidebar & Header)</span>
+                                <span>{t('setting.navigationPosition.semiDark')}</span>
                             </label>
                         </div>
                     </div>
 
                     <div className="border border-dashed border-white-light dark:border-[#1b2e4b] rounded-md mb-3 p-3">
-                        <h5 className="mb-1 text-base dark:text-white leading-none">Layout Style</h5>
-                        <p className="text-white-dark text-xs">Select the primary layout style for your app.</p>
+                        <h5 className="mb-1 text-base dark:text-white leading-none">{t('setting.layoutStyle.title')}</h5>
+                        <p className="text-white-dark text-xs">{t('setting.layoutStyle.description')}</p>
                         <div className="flex gap-2 mt-3">
                             <button
                                 type="button"
                                 className={`${themeConfig.layout === 'boxed-layout' ? 'btn-primary' : 'btn-outline-primary'} btn flex-auto`}
                                 onClick={() => dispatch(toggleLayout('boxed-layout'))}
                             >
-                                Box
+                                {t('setting.layoutStyle.box')}
                             </button>
 
                             <button type="button" className={`${themeConfig.layout === 'full' ? 'btn-primary' : 'btn-outline-primary'} btn flex-auto`} onClick={() => dispatch(toggleLayout('full'))}>
-                                Full
+                                {t('setting.layoutStyle.full')}
                             </button>
                         </div>
                     </div>
 
                     <div className="border border-dashed border-white-light dark:border-[#1b2e4b] rounded-md mb-3 p-3">
-                        <h5 className="mb-1 text-base dark:text-white leading-none">Direction</h5>
-                        <p className="text-white-dark text-xs">Select the direction for your app.</p>
+                        <h5 className="mb-1 text-base dark:text-white leading-none">{t('setting.direction.title')}</h5>
+                        <p className="text-white-dark text-xs">{t('setting.direction.description')}</p>
                         <div className="flex gap-2 mt-3">
                             <button type="button" className={`${themeConfig.rtlClass === 'ltr' ? 'btn-primary' : 'btn-outline-primary'} btn flex-auto`} onClick={() => dispatch(toggleRTL('ltr'))}>
-                                LTR
+                                {t('setting.direction.ltr')}
                             </button>
 
                             <button type="button" className={`${themeConfig.rtlClass === 'rtl' ? 'btn-primary' : 'btn-outline-primary'} btn flex-auto`} onClick={() => dispatch(toggleRTL('rtl'))}>
-                                RTL
+                                {t('setting.direction.rtl')}
                             </button>
                         </div>
                     </div>
 
                     <div className="border border-dashed border-white-light dark:border-[#1b2e4b] rounded-md mb-3 p-3">
-                        <h5 className="mb-1 text-base dark:text-white leading-none">Navbar Type</h5>
-                        <p className="text-white-dark text-xs">Sticky or Floating.</p>
+                        <h5 className="mb-1 text-base dark:text-white leading-none">{t('setting.navbarType.title')}</h5>
+                        <p className="text-white-dark text-xs">{t('setting.navbarType.description')}</p>
                         <div className="mt-3 flex items-center gap-3 text-primary">
                             <label className="inline-flex mb-0">
                                 <input
@@ -139,7 +142,7 @@ const Setting = () => {
                                     className="form-radio"
                                     onChange={() => dispatch(toggleNavbar('navbar-sticky'))}
                                 />
-                                <span>Sticky</span>
+                                <span>{t('setting.navbarType.sticky')}</span>
                             </label>
                             <label className="inline-flex mb-0">
                                 <input
@@ -149,7 +152,7 @@ const Setting = () => {
                                     className="form-radio"
                                     onChange={() => dispatch(toggleNavbar('navbar-floating'))}
                                 />
-                                <span>Floating</span>
+                                <span>{t('setting.navbarType.floating')}</span>
                             </label>
                             <label className="inline-flex mb-0">
                                 <input
@@ -159,26 +162,26 @@ const Setting = () => {
                                     className="form-radio"
                                     onChange={() => dispatch(toggleNavbar('navbar-static'))}
                                 />
-                                <span>Static</span>
+                                <span>{t('setting.navbarType.static')}</span>
                             </label>
                         </div>
                     </div>
 
                     <div className="border border-dashed border-white-light dark:border-[#1b2e4b] rounded-md mb-3 p-3">
-                        <h5 className="mb-1 text-base dark:text-white leading-none">Router Transition</h5>
-                        <p className="text-white-dark text-xs">Animation of main content.</p>
+                        <h5 className="mb-1 text-base dark:text-white leading-none">{t('setting.routerTransition.title')}</h5>
+                        <p className="text-white-dark text-xs">{t('setting.routerTransition.description')}</p>
                         <div className="mt-3">
                             <select className="form-select border-primary text-primary" value={themeConfig.animation} onChange={(e) => dispatch(toggleAnimation(e.target.value))}>
-                                <option value=" ">None</option>
-                                <option value="animate__fadeIn">Fade</option>
-                                <option value="animate__fadeInDown">Fade Down</option>
-                                <option value="animate__fadeInUp">Fade Up</option>
-                                <option value="animate__fadeInLeft">Fade Left</option>
-                                <option value="animate__fadeInRight">Fade Right</option>
-                                <option value="animate__slideInDown">Slide Down</option>
-                                <option value="animate__slideInLeft">Slide Left</option>
-                                <option value="animate__slideInRight">Slide Right</option>
-                                <option value="animate__zoomIn">Zoom In</option>
+                                <option value=" ">{t('setting.routerTransition.none')}</option>
+                                <option value="animate__fadeIn">{t('setting.routerTransition.fade')}</option>
+                                <option value="animate__fadeInDown">{t('setting.routerTransition.fadeDown')}</option>
+                                <option value="animate__fadeInUp">{t('setting.routerTransition.fadeUp')}</option>
+                                <option value="animate__fadeInLeft">{t('setting.routerTransition.fadeLeft')}</option>
+                                <option value="animate__fadeInRight">{t('setting.routerTransition.fadeRight')}</option>
+                                <option value="animate__slideInDown">{t('setting.routerTransition.slideDown')}</option>
+                                <option value="animate__slideInLeft">{t('setting.routerTransition.slideLeft')}</option>
+                                <option value="animate__slideInRight">{t('setting.routerTransition.slideRight')}</option>
+                                <option value="animate__zoomIn">{t('setting.routerTransition.zoomIn')}</option>
                             </select>
                         </div>
                     </div>

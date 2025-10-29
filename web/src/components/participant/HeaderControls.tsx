@@ -6,6 +6,7 @@ import type { IRootState, AppDispatch } from '../../store';
 import { setCurrentPage, setZoomLevel } from '../../store/slices/participantSlice';
 import { downloadPackage } from '../../store/thunk/participantThunks';
 import { toast } from 'react-toastify';
+import { useTranslation } from 'react-i18next';
 
 const FiChevronLeftTyped = FiChevronLeft as ComponentType<{ className?: string }>;
 const FiChevronRightTyped = FiChevronRight as ComponentType<{ className?: string }>;
@@ -39,12 +40,11 @@ interface HeaderControlsProps {
 }
 
 const HeaderControls: React.FC<HeaderControlsProps> = ({ documentName, participants, status, options }) => {
+    const { t } = useTranslation();
     const dispatch = useDispatch<AppDispatch>();
     const currentPage = useSelector((state: IRootState) => state.participant.currentPage);
     const numPages = useSelector((state: IRootState) => state.participant.numPages);
     const zoomLevel = useSelector((state: IRootState) => state.participant.zoomLevel);
-
-    // ✅ FIX: Read packageData directly from Redux instead of relying on props
     const packageData = useSelector((state: IRootState) => state.participant.packageData);
     const { isDownloading } = useSelector((state: IRootState) => state.participant.uiState);
 
@@ -55,13 +55,12 @@ const HeaderControls: React.FC<HeaderControlsProps> = ({ documentName, participa
     const canDownload = isDocumentFinalized || options.allowDownloadUnsigned;
 
     const handleDownload = async () => {
-        // ✅ Now packageData is always the latest from Redux
         if (!packageData || !packageData.currentUser?.id) {
-            toast.error('Package data is not available. Please refresh the page and try again.');
+            toast.error(t('headerControls.errors.noPackageData') as string);
             return;
         }
 
-        toast.info('Preparing your document for download...');
+        toast.info(t('headerControls.download.preparing') as string);
 
         try {
             await dispatch(
@@ -112,15 +111,15 @@ const HeaderControls: React.FC<HeaderControlsProps> = ({ documentName, participa
     const getStatusStyles = () => {
         switch (status) {
             case 'Completed':
-                return { bg: 'bg-green-100', text: 'text-green-800', icon: FiCheckCircleTyped, label: 'Completed' };
+                return { bg: 'bg-green-100', text: 'text-green-800', icon: FiCheckCircleTyped, label: t('headerControls.status.completed') };
             case 'Sent':
-                return { bg: 'bg-blue-100', text: 'text-blue-800', icon: FiClockTyped, label: 'Sent' };
+                return { bg: 'bg-blue-100', text: 'text-blue-800', icon: FiClockTyped, label: t('headerControls.status.sent') };
             case 'Draft':
-                return { bg: 'bg-gray-100', text: 'text-gray-800', icon: FiEditTyped, label: 'Draft' };
+                return { bg: 'bg-gray-100', text: 'text-gray-800', icon: FiEditTyped, label: t('headerControls.status.draft') };
             case 'Archived':
-                return { bg: 'bg-gray-200', text: 'text-gray-800', icon: FiArchiveTyped, label: 'Archived' };
+                return { bg: 'bg-gray-200', text: 'text-gray-800', icon: FiArchiveTyped, label: t('headerControls.status.archived') };
             case 'Rejected':
-                return { bg: 'bg-red-100', text: 'text-red-800', icon: FiClockTyped, label: 'Rejected' };
+                return { bg: 'bg-red-100', text: 'text-red-800', icon: FiClockTyped, label: t('headerControls.status.rejected') };
             default:
                 return { bg: 'bg-gray-100', text: 'text-gray-800', icon: FiClockTyped, label: status };
         }
@@ -138,22 +137,20 @@ const HeaderControls: React.FC<HeaderControlsProps> = ({ documentName, participa
                             onClick={handlePreviousPage}
                             disabled={currentPage === 1}
                             className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 hover:scale-105 active:scale-95"
-                            title="Previous Page"
+                            title={t('headerControls.navigation.previous')}
                         >
                             <FiChevronLeftTyped className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" />
                         </button>
 
                         <div className="px-3 py-1.5 bg-gray-50 rounded-lg border border-gray-200">
-                            <span className="text-sm font-medium text-[#1e293b] whitespace-nowrap">
-                                {currentPage} / {numPages}
-                            </span>
+                            <span className="text-sm font-medium text-[#1e293b] whitespace-nowrap">{t('headerControls.navigation.page', { current: currentPage, total: numPages })}</span>
                         </div>
 
                         <button
                             onClick={handleNextPage}
                             disabled={currentPage === numPages}
                             className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 hover:scale-105 active:scale-95"
-                            title="Next Page"
+                            title={t('headerControls.navigation.next')}
                         >
                             <FiChevronRightTyped className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" />
                         </button>
@@ -165,20 +162,20 @@ const HeaderControls: React.FC<HeaderControlsProps> = ({ documentName, participa
                             onClick={handleZoomOut}
                             disabled={zoomLevel <= 50}
                             className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
-                            title="Zoom Out"
+                            title={t('headerControls.zoom.out')}
                         >
                             <FiZoomOutTyped className="w-4 h-4 text-gray-600" />
                         </button>
 
                         <div className="px-2 py-1 bg-gray-50 rounded border border-gray-200 min-w-[4rem] text-center">
-                            <span className="text-sm font-medium text-gray-700">{zoomLevel}%</span>
+                            <span className="text-sm font-medium text-gray-700">{t('headerControls.zoom.level', { level: zoomLevel })}</span>
                         </div>
 
                         <button
                             onClick={handleZoomIn}
                             disabled={zoomLevel >= 200}
                             className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
-                            title="Zoom In"
+                            title={t('headerControls.zoom.in')}
                         >
                             <FiZoomInTyped className="w-4 h-4 text-gray-600" />
                         </button>
@@ -203,7 +200,7 @@ const HeaderControls: React.FC<HeaderControlsProps> = ({ documentName, participa
                     {/* Full Screen Button - Hidden on mobile */}
                     <button
                         className="hidden lg:flex p-2 rounded-lg hover:bg-gray-100 transition-all duration-200"
-                        title={isFullscreen ? 'Exit Fullscreen View' : 'Fullscreen View'}
+                        title={isFullscreen ? t('headerControls.fullscreen.exit') : t('headerControls.fullscreen.enter')}
                         onClick={handleFullscreen}
                     >
                         {isFullscreen ? <FiMinimize2Typed className="w-4 h-4 text-gray-600" /> : <FiMaximize2Typed className="w-4 h-4 text-gray-600" />}
@@ -211,7 +208,7 @@ const HeaderControls: React.FC<HeaderControlsProps> = ({ documentName, participa
 
                     {/* More Options Dropdown */}
                     <Menu as="div" className="relative">
-                        <Menu.Button className="p-2 rounded-lg hover:bg-gray-100 transition-all duration-200 hover:scale-105 active:scale-95" title="More options">
+                        <Menu.Button className="p-2 rounded-lg hover:bg-gray-100 transition-all duration-200 hover:scale-105 active:scale-95" title={t('headerControls.options')}>
                             <FiMoreVerticalTyped className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" />
                         </Menu.Button>
                         <Transition
@@ -237,8 +234,8 @@ const HeaderControls: React.FC<HeaderControlsProps> = ({ documentName, participa
                                                     <FiUsersTyped className="w-4 h-4 text-blue-600" />
                                                 </div>
                                                 <div className="text-left">
-                                                    <div>View Participants</div>
-                                                    <div className="text-xs text-gray-500">See completion status</div>
+                                                    <div>{t('headerControls.participants.title')}</div>
+                                                    <div className="text-xs text-gray-500">{t('headerControls.participants.description')}</div>
                                                 </div>
                                             </button>
                                         )}
@@ -248,7 +245,7 @@ const HeaderControls: React.FC<HeaderControlsProps> = ({ documentName, participa
                                             <button
                                                 onClick={handleDownload}
                                                 disabled={!canDownload || isDownloading}
-                                                title={!canDownload ? 'Download is available only after completion' : 'Download PDF'}
+                                                title={!canDownload ? t('headerControls.download.disabled') : t('headerControls.download.title')}
                                                 className={`${
                                                     active && !isDownloading ? 'bg-gray-50 text-[#1e293b]' : 'text-gray-700'
                                                 } group flex rounded-lg items-center w-full px-3 py-2.5 text-sm transition-colors duration-150 font-medium
@@ -258,8 +255,8 @@ const HeaderControls: React.FC<HeaderControlsProps> = ({ documentName, participa
                                                     {isDownloading ? <FiLoaderTyped className="w-4 h-4 text-green-600 animate-spin" /> : <FiDownloadTyped className="w-4 h-4 text-green-600" />}
                                                 </div>
                                                 <div className="text-left">
-                                                    <div>{isDownloading ? 'Downloading...' : 'Download File'}</div>
-                                                    <div className="text-xs text-gray-500">Save PDF copy</div>
+                                                    <div>{isDownloading ? t('headerControls.download.downloading') : t('headerControls.download.label')}</div>
+                                                    <div className="text-xs text-gray-500">{t('headerControls.download.description')}</div>
                                                 </div>
                                             </button>
                                         )}
@@ -268,12 +265,12 @@ const HeaderControls: React.FC<HeaderControlsProps> = ({ documentName, participa
                                     {/* Mobile-only zoom controls */}
                                     <div className="sm:hidden border-t border-gray-100 mt-1 pt-1">
                                         <div className="px-3 py-2">
-                                            <div className="text-xs font-medium text-gray-500 mb-2">Zoom Level</div>
+                                            <div className="text-xs font-medium text-gray-500 mb-2">{t('headerControls.zoom.title')}</div>
                                             <div className="flex items-center gap-2">
                                                 <button onClick={handleZoomOut} disabled={zoomLevel <= 50} className="p-1.5 rounded border border-gray-300 hover:bg-gray-50 disabled:opacity-50">
                                                     <FiZoomOutTyped className="w-3 h-3" />
                                                 </button>
-                                                <span className="text-sm font-medium text-gray-700 min-w-[3rem] text-center">{zoomLevel}%</span>
+                                                <span className="text-sm font-medium text-gray-700 min-w-[3rem] text-center">{t('headerControls.zoom.level', { level: zoomLevel })}</span>
                                                 <button onClick={handleZoomIn} disabled={zoomLevel >= 200} className="p-1.5 rounded border border-gray-300 hover:bg-gray-50 disabled:opacity-50">
                                                     <FiZoomInTyped className="w-3 h-3" />
                                                 </button>
@@ -318,8 +315,8 @@ const HeaderControls: React.FC<HeaderControlsProps> = ({ documentName, participa
                                         <div className="px-4 sm:px-6 py-6 border-b border-gray-200">
                                             <div className="flex items-center justify-between">
                                                 <div>
-                                                    <h2 className="text-lg sm:text-xl font-semibold text-[#1e293b]">Participant Status</h2>
-                                                    <p className="text-sm text-gray-500 mt-1">Track completion progress</p>
+                                                    <h2 className="text-lg sm:text-xl font-semibold text-[#1e293b]">{t('headerControls.drawer.title')}</h2>
+                                                    <p className="text-sm text-gray-500 mt-1">{t('headerControls.drawer.description')}</p>
                                                 </div>
                                                 <button
                                                     onClick={() => setIsApproverDrawerOpen(false)}
@@ -382,10 +379,14 @@ const HeaderControls: React.FC<HeaderControlsProps> = ({ documentName, participa
                                                                                     : 'bg-blue-100 text-blue-800'
                                                                             }`}
                                                                         >
-                                                                            {participant.status}
+                                                                            {t(`headerControls.participantStatus.${participant.status.toLowerCase()}`)}
                                                                         </span>
                                                                         <p className="text-xs text-gray-500 mt-1">
-                                                                            {isCompleted ? 'All tasks complete' : isNotApplicable ? 'For records only' : 'Awaiting action'}
+                                                                            {isCompleted
+                                                                                ? t('headerControls.participantStatus.completedDesc')
+                                                                                : isNotApplicable
+                                                                                ? t('headerControls.participantStatus.notApplicableDesc')
+                                                                                : t('headerControls.participantStatus.pendingDesc')}
                                                                         </p>
                                                                     </div>
                                                                 </div>
@@ -394,7 +395,7 @@ const HeaderControls: React.FC<HeaderControlsProps> = ({ documentName, participa
                                                     })
                                                 ) : (
                                                     <div className="text-center py-10">
-                                                        <p className="text-gray-500">No participant information available.</p>
+                                                        <p className="text-gray-500">{t('headerControls.drawer.noParticipants')}</p>
                                                     </div>
                                                 )}
                                             </div>
@@ -404,7 +405,7 @@ const HeaderControls: React.FC<HeaderControlsProps> = ({ documentName, participa
                                                 onClick={() => setIsApproverDrawerOpen(false)}
                                                 className="w-full px-4 py-3 bg-[#1e293b] text-white font-medium rounded-xl hover:bg-opacity-90 transition-all duration-200 shadow-sm hover:shadow-md"
                                             >
-                                                Back to Document
+                                                {t('headerControls.drawer.back')}
                                             </button>
                                         </div>
                                     </div>

@@ -1,6 +1,7 @@
 import React, { useEffect, useState, ChangeEvent, FormEvent, ComponentType } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
+import { useTranslation } from 'react-i18next';
 import { IRootState, AppDispatch } from '../store';
 import { toast } from 'react-toastify';
 
@@ -18,7 +19,13 @@ import IconEye from '../components/Icon/IconEye';
 import { FaEyeSlash } from 'react-icons/fa';
 const FaEyeSlashTyped = FaEyeSlash as ComponentType<{ className?: string }>;
 
+// Constants for localStorage keys
+const REMEMBER_ME_KEY = 'rememberMe';
+const SAVED_EMAIL_KEY = 'savedEmail';
+const SAVED_PASSWORD_KEY = 'savedPassword';
+
 const Login = () => {
+    const { t } = useTranslation();
     const dispatch: AppDispatch = useDispatch();
     const navigate = useNavigate();
 
@@ -32,11 +39,21 @@ const Login = () => {
     const [flag, setFlag] = useState(locale);
     const [showPassword, setShowPassword] = useState(false);
     const [isVisible, setIsVisible] = useState(false);
+    const [rememberMe, setRememberMe] = useState(false);
 
     useEffect(() => {
-        dispatch(setPageTitle('Login'));
+        dispatch(setPageTitle(t('login.meta.title')));
         setIsVisible(true);
-    }, [dispatch]);
+
+        // Load saved credentials on mount
+        const savedRememberMe = localStorage.getItem(REMEMBER_ME_KEY) === 'true';
+        if (savedRememberMe) {
+            const savedEmail = localStorage.getItem(SAVED_EMAIL_KEY) || '';
+            const savedPassword = localStorage.getItem(SAVED_PASSWORD_KEY) || '';
+            setFormData({ email: savedEmail, password: savedPassword });
+            setRememberMe(true);
+        }
+    }, [dispatch, t]);
 
     // Handlers
     const setLocale = (newFlag: string) => {
@@ -50,26 +67,45 @@ const Login = () => {
         setFormData({ ...formData, [id]: value });
     };
 
+    const handleRememberMeChange = (e: ChangeEvent<HTMLInputElement>) => {
+        setRememberMe(e.target.checked);
+    };
+
     const submitForm = async (e: FormEvent) => {
         e.preventDefault();
         try {
             await dispatch(loginUser(formData)).unwrap();
 
-            // After successful login, immediately check subscription status
+            // Handle Remember Me
+            if (rememberMe) {
+                localStorage.setItem(REMEMBER_ME_KEY, 'true');
+                localStorage.setItem(SAVED_EMAIL_KEY, formData.email);
+                localStorage.setItem(SAVED_PASSWORD_KEY, formData.password);
+            } else {
+                // Clear saved credentials if remember me is unchecked
+                localStorage.removeItem(REMEMBER_ME_KEY);
+                localStorage.removeItem(SAVED_EMAIL_KEY);
+                localStorage.removeItem(SAVED_PASSWORD_KEY);
+            }
+
             const statusResult = await dispatch(fetchSubscriptionStatus()).unwrap();
+            toast.success(t('login.messages.success') as string);
 
-            toast.success('Login successful!');
-
-            // Decide where to redirect the user
             if (statusResult.hasActiveSubscription) {
                 navigate('/dashboard');
             } else {
                 navigate('/subscriptions');
             }
         } catch (error: any) {
-            toast.error(error || 'Login failed. Please check your credentials.');
+            toast.error(error || t('login.messages.error'));
         }
     };
+
+    const brandingFeatures = [
+        { icon: '🔒', titleKey: 'login.branding.features.encryption.title', descKey: 'login.branding.features.encryption.description' },
+        { icon: '⚡', titleKey: 'login.branding.features.uptime.title', descKey: 'login.branding.features.uptime.description' },
+        { icon: '✓', titleKey: 'login.branding.features.binding.title', descKey: 'login.branding.features.binding.description' },
+    ];
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-blue-900 flex items-center justify-center px-4 py-8 relative overflow-hidden">
@@ -93,28 +129,21 @@ const Login = () => {
                             <div className="space-y-8">
                                 <div>
                                     <Link to="/" className="block">
-                                        <h2 className="text-5xl font-bold text-white mb-4">Welcome to</h2>
+                                        <h2 className="text-5xl font-bold text-white mb-4">{t('login.branding.welcome')}</h2>
                                         <h1 className="text-6xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">i-sign.eu</h1>
                                     </Link>
                                 </div>
-
-                                <p className="text-xl text-gray-300 leading-relaxed">The most secure and user-friendly electronic signature platform for businesses of all sizes.</p>
-
-                                {/* Feature highlights */}
+                                <p className="text-xl text-gray-300 leading-relaxed">{t('login.branding.description')}</p>
                                 <div className="space-y-4 pt-8">
-                                    {[
-                                        { icon: '🔒', title: '256-bit Encryption', desc: 'Bank-level security' },
-                                        { icon: '⚡', title: '99.9% Uptime', desc: 'Always available' },
-                                        { icon: '✓', title: 'Legally Binding', desc: 'Compliant signatures' },
-                                    ].map((feature, index) => (
+                                    {brandingFeatures.map((feature, index) => (
                                         <div
                                             key={index}
                                             className="flex items-center gap-4 bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-white/10 hover:bg-white/10 transition-all duration-300 hover:scale-105 transform"
                                         >
                                             <div className="text-3xl">{feature.icon}</div>
                                             <div>
-                                                <h3 className="text-white font-semibold">{feature.title}</h3>
-                                                <p className="text-gray-400 text-sm">{feature.desc}</p>
+                                                <h3 className="text-white font-semibold">{t(feature.titleKey)}</h3>
+                                                <p className="text-gray-400 text-sm">{t(feature.descKey)}</p>
                                             </div>
                                         </div>
                                     ))}
@@ -126,14 +155,11 @@ const Login = () => {
                     {/* Right side - Login Form */}
                     <div className={`transition-all duration-1000 delay-300 transform ${isVisible ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'}`}>
                         <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-8 md:p-12 border border-white/20 shadow-2xl">
-                            {/* Header */}
                             <div className="flex justify-between items-start mb-8">
                                 <div>
-                                    <h2 className="text-3xl md:text-4xl font-bold text-white mb-2">Sign In</h2>
-                                    <p className="text-gray-300">Welcome back! Please enter your details.</p>
+                                    <h2 className="text-3xl md:text-4xl font-bold text-white mb-2">{t('login.form.header.title')}</h2>
+                                    <p className="text-gray-300">{t('login.form.header.description')}</p>
                                 </div>
-
-                                {/* Language Dropdown */}
                                 <div className="dropdown ms-auto w-max">
                                     <Dropdown
                                         offset={[0, 8]}
@@ -169,25 +195,22 @@ const Login = () => {
                                 </div>
                             </div>
 
-                            {/* Mobile Logo */}
                             <div className="lg:hidden text-center mb-8">
                                 <Link to="/">
                                     <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">i-sign.eu</h1>
                                 </Link>
                             </div>
 
-                            {/* Form */}
                             <form onSubmit={submitForm} className="space-y-6">
-                                {/* Email Input */}
                                 <div className="space-y-2">
                                     <label htmlFor="email" className="text-white font-medium block">
-                                        Email Address
+                                        {t('login.form.email.label')}
                                     </label>
                                     <div className="relative group">
                                         <input
                                             id="email"
                                             type="email"
-                                            placeholder="Enter your email"
+                                            placeholder={t('login.form.email.placeholder')}
                                             className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 pl-12 text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all duration-300"
                                             value={formData.email}
                                             onChange={handleChange}
@@ -199,16 +222,15 @@ const Login = () => {
                                     </div>
                                 </div>
 
-                                {/* Password Input */}
                                 <div className="space-y-2">
                                     <label htmlFor="password" className="text-white font-medium block">
-                                        Password
+                                        {t('login.form.password.label')}
                                     </label>
                                     <div className="relative group">
                                         <input
                                             id="password"
                                             type={showPassword ? 'text' : 'password'}
-                                            placeholder="Enter your password"
+                                            placeholder={t('login.form.password.placeholder')}
                                             className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 pl-12 pr-12 text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all duration-300"
                                             value={formData.password}
                                             onChange={handleChange}
@@ -234,14 +256,21 @@ const Login = () => {
                                     </div>
                                 </div>
 
-                                {/* Forgot Password */}
-                                <div className="flex justify-end">
-                                    <Link to="/reset-password" className="text-blue-400 hover:text-blue-300 text-sm font-medium transition-colors duration-300">
-                                        Forgot your password?
+                                {/* Remember Me and Forgot Password Row */}
+                                <div className="flex items-center justify-between">
+                                    <label htmlFor="rememberMe" className="flex items-center gap-3 cursor-pointer group">
+                                        <div className="relative">
+                                            <input id="rememberMe" type="checkbox" checked={rememberMe} onChange={handleRememberMeChange} className="sr-only peer" />
+                                            <div className="w-11 h-6 bg-white/10 border border-white/20 rounded-full peer transition-all duration-300 peer-checked:bg-gradient-to-r peer-checked:from-blue-600 peer-checked:to-cyan-600 peer-checked:border-transparent group-hover:border-blue-400/50"></div>
+                                            <div className="absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-all duration-300 peer-checked:translate-x-5 shadow-lg"></div>
+                                        </div>
+                                        <span className="text-sm font-medium text-gray-300 group-hover:text-white transition-colors duration-300">{t('login.form.rememberMe')}</span>
+                                    </label>
+                                    <Link to="/reset-password" className="text-blue-400 hover:text-blue-300 text-sm font-medium transition-colors duration-300 hover:underline">
+                                        {t('login.form.forgotPassword')}
                                     </Link>
                                 </div>
 
-                                {/* Submit Button */}
                                 <button
                                     type="submit"
                                     disabled={loading}
@@ -250,11 +279,11 @@ const Login = () => {
                                     {loading ? (
                                         <>
                                             <span className="animate-spin border-2 border-white border-l-transparent rounded-full w-5 h-5 inline-block"></span>
-                                            <span>Signing In...</span>
+                                            <span>{t('login.form.button.loading')}</span>
                                         </>
                                     ) : (
                                         <>
-                                            <span>Sign In</span>
+                                            <span>{t('login.form.button.default')}</span>
                                             <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                                             </svg>
@@ -262,30 +291,26 @@ const Login = () => {
                                     )}
                                 </button>
 
-                                {/* Divider */}
                                 <div className="relative my-8">
                                     <div className="absolute inset-0 flex items-center">
                                         <div className="w-full border-t border-white/20"></div>
                                     </div>
                                     <div className="relative flex justify-center text-sm">
-                                        <span className="px-4 bg-slate-800 text-gray-400">or</span>
+                                        <span className="px-4 bg-slate-800 text-gray-400">{t('login.form.divider')}</span>
                                     </div>
                                 </div>
-
                             </form>
 
-                            {/* Sign Up Link */}
                             <div className="mt-8 text-center">
                                 <p className="text-gray-300">
-                                    Don't have an account?{' '}
+                                    {t('login.form.signup.prompt')}{' '}
                                     <Link to="/register" className="text-blue-400 hover:text-blue-300 font-semibold transition-colors duration-300">
-                                        Sign Up
+                                        {t('login.form.signup.link')}
                                     </Link>
                                 </p>
                             </div>
 
-                            {/* Footer */}
-                            <div className="mt-8 pt-6 border-t border-white/10 text-center text-sm text-gray-400">© {new Date().getFullYear()} i-sign.eu. All Rights Reserved.</div>
+                            <div className="mt-8 pt-6 border-t border-white/10 text-center text-sm text-gray-400">{t('login.footer.copyright', { year: new Date().getFullYear() })}</div>
                         </div>
                     </div>
                 </div>

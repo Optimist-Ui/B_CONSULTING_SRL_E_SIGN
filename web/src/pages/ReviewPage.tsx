@@ -5,6 +5,7 @@ import { AppDispatch, IRootState } from '../store';
 import { checkReviewEligibility, submitReview } from '../store/thunk/reviewThunks';
 import StarRatingInput from '../components/reviews/StarRatingInput';
 import { ReviewAnswers } from '../store/thunk/reviewThunks';
+import { useTranslation } from 'react-i18next';
 
 // Icons
 import IconLoader from '../components/Icon/IconLoader';
@@ -12,6 +13,7 @@ import IconCircleCheck from '../components/Icon/IconCircleCheck';
 import IconPlusCircle from '../components/Icon/IconPlusCircle';
 
 const ReviewPage: React.FC = () => {
+    const { t } = useTranslation();
     const { packageId, participantId } = useParams<{ packageId: string; participantId: string }>();
     const dispatch = useDispatch<AppDispatch>();
 
@@ -43,7 +45,7 @@ const ReviewPage: React.FC = () => {
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (Object.values(ratings).some((r) => r === 0)) {
-            setValidationError('Please provide a rating for all questions.');
+            setValidationError(t('reviewPage.errors.allRatingsRequired'));
             return;
         }
         if (packageId && participantId) {
@@ -68,8 +70,8 @@ const ReviewPage: React.FC = () => {
                         </div>
                     </div>
                     <div className="mt-6 text-center">
-                        <h3 className="text-xl font-semibold mb-2">Checking Eligibility</h3>
-                        <p className="text-gray-300">Please wait while we verify your access...</p>
+                        <h3 className="text-xl font-semibold mb-2">{t('reviewPage.loading.title')}</h3>
+                        <p className="text-gray-300">{t('reviewPage.loading.message')}</p>
                     </div>
 
                     {/* Loading dots animation */}
@@ -105,11 +107,11 @@ const ReviewPage: React.FC = () => {
                         </div>
                     </div>
 
-                    <h2 className="text-3xl font-bold text-white mb-3">Thank You! 🎉</h2>
-                    <p className="text-lg text-gray-300 mb-6">Your feedback has been submitted successfully.</p>
+                    <h2 className="text-3xl font-bold text-white mb-3">{t('reviewPage.success.title')}</h2>
+                    <p className="text-lg text-gray-300 mb-6">{t('reviewPage.success.message')}</p>
 
                     <div className="bg-green-500/10 border border-green-400/20 rounded-lg p-4 inline-block">
-                        <p className="text-green-400 text-sm font-medium">Your review helps us improve the experience for everyone</p>
+                        <p className="text-green-400 text-sm font-medium">{t('reviewPage.success.feedback')}</p>
                     </div>
                 </div>
             );
@@ -122,11 +124,11 @@ const ReviewPage: React.FC = () => {
                     <div className="w-20 h-20 mx-auto bg-yellow-500/20 rounded-full flex items-center justify-center mb-6">
                         <IconPlusCircle className="w-10 h-10 text-yellow-400" />
                     </div>
-                    <h2 className="text-2xl font-bold text-white mb-3">Review Not Available</h2>
+                    <h2 className="text-2xl font-bold text-white mb-3">{t('reviewPage.ineligible.title')}</h2>
                     <p className="text-gray-300 text-lg">{eligibility.reason}</p>
 
                     <div className="mt-8 bg-yellow-500/10 border border-yellow-400/20 rounded-lg p-4 inline-block">
-                        <p className="text-yellow-400 text-sm">If you believe this is an error, please contact support</p>
+                        <p className="text-yellow-400 text-sm">{t('reviewPage.ineligible.contactSupport')}</p>
                     </div>
                 </div>
             );
@@ -139,21 +141,18 @@ const ReviewPage: React.FC = () => {
                 <div className="text-center mb-8">
                     <div className="inline-flex items-center gap-2 bg-blue-500/20 text-blue-300 px-4 py-2 rounded-full text-sm font-medium mb-4">
                         <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
-                        Feedback Required
+                        {t('reviewPage.form.feedbackRequired')}
                     </div>
                     <h1 className="text-3xl md:text-4xl font-bold text-white mb-3">
-                        How was your
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400"> experience</span>?
+                        {t('reviewPage.form.title')} <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">{t('reviewPage.form.titleHighlight')}</span>
                     </h1>
-                    <p className="text-gray-300 text-lg max-w-2xl mx-auto">Your feedback helps us improve the e-signing experience for everyone. Please take a moment to rate your experience.</p>
+                    <p className="text-gray-300 text-lg max-w-2xl mx-auto">{t('reviewPage.form.description')}</p>
 
                     {/* Progress indicator */}
                     <div className="mt-6">
                         <div className="flex items-center justify-center gap-2 mb-2">
-                            <span className="text-sm text-gray-400">Progress:</span>
-                            <span className="text-sm font-medium text-blue-400">
-                                {completedRatings} of {totalRatings} completed
-                            </span>
+                            <span className="text-sm text-gray-400">{t('reviewPage.form.progress')}</span>
+                            <span className="text-sm font-medium text-blue-400">{t('reviewPage.form.progressStatus', { completed: completedRatings, total: totalRatings })}</span>
                         </div>
                         <div className="w-32 h-2 bg-slate-700 rounded-full mx-auto overflow-hidden">
                             <div className="h-full bg-gradient-to-r from-blue-500 to-purple-500 rounded-full transition-all duration-500 ease-out" style={{ width: `${completionPercentage}%` }}></div>
@@ -175,7 +174,7 @@ const ReviewPage: React.FC = () => {
                                 <div className="flex items-start justify-between mb-4">
                                     <div className="flex-1">
                                         <h3 className="text-white font-semibold text-lg mb-1">{question}</h3>
-                                        <p className="text-gray-400 text-sm">Rate from 1 (poor) to 5 (excellent)</p>
+                                        <p className="text-gray-400 text-sm">{t('reviewPage.form.ratingInstruction')}</p>
                                     </div>
                                     {ratings[key as keyof ReviewAnswers] > 0 && (
                                         <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center ml-3">
@@ -210,20 +209,20 @@ const ReviewPage: React.FC = () => {
                                 </svg>
                             </div>
                             <div>
-                                <h3 className="text-white font-semibold text-lg">Additional Comments</h3>
-                                <p className="text-gray-400 text-sm">Tell us more about your experience (optional)</p>
+                                <h3 className="text-white font-semibold text-lg">{t('reviewPage.form.commentsTitle')}</h3>
+                                <p className="text-gray-400 text-sm">{t('reviewPage.form.commentsDescription')}</p>
                             </div>
                         </div>
                         <textarea
                             id="comment"
                             value={comment}
                             onChange={(e) => setComment(e.target.value)}
-                            placeholder="Share your thoughts, suggestions, or any specific feedback..."
+                            placeholder={t('reviewPage.form.commentsPlaceholder')}
                             rows={4}
                             className="w-full bg-slate-900/50 border border-slate-600 rounded-lg p-4 text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 resize-none"
                         />
                         <div className="mt-2 text-right">
-                            <span className="text-xs text-gray-500">{comment.length}/500</span>
+                            <span className="text-xs text-gray-500">{t('reviewPage.form.commentLength', { length: comment.length })}</span>
                         </div>
                     </div>
 
@@ -242,7 +241,7 @@ const ReviewPage: React.FC = () => {
                                 </div>
                                 <div>
                                     {validationError && <p className="text-red-400 font-medium">{validationError}</p>}
-                                    {error && <p className="text-red-400 font-medium">Submission Error: {error}</p>}
+                                    {error && <p className="text-red-400 font-medium">{t('reviewPage.errors.submissionError', { error })}</p>}
                                 </div>
                             </div>
                         </div>
@@ -262,14 +261,14 @@ const ReviewPage: React.FC = () => {
                                 {submissionStatus === 'loading' ? (
                                     <>
                                         <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                                        <span>Submitting Feedback...</span>
+                                        <span>{t('reviewPage.form.submitting')}</span>
                                     </>
                                 ) : (
                                     <>
                                         <svg className="w-5 h-5 group-hover:rotate-12 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
                                         </svg>
-                                        <span>Submit Feedback</span>
+                                        <span>{t('reviewPage.form.submitButton')}</span>
                                         <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                                         </svg>
@@ -282,9 +281,7 @@ const ReviewPage: React.FC = () => {
                         </button>
 
                         {/* Helper text */}
-                        <p className="text-center text-gray-400 text-sm mt-3">
-                            {completionPercentage === 100 ? 'All ratings completed! Ready to submit.' : 'Please complete all ratings before submitting.'}
-                        </p>
+                        <p className="text-center text-gray-400 text-sm mt-3">{completionPercentage === 100 ? t('reviewPage.form.submitReady') : t('reviewPage.form.submitIncomplete')}</p>
                     </div>
                 </form>
             </div>

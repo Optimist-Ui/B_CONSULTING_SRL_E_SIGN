@@ -1,6 +1,7 @@
 import React, { ComponentType, useMemo } from 'react';
 import { DocumentPackage } from '../../store/slices/packageSlice';
 import { FiCheck, FiClock } from 'react-icons/fi';
+import { useTranslation } from 'react-i18next'; // Import useTranslation
 
 const FiClockTyped = FiClock as ComponentType<{ className?: string }>;
 const FiCheckTyped = FiCheck as ComponentType<{ className?: string }>;
@@ -10,6 +11,7 @@ interface Props {
 }
 
 const ParticipantStatusPanel: React.FC<Props> = ({ packageData }) => {
+    const { t } = useTranslation(); // Initialize translation hook
     const participants = useMemo(() => {
         const participantMap = new Map();
 
@@ -30,17 +32,17 @@ const ParticipantStatusPanel: React.FC<Props> = ({ packageData }) => {
             if (!participantMap.has(receiver.contactId)) {
                 participantMap.set(receiver.contactId, {
                     ...receiver,
-                    roles: new Set(['Receiver']),
+                    roles: new Set([t('participantStatusPanel.roles.receiver')]),
                     isComplete: true,
                 });
             } else {
-                participantMap.get(receiver.contactId).roles.add('Receiver');
+                participantMap.get(receiver.contactId).roles.add(t('participantStatusPanel.roles.receiver'));
             }
         });
 
         // Calculate completion status for each participant
         participantMap.forEach((participant) => {
-            if (participant.roles.has('Receiver') && participant.roles.size === 1) return;
+            if (participant.roles.has(t('participantStatusPanel.roles.receiver')) && participant.roles.size === 1) return;
 
             const requiredFields = packageData.fields.filter((field) => field.required && field.assignedUsers?.some((u) => u.contactId === participant.contactId));
 
@@ -61,15 +63,16 @@ const ParticipantStatusPanel: React.FC<Props> = ({ packageData }) => {
         });
 
         return Array.from(participantMap.values());
-    }, [packageData]);
+    }, [packageData, t]);
 
     return (
         <div className="h-full flex flex-col">
             {/* Header - Hidden on mobile as it's shown in toggle */}
             <div className="hidden lg:block p-4 border-b border-gray-100">
-                <h2 className="text-sm font-semibold text-gray-900">Participants</h2>
+                <h2 className="text-sm font-semibold text-gray-900">{t('participantStatusPanel.header.title')}</h2>
                 <p className="text-xs text-gray-500 mt-1">
-                    {participants.length} participant{participants.length !== 1 ? 's' : ''}
+                    {t('participantStatusPanel.header.participantCount', { count: participants.length })}
+                    {participants.length !== 1 ? t('participantStatusPanel.header.pluralSuffix') : ''}
                 </p>
             </div>
 
@@ -106,7 +109,7 @@ const ParticipantStatusPanel: React.FC<Props> = ({ packageData }) => {
 
                     {participants.length === 0 && (
                         <div className="text-center py-8">
-                            <p className="text-sm text-gray-500">No participants assigned</p>
+                            <p className="text-sm text-gray-500">{t('participantStatusPanel.messages.noParticipants')}</p>
                         </div>
                     )}
                 </div>

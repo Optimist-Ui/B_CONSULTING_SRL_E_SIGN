@@ -3,12 +3,14 @@ import { DocumentPackage } from '../../store/slices/packageSlice';
 import ParticipantStatusPanel from './ParticipantStatusPanel';
 import PackageStatusHeader from './PackageStatusHeader';
 import OwnerDocumentViewer from './OwnerDocumentViewer';
+import { useTranslation } from 'react-i18next'; // Import useTranslation
 
 interface Props {
     packageData: DocumentPackage;
 }
 
 const PackageStatusLayout: React.FC<Props> = ({ packageData }) => {
+    const { t } = useTranslation(); // Initialize translation hook
     const [showParticipants, setShowParticipants] = useState(false);
 
     return (
@@ -17,7 +19,7 @@ const PackageStatusLayout: React.FC<Props> = ({ packageData }) => {
             <div className="lg:hidden bg-white border-b border-gray-200 p-4">
                 <button onClick={() => setShowParticipants(!showParticipants)} className="flex items-center justify-between w-full text-left">
                     <span className="font-medium text-gray-900">
-                        Participants (
+                        {t('packageStatusLayout.participants.title')} (
                         {packageData.fields?.reduce((acc, field) => {
                             field.assignedUsers?.forEach((user) => acc.add(user.contactId));
                             return acc;

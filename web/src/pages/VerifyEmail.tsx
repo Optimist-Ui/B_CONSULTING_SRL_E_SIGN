@@ -2,6 +2,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
+import { useTranslation } from 'react-i18next';
 import { AppDispatch } from '../store';
 import { verifyEmail } from '../store/thunk/authThunks';
 import { setPageTitle } from '../store/slices/themeConfigSlice';
@@ -11,6 +12,7 @@ import IconCircleCheck from '../components/Icon/IconCircleCheck';
 import IconXCircle from '../components/Icon/IconXCircle';
 
 const VerifyEmail = () => {
+    const { t } = useTranslation();
     const dispatch: AppDispatch = useDispatch();
     const { token } = useParams<{ token: string }>();
 
@@ -21,7 +23,7 @@ const VerifyEmail = () => {
     const effectRan = useRef(false);
 
     useEffect(() => {
-        dispatch(setPageTitle('Verifying Email...'));
+        dispatch(setPageTitle(t('verifyEmail.meta.title')));
         setIsVisible(true);
 
         // Prevents double-execution in development (React 18 Strict Mode)
@@ -34,22 +36,28 @@ const VerifyEmail = () => {
                 .unwrap()
                 .then((response) => {
                     setStatus('success');
-                    setMessage(response.message || 'Email verified successfully! You may now log in.');
+                    setMessage(response.message || t('verifyEmail.messages.success'));
                 })
                 .catch((error) => {
                     setStatus('error');
-                    setMessage(error || 'The link is invalid or has expired.');
+                    setMessage(error || t('verifyEmail.messages.error'));
                 });
         } else {
             setStatus('error');
-            setMessage('No verification token was found. The link is incomplete.');
+            setMessage(t('verifyEmail.messages.noToken'));
         }
 
         // Mark the effect as having run
         return () => {
             effectRan.current = true;
         };
-    }, [dispatch, token]);
+    }, [dispatch, token, t]);
+
+    const brandingFeatures = [
+        { icon: '✉️', titleKey: 'verifyEmail.branding.features.verification.title', descKey: 'verifyEmail.branding.features.verification.description' },
+        { icon: '⚡', titleKey: 'verifyEmail.branding.features.access.title', descKey: 'verifyEmail.branding.features.access.description' },
+        { icon: '🔐', titleKey: 'verifyEmail.branding.features.protected.title', descKey: 'verifyEmail.branding.features.protected.description' },
+    ];
 
     const renderContent = () => {
         switch (status) {
@@ -62,8 +70,8 @@ const VerifyEmail = () => {
                                 <div className="w-10 h-10 bg-blue-500/20 rounded-full animate-pulse"></div>
                             </div>
                         </div>
-                        <h2 className="text-3xl font-bold mb-4 text-white">Verifying Account</h2>
-                        <p className="text-gray-300 text-lg">Please wait while we activate your account...</p>
+                        <h2 className="text-3xl font-bold mb-4 text-white">{t('verifyEmail.status.loading.title')}</h2>
+                        <p className="text-gray-300 text-lg">{t('verifyEmail.status.loading.description')}</p>
                         <div className="mt-6 flex gap-1">
                             <span className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
                             <span className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
@@ -80,13 +88,13 @@ const VerifyEmail = () => {
                                 <IconCircleCheck className="w-20 h-20" />
                             </div>
                         </div>
-                        <h2 className="text-3xl font-bold mb-4 text-white">Account Activated!</h2>
+                        <h2 className="text-3xl font-bold mb-4 text-white">{t('verifyEmail.status.success.title')}</h2>
                         <p className="text-gray-300 text-lg mb-8 max-w-md">{message}</p>
                         <Link
                             to="/login"
                             className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-green-500/25 transform flex items-center justify-center gap-2"
                         >
-                            <span>Proceed to Login</span>
+                            <span>{t('verifyEmail.status.success.button')}</span>
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                             </svg>
@@ -102,13 +110,13 @@ const VerifyEmail = () => {
                                 <IconXCircle className="w-20 h-20" />
                             </div>
                         </div>
-                        <h2 className="text-3xl font-bold mb-4 text-red-400">Verification Failed</h2>
+                        <h2 className="text-3xl font-bold mb-4 text-red-400">{t('verifyEmail.status.error.title')}</h2>
                         <p className="text-gray-300 text-lg mb-8 max-w-md">{message}</p>
                         <Link
                             to="/register"
                             className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-blue-500/25 transform flex items-center justify-center gap-2"
                         >
-                            <span>Back to Registration</span>
+                            <span>{t('verifyEmail.status.error.button')}</span>
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                             </svg>
@@ -142,28 +150,21 @@ const VerifyEmail = () => {
                             <div className="space-y-8">
                                 <div>
                                     <Link to="/" className="block">
-                                        <h2 className="text-5xl font-bold text-white mb-4">Welcome to</h2>
+                                        <h2 className="text-5xl font-bold text-white mb-4">{t('verifyEmail.branding.welcome')}</h2>
                                         <h1 className="text-6xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">i-sign.eu</h1>
                                     </Link>
                                 </div>
-
-                                <p className="text-xl text-gray-300 leading-relaxed">Verify your email and start signing documents securely with our trusted platform.</p>
-
-                                {/* Feature highlights */}
+                                <p className="text-xl text-gray-300 leading-relaxed">{t('verifyEmail.branding.description')}</p>
                                 <div className="space-y-4 pt-8">
-                                    {[
-                                        { icon: '✉️', title: 'Email Verification', desc: 'Secure account setup' },
-                                        { icon: '⚡', title: 'Instant Access', desc: 'Start signing immediately' },
-                                        { icon: '🔐', title: 'Protected Account', desc: 'Your data is safe' },
-                                    ].map((feature, index) => (
+                                    {brandingFeatures.map((feature, index) => (
                                         <div
                                             key={index}
                                             className="flex items-center gap-4 bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-white/10 hover:bg-white/10 transition-all duration-300 hover:scale-105 transform"
                                         >
                                             <div className="text-3xl">{feature.icon}</div>
                                             <div>
-                                                <h3 className="text-white font-semibold">{feature.title}</h3>
-                                                <p className="text-gray-400 text-sm">{feature.desc}</p>
+                                                <h3 className="text-white font-semibold">{t(feature.titleKey)}</h3>
+                                                <p className="text-gray-400 text-sm">{t(feature.descKey)}</p>
                                             </div>
                                         </div>
                                     ))}
@@ -175,18 +176,13 @@ const VerifyEmail = () => {
                     {/* Right side - Verification Status */}
                     <div className={`transition-all duration-1000 delay-300 transform ${isVisible ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'}`}>
                         <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-8 md:p-12 border border-white/20 shadow-2xl">
-                            {/* Mobile Logo */}
                             <div className="lg:hidden text-center mb-8">
                                 <Link to="/">
                                     <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">i-sign.eu</h1>
                                 </Link>
                             </div>
-
-                            {/* Content */}
                             <div className="min-h-[400px] flex items-center justify-center">{renderContent()}</div>
-
-                            {/* Footer */}
-                            <div className="mt-8 pt-6 border-t border-white/10 text-center text-sm text-gray-400">© {new Date().getFullYear()} i-sign.eu. All Rights Reserved.</div>
+                            <div className="mt-8 pt-6 border-t border-white/10 text-center text-sm text-gray-400">{t('verifyEmail.footer.copyright', { year: new Date().getFullYear() })}</div>
                         </div>
                     </div>
                 </div>

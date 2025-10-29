@@ -3,34 +3,37 @@ import { lazy } from 'react';
 import ProtectedRoute from '../utils/ProtectedRoute';
 import SubscriptionRequiredRoute from '../utils/SubscriptionRequiredRoute';
 import PublicRoute from '../utils/PublicRoute';
-import PendingVerification from '../pages/PendingVerification';
-import VerifyEmail from '../pages/VerifyEmail';
-import MyDocuments from '../pages/MyDocuments';
-import TemplatesDashboard from '../pages/TemplatesDashboard';
-import PackageDashboard from '../pages/PackagesDashboard';
+
 import ParticipantPage from '../pages/ParticipantPage';
-import PackageStatusPage from '../pages/PackageStatusPage';
-import Home from '../pages/Home';
-import CookiePolicyPage from '../pages/CookiePolicyPage';
-import PaymentMethods from '../pages/PaymentMethods';
-import Subscriptions from '../pages/Subscriptions';
-import SubscriptionRequired from '../pages/SubscriptionRequired';
-import EnterpriseContact from '../pages/EnterpriseContact';
-import ReviewPage from '../pages/ReviewPage';
-import ReactivateAccount from '../pages/ReactivateAccount';
-import DigitalSignaturesGuidePage from '../pages/DigitalSignaturesGuidePage';
 
 // ---------------- LAZY LOADED PAGE COMPONENTS ----------------
 const Index = lazy(() => import('../pages/Index'));
 const Contacts = lazy(() => import('../pages/Contacts'));
 const Profile = lazy(() => import('../pages/Profile'));
+const PaymentMethods = lazy(() => import('../pages/PaymentMethods'));
+const Subscriptions = lazy(() => import('../pages/Subscriptions'));
+const SubscriptionRequired = lazy(() => import('../pages/SubscriptionRequired'));
+
+//package module
+const TemplatesDashboard = lazy(() => import('../pages/TemplatesDashboard'));
+const PackageDashboard = lazy(() => import('../pages/PackagesDashboard'));
+const PackageStatusPage = lazy(() => import('../pages/PackageStatusPage'));
 
 // Public Pages
+const Home = lazy(() => import('../pages/Home'));
+const CookiePolicyPage = lazy(() => import('../pages/CookiePolicyPage'));
+const TermsAndPrivacy = lazy(() => import('../pages/TermsAndPrivacy'));
+const DigitalSignaturesGuidePage = lazy(() => import('../pages/DigitalSignaturesGuidePage'));
+const EnterpriseContact = lazy(() => import('../pages/EnterpriseContact'));
+const ReviewPage = lazy(() => import('../pages/ReviewPage'));
+//auth
 const Register = lazy(() => import('../pages/Register'));
 const Login = lazy(() => import('../pages/Login'));
 const ForgetPassword = lazy(() => import('../pages/ForgetPassword'));
 const ResetPassword = lazy(() => import('../pages/ResetPassword'));
-const TermsAndPrivacy = lazy(() => import('../pages/TermsAndPrivacy'));
+const ReactivateAccount = lazy(() => import('../pages/ReactivateAccount'));
+const PendingVerification = lazy(() => import('../pages/PendingVerification'));
+const VerifyEmail = lazy(() => import('../pages/VerifyEmail'));
 
 // Error Page
 const Error404 = lazy(() => import('../pages/Error404'));
@@ -43,15 +46,6 @@ const routes = [
         element: (
             <SubscriptionRequiredRoute requiresActiveSubscription={true}>
                 <Index />
-            </SubscriptionRequiredRoute>
-        ),
-        layout: 'default',
-    },
-    {
-        path: '/my-documents',
-        element: (
-            <SubscriptionRequiredRoute requiresActiveSubscription={true}>
-                <MyDocuments />
             </SubscriptionRequiredRoute>
         ),
         layout: 'default',

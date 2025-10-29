@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { IRootState, AppDispatch } from '../store';
 import { useEffect, useState, FormEvent, ChangeEvent, ComponentType } from 'react';
 import { toast } from 'react-toastify';
+import { useTranslation } from 'react-i18next';
 
 // Redux Imports
 import { setPageTitle, toggleRTL } from '../store/slices/themeConfigSlice';
@@ -19,6 +20,7 @@ import IconEye from '../components/Icon/IconEye';
 const FaEyeSlashTyped = FaEyeSlash as ComponentType<{ className?: string }>;
 
 const ResetPassword = () => {
+    const { t } = useTranslation();
     const dispatch: AppDispatch = useDispatch();
     const navigate = useNavigate();
     const { token } = useParams<{ token: string }>();
@@ -37,37 +39,30 @@ const ResetPassword = () => {
     const [flag, setFlag] = useState(locale);
     const [passwordError, setPasswordError] = useState('');
 
-    // Effect to verify the token on component load
     useEffect(() => {
-        dispatch(setPageTitle('Reset Password'));
+        dispatch(setPageTitle(t('resetPassword.meta.title')));
         setIsVisible(true);
         if (token) {
             dispatch(verifyResetToken(token));
         } else {
-            toast.error('No reset token provided.');
+            toast.error(t('resetPassword.messages.noToken') as string);
             navigate('/login');
         }
-    }, [dispatch, token, navigate]);
+    }, [dispatch, token, navigate, t]);
 
-    // Effect to control the UI phase based on Redux state
     useEffect(() => {
         let timer: NodeJS.Timeout;
-
         if (!loading) {
             if (isTokenVerified) {
                 setPhase('success');
-                timer = setTimeout(() => {
-                    setPhase('form');
-                }, 1500);
+                timer = setTimeout(() => setPhase('form'), 1500);
             } else if (reduxError) {
                 setPhase('error');
             }
         }
-
         return () => clearTimeout(timer);
     }, [loading, isTokenVerified, reduxError]);
 
-    // Form and UI handlers
     const setLocale = (newFlag: string) => {
         setFlag(newFlag);
         i18next.changeLanguage(newFlag);
@@ -80,7 +75,7 @@ const ResetPassword = () => {
 
         if (name === 'newPassword') {
             if (value.length > 0 && value.length < 6) {
-                setPasswordError('Password must be at least 6 characters');
+                setPasswordError(t('resetPassword.validation.passwordMin'));
             } else {
                 setPasswordError('');
             }
@@ -90,33 +85,38 @@ const ResetPassword = () => {
     const submitForm = async (e: FormEvent) => {
         e.preventDefault();
         if (formData.newPassword.length < 6) {
-            toast.error('Password must be at least 6 characters.');
+            toast.error(t('resetPassword.validation.passwordMin') as string);
             return;
         }
         if (formData.newPassword !== formData.confirmPassword) {
-            toast.error('Passwords do not match.');
+            toast.error(t('resetPassword.validation.passwordsMismatch') as string);
             return;
         }
         if (token) {
             try {
                 await dispatch(resetPassword({ token, newPassword: formData.newPassword })).unwrap();
-                toast.success('Password successfully reset! You can now log in.');
+                toast.success(t('resetPassword.messages.success') as string);
                 navigate('/login');
             } catch (err: any) {
-                toast.error(err || 'Failed to reset password. The link may have expired.');
+                toast.error(err || t('resetPassword.messages.error'));
             }
         }
     };
 
-    // Dynamically render content based on the current phase
+    const brandingFeatures = [
+        { icon: '🔒', titleKey: 'login.branding.features.encryption.title', descKey: 'login.branding.features.encryption.description' },
+        { icon: '⚡', titleKey: 'login.branding.features.uptime.title', descKey: 'login.branding.features.uptime.description' },
+        { icon: '✓', titleKey: 'login.branding.features.binding.title', descKey: 'login.branding.features.binding.description' },
+    ];
+
     const renderContent = () => {
         switch (phase) {
             case 'verifying':
                 return (
                     <div className="flex flex-col items-center justify-center text-center space-y-6">
                         <span className="animate-spin border-4 border-transparent border-l-blue-500 rounded-full w-14 h-14"></span>
-                        <h2 className="text-2xl font-bold text-white">Verifying Link</h2>
-                        <p className="text-gray-300">Please wait while we check your password reset link...</p>
+                        <h2 className="text-2xl font-bold text-white">{t('resetPassword.status.verifying.title')}</h2>
+                        <p className="text-gray-300">{t('resetPassword.status.verifying.description')}</p>
                     </div>
                 );
             case 'success':
@@ -128,8 +128,8 @@ const ResetPassword = () => {
                                 <IconCircleCheck className="w-16 h-16" />
                             </div>
                         </div>
-                        <h2 className="text-2xl font-bold text-white">Verification Successful!</h2>
-                        <p className="text-gray-300">Please wait, loading the form...</p>
+                        <h2 className="text-2xl font-bold text-white">{t('resetPassword.status.success.title')}</h2>
+                        <p className="text-gray-300">{t('resetPassword.status.success.description')}</p>
                     </div>
                 );
             case 'error':
@@ -141,13 +141,13 @@ const ResetPassword = () => {
                                 <IconXCircle className="w-16 h-16" />
                             </div>
                         </div>
-                        <h2 className="text-2xl font-bold text-red-500">Invalid or Expired Link</h2>
-                        <p className="text-gray-300">{reduxError || 'The password reset link is not valid. It may have been used already or has expired.'}</p>
+                        <h2 className="text-2xl font-bold text-red-500">{t('resetPassword.status.error.title')}</h2>
+                        <p className="text-gray-300">{reduxError || t('resetPassword.status.error.description')}</p>
                         <Link
                             to="/login"
                             className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-semibold py-3 rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-blue-500/25 transform flex items-center justify-center gap-2 mt-4"
                         >
-                            Back to Login
+                            {t('resetPassword.status.error.button')}
                         </Link>
                     </div>
                 );
@@ -155,21 +155,20 @@ const ResetPassword = () => {
                 return (
                     <div className="space-y-6">
                         <div className="text-center">
-                            <h2 className="text-3xl md:text-4xl font-bold text-white mb-2">Create New Password</h2>
-                            <p className="text-gray-300">Please enter your new password below.</p>
+                            <h2 className="text-3xl md:text-4xl font-bold text-white mb-2">{t('resetPassword.form.header.title')}</h2>
+                            <p className="text-gray-300">{t('resetPassword.form.header.description')}</p>
                         </div>
                         <form className="space-y-5" onSubmit={submitForm}>
-                            {/* New Password Input */}
                             <div className="space-y-2">
                                 <label htmlFor="newPassword" className="text-white font-medium block">
-                                    New Password
+                                    {t('resetPassword.form.newPassword.label')}
                                 </label>
                                 <div className="relative group">
                                     <input
                                         id="newPassword"
                                         name="newPassword"
                                         type={showPassword ? 'text' : 'password'}
-                                        placeholder="Enter new password (min. 6 characters)"
+                                        placeholder={t('resetPassword.form.newPassword.placeholder')}
                                         className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 pl-12 pr-12 text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all duration-300"
                                         value={formData.newPassword}
                                         onChange={handleChange}
@@ -206,18 +205,16 @@ const ResetPassword = () => {
                                     </p>
                                 )}
                             </div>
-
-                            {/* Confirm Password Input */}
                             <div className="space-y-2">
                                 <label htmlFor="confirmPassword" className="text-white font-medium block">
-                                    Confirm Password
+                                    {t('resetPassword.form.confirmPassword.label')}
                                 </label>
                                 <div className="relative group">
                                     <input
                                         id="confirmPassword"
                                         name="confirmPassword"
                                         type={showPassword ? 'text' : 'password'}
-                                        placeholder="Confirm new password"
+                                        placeholder={t('resetPassword.form.confirmPassword.placeholder')}
                                         className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 pl-12 pr-12 text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all duration-300"
                                         value={formData.confirmPassword}
                                         onChange={handleChange}
@@ -242,8 +239,6 @@ const ResetPassword = () => {
                                     </button>
                                 </div>
                             </div>
-
-                            {/* Submit Button */}
                             <button
                                 type="submit"
                                 disabled={loading || passwordError !== '' || formData.newPassword.length < 6}
@@ -252,11 +247,11 @@ const ResetPassword = () => {
                                 {loading ? (
                                     <>
                                         <span className="animate-spin border-2 border-white border-l-transparent rounded-full w-5 h-5 inline-block"></span>
-                                        <span>Resetting Password...</span>
+                                        <span>{t('resetPassword.form.button.loading')}</span>
                                     </>
                                 ) : (
                                     <>
-                                        <span>Reset Password</span>
+                                        <span>{t('resetPassword.form.button.default')}</span>
                                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                                         </svg>
@@ -273,48 +268,36 @@ const ResetPassword = () => {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-blue-900 flex items-center justify-center px-4 py-8 relative overflow-hidden">
-            {/* Animated background elements */}
             <div className="absolute inset-0 overflow-hidden">
                 <div className="absolute top-20 left-10 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
                 <div className="absolute bottom-20 right-10 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '700ms' }}></div>
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-cyan-500/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1000ms' }}></div>
             </div>
-
-            {/* Floating particles */}
             <div className="absolute top-1/4 left-1/4 w-2 h-2 bg-blue-400/40 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
             <div className="absolute top-3/4 right-1/4 w-3 h-3 bg-purple-400/40 rounded-full animate-bounce" style={{ animationDelay: '500ms' }}></div>
             <div className="absolute bottom-1/4 left-1/3 w-2 h-2 bg-cyan-400/40 rounded-full animate-bounce" style={{ animationDelay: '700ms' }}></div>
-
             <div className="relative w-full max-w-6xl mx-auto">
                 <div className="grid lg:grid-cols-2 gap-8 items-center">
-                    {/* Left side - Branding */}
                     <div className={`hidden lg:block transition-all duration-1000 transform ${isVisible ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0'}`}>
                         <div className="bg-white/5 backdrop-blur-xl rounded-3xl p-12 border border-white/10 shadow-2xl">
                             <div className="space-y-8">
                                 <div>
                                     <Link to="/" className="block">
-                                        <h2 className="text-5xl font-bold text-white mb-4">Welcome to</h2>
+                                        <h2 className="text-5xl font-bold text-white mb-4">{t('login.branding.welcome')}</h2>
                                         <h1 className="text-6xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">i-sign.eu</h1>
                                     </Link>
                                 </div>
-
-                                <p className="text-xl text-gray-300 leading-relaxed">The most secure and user-friendly electronic signature platform for businesses of all sizes.</p>
-
-                                {/* Feature highlights */}
+                                <p className="text-xl text-gray-300 leading-relaxed">{t('login.branding.description')}</p>
                                 <div className="space-y-4 pt-8">
-                                    {[
-                                        { icon: '🔒', title: '256-bit Encryption', desc: 'Bank-level security' },
-                                        { icon: '⚡', title: '99.9% Uptime', desc: 'Always available' },
-                                        { icon: '✓', title: 'Legally Binding', desc: 'Compliant signatures' },
-                                    ].map((feature, index) => (
+                                    {brandingFeatures.map((feature, index) => (
                                         <div
                                             key={index}
                                             className="flex items-center gap-4 bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-white/10 hover:bg-white/10 transition-all duration-300 hover:scale-105 transform"
                                         >
                                             <div className="text-3xl">{feature.icon}</div>
                                             <div>
-                                                <h3 className="text-white font-semibold">{feature.title}</h3>
-                                                <p className="text-gray-400 text-sm">{feature.desc}</p>
+                                                <h3 className="text-white font-semibold">{t(feature.titleKey)}</h3>
+                                                <p className="text-gray-400 text-sm">{t(feature.descKey)}</p>
                                             </div>
                                         </div>
                                     ))}
@@ -322,11 +305,8 @@ const ResetPassword = () => {
                             </div>
                         </div>
                     </div>
-
-                    {/* Right side - Reset Password Form */}
                     <div className={`transition-all duration-1000 delay-300 transform ${isVisible ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'}`}>
                         <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-8 md:p-12 border border-white/20 shadow-2xl">
-                            {/* Language Dropdown - Top Right */}
                             <div className="flex justify-end mb-6">
                                 <div className="dropdown w-max">
                                     <Dropdown
@@ -362,19 +342,13 @@ const ResetPassword = () => {
                                     </Dropdown>
                                 </div>
                             </div>
-
-                            {/* Mobile Logo */}
                             <div className="lg:hidden text-center mb-8">
                                 <Link to="/">
                                     <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">i-sign.eu</h1>
                                 </Link>
                             </div>
-
-                            {/* Dynamic Content */}
                             {renderContent()}
-
-                            {/* Footer */}
-                            <div className="mt-12 pt-6 border-t border-white/10 text-center text-sm text-gray-400">© {new Date().getFullYear()} i-sign.eu. All Rights Reserved.</div>
+                            <div className="mt-12 pt-6 border-t border-white/10 text-center text-sm text-gray-400">{t('resetPassword.footer.copyright', { year: new Date().getFullYear() })}</div>
                         </div>
                     </div>
                 </div>

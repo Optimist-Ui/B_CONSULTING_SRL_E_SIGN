@@ -1,10 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 const HomeAboutSection = () => {
+    const { t } = useTranslation();
     const [isVisible, setIsVisible] = useState(false);
     const sectionRef = useRef(null);
-     const navigate = useNavigate();
+    const navigate = useNavigate();
 
     useEffect(() => {
         const observer = new IntersectionObserver(
@@ -16,13 +18,14 @@ const HomeAboutSection = () => {
             { threshold: 0.2 }
         );
 
-        if (sectionRef.current) {
-            observer.observe(sectionRef.current);
+        const currentRef = sectionRef.current;
+        if (currentRef) {
+            observer.observe(currentRef);
         }
 
         return () => {
-            if (sectionRef.current) {
-                observer.unobserve(sectionRef.current);
+            if (currentRef) {
+                observer.unobserve(currentRef);
             }
         };
     }, []);
@@ -35,8 +38,8 @@ const HomeAboutSection = () => {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
             ),
-            title: 'Secure by Design',
-            description: 'eIDAS, GDPR, and ISO 27001 compliant',
+            titleKey: 'about.whyChooseUs.features.secure.title',
+            descriptionKey: 'about.whyChooseUs.features.secure.description',
         },
         {
             id: 2,
@@ -45,8 +48,8 @@ const HomeAboutSection = () => {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
             ),
-            title: 'Fast & Simple',
-            description: 'Sign in seconds with no downloads',
+            titleKey: 'about.whyChooseUs.features.fast.title',
+            descriptionKey: 'about.whyChooseUs.features.fast.description',
         },
         {
             id: 3,
@@ -60,8 +63,8 @@ const HomeAboutSection = () => {
                     />
                 </svg>
             ),
-            title: 'Integrated Workflows',
-            description: 'Connect with 500+ business tools',
+            titleKey: 'about.whyChooseUs.features.integrated.title',
+            descriptionKey: 'about.whyChooseUs.features.integrated.description',
         },
         {
             id: 4,
@@ -75,16 +78,16 @@ const HomeAboutSection = () => {
                     />
                 </svg>
             ),
-            title: 'Smart Automation',
-            description: 'Automated reminders and audit trails',
+            titleKey: 'about.whyChooseUs.features.automation.title',
+            descriptionKey: 'about.whyChooseUs.features.automation.description',
         },
     ];
 
     const sustainabilityFeatures = [
-        { icon: '🌱', title: 'CO₂ Reduction', description: 'Cutting paper waste' },
-        { icon: '🌍', title: 'Green Operations', description: 'Renewable energy data centers' },
-        { icon: '🌳', title: 'Reforestation', description: 'Global tree-planting' },
-        { icon: '🔄', title: 'Sustainable Innovation', description: 'Tech for the environment' },
+        { icon: '🌱', titleKey: 'about.sustainability.features.co2.title', descriptionKey: 'about.sustainability.features.co2.description' },
+        { icon: '🌍', titleKey: 'about.sustainability.features.greenOps.title', descriptionKey: 'about.sustainability.features.greenOps.description' },
+        { icon: '🌳', titleKey: 'about.sustainability.features.reforestation.title', descriptionKey: 'about.sustainability.features.reforestation.description' },
+        { icon: '🔄', titleKey: 'about.sustainability.features.innovation.title', descriptionKey: 'about.sustainability.features.innovation.description' },
     ];
 
     return (
@@ -100,21 +103,22 @@ const HomeAboutSection = () => {
                 {/* Hero Section */}
                 <div className={`text-center mb-12 md:mb-14 transition-all duration-1000 ease-out transform ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}>
                     <div className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-500/20 to-green-500/20 text-blue-400 rounded-full text-xs md:text-sm font-semibold mb-4 border border-blue-400/30">
-                        <span>✨ About E-Sign.eu</span>
+                        <span>{t('about.tag')}</span>
                     </div>
 
                     <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">
-                        Reinventing Trust in the
-                        <span className="block bg-gradient-to-r from-blue-400 via-green-400 to-blue-400 bg-clip-text text-transparent">Digital Era</span>
+                        {t('about.title.main')}
+                        <span className="block bg-gradient-to-r from-blue-400 via-green-400 to-blue-400 bg-clip-text text-transparent">{t('about.title.highlight')}</span>
                     </h1>
 
                     <p className="text-sm md:text-base text-gray-300 max-w-2xl mx-auto leading-relaxed mb-6">
-                        Signing a document should be <span className="text-blue-400 font-semibold">effortless</span>, <span className="text-green-400 font-semibold">secure</span>, and{' '}
-                        <span className="text-purple-400 font-semibold">sustainable</span>.
+                        {t('about.subtitle.prefix')} <span className="text-blue-400 font-semibold">{t('about.keywords.effortless')}</span>,{' '}
+                        <span className="text-green-400 font-semibold">{t('about.keywords.secure')}</span>, {t('about.subtitle.connector')}{' '}
+                        <span className="text-purple-400 font-semibold">{t('about.keywords.sustainable')}</span>.
                     </p>
 
                     <div className="bg-gradient-to-r from-blue-500/10 to-green-500/10 backdrop-blur-sm rounded-lg md:rounded-2xl p-4 md:p-6 max-w-3xl mx-auto border border-blue-400/20">
-                        <p className="text-sm md:text-base text-gray-200 leading-relaxed italic">"Every digital signature is a step toward a cleaner, faster, and more connected world."</p>
+                        <p className="text-sm md:text-base text-gray-200 leading-relaxed italic">"{t('about.quote')}"</p>
                     </div>
                 </div>
 
@@ -137,9 +141,9 @@ const HomeAboutSection = () => {
                                     />
                                 </svg>
                             </div>
-                            <h2 className="text-xl md:text-2xl font-bold text-white">Our Mission</h2>
+                            <h2 className="text-xl md:text-2xl font-bold text-white">{t('about.mission.title')}</h2>
                         </div>
-                        <p className="text-sm md:text-base text-gray-300 leading-relaxed">Make digital trust accessible to everyone, enabling secure, efficient, and sustainable business workflows.</p>
+                        <p className="text-sm md:text-base text-gray-300 leading-relaxed">{t('about.mission.description')}</p>
                     </div>
 
                     {/* Vision */}
@@ -160,9 +164,9 @@ const HomeAboutSection = () => {
                                     />
                                 </svg>
                             </div>
-                            <h2 className="text-xl md:text-2xl font-bold text-white">Our Vision</h2>
+                            <h2 className="text-xl md:text-2xl font-bold text-white">{t('about.vision.title')}</h2>
                         </div>
-                        <p className="text-sm md:text-base text-gray-300 leading-relaxed">A world without paper where agreements flow as easily as ideas, powered by sustainable innovation.</p>
+                        <p className="text-sm md:text-base text-gray-300 leading-relaxed">{t('about.vision.description')}</p>
                     </div>
                 </div>
 
@@ -170,9 +174,10 @@ const HomeAboutSection = () => {
                 <div className={`mb-12 transition-all duration-1000 delay-500 ease-out transform ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}>
                     <div className="text-center mb-8">
                         <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">
-                            Committed to a<span className="block bg-gradient-to-r from-green-400 to-blue-400 bg-clip-text text-transparent">Carbon-Neutral Future</span>
+                            {t('about.sustainability.title.main')}{' '}
+                            <span className="block bg-gradient-to-r from-green-400 to-blue-400 bg-clip-text text-transparent">{t('about.sustainability.title.highlight')}</span>
                         </h2>
-                        <p className="text-sm md:text-base text-gray-300 max-w-2xl mx-auto">Every document signed contributes to a sustainable ecosystem</p>
+                        <p className="text-sm md:text-base text-gray-300 max-w-2xl mx-auto">{t('about.sustainability.description')}</p>
                     </div>
 
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
@@ -182,8 +187,8 @@ const HomeAboutSection = () => {
                                 className={`bg-gradient-to-br from-green-500/10 to-blue-500/10 backdrop-blur-sm rounded-lg md:rounded-xl p-4 border border-green-400/30 hover:border-green-400/60 transition-all duration-300 hover:scale-105 text-center`}
                             >
                                 <div className="text-2xl md:text-3xl mb-2">{feature.icon}</div>
-                                <h3 className="text-xs md:text-sm font-bold text-white mb-1">{feature.title}</h3>
-                                <p className="text-xs text-gray-300">{feature.description}</p>
+                                <h3 className="text-xs md:text-sm font-bold text-white mb-1">{t(feature.titleKey)}</h3>
+                                <p className="text-xs text-gray-300">{t(feature.descriptionKey)}</p>
                             </div>
                         ))}
                     </div>
@@ -192,8 +197,8 @@ const HomeAboutSection = () => {
                 {/* Why Choose Us Features */}
                 <div className={`mb-10 transition-all duration-1000 delay-700 ease-out transform ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}>
                     <div className="text-center mb-8">
-                        <h2 className="text-2xl md:text-3xl font-bold text-white mb-2">Why Choose E-Sign.eu</h2>
-                        <p className="text-sm md:text-base text-gray-300 max-w-2xl mx-auto">Experience seamless signing without limits</p>
+                        <h2 className="text-2xl md:text-3xl font-bold text-white mb-2">{t('about.whyChooseUs.title')}</h2>
+                        <p className="text-sm md:text-base text-gray-300 max-w-2xl mx-auto">{t('about.whyChooseUs.description')}</p>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -207,8 +212,8 @@ const HomeAboutSection = () => {
                                     <div className="text-white text-sm">{feature.icon}</div>
                                 </div>
                                 <div className="flex-1">
-                                    <h6 className="text-sm md:text-base font-bold text-white mb-1 group-hover:text-blue-400 transition-colors">{feature.title}</h6>
-                                    <p className="text-xs md:text-sm text-gray-300">{feature.description}</p>
+                                    <h6 className="text-sm md:text-base font-bold text-white mb-1 group-hover:text-blue-400 transition-colors">{t(feature.titleKey)}</h6>
+                                    <p className="text-xs md:text-sm text-gray-300">{t(feature.descriptionKey)}</p>
                                 </div>
                             </div>
                         ))}
@@ -219,12 +224,15 @@ const HomeAboutSection = () => {
                 <div className={`text-center transition-all duration-1000 delay-1000 ease-out transform ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}>
                     <div className="bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-green-500/10 backdrop-blur-sm rounded-lg md:rounded-2xl p-6 md:p-8 border border-blue-400/30">
                         <h2 className="text-2xl md:text-3xl font-bold text-white mb-4">
-                            Join the <span className="bg-gradient-to-r from-blue-400 to-green-400 bg-clip-text text-transparent">Digital Trust Revolution</span>
+                            {t('about.cta.title.main')} <span className="bg-gradient-to-r from-blue-400 to-green-400 bg-clip-text text-transparent">{t('about.cta.title.highlight')}</span>
                         </h2>
-                        <p className="text-sm md:text-base text-gray-300 mb-6 max-w-xl mx-auto">Be part of the sustainable future</p>
-                        <button onClick={() => navigate('/subscriptions')} className="group bg-gradient-to-r from-blue-600 via-purple-600 to-green-600 hover:from-blue-700 hover:via-purple-700 hover:to-green-700 text-white px-8 md:px-10 py-3 md:py-4 rounded-lg md:rounded-xl text-sm md:text-base font-bold transition-all duration-500 hover:scale-105 hover:shadow-lg hover:shadow-blue-600/30">
+                        <p className="text-sm md:text-base text-gray-300 mb-6 max-w-xl mx-auto">{t('about.cta.description')}</p>
+                        <button
+                            onClick={() => navigate('/subscriptions')}
+                            className="group bg-gradient-to-r from-blue-600 via-purple-600 to-green-600 hover:from-blue-700 hover:via-purple-700 hover:to-green-700 text-white px-8 md:px-10 py-3 md:py-4 rounded-lg md:rounded-xl text-sm md:text-base font-bold transition-all duration-500 hover:scale-105 hover:shadow-lg hover:shadow-blue-600/30"
+                        >
                             <span className="flex items-center justify-center gap-2">
-                                <span>Subscribe Now</span>
+                                <span>{t('about.cta.button')}</span>
                                 <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                                 </svg>

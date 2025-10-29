@@ -10,6 +10,7 @@ import PhoneInput from 'react-phone-number-input';
 import { E164Number } from 'libphonenumber-js/core';
 import 'react-phone-number-input/style.css';
 import { ReassignmentContact } from '../../../store/slices/participantSlice';
+import { useTranslation } from 'react-i18next';
 
 // Typed Icons
 const FiXTyped = FiX as ComponentType<{ className?: string }>;
@@ -21,6 +22,7 @@ const FiLoaderTyped = FiLoader as ComponentType<{ className?: string }>;
 const FiAlertTriangleTyped = FiAlertTriangle as ComponentType<{ className?: string }>;
 
 const AddReceiverDrawer: React.FC = () => {
+    const { t } = useTranslation();
     const dispatch = useDispatch<AppDispatch>();
     const { packageData } = useSelector((state: IRootState) => state.participant);
     const { isAddReceiverDrawerOpen, addReceiverStep, addReceiverLoading, addReceiverError, reassignmentContacts, selectedAddReceiverContact, reassignFormData } = useSelector(
@@ -49,7 +51,7 @@ const AddReceiverDrawer: React.FC = () => {
     const handleCreateContact = async () => {
         const { email, firstName, lastName } = reassignFormData;
         if (!email.trim() || !firstName.trim() || !lastName.trim()) {
-            return toast.error('Please provide first name, last name, and email.');
+            return toast.error(t('addReceiverDrawer.errors.missingFields') as string);
         }
         if (!packageData) return;
 
@@ -94,30 +96,30 @@ const AddReceiverDrawer: React.FC = () => {
     const getStepTitle = () => {
         switch (addReceiverStep) {
             case 'select':
-                return 'Select Contact to Add';
+                return t('addReceiverDrawer.steps.select.title');
             case 'add':
-                return 'Add New Contact';
+                return t('addReceiverDrawer.steps.add.title');
             case 'success':
-                return 'Receiver Added Successfully';
+                return t('addReceiverDrawer.steps.success.title');
             case 'failure':
-                return 'Action Failed';
+                return t('addReceiverDrawer.steps.failure.title');
             default:
-                return 'Add Receiver';
+                return t('addReceiverDrawer.steps.default.title');
         }
     };
 
     const getStepDescription = () => {
         switch (addReceiverStep) {
             case 'select':
-                return 'Choose an existing contact to add as a receiver';
+                return t('addReceiverDrawer.steps.select.description');
             case 'add':
-                return 'Enter the details for a new contact';
+                return t('addReceiverDrawer.steps.add.description');
             case 'success':
-                return 'The contact has been notified and added to the document';
+                return t('addReceiverDrawer.steps.success.description');
             case 'failure':
-                return addReceiverError || 'An unexpected error occurred';
+                return addReceiverError || t('addReceiverDrawer.steps.failure.description');
             default:
-                return 'Add a new read-only participant to this document';
+                return t('addReceiverDrawer.steps.default.description');
         }
     };
 
@@ -138,7 +140,7 @@ const AddReceiverDrawer: React.FC = () => {
                 <FiSearchTyped className="absolute top-1/2 left-4 -translate-y-1/2 text-gray-400 w-5 h-5" />
                 <input
                     type="text"
-                    placeholder="Search by name or email..."
+                    placeholder={t('addReceiverDrawer.steps.select.searchPlaceholder')}
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="w-full px-4 py-3 pl-12 border border-gray-300 rounded-xl focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-all duration-200 shadow-sm"
@@ -149,7 +151,7 @@ const AddReceiverDrawer: React.FC = () => {
                 {addReceiverLoading && addReceiverStep === 'select' ? (
                     <div className="flex items-center justify-center py-10 bg-gradient-to-r from-gray-50 to-slate-50 border border-gray-200 rounded-xl">
                         <FiLoaderTyped className="animate-spin w-6 h-6 text-[#1e293b] mr-2" />
-                        <span className="text-gray-600">Loading Contacts...</span>
+                        <span className="text-gray-600">{t('addReceiverDrawer.steps.select.loading')}</span>
                     </div>
                 ) : filteredContacts.length > 0 ? (
                     filteredContacts.map((contact) => (
@@ -175,7 +177,7 @@ const AddReceiverDrawer: React.FC = () => {
                 ) : (
                     <div className="bg-gradient-to-r from-yellow-50 to-amber-50 border border-yellow-200 rounded-xl p-4 text-center">
                         <FiAlertTriangleTyped className="w-6 h-6 text-yellow-600 mx-auto mb-2" />
-                        <p className="text-sm text-gray-600">No contacts found.</p>
+                        <p className="text-sm text-gray-600">{t('addReceiverDrawer.steps.select.noContacts')}</p>
                     </div>
                 )}
             </div>
@@ -185,7 +187,7 @@ const AddReceiverDrawer: React.FC = () => {
                 onClick={() => dispatch(setAddReceiverStep('add'))}
                 className="w-full px-4 py-3 bg-[#1e293b] text-white font-medium rounded-xl hover:bg-opacity-90 transition-all duration-200 shadow-sm hover:shadow-md flex items-center justify-center"
             >
-                <FiUserPlusTyped className="w-5 h-5 mr-2" /> Add New Contact
+                <FiUserPlusTyped className="w-5 h-5 mr-2" /> {t('addReceiverDrawer.steps.select.addButton')}
             </button>
         </div>
     );
@@ -193,47 +195,47 @@ const AddReceiverDrawer: React.FC = () => {
     const renderAddStep = () => (
         <div className="space-y-6" onKeyPress={handleAddStepKeyPress}>
             <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-4">
-                <p className="text-sm text-gray-600">Enter the details of the new contact you want to add as a receiver.</p>
+                <p className="text-sm text-gray-600">{t('addReceiverDrawer.steps.add.description')}</p>
             </div>
 
             <div>
-                <label className="block text-sm font-medium text-[#1e293b] mb-2">New Receiver's Email*</label>
+                <label className="block text-sm font-medium text-[#1e293b] mb-2">{t('addReceiverDrawer.steps.add.emailLabel')}*</label>
                 <input
                     type="email"
                     value={reassignFormData.email}
                     onChange={(e) => handleFieldChange('email', e.target.value)}
                     className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-all duration-200 shadow-sm"
-                    placeholder="name@example.com"
+                    placeholder={t('addReceiverDrawer.steps.add.emailPlaceholder')}
                 />
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                    <label className="block text-sm font-medium text-[#1e293b] mb-2">First Name*</label>
+                    <label className="block text-sm font-medium text-[#1e293b] mb-2">{t('addReceiverDrawer.steps.add.firstNameLabel')}*</label>
                     <input
                         type="text"
                         value={reassignFormData.firstName}
                         onChange={(e) => handleFieldChange('firstName', e.target.value)}
                         className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-all duration-200 shadow-sm"
-                        placeholder="First name"
+                        placeholder={t('addReceiverDrawer.steps.add.firstNamePlaceholder')}
                     />
                 </div>
                 <div>
-                    <label className="block text-sm font-medium text-[#1e293b] mb-2">Last Name*</label>
+                    <label className="block text-sm font-medium text-[#1e293b] mb-2">{t('addReceiverDrawer.steps.add.lastNameLabel')}*</label>
                     <input
                         type="text"
                         value={reassignFormData.lastName}
                         onChange={(e) => handleFieldChange('lastName', e.target.value)}
                         className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-all duration-200 shadow-sm"
-                        placeholder="Last name"
+                        placeholder={t('addReceiverDrawer.steps.add.lastNamePlaceholder')}
                     />
                 </div>
             </div>
 
             <div>
-                <label className="block text-sm font-medium text-[#1e293b] mb-2">Phone Number</label>
+                <label className="block text-sm font-medium text-[#1e293b] mb-2">{t('addReceiverDrawer.steps.add.phoneLabel')}</label>
                 <PhoneInput
-                    placeholder="Enter phone number"
+                    placeholder={t('addReceiverDrawer.steps.add.phonePlaceholder')}
                     value={reassignFormData.phone as E164Number}
                     onChange={(value) => handleFieldChange('phone', value || '')}
                     defaultCountry="US"
@@ -248,14 +250,14 @@ const AddReceiverDrawer: React.FC = () => {
                     onClick={() => dispatch(setAddReceiverStep('select'))}
                     className="px-6 py-3 border border-gray-300 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition-all duration-200 shadow-sm"
                 >
-                    Back
+                    {t('addReceiverDrawer.steps.add.backButton')}
                 </button>
                 <button
                     onClick={handleCreateContact}
                     disabled={addReceiverLoading || !reassignFormData.email.trim() || !reassignFormData.firstName.trim() || !reassignFormData.lastName.trim()}
                     className="flex-1 px-6 py-3 bg-[#1e293b] text-white font-medium rounded-xl hover:bg-opacity-90 transition-all duration-200 shadow-sm hover:shadow-md disabled:bg-gray-300 disabled:cursor-not-allowed disabled:hover:shadow-sm flex items-center justify-center"
                 >
-                    {addReceiverLoading ? <FiLoaderTyped className="animate-spin w-5 h-5" /> : 'Create and Add Contact'}
+                    {addReceiverLoading ? <FiLoaderTyped className="animate-spin w-5 h-5" /> : t('addReceiverDrawer.steps.add.createButton')}
                 </button>
             </div>
         </div>
@@ -266,21 +268,21 @@ const AddReceiverDrawer: React.FC = () => {
             <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-6 animate-pulse">
                 <FiCheckCircleTyped className="w-10 h-10" />
             </div>
-            <h3 className="text-xl font-semibold text-[#1e293b] mb-3">Receiver Added Successfully!</h3>
+            <h3 className="text-xl font-semibold text-[#1e293b] mb-3">{t('addReceiverDrawer.steps.success.title')}</h3>
             <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl p-4 mb-6">
                 <p className="text-sm text-gray-600">
                     <strong>
                         {selectedAddReceiverContact?.firstName} {selectedAddReceiverContact?.lastName}
                     </strong>{' '}
-                    has been added as a receiver and notified.
+                    {t('addReceiverDrawer.steps.success.message')}
                 </p>
                 <p className="text-sm text-gray-500 mt-2">{selectedAddReceiverContact?.email}</p>
-                <p className="text-xs text-gray-500 mt-2">All parties will be notified of this addition.</p>
+                <p className="text-xs text-gray-500 mt-2">{t('addReceiverDrawer.steps.success.notification')}</p>
             </div>
 
             {/* Action Button - Inline with content */}
             <button onClick={closeDrawer} className="w-full px-6 py-3 bg-[#1e293b] text-white font-medium rounded-xl hover:bg-opacity-90 transition-all duration-200 shadow-sm hover:shadow-md">
-                Back to Document
+                {t('addReceiverDrawer.steps.success.backButton')}
             </button>
         </div>
     );
@@ -290,14 +292,14 @@ const AddReceiverDrawer: React.FC = () => {
             <div className="w-20 h-20 bg-red-100 text-red-600 rounded-full flex items-center justify-center mb-6">
                 <FiAlertTriangleTyped className="w-10 h-10" />
             </div>
-            <h3 className="text-xl font-semibold text-[#1e293b] mb-3">Action Failed</h3>
+            <h3 className="text-xl font-semibold text-[#1e293b] mb-3">{t('addReceiverDrawer.steps.failure.title')}</h3>
             <div className="bg-gradient-to-r from-red-50 to-rose-50 border border-red-200 rounded-xl p-4 mb-6">
-                <p className="text-sm text-gray-600">{addReceiverError || 'An unexpected error occurred. Please try again.'}</p>
+                <p className="text-sm text-gray-600">{addReceiverError || t('addReceiverDrawer.steps.failure.description')}</p>
             </div>
 
             {/* Action Button - Inline with content */}
             <button onClick={closeDrawer} className="w-full px-6 py-3 bg-[#1e293b] text-white font-medium rounded-xl hover:bg-opacity-90 transition-all duration-200 shadow-sm hover:shadow-md">
-                Close
+                {t('addReceiverDrawer.steps.failure.closeButton')}
             </button>
         </div>
     );
@@ -338,7 +340,11 @@ const AddReceiverDrawer: React.FC = () => {
                                                 <h2 className="text-lg sm:text-xl font-semibold text-[#1e293b]">{getStepTitle()}</h2>
                                                 <p className="text-sm text-gray-500 mt-1">{getStepDescription()}</p>
                                             </div>
-                                            <button onClick={closeDrawer} className="p-2 rounded-lg text-gray-500 hover:text-[#1e293b] hover:bg-gray-100 transition-all duration-200">
+                                            <button
+                                                onClick={closeDrawer}
+                                                className="p-2 rounded-lg text-gray-500 hover:text-[#1e293b] hover:bg-gray-100 transition-all duration-200"
+                                                title={t('addReceiverDrawer.close')}
+                                            >
                                                 <FiChevronRightTyped className="w-5 h-5" />
                                             </button>
                                         </div>

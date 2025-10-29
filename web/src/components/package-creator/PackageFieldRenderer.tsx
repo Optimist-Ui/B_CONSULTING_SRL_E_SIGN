@@ -1,4 +1,5 @@
 import React, { useCallback, useRef, useEffect, memo, useMemo, ComponentType, useState } from 'react';
+import { useTranslation } from 'react-i18next'; // Import useTranslation
 import { PackageField, AssignedUser, FieldRole, ConcreteSignatureMethod } from '../../store/slices/packageSlice';
 import { useDraggableResizable } from '../../hooks/use-draggable-resizable';
 import AddEditContactModal from '../common/AddEditContactModal';
@@ -41,6 +42,7 @@ interface PackageFieldRendererProps {
 }
 
 const PackageFieldRenderer: React.FC<PackageFieldRendererProps> = ({ field, isSelected, onUpdate, onDelete, onSelect, containerRef, onResizeStart, onResizeEnd, onAssignUser, onRemoveUser }) => {
+    const { t } = useTranslation(); // Initialize translation hook
     const fieldRef = useRef<HTMLDivElement>(null);
     const quickAssignRef = useRef<HTMLDivElement>(null);
     const [showQuickAssign, setShowQuickAssign] = useState(false);
@@ -173,7 +175,7 @@ const PackageFieldRenderer: React.FC<PackageFieldRendererProps> = ({ field, isSe
         return () => {
             document.removeEventListener('mousedown', handleClickOutside);
         };
-    }, [showQuickAssign]); // Remove calculateModalPosition from dependencies!
+    }, [showQuickAssign]);
 
     const getIconForFieldType = useCallback((type: PackageField['type']) => {
         switch (type) {
@@ -209,7 +211,7 @@ const PackageFieldRenderer: React.FC<PackageFieldRendererProps> = ({ field, isSe
 
         // Validation for signature fields
         if (isSignatureField && hasSignerAssigned) {
-            toast.error('Signature fields can only have one signer assigned.');
+            toast.error(t('packageFieldRenderer.errors.signatureFieldHasSigner') as string);
             return;
         }
 
@@ -225,13 +227,13 @@ const PackageFieldRenderer: React.FC<PackageFieldRendererProps> = ({ field, isSe
         };
 
         onAssignUser(field.id, newAssignment);
-        toast.success(`${contact.firstName} ${contact.lastName} assigned as ${selectedRole}`);
+        toast.success(t('packageFieldRenderer.messages.userAssigned', { name: `${contact.firstName} ${contact.lastName}`, role: selectedRole }) as string);
 
         // Reset form
         setSelectedContactId('');
         setShowQuickAssign(false);
         setSignatureMethods(['Email OTP']);
-    }, [selectedContactId, selectedRole, signatureMethods, contacts, field.id, onAssignUser, isSignatureField, hasSignerAssigned]);
+    }, [selectedContactId, selectedRole, signatureMethods, contacts, field.id, onAssignUser, isSignatureField, hasSignerAssigned, t]);
 
     const toggleSignatureMethod = (method: ConcreteSignatureMethod) => {
         setSignatureMethods((prev) => {
@@ -246,10 +248,10 @@ const PackageFieldRenderer: React.FC<PackageFieldRendererProps> = ({ field, isSe
     const handleLabelUpdate = useCallback(() => {
         if (labelInput.trim() && labelInput !== field.label) {
             onUpdate(field.id, { label: labelInput.trim() });
-            toast.success('Label updated');
+            toast.success(t('packageFieldRenderer.messages.labelUpdated') as string);
         }
         setIsEditingLabel(false);
-    }, [labelInput, field.label, field.id, onUpdate]);
+    }, [labelInput, field.label, field.id, onUpdate, t]);
 
     const handleLabelKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === 'Enter') {
@@ -283,13 +285,13 @@ const PackageFieldRenderer: React.FC<PackageFieldRendererProps> = ({ field, isSe
                 <div className={`flex items-center justify-center gap-2 text-xs font-medium transition-colors ${isSelected ? 'text-blue-700 dark:text-blue-300' : 'text-gray-600 dark:text-gray-400'}`}>
                     {getIconForFieldType(field.type)}
                     {field.type === 'text' || field.type === 'textarea' ? (
-                        <span className="italic truncate max-w-[140px] font-normal">{field.placeholder || 'Text'}</span>
+                        <span className="italic truncate max-w-[140px] font-normal">{field.placeholder || t('packageFieldRenderer.fieldTypes.text')}</span>
                     ) : field.type === 'radio' ? (
-                        <span className="truncate">Radio</span>
+                        <span className="truncate">{t('packageFieldRenderer.fieldTypes.radio')}</span>
                     ) : field.type === 'dropdown' ? (
-                        <span className="truncate">Select</span>
+                        <span className="truncate">{t('packageFieldRenderer.fieldTypes.dropdown')}</span>
                     ) : (
-                        <span className="capitalize">{field.type}</span>
+                        <span className="capitalize">{t(`packageFieldRenderer.fieldTypes.${field.type}`)}</span>
                     )}
                 </div>
 
@@ -353,7 +355,7 @@ const PackageFieldRenderer: React.FC<PackageFieldRendererProps> = ({ field, isSe
                                 onKeyDown={handleLabelKeyDown}
                                 onClick={(e) => e.stopPropagation()}
                                 className="flex-1 bg-white/20 border border-white/30 rounded px-2 py-0.5 text-white placeholder-white/60 focus:outline-none focus:ring-1 focus:ring-white/50 min-w-0"
-                                placeholder="Field label"
+                                placeholder={t('packageFieldRenderer.labelInput.placeholder')}
                                 autoFocus
                             />
                         ) : (
@@ -365,7 +367,7 @@ const PackageFieldRenderer: React.FC<PackageFieldRendererProps> = ({ field, isSe
                                         setIsEditingLabel(true);
                                     }
                                 }}
-                                title={field.type === 'signature' ? 'Signature field label cannot be edited' : 'Click to edit label'}
+                                title={t(`packageFieldRenderer.labelTitle.${field.type === 'signature' ? 'signature' : 'editable'}`)}
                             >
                                 {field.label}
                                 {field.required && <span className="text-yellow-300 text-sm font-bold">*</span>}
@@ -378,12 +380,12 @@ const PackageFieldRenderer: React.FC<PackageFieldRendererProps> = ({ field, isSe
                                 onClick={(e) => {
                                     e.stopPropagation();
                                     onUpdate(field.id, { required: !field.required });
-                                    toast.success(field.required ? 'Field marked as optional' : 'Field marked as required');
+                                    toast.success(t(field.required ? 'packageFieldRenderer.messages.markedOptional' : 'packageFieldRenderer.messages.markedRequired') as string);
                                 }}
                                 className={`p-1 rounded-md hover:scale-110 transition-all duration-150 active:scale-95 ${
                                     field.required ? 'bg-yellow-500/80 hover:bg-yellow-600' : 'hover:bg-gray-500/50'
                                 }`}
-                                title={field.required ? 'Mark as optional' : 'Mark as required'}
+                                title={t(field.required ? 'packageFieldRenderer.titles.markOptional' : 'packageFieldRenderer.titles.markRequired')}
                             >
                                 <span className="text-base font-bold leading-none">{field.required ? '*' : '○'}</span>
                             </button>
@@ -393,7 +395,7 @@ const PackageFieldRenderer: React.FC<PackageFieldRendererProps> = ({ field, isSe
                                     onClick={(e) => {
                                         e.stopPropagation();
                                         if (isSignatureField && hasSignerAssigned) {
-                                            toast.info('Signature field already has a signer assigned');
+                                            toast.info(t('packageFieldRenderer.messages.signatureFieldAssigned') as string);
                                         } else {
                                             setShowQuickAssign(!showQuickAssign);
                                         }
@@ -401,7 +403,7 @@ const PackageFieldRenderer: React.FC<PackageFieldRendererProps> = ({ field, isSe
                                     className={`p-1 rounded-md hover:scale-110 transition-all duration-150 active:scale-95 ${
                                         isSignatureField && hasSignerAssigned ? 'hover:bg-yellow-500 opacity-60' : 'hover:bg-green-500'
                                     }`}
-                                    title={isSignatureField && hasSignerAssigned ? 'Signature field already has a signer' : 'Quick assign user'}
+                                    title={t(isSignatureField && hasSignerAssigned ? 'packageFieldRenderer.titles.signatureFieldAssigned' : 'packageFieldRenderer.titles.quickAssign')}
                                 >
                                     <FaUserPlusTyped className="w-3 h-3" />
                                 </button>
@@ -413,7 +415,7 @@ const PackageFieldRenderer: React.FC<PackageFieldRendererProps> = ({ field, isSe
                                     onDelete(field.id);
                                 }}
                                 className="p-1 rounded-md hover:bg-red-500 hover:scale-110 transition-all duration-150 active:scale-95"
-                                title="Delete field"
+                                title={t('packageFieldRenderer.titles.deleteField')}
                             >
                                 <FaTrashTyped className="w-3 h-3" />
                             </button>
@@ -435,7 +437,7 @@ const PackageFieldRenderer: React.FC<PackageFieldRendererProps> = ({ field, isSe
                             <div className="flex items-center justify-between mb-3">
                                 <h4 className="text-sm font-bold text-gray-800 dark:text-white flex items-center gap-2">
                                     <FaUserPlusTyped className="text-blue-600" />
-                                    Quick Assign
+                                    {t('packageFieldRenderer.quickAssign.title')}
                                 </h4>
                                 <button
                                     onClick={(e) => {
@@ -452,20 +454,20 @@ const PackageFieldRenderer: React.FC<PackageFieldRendererProps> = ({ field, isSe
                             {isSignatureField && (
                                 <div className="mb-3 p-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg flex items-start gap-2">
                                     <FiAlertCircleTyped className="w-4 h-4 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
-                                    <p className="text-xs text-blue-700 dark:text-blue-300">Signature fields can only have one Signer assigned.</p>
+                                    <p className="text-xs text-blue-700 dark:text-blue-300">{t('packageFieldRenderer.quickAssign.signatureWarning')}</p>
                                 </div>
                             )}
 
                             <div className="space-y-3">
                                 <div>
-                                    <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 block mb-1">Select Contact</label>
+                                    <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 block mb-1">{t('packageFieldRenderer.quickAssign.selectContact')}</label>
                                     <select
                                         className="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                                         value={selectedContactId}
                                         onChange={(e) => setSelectedContactId(e.target.value)}
                                         onClick={(e) => e.stopPropagation()}
                                     >
-                                        <option value="">Choose a contact...</option>
+                                        <option value="">{t('packageFieldRenderer.quickAssign.selectContactPlaceholder')}</option>
                                         {contacts.map((contact) => (
                                             <option key={contact._id} value={contact._id}>
                                                 {contact.firstName} {contact.lastName} ({contact.email})
@@ -482,12 +484,12 @@ const PackageFieldRenderer: React.FC<PackageFieldRendererProps> = ({ field, isSe
                                         className="mt-2 w-full px-3 py-2 text-xs bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 border border-gray-300 dark:border-gray-600"
                                     >
                                         <FiPlusCircleTyped className="w-3 h-3" />
-                                        Add New Contact
+                                        {t('packageFieldRenderer.quickAssign.addNewContact')}
                                     </button>
                                 </div>
 
                                 <div>
-                                    <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 block mb-1">Role</label>
+                                    <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 block mb-1">{t('packageFieldRenderer.quickAssign.role')}</label>
                                     <select
                                         className="w-full px-3 py-2 text-xs border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                                         value={selectedRole}
@@ -497,20 +499,20 @@ const PackageFieldRenderer: React.FC<PackageFieldRendererProps> = ({ field, isSe
                                     >
                                         {availableRoles.map((role) => (
                                             <option key={role} value={role}>
-                                                {role}
+                                                {t(`packageFieldRenderer.quickAssign.roles.${role}`)}
                                             </option>
                                         ))}
                                     </select>
                                     {isSignatureField ? (
-                                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Signature fields require Signer role</p>
+                                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{t('packageFieldRenderer.quickAssign.signatureRoleNote')}</p>
                                     ) : (
-                                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Signers can only be assigned to signature fields</p>
+                                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{t('packageFieldRenderer.quickAssign.nonSignatureRoleNote')}</p>
                                     )}
                                 </div>
 
                                 {selectedRole === 'Signer' && (
                                     <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600">
-                                        <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 block mb-2">Authentication Methods</label>
+                                        <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 block mb-2">{t('packageFieldRenderer.quickAssign.authMethods')}</label>
                                         <div className="space-y-2">
                                             <label className="flex items-center gap-2 text-xs cursor-pointer group">
                                                 <input
@@ -520,7 +522,9 @@ const PackageFieldRenderer: React.FC<PackageFieldRendererProps> = ({ field, isSe
                                                     onChange={() => toggleSignatureMethod('Email OTP')}
                                                     onClick={(e) => e.stopPropagation()}
                                                 />
-                                                <span className="group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">Email OTP Verification</span>
+                                                <span className="group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                                                    {t('packageFieldRenderer.quickAssign.authMethodsEmail')}
+                                                </span>
                                             </label>
                                             <label className="flex items-center gap-2 text-xs cursor-pointer group">
                                                 <input
@@ -530,7 +534,9 @@ const PackageFieldRenderer: React.FC<PackageFieldRendererProps> = ({ field, isSe
                                                     onChange={() => toggleSignatureMethod('SMS OTP')}
                                                     onClick={(e) => e.stopPropagation()}
                                                 />
-                                                <span className="group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">SMS OTP Verification</span>
+                                                <span className="group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                                                    {t('packageFieldRenderer.quickAssign.authMethodsSMS')}
+                                                </span>
                                             </label>
                                         </div>
                                     </div>
@@ -545,7 +551,7 @@ const PackageFieldRenderer: React.FC<PackageFieldRendererProps> = ({ field, isSe
                                     className="w-full px-4 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed text-white text-xs font-bold rounded-lg transition-all duration-150 flex items-center justify-center gap-2 shadow-md hover:shadow-lg active:scale-95"
                                 >
                                     <FiCheckTyped className="w-4 h-4" />
-                                    Assign to Field
+                                    {t('packageFieldRenderer.quickAssign.assignButton')}
                                 </button>
                             </div>
                         </div>
@@ -573,7 +579,11 @@ const PackageFieldRenderer: React.FC<PackageFieldRendererProps> = ({ field, isSe
                                             ? 'bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800'
                                             : 'bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800'
                                     }`}
-                                    title={`${assignee.contactName} (${assignee.role})${assignee.signatureMethods ? '\n' + assignee.signatureMethods.join(', ') : ''}`}
+                                    title={t('packageFieldRenderer.assignedUsers.title', {
+                                        name: assignee.contactName,
+                                        role: assignee.role,
+                                        methods: assignee.signatureMethods ? assignee.signatureMethods.join(', ') : '',
+                                    })}
                                 >
                                     <MdOutlinePeopleAltTyped className="w-3 h-3" />
                                     <span>{assignee.contactName}</span>
@@ -601,7 +611,7 @@ const PackageFieldRenderer: React.FC<PackageFieldRendererProps> = ({ field, isSe
                 onSaveSuccess={(newContact: Contact) => {
                     setSelectedContactId(newContact._id);
                     setAddContactModalOpen(false);
-                    toast.success(`${newContact.firstName} ${newContact.lastName} added successfully`);
+                    toast.success(t('packageFieldRenderer.messages.contactAdded', { name: `${newContact.firstName} ${newContact.lastName}` }) as string);
                 }}
             />
         </>

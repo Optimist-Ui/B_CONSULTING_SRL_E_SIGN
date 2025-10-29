@@ -4,6 +4,7 @@ import Swal from 'sweetalert2';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, useStripe, useElements, CardElement } from '@stripe/react-stripe-js';
 import { toast } from 'react-toastify';
+import { useTranslation } from 'react-i18next';
 
 // Redux and Store imports
 import { IRootState, AppDispatch } from '../../store';
@@ -37,11 +38,13 @@ interface PurchaseModalProps {
 
 // A dedicated card component for SELECTION inside the modal.
 const SelectablePaymentMethodCard: React.FC<{ pm: PaymentMethod; isSelected: boolean }> = ({ pm, isSelected }) => {
+    const { t } = useTranslation();
+
     const getCardBrandName = (brand: string) => {
         const brands: Record<string, string> = {
-            visa: 'Visa',
-            mastercard: 'Mastercard',
-            amex: 'American Express',
+            visa: t('purchaseModal.cardBrands.visa'),
+            mastercard: t('purchaseModal.cardBrands.mastercard'),
+            amex: t('purchaseModal.cardBrands.amex'),
         };
         return brands[brand] || brand.charAt(0).toUpperCase() + brand.slice(1);
     };
@@ -55,14 +58,12 @@ const SelectablePaymentMethodCard: React.FC<{ pm: PaymentMethod; isSelected: boo
             <div className={`flex items-center justify-center w-12 h-8 rounded-md mr-4 text-white font-bold text-sm bg-gray-700`}>{getCardBrandName(pm.brand)}</div>
             <div className="flex-grow">
                 <p className="font-semibold text-gray-800 dark:text-gray-200">**** **** **** {pm.last4}</p>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                    Expires {pm.exp_month.toString().padStart(2, '0')}/{pm.exp_year}
-                </p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">{t('purchaseModal.expires', { month: pm.exp_month.toString().padStart(2, '0'), year: pm.exp_year })}</p>
             </div>
             {pm.isDefault && (
                 <div className="flex items-center text-xs font-medium text-gray-500 dark:text-gray-400">
                     <IconStar className="w-4 h-4 mr-1 text-yellow-500" />
-                    Default
+                    {t('purchaseModal.default')}
                 </div>
             )}
         </div>
@@ -70,6 +71,7 @@ const SelectablePaymentMethodCard: React.FC<{ pm: PaymentMethod; isSelected: boo
 };
 
 const PurchaseModalContent: React.FC<PurchaseModalProps> = ({ isOpen, onClose, plan, isYearly }) => {
+    const { t } = useTranslation();
     const stripe = useStripe();
     const elements = useElements();
     const dispatch = useDispatch<AppDispatch>();
@@ -119,19 +121,19 @@ const PurchaseModalContent: React.FC<PurchaseModalProps> = ({ isOpen, onClose, p
         try {
             if (isAddingNewCard) {
                 const cardElement = elements.getElement(CardElement);
-                if (!cardElement) throw new Error('Card details form not found.');
+                if (!cardElement) throw new Error(t('purchaseModal.errors.cardNotFound'));
 
                 const { error: pmError, paymentMethod } = await stripe.createPaymentMethod({ type: 'card', card: cardElement });
-                if (pmError) throw new Error(pmError.message || 'Invalid card details.');
+                if (pmError) throw new Error(pmError.message || t('purchaseModal.errors.invalidCard'));
                 paymentMethodId = paymentMethod.id;
             }
 
             if (!paymentMethodId) {
-                throw new Error('Please select or add a payment method to continue.');
+                throw new Error(t('purchaseModal.errors.noPaymentMethod'));
             }
 
             const priceId = isYearly ? plan.yearlyPriceId : plan.monthlyPriceId;
-            if (!priceId) throw new Error('This plan is not available for purchase at the moment.');
+            if (!priceId) throw new Error(t('purchaseModal.errors.planNotAvailable'));
 
             // Dispatch the appropriate thunk based on the user's action
             if (isTrialAction) {
@@ -149,11 +151,11 @@ const PurchaseModalContent: React.FC<PurchaseModalProps> = ({ isOpen, onClose, p
                     }
                     onSuccess();
                 } else {
-                    throw new Error((resultAction.payload as string) || 'An unknown error occurred.');
+                    throw new Error((resultAction.payload as string) || t('purchaseModal.errors.unknownError'));
                 }
             }
         } catch (err: any) {
-            setError(err.message || 'An unexpected error occurred.');
+            setError(err.message || t('purchaseModal.errors.unknownError'));
         } finally {
             setIsLoading(false);
         }
@@ -172,10 +174,10 @@ const PurchaseModalContent: React.FC<PurchaseModalProps> = ({ isOpen, onClose, p
 
     const onSuccess = () =>
         showSuccessToast(
-            isTopUp ? 'Top-up Successful!' : 'Subscription Successful!',
-            isTopUp ? `You now have more documents available on your ${plan.name} plan!` : `Welcome to the ${plan.name} plan!`
+            isTopUp ? t('purchaseModal.success.topUp') : t('purchaseModal.success.subscription'),
+            isTopUp ? t('purchaseModal.success.topUpMessage', { planName: plan.name }) : t('purchaseModal.success.subscriptionMessage', { planName: plan.name })
         );
-    const onTrialSuccess = () => showSuccessToast('Free Trial Started!', `You have 14 days of access to the ${plan.name} plan!`);
+    const onTrialSuccess = () => showSuccessToast(t('purchaseModal.success.trial'), t('purchaseModal.success.trialMessage', { planName: plan.name }));
 
     const handleAddNewCardSuccess = () => {
         dispatch(fetchPaymentMethods());
@@ -193,13 +195,13 @@ const PurchaseModalContent: React.FC<PurchaseModalProps> = ({ isOpen, onClose, p
             <div className="space-y-6">
                 {/* Plan Summary Section */}
                 <div>
-                    <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-1">{isTopUp ? 'Top-up Details' : 'Your Plan'}</h3>
+                    <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-1">{isTopUp ? t('purchaseModal.topUpDetails') : t('purchaseModal.yourPlan')}</h3>
                     <div className="flex justify-between items-center p-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
                         <div>
                             <p className="font-bold text-gray-900 dark:text-white">
-                                {plan.name} ({isYearly ? 'Yearly' : 'Monthly'})
+                                {plan.name} ({isYearly ? t('purchaseModal.yearly') : t('purchaseModal.monthly')})
                             </p>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Billed {isYearly ? 'annually' : 'monthly'}.</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">{t('purchaseModal.billed', { interval: isYearly ? t('purchaseModal.annually') : t('purchaseModal.monthly') })}</p>
                         </div>
                         <p className="text-xl font-bold text-gray-900 dark:text-white">€{isYearly ? plan.yearlyPrice : plan.monthlyPrice}</p>
                     </div>
@@ -208,13 +210,13 @@ const PurchaseModalContent: React.FC<PurchaseModalProps> = ({ isOpen, onClose, p
                 {subscription?.isTrialing && (
                     <div className="bg-yellow-50 dark:bg-yellow-900/50 p-4 rounded-lg flex items-center text-yellow-800 dark:text-yellow-200">
                         <IconArchive className="w-5 h-5 mr-2" />
-                        Note: Proceeding will end your free trial and charge you immediately.
+                        {t('purchaseModal.trialEndNote')}
                     </div>
                 )}
 
                 {/* Payment Method Section */}
                 <div>
-                    <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-3">Select Payment Method</h3>
+                    <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-3">{t('purchaseModal.selectPaymentMethod')}</h3>
                     <div className="space-y-3">
                         {paymentMethods.map((pm) => (
                             <div key={pm.id} onClick={() => setSelectedPM(pm.id)} className="cursor-pointer">
@@ -223,7 +225,7 @@ const PurchaseModalContent: React.FC<PurchaseModalProps> = ({ isOpen, onClose, p
                         ))}
                     </div>
                     <button onClick={() => setIsAddingNewCard(true)} className="btn btn-outline-secondary w-full mt-4 flex items-center justify-center">
-                        <IconPlus className="w-5 h-5 mr-2" /> Use a Different Card
+                        <IconPlus className="w-5 h-5 mr-2" /> {t('purchaseModal.useDifferentCard')}
                     </button>
                 </div>
 
@@ -231,21 +233,23 @@ const PurchaseModalContent: React.FC<PurchaseModalProps> = ({ isOpen, onClose, p
                 <div className="border-t border-gray-200 dark:border-gray-700 pt-5 space-y-3">
                     {!hasHadTrial && plan.monthlyPrice > 0 && !isTopUp && (
                         <button onClick={() => handleTransaction(true)} disabled={!!isLoading} className="btn btn-primary w-full h-12 text-lg">
-                            {isLoading === 'trial' ? 'Starting Trial...' : 'Start 14-Day Free Trial'}
+                            {isLoading === 'trial' ? t('purchaseModal.startingTrial') : t('purchaseModal.startTrial')}
                         </button>
                     )}
                     <button onClick={() => handleTransaction(false)} disabled={!!isLoading || !selectedPM} className="btn btn-outline-primary w-full h-12 text-lg">
-                        {isLoading === 'purchase' ? 'Processing...' : `${isTopUp ? 'Top-up' : 'Subscribe'} Now (€${isYearly ? plan.yearlyPrice : plan.monthlyPrice})`}
+                        {isLoading === 'purchase'
+                            ? t('purchaseModal.processing')
+                            : t('purchaseModal.subscribe', { action: isTopUp ? t('purchaseModal.topUp') : t('purchaseModal.subscribeNow'), price: isYearly ? plan.yearlyPrice : plan.monthlyPrice })}
                     </button>
                     {error && <p className="text-red-600 text-sm mt-3 text-center">{error}</p>}
-                    <p className="text-xs text-gray-500 dark:text-gray-400 text-center mt-3">By continuing, you agree to our Terms of Service.</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 text-center mt-3">{t('purchaseModal.termsAgreement')}</p>
                 </div>
             </div>
         );
     };
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose} title={isTopUp ? 'Top-up Your Plan' : 'Confirm Your Subscription'}>
+        <Modal isOpen={isOpen} onClose={onClose} title={isTopUp ? t('purchaseModal.topUpTitle') : t('purchaseModal.confirmSubscription')}>
             {renderContent()}
         </Modal>
     );
