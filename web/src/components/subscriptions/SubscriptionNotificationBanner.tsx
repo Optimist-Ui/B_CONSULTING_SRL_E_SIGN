@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { SubscriptionStatus } from '../../store/slices/subscriptionSlice';
+import { useTranslation } from 'react-i18next';
 
 // Import your icon components
 import { IconRocket, IconStar } from '../Icon/IconRocket';
@@ -12,6 +13,7 @@ interface SubscriptionBannerProps {
 }
 
 const SubscriptionNotificationBanner: React.FC<SubscriptionBannerProps> = ({ subscriptionStatus }) => {
+    const { t } = useTranslation();
     const navigate = useNavigate();
 
     const { hasActiveSubscription, canCreatePackages, reason, status, documentsUsed, documentLimit } = subscriptionStatus;
@@ -23,31 +25,31 @@ const SubscriptionNotificationBanner: React.FC<SubscriptionBannerProps> = ({ sub
     const getBannerConfig = () => {
         if (!hasActiveSubscription) {
             return {
-                title: 'Unlock All Features',
-                message: 'Activate a subscription to start creating and managing documents.',
+                title: t('subscriptionBanner.noSubscription.title'),
+                message: t('subscriptionBanner.noSubscription.message'),
                 bgGradient: 'from-purple-600 to-blue-600', // On-brand colors
                 icon: IconRocket,
-                ctaText: 'View Plans',
+                ctaText: t('subscriptionBanner.noSubscription.ctaText'),
             };
         }
         if (!canCreatePackages) {
             return {
-                title: 'Document Limit Reached',
-                message: reason || 'Please upgrade your plan to continue creating new documents.',
+                title: t('subscriptionBanner.limitReached.title'),
+                message: reason || t('subscriptionBanner.limitReached.message'),
                 bgGradient: 'from-blue-600 to-teal-600', // On-brand colors
                 icon: IconStar,
-                ctaText: 'Upgrade Plan',
+                ctaText: t('subscriptionBanner.limitReached.ctaText'),
             };
         }
         if (status === 'ACTIVE' && documentsUsed !== undefined && documentLimit !== undefined) {
             const remaining = documentLimit - documentsUsed;
             if (remaining <= 5 && remaining > 0) {
                 return {
-                    title: 'Running Low on Documents',
-                    message: `You have only ${remaining} documents left. Upgrade to get more.`,
+                    title: t('subscriptionBanner.lowDocuments.title'),
+                    message: t('subscriptionBanner.lowDocuments.message', { remaining }),
                     bgGradient: 'from-yellow-600 to-orange-600',
                     icon: IconArchive, // Use a warning icon
-                    ctaText: 'Upgrade Plan',
+                    ctaText: t('subscriptionBanner.lowDocuments.ctaText'),
                 };
             }
         }

@@ -5,40 +5,42 @@ import { TypeAnimation } from 'react-type-animation';
 import 'swiper/css';
 import 'swiper/css/effect-cards';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 const HomeHero = () => {
+    const { t } = useTranslation();
     const [isVisible, setIsVisible] = useState(false);
     const navigate = useNavigate();
 
-    // Sample document images for the cards
+    // Sample document images for the cards with translation keys
     const documentImages = [
         {
             id: 1,
-            title: 'Contract Agreement',
+            titleKey: 'hero.documents.contractAgreement',
             image: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=400&h=500&fit=crop&crop=center',
             type: 'PDF',
         },
         {
             id: 2,
-            title: 'Invoice Document',
+            titleKey: 'hero.documents.invoiceDocument',
             image: 'https://images.unsplash.com/photo-1554224154-26032ffc0d07?w=400&h=500&fit=crop&crop=center',
             type: 'DOC',
         },
         {
             id: 3,
-            title: 'Legal Agreement',
+            titleKey: 'hero.documents.legalAgreement',
             image: 'https://images.unsplash.com/photo-1589829085413-56de8ae18c73?w=400&h=500&fit=crop&crop=center',
             type: 'PDF',
         },
         {
             id: 4,
-            title: 'Business Proposal',
+            titleKey: 'hero.documents.businessProposal',
             image: 'https://images.unsplash.com/photo-1586953208448-b95a79798f07?w=400&h=500&fit=crop&crop=center',
             type: 'DOC',
         },
         {
             id: 5,
-            title: 'Terms & Conditions',
+            titleKey: 'hero.documents.termsConditions',
             image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=500&fit=crop&crop=center',
             type: 'PDF',
         },
@@ -63,7 +65,17 @@ const HomeHero = () => {
                             >
                                 <div className="min-h-[1.2em]">
                                     <TypeAnimation
-                                        sequence={['Sign Documents', 2000, 'Secure Contracts', 2000, 'Digital Agreements', 2000, 'E-Signatures', 2000]}
+                                        key={t('hero.headline.signDocuments')} // Force re-render on language change for typewriter effect
+                                        sequence={[
+                                            t('hero.headline.signDocuments'),
+                                            2000,
+                                            t('hero.headline.secureContracts'),
+                                            2000,
+                                            t('hero.headline.digitalAgreements'),
+                                            2000,
+                                            t('hero.headline.eSignatures'),
+                                            2000,
+                                        ]}
                                         wrapper="span"
                                         speed={50}
                                         repeat={Infinity}
@@ -71,12 +83,12 @@ const HomeHero = () => {
                                         style={{ display: 'inline-block' }}
                                     />
                                 </div>
-                                <span className="block text-blue-400 mt-2">Digitally</span>
+                                <span className="block text-blue-400 mt-2">{t('hero.headline.suffix')}</span>
                             </h1>
                         </div>
 
                         <div className={`transition-all duration-1000 delay-300 transform ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}>
-                            <p className="text-lg sm:text-xl md:text-2xl text-gray-300 mb-8 max-w-2xl">The most secure and user-friendly electronic signature platform for businesses of all sizes.</p>
+                            <p className="text-lg sm:text-xl md:text-2xl text-gray-300 mb-8 max-w-2xl">{t('hero.subheadline')}</p>
                         </div>
 
                         {/* Feature highlights - Better mobile layout */}
@@ -86,16 +98,16 @@ const HomeHero = () => {
                             }`}
                         >
                             <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 text-center">
-                                <div className="text-2xl font-bold text-blue-400">256-bit</div>
-                                <div className="text-sm text-gray-300">Encryption</div>
+                                <div className="text-2xl font-bold text-blue-400">{t('hero.features.encryptionValue')}</div>
+                                <div className="text-sm text-gray-300">{t('hero.features.encryption')}</div>
                             </div>
                             <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 text-center">
-                                <div className="text-2xl font-bold text-blue-400">99.9%</div>
-                                <div className="text-sm text-gray-300">Uptime</div>
+                                <div className="text-2xl font-bold text-blue-400">{t('hero.features.uptimeValue')}</div>
+                                <div className="text-sm text-gray-300">{t('hero.features.uptime')}</div>
                             </div>
                             <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 text-center">
-                                <div className="text-2xl font-bold text-blue-400">Legal</div>
-                                <div className="text-sm text-gray-300">Binding</div>
+                                <div className="text-2xl font-bold text-blue-400">{t('hero.features.bindingValue')}</div>
+                                <div className="text-sm text-gray-300">{t('hero.features.binding')}</div>
                             </div>
                         </div>
 
@@ -105,9 +117,12 @@ const HomeHero = () => {
                                 isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
                             }`}
                         >
-                            <button onClick={() => navigate('/subscriptions')} className="group bg-blue-600 hover:bg-blue-700 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-lg text-base sm:text-lg font-medium transition-all duration-300 hover:shadow-lg hover:shadow-blue-600/25 hover:scale-105 transform">
+                            <button
+                                onClick={() => navigate('/subscriptions')}
+                                className="group bg-blue-600 hover:bg-blue-700 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-lg text-base sm:text-lg font-medium transition-all duration-300 hover:shadow-lg hover:shadow-blue-600/25 hover:scale-105 transform"
+                            >
                                 <span className="flex items-center justify-center gap-2">
-                                    Start Free Trial
+                                    {t('hero.cta.startTrial')}
                                     <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                                     </svg>
@@ -118,7 +133,7 @@ const HomeHero = () => {
                                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1.01M15 10h1.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
-                                    Watch Demo
+                                    {t('hero.cta.watchDemo')}
                                 </span>
                             </button>
                         </div>
@@ -175,9 +190,9 @@ const HomeHero = () => {
 
                                                     {/* Signature area */}
                                                     <div className="mt-6 pt-4 border-t border-gray-300">
-                                                        <div className="text-xs text-gray-500 mb-2">Signature Required:</div>
+                                                        <div className="text-xs text-gray-500 mb-2">{t('hero.documents.signatureRequired')}</div>
                                                         <div className="h-10 border-2 border-dashed border-blue-300 rounded flex items-center justify-center bg-blue-50/50">
-                                                            <span className="text-xs text-blue-600 font-medium">Click to Sign</span>
+                                                            <span className="text-xs text-blue-600 font-medium">{t('hero.documents.clickToSign')}</span>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -186,8 +201,8 @@ const HomeHero = () => {
                                             {/* Document footer */}
                                             <div className="h-1/5 bg-slate-50 p-4 flex items-center justify-between">
                                                 <div>
-                                                    <h3 className="font-semibold text-gray-800 text-sm">{doc.title}</h3>
-                                                    <p className="text-xs text-gray-500">Ready for signature</p>
+                                                    <h3 className="font-semibold text-gray-800 text-sm">{t(doc.titleKey)}</h3>
+                                                    <p className="text-xs text-gray-500">{t('hero.documents.readyForSignature')}</p>
                                                 </div>
                                                 <div className="flex space-x-1">
                                                     <div className="w-2 h-2 bg-green-400 rounded-full"></div>

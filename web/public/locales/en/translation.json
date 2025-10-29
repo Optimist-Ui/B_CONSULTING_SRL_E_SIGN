@@ -1,128 +1,2848 @@
 {
-    "dashboard": "Dashboard",
-    "sales": "Sales",
-    "analytics": "Analytics",
-    "apps": "Apps",
-    "components": "Components",
-    "elements": "Elements",
-    "font_icons": "Font Icons",
-    "widgets": "Widgets",
-    "tables": "Tables",
-    "datatables": "Data Tables",
-    "forms": "Forms",
-    "users": "Users",
-    "pages": "Pages",
-    "authentication": "Authentication",
-    "drag_and_drop": "Drag and Drop",
-    "maps": "Maps",
-    "charts": "Charts",
-    "starter_kit": "Starter Kit",
-    "documentation": "Documentation",
-    "ui_kit": "UI Kit",
-    "more": "More",
-    "finance": "Finance",
-    "crypto": "Crypto",
-    "chat": "Chat",
-    "mailbox": "Mailbox",
-    "todo_list": "Todo List",
-    "notes": "Notes",
-    "scrumboard": "Scrumboard",
-    "contacts": "Contacts",
-    "invoice": "Invoice",
-    "list": "List",
-    "preview": "Preview",
-    "add": "Add",
-    "edit": "Edit",
-    "calendar": "Calendar",
-    "tabs": "Tabs",
-    "accordions": "Accordions",
-    "modals": "Modals",
-    "cards": "Cards",
-    "carousel": "Carousel",
-    "countdown": "Countdown",
-    "counter": "Counter",
-    "sweet_alerts": "Sweet Alerts",
-    "timeline": "Timeline",
-    "notifications": "Notifications",
-    "media_object": "Media Object",
-    "list_group": "List Group",
-    "pricing_tables": "Pricing Tables",
-    "lightbox": "Lightbox",
-    "alerts": "Alerts",
-    "avatar": "Avatar",
-    "badges": "Badges",
-    "breadcrumbs": "Breadcrumbs",
-    "buttons": "Buttons",
-    "button_groups": "Button Groups",
-    "color_library": "Color Library",
-    "dropdown": "Dropdown",
-    "infobox": "Infobox",
-    "jumbotron": "Jumbotron",
-    "loader": "Loader",
-    "pagination": "Pagination",
-    "popovers": "Popovers",
-    "progress_bar": "Progress Bar",
-    "search": "Search",
-    "tooltips": "Tooltips",
-    "treeview": "Treeview",
-    "typography": "Typography",
-    "basic": "Basic",
-    "order_sorting": "Order Sorting",
-    "multi_column": "Multi Column",
-    "multiple_tables": "Multiple Tables",
-    "alt_pagination": "Alt. Pagination",
-    "range_search": "Range Search",
-    "export": "Export",
-    "input_group": "Input Group",
-    "layouts": "Layouts",
-    "validation": "Validation",
-    "input_mask": "Input Mask",
-    "select2": "Select2",
-    "touchspin": "Touchspin",
-    "checkbox_and_radio": "Checkbox & Radio",
-    "switches": "Switches",
-    "wizards": "Wizards",
-    "file_upload": "File Upload",
-    "quill_editor": "Quill Editor",
-    "markdown_editor": "Markdown Editor",
-    "date_and_range_picker": "Date & Range Picker",
-    "clipboard": "Clipboard",
-    "user_and_pages": "User And Pages",
-    "profile": "Profile",
-    "account_settings": "Account Settings",
-    "knowledge_base": "Knowledge Base",
-    "contact_form": "Contact Form",
-    "faq": "Faq",
-    "coming_soon": "Coming Soon",
-    "error": "Error",
-    "maintenence": "Maintenence",
-    "login_boxed": "Login Boxed",
-    "register_boxed": "Register Boxed",
-    "unlock_boxed": "Unlock Boxed",
-    "recover_id_boxed": "Recover Id Boxed",
-    "login_cover": "Login Cover",
-    "register_cover": "Register Cover",
-    "unlock_cover": "Unlock Cover",
-    "recover_id_cover": "Recover Id Cover",
-    "supports": "Supports",
-    "login": "Login",
-    "lockscreen": "Lockscreen",
-    "password_recovery": "Password Recovery",
-    "register": "Register",
-    "404": "404",
-    "500": "500",
-    "503": "503",
-    "user_interface": "User Interface",
-    "tables_and_forms": "Tables And Forms",
-    "columns_filter": "Columns Filter",
-    "column_chooser": "Column Chooser",
-    "advanced": "Advanced",
-    "checkbox": "Checkbox",
-    "skin": "Skin",
-    "sticky_header": "Sticky Header",
-    "clone_header": "Clone Header",
-    "coming_soon_boxed": "Coming Soon Boxed",
-    "coming_soon_cover": "Coming Soon Cover",
-    "contact_us_boxed": "Contact Us Boxed",
-    "contact_us_cover": "Contact Us Cover"
+    "navbar": {
+        "home": "Home",
+        "pricing": "Pricing",
+        "about": "About",
+        "faq": "FAQ",
+        "eidas": "eIDAS",
+        "termsAndPrivacy": "Terms & Privacy",
+        "signIn": "Sign In",
+        "dashboard": "Dashboard",
+        "logout": "Logout",
+        "loginRegister": "Login / Register",
+        "goToDashboard": "Go to Dashboard"
+    },
+    "authModal": {
+        "title": "Join Us",
+        "description": "Choose an option to continue and manage your documents.",
+        "loginButton": "Login to Your Account",
+        "registerButton": "Create a New Account"
+    },
+    "hero": {
+        "headline": {
+            "signDocuments": "Sign Documents",
+            "secureContracts": "Secure Contracts",
+            "digitalAgreements": "Digital Agreements",
+            "eSignatures": "E-Signatures",
+            "suffix": "Digitally"
+        },
+        "subheadline": "The most secure and user-friendly electronic signature platform for businesses of all sizes.",
+        "features": {
+            "encryption": "Encryption",
+            "encryptionValue": "256-bit",
+            "uptime": "Uptime",
+            "uptimeValue": "99.9%",
+            "binding": "Binding",
+            "bindingValue": "Legal"
+        },
+        "cta": {
+            "startTrial": "Start Free Trial",
+            "watchDemo": "Watch Demo"
+        },
+        "documents": {
+            "contractAgreement": "Contract Agreement",
+            "invoiceDocument": "Invoice Document",
+            "legalAgreement": "Legal Agreement",
+            "businessProposal": "Business Proposal",
+            "termsConditions": "Terms & Conditions",
+            "signatureRequired": "Signature Required:",
+            "clickToSign": "Click to Sign",
+            "readyForSignature": "Ready for signature"
+        }
+    },
+    "features": {
+        "tag": "Powerful Features",
+        "title": {
+            "main": "Everything You Need for",
+            "highlight": "Digital Signatures"
+        },
+        "description": "Our comprehensive platform provides all the tools and security features you need to streamline your document signing process.",
+        "list": {
+            "legallyBinding": {
+                "title": "Legally Binding",
+                "description": "All signatures are legally valid and compliant with international e-signature laws including eIDAS and UETA."
+            },
+            "bankSecurity": {
+                "title": "Bank-Level Security",
+                "description": "Advanced 256-bit SSL encryption, multi-factor authentication, and secure cloud storage protect your documents."
+            },
+            "lightningFast": {
+                "title": "Lightning Fast",
+                "description": "Complete document signing in under 60 seconds. No downloads, no printing, no delays."
+            },
+            "mobileOptimized": {
+                "title": "Mobile Optimized",
+                "description": "Sign documents seamlessly on any device - desktop, tablet, or smartphone with our responsive design."
+            },
+            "multiPartySigning": {
+                "title": "Multi-Party Signing",
+                "description": "Collect signatures from multiple parties with automated reminders and real-time status tracking."
+            },
+            "auditTrail": {
+                "title": "Detailed Audit Trail",
+                "description": "Complete audit trail with timestamps, IP addresses, and certificate of completion for full transparency."
+            }
+        },
+        "benefits": {
+            "title": "Trusted by Thousands",
+            "description": "Join businesses worldwide who have streamlined their document processes with our platform.",
+            "faster": {
+                "label": "Faster than paper",
+                "description": "Complete workflows in minutes, not days"
+            },
+            "uptime": {
+                "label": "Uptime guarantee",
+                "description": "Always available when you need it"
+            },
+            "encryption": {
+                "label": "SSL encryption",
+                "description": "Enterprise-grade security"
+            },
+            "support": {
+                "label": "Expert support",
+                "description": "Help whenever you need it"
+            }
+        },
+        "cta": {
+            "startTrial": "Start Free Trial",
+            "learnMore": "Learn More"
+        }
+    },
+    "about": {
+        "tag": "✨ About I-Sign.eu",
+        "title": {
+            "main": "Reinventing Trust in the",
+            "highlight": "Digital Era"
+        },
+        "subtitle": {
+            "prefix": "Signing a document should be",
+            "connector": "and"
+        },
+        "keywords": {
+            "effortless": "effortless",
+            "secure": "secure",
+            "sustainable": "sustainable"
+        },
+        "quote": "Every digital signature is a step toward a cleaner, faster, and more connected world.",
+        "mission": {
+            "title": "Our Mission",
+            "description": "Make digital trust accessible to everyone, enabling secure, efficient, and sustainable business workflows."
+        },
+        "vision": {
+            "title": "Our Vision",
+            "description": "A world without paper where agreements flow as easily as ideas, powered by sustainable innovation."
+        },
+        "sustainability": {
+            "title": {
+                "main": "Committed to a",
+                "highlight": "Carbon-Neutral Future"
+            },
+            "description": "Every document signed contributes to a sustainable ecosystem",
+            "features": {
+                "co2": {
+                    "title": "CO₂ Reduction",
+                    "description": "Cutting paper waste"
+                },
+                "greenOps": {
+                    "title": "Green Operations",
+                    "description": "Renewable energy data centers"
+                },
+                "reforestation": {
+                    "title": "Reforestation",
+                    "description": "Global tree-planting"
+                },
+                "innovation": {
+                    "title": "Sustainable Innovation",
+                    "description": "Tech for the environment"
+                }
+            }
+        },
+        "whyChooseUs": {
+            "title": "Why Choose I-Sign.eu",
+            "description": "Experience seamless signing without limits",
+            "features": {
+                "secure": {
+                    "title": "Secure by Design",
+                    "description": "eIDAS, GDPR, and ISO 27001 compliant"
+                },
+                "fast": {
+                    "title": "Fast & Simple",
+                    "description": "Sign in seconds with no downloads"
+                },
+                "integrated": {
+                    "title": "Integrated Workflows",
+                    "description": "Connect with 500+ business tools"
+                },
+                "automation": {
+                    "title": "Smart Automation",
+                    "description": "Automated reminders and audit trails"
+                }
+            }
+        },
+        "cta": {
+            "title": {
+                "main": "Join the",
+                "highlight": "Digital Trust Revolution"
+            },
+            "description": "Be part of the sustainable future",
+            "button": "Subscribe Now"
+        }
+    },
+    "pricing": {
+        "tag": "Simple & Transparent Pricing",
+        "title": {
+            "main": "Choose Your Perfect",
+            "highlight": "Signing Experience"
+        },
+        "description": "Start free and scale with confidence. Every plan includes enterprise-grade security, dedicated support, and our industry-leading uptime guarantee.",
+        "billing": {
+            "monthly": "Monthly Billing",
+            "yearly": "Yearly Billing",
+            "save": "Save 20%"
+        },
+        "plans": {
+            "popularBadge": "⭐ Most Popular Choice",
+            "perMonth": "/mo",
+            "billedYearly": "Billed as €{{price}} per year",
+            "starter": {
+                "description": "Perfect for individuals and small teams getting started."
+            },
+            "pro": {
+                "description": "Best value for growing businesses and professional teams."
+            },
+            "enterprise": {
+                "description": "Complete solution for large organizations with custom needs."
+            }
+        },
+        "buttons": {
+            "contactSales": "Contact Sales",
+            "startFree": "Start Free Today",
+            "startTrial": "Start 14-Day Free Trial"
+        },
+        "footerNotice": "🔒 No setup fees • Cancel anytime • 30-day guarantee",
+        "enterpriseCta": {
+            "title": "Need a Custom Enterprise Solution?",
+            "description": "Get personalized pricing and dedicated support for your organization's unique requirements.",
+            "button": "Schedule a Demo Call"
+        }
+    },
+    "faq": {
+        "title": {
+            "main": "Frequently Asked",
+            "highlight": "Questions"
+        },
+        "description": "Find answers to common questions about our i-signature platform and services.",
+        "buttons": {
+            "showMore": "Show More",
+            "showLess": "Show Less",
+            "learnMore": "Learn About Signatures"
+        },
+        "visual": {
+            "uptimeLabel": "Uptime",
+            "bindingValue": "Legal",
+            "bindingLabel": "Binding",
+            "features": {
+                "security": "Bank-level Security",
+                "tracking": "Real-time Tracking",
+                "api": "API Integration",
+                "storage": "Unlimited Storage"
+            },
+            "cta": "Start Free Trial"
+        },
+        "questions": {
+            "q1": {
+                "question": "What is the i-signing tool?",
+                "answer": "Our i-signing tool is a secure digital solution that allows you to sign, send, and manage documents online, eliminating the need for printing, scanning, or mailing."
+            },
+            "q2": {
+                "question": "Who can use the i-signing tool?",
+                "answer": "It’s designed for businesses of all sizes, freelancers, and individuals who need to legally sign or request signatures on documents."
+            },
+            "q3": {
+                "question": "Do signers need an account to sign documents?",
+                "answer": "No. Recipients can sign documents without creating an account. They just receive a secure link to review and sign."
+            },
+            "q4": {
+                "question": "Is the i-signing tool legally binding?",
+                "answer": "Yes. Our solution complies with major i-signature regulations, including eIDAS (EU), eSIGN Act (US), and UETA, making signed documents legally valid and enforceable."
+            },
+            "q5": {
+                "question": "How secure are my documents?",
+                "answer": "All documents are encrypted during transfer and storage. We use SSL/TLS encryption and industry-standard security measures to protect your data."
+            },
+            "q6": {
+                "question": "Can I track who signed my document and when?",
+                "answer": "Yes. Each document comes with a detailed audit trail, showing when it was opened, viewed, and signed."
+            },
+            "q7": {
+                "question": "Is the tool GDPR-compliant?",
+                "answer": "Absolutely. We follow GDPR guidelines for data protection, storage, and consent handling."
+            },
+            "q8": {
+                "question": "Are i-signatures accepted worldwide?",
+                "answer": "E-signatures are legally recognized in most countries. However, some specific documents (like wills, property deeds, or court filings) may still require wet-ink signatures."
+            },
+            "q9": {
+                "question": "Can I customize my signature style?",
+                "answer": "Yes. You can draw your signature, upload an image, or choose from predefined styles."
+            },
+            "q10": {
+                "question": "What file types are supported?",
+                "answer": "We support PDF, Word, Excel, and most common document formats."
+            },
+            "q11": {
+                "question": "Can I sign on mobile devices?",
+                "answer": "Yes. Our tool is fully responsive and works on smartphones, tablets, and desktops."
+            },
+            "q12": {
+                "question": "Can I request multiple signatures on one document?",
+                "answer": "Yes. You can assign signing roles, set signing order, and collect multiple signatures."
+            },
+            "q13": {
+                "question": "Can I set reminders for unsigned documents?",
+                "answer": "Yes. Automatic reminders can be sent to recipients until they sign."
+            },
+            "q14": {
+                "question": "Can I prevent document changes after signing?",
+                "answer": "Yes. Once signed, the document is locked to prevent further modifications."
+            },
+            "q15": {
+                "question": "Is there a free trial?",
+                "answer": "Yes. We offer a free trial with limited features so you can test the tool before upgrading."
+            },
+            "q16": {
+                "question": "Do you offer team or enterprise plans?",
+                "answer": "Yes. We have flexible plans for individuals, teams, and large organizations with additional features like bulk sending, branding, and integrations."
+            },
+            "q17": {
+                "question": "Which payment methods do you accept?",
+                "answer": "We accept major credit/debit cards, PayPal, and invoice-based payments for enterprise customers."
+            }
+        }
+    },
+    "testimonials": {
+        "loading": "Loading testimonials...",
+        "error": {
+            "title": "No testimonials available",
+            "description": "Check back soon for customer reviews and feedback."
+        },
+        "header": {
+            "tag": "Customer Reviews",
+            "title": {
+                "main": "Loved by",
+                "highlight": "Thousands",
+                "suffix": "of professionals worldwide"
+            },
+            "description": "Join the growing community of businesses who trust our platform for their digital signing needs"
+        },
+        "stats": {
+            "customers": "Happy Customers",
+            "documents": "Documents Signed",
+            "uptime": "Uptime Guarantee",
+            "support": "Expert Support"
+        },
+        "cta": {
+            "title": "Ready to join our satisfied customers?",
+            "description": "Start your free trial today and experience why thousands of professionals choose our platform",
+            "button": "Start Free Trial"
+        }
+    },
+    "footer": {
+        "description": "The most secure and user-friendly electronic signature platform for businesses of all sizes. Sign documents digitally with confidence.",
+        "certification": "SOC 2 Type II Certified",
+        "quickLinks": {
+            "title": "Quick Links",
+            "home": "Home",
+            "about": "About Us",
+            "pricing": "Pricing",
+            "faq": "FAQ"
+        },
+        "legal": {
+            "title": "Legal & Support",
+            "privacy": "Privacy Policy",
+            "terms": "Terms of Service",
+            "security": "Security",
+            "help": "Help Center",
+            "contact": "Contact Support"
+        },
+        "copyright": "© {{year}} I-Sign. All rights reserved."
+    },
+    "login": {
+        "meta": {
+            "title": "Login"
+        },
+        "branding": {
+            "welcome": "Welcome to",
+            "description": "The most secure and user-friendly electronic signature platform for businesses of all sizes.",
+            "features": {
+                "encryption": {
+                    "title": "256-bit Encryption",
+                    "description": "Bank-level security"
+                },
+                "uptime": {
+                    "title": "99.9% Uptime",
+                    "description": "Always available"
+                },
+                "binding": {
+                    "title": "Legally Binding",
+                    "description": "Compliant signatures"
+                }
+            }
+        },
+        "form": {
+            "header": {
+                "title": "Sign In",
+                "description": "Welcome back! Please enter your details."
+            },
+            "email": {
+                "label": "Email Address",
+                "placeholder": "Enter your email"
+            },
+            "password": {
+                "label": "Password",
+                "placeholder": "Enter your password"
+            },
+            "rememberMe": "Remember me",
+            "forgotPassword": "Forgot your password?",
+            "button": {
+                "default": "Sign In",
+                "loading": "Signing In..."
+            },
+            "divider": "or",
+            "signup": {
+                "prompt": "Don't have an account?",
+                "link": "Sign Up"
+            }
+        },
+        "footer": {
+            "copyright": "© {{year}} i-sign.eu. All Rights Reserved."
+        },
+        "messages": {
+            "success": "Login successful!",
+            "error": "Login failed. Please check your credentials."
+        }
+    },
+    "register": {
+        "meta": {
+            "title": "Register"
+        },
+        "messages": {
+            "success": "Registration successful!",
+            "error": "Registration failed. Please try again."
+        },
+        "branding": {
+            "welcome": "Welcome to",
+            "description": "Join thousands of businesses that trust our platform for secure electronic signatures.",
+            "features": {
+                "setup": {
+                    "title": "Quick Setup",
+                    "description": "Get started in minutes"
+                },
+                "secure": {
+                    "title": "Secure & Compliant",
+                    "description": "Industry-standard security"
+                },
+                "business": {
+                    "title": "Business Ready",
+                    "description": "Enterprise features included"
+                }
+            }
+        },
+        "form": {
+            "header": {
+                "title": "Sign Up",
+                "description": "Create your account to get started."
+            },
+            "firstName": {
+                "label": "First Name",
+                "placeholder": "Enter your first name"
+            },
+            "lastName": {
+                "label": "Last Name",
+                "placeholder": "Enter your last name"
+            },
+            "email": {
+                "label": "Email Address",
+                "placeholder": "Enter your email"
+            },
+            "password": {
+                "label": "Password",
+                "placeholder": "Create a password (min. 6 characters)"
+            },
+            "button": {
+                "default": "Create Account",
+                "loading": "Creating Account..."
+            },
+            "signin": {
+                "prompt": "Already have an account?",
+                "link": "Sign In"
+            }
+        },
+        "validation": {
+            "firstName": {
+                "min": "First name must be at least 2 characters",
+                "max": "First name cannot exceed 50 characters",
+                "matches": "Only letters, spaces, hyphens, and apostrophes allowed",
+                "required": "First name is required"
+            },
+            "lastName": {
+                "min": "Last name must be at least 2 characters",
+                "max": "Last name cannot exceed 50 characters",
+                "matches": "Only letters, spaces, hyphens, and apostrophes allowed",
+                "required": "Last name is required"
+            },
+            "email": {
+                "invalid": "Invalid email format",
+                "max": "Email cannot exceed 100 characters",
+                "required": "Email is required"
+            },
+            "password": {
+                "min": "Password must be at least 6 characters",
+                "max": "Password cannot exceed 128 characters",
+                "required": "Password is required"
+            }
+        },
+        "footer": {
+            "copyright": "© {{year}} i-sign.eu. All Rights Reserved."
+        }
+    },
+    "forgotPassword": {
+        "meta": {
+            "title": "Forgot Password"
+        },
+        "messages": {
+            "success": "If the email is registered, a reset link has been sent.",
+            "error": "Failed to send reset link. Please try again."
+        },
+        "branding": {
+            "welcome": "Welcome to",
+            "description": "Reset your password securely and get back to signing documents in minutes.",
+            "features": {
+                "secure": {
+                    "title": "Secure Reset",
+                    "description": "Protected recovery process"
+                },
+                "verification": {
+                    "title": "Email Verification",
+                    "description": "Instant link delivery"
+                }
+            }
+        },
+        "form": {
+            "header": {
+                "title": "Reset Password",
+                "description": "Enter your email to receive a reset link."
+            },
+            "email": {
+                "label": "Email Address",
+                "placeholder": "Enter your email"
+            },
+            "button": {
+                "default": "Send Reset Link",
+                "loading": "Sending Reset Link..."
+            },
+            "backToLogin": "Back to Sign In"
+        },
+        "footer": {
+            "copyright": "© {{year}} i-sign.eu. All Rights Reserved."
+        }
+    },
+    "resetPassword": {
+        "meta": {
+            "title": "Reset Password"
+        },
+        "messages": {
+            "noToken": "No reset token provided.",
+            "success": "Password successfully reset! You can now log in.",
+            "error": "Failed to reset password. The link may have expired."
+        },
+        "validation": {
+            "passwordMin": "Password must be at least 6 characters.",
+            "passwordsMismatch": "Passwords do not match."
+        },
+        "status": {
+            "verifying": {
+                "title": "Verifying Link",
+                "description": "Please wait while we check your password reset link..."
+            },
+            "success": {
+                "title": "Verification Successful!",
+                "description": "Please wait, loading the form..."
+            },
+            "error": {
+                "title": "Invalid or Expired Link",
+                "description": "The password reset link is not valid. It may have been used already or has expired.",
+                "button": "Back to Login"
+            }
+        },
+        "form": {
+            "header": {
+                "title": "Create New Password",
+                "description": "Please enter your new password below."
+            },
+            "newPassword": {
+                "label": "New Password",
+                "placeholder": "Enter new password (min. 6 characters)"
+            },
+            "confirmPassword": {
+                "label": "Confirm Password",
+                "placeholder": "Confirm new password"
+            },
+            "button": {
+                "default": "Reset Password",
+                "loading": "Resetting Password..."
+            }
+        },
+        "footer": {
+            "copyright": "© {{year}} i-sign.eu. All Rights Reserved."
+        }
+    },
+    "reactivate": {
+        "meta": {
+            "title": "Reactivating Account..."
+        },
+        "messages": {
+            "success": "Account reactivated successfully! You may now log in.",
+            "error": "The link is invalid or has expired.",
+            "noToken": "No reactivation token was found. The link is incomplete."
+        },
+        "branding": {
+            "welcome": "Welcome to",
+            "description": "Reactivate your account and continue using our secure electronic signature platform.",
+            "features": {
+                "reactivation": {
+                    "title": "Quick Reactivation",
+                    "description": "Instant account recovery"
+                },
+                "secure": {
+                    "title": "Secure Process",
+                    "description": "Protected verification"
+                },
+                "preserved": {
+                    "title": "Data Preserved",
+                    "description": "All your documents safe"
+                }
+            }
+        },
+        "status": {
+            "loading": {
+                "title": "Reactivating Account",
+                "description": "Please wait while we reactivate your account..."
+            },
+            "success": {
+                "title": "Account Reactivated!",
+                "button": "Proceed to Login"
+            },
+            "error": {
+                "title": "Reactivation Failed",
+                "button": "Back to Login"
+            }
+        },
+        "footer": {
+            "copyright": "© {{year}} i-sign.eu. All Rights Reserved."
+        }
+    },
+    "verifyEmail": {
+        "meta": {
+            "title": "Verifying Email..."
+        },
+        "messages": {
+            "success": "Email verified successfully! You may now log in.",
+            "error": "The link is invalid or has expired.",
+            "noToken": "No verification token was found. The link is incomplete."
+        },
+        "branding": {
+            "welcome": "Welcome to",
+            "description": "Verify your email and start signing documents securely with our trusted platform.",
+            "features": {
+                "verification": {
+                    "title": "Email Verification",
+                    "description": "Secure account setup"
+                },
+                "access": {
+                    "title": "Instant Access",
+                    "description": "Start signing immediately"
+                },
+                "protected": {
+                    "title": "Protected Account",
+                    "description": "Your data is safe"
+                }
+            }
+        },
+        "status": {
+            "loading": {
+                "title": "Verifying Account",
+                "description": "Please wait while we activate your account..."
+            },
+            "success": {
+                "title": "Account Activated!",
+                "button": "Proceed to Login"
+            },
+            "error": {
+                "title": "Verification Failed",
+                "button": "Back to Registration"
+            }
+        },
+        "footer": {
+            "copyright": "© {{year}} i-sign.eu. All Rights Reserved."
+        }
+    },
+    "pendingVerification": {
+        "meta": {
+            "title": "Check Your Email"
+        },
+        "branding": {
+            "welcome": "Welcome to",
+            "description": "The most secure and user-friendly electronic signature platform for businesses of all sizes."
+        },
+        "content": {
+            "title": "Check Your Inbox",
+            "message": "We have sent a verification link to your email address. Please click the link to activate your account before logging in.",
+            "button": "Return to Login"
+        },
+        "footer": {
+            "copyright": "© {{year}} i-sign.eu. All Rights Reserved."
+        }
+    },
+    "eidasGuide": {
+        "header": {
+            "backLink": "Back to FAQs",
+            "title": "Understanding Digital Signatures",
+            "subtitle": "A comprehensive guide to electronic signatures and their legal framework under eIDAS"
+        },
+        "tabs": {
+            "overview": "Overview",
+            "ses": "Simple (SES)",
+            "aes": "Advanced (AES)",
+            "qes": "Qualified (QES)",
+            "faqs": "FAQs"
+        },
+        "content": {
+            "overview": {
+                "title": "What is a Digital Signature?",
+                "p1": "A digital signature is a specific form of electronic signature that uses advanced cryptographic methods to securely link a signer to a document. It provides the highest level of assurance regarding the authenticity of the signer and the integrity of the signed document.",
+                "p2_prefix": "Digital signatures are based on",
+                "p2_link": "Public Key Infrastructure (PKI)",
+                "p2_suffix": "an internationally recognized standard that ensures documents cannot be altered once signed and that the signer's identity can be reliably verified. This makes digital signatures particularly important for transactions requiring strong legal certainty.",
+                "comparison": {
+                    "title": "Electronic vs Digital Signatures",
+                    "p1_strong": "Electronic signatures (i-sign.eus)",
+                    "p1_text": "are a broad category of methods used to indicate a person's intent to sign a document in digital form. They are widely adopted because they are simple to use, quick to implement, and legally recognized under the EU eIDAS Regulation (No. 910/2014). Common use cases include employment contracts, purchase orders, invoices, and customer agreements.",
+                    "p2_strong": "Digital signatures",
+                    "p2_text": "on the other hand, are a specific type of electronic signature that use advanced cryptographic technology to provide stronger security and authentication. They are particularly important in highly regulated industries and are explicitly defined under eIDAS."
+                },
+                "types": {
+                    "title": "Three Types Under eIDAS",
+                    "description": "Under the EU eIDAS Regulation, electronic signatures are categorized into three levels, from least to most stringent:",
+                    "ses": {
+                        "title": "Simple (SES)",
+                        "description": "Basic forms of i-sign.eus, suitable for low-risk documents."
+                    },
+                    "aes": {
+                        "title": "Advanced (AES)",
+                        "description": "Higher security, uniquely linked to the signer with verified identity."
+                    },
+                    "qes": {
+                        "title": "Qualified (QES)",
+                        "description": "Most secure, legally equivalent to handwritten signatures."
+                    }
+                },
+                "tip": {
+                    "strong": "New to digital signatures?",
+                    "text": "While digital signatures may appear complex at first, they become much clearer once the key elements are understood. Explore each tab above to learn when to use each type of signature."
+                }
+            },
+            "ses": {
+                "title": "Simple Electronic Signature (SES)",
+                "subtitle": "For everyday transactions",
+                "p1": "A Simple Electronic Signature (SES) is the most basic type of electronic signature under the eIDAS Regulation. It does not require advanced methods of signer authentication or identity verification.",
+                "howItWorks": {
+                    "title": "How It Works",
+                    "p1": "In practice, an SES may involve something as straightforward as:",
+                    "li1": "Entering a PIN or access code",
+                    "li2": "Clicking \"I accept\" or ticking a checkbox",
+                    "li3": "Providing a signature through an email-linked signing process"
+                },
+                "useCases": {
+                    "title": "Common Use Cases",
+                    "p1": "This type of signature is often sufficient for low-risk, day-to-day transactions, such as:",
+                    "item1": "Sales and procurement agreements",
+                    "item2": "Acceptance of terms and conditions",
+                    "item3": "Simple forms and declarations"
+                },
+                "warning": {
+                    "strong": "Important:",
+                    "text": "While SES offers speed and convenience, it provides the lowest level of assurance regarding the signer's identity and document integrity. For higher-risk or regulated transactions, stronger forms of signature such as Advanced (AES) or Qualified (QES) may be required."
+                },
+                "learnMoreLink": "Learn more about standard i-sign.eu implementation →"
+            },
+            "aes": {
+                "title": "Advanced Electronic Signature (AES)",
+                "subtitle": "For high-value transactions",
+                "p1": "An Advanced Electronic Signature (AES) offers a higher level of security than a Simple Electronic Signature. It requires additional authentication steps to ensure that the signer's identity is verified and that the signature is uniquely linked to them.",
+                "requirements": {
+                    "title": "eIDAS Requirements",
+                    "p1": "To qualify as AES under eIDAS, the signature must meet the following criteria:",
+                    "li1": "It is uniquely linked to the signer",
+                    "li2": "It is capable of identifying the signer",
+                    "li3": "It is created using electronic signature creation data that the signer can maintain under their sole control",
+                    "li4": "It is linked to the signed data in such a way that any subsequent change to the data is detectable"
+                },
+                "authMethods": {
+                    "title": "Authentication Methods",
+                    "p1": "In practice, AES may involve:",
+                    "item1": { "title": "Identity Verification", "description": "Government-issued ID verification" },
+                    "item2": { "title": "Biometric Checks", "description": "Facial recognition or fingerprint scanning" },
+                    "item3": { "title": "Digital Certificates", "description": "Unique certificate generated for the transaction" },
+                    "item4": { "title": "One-Time Passcode", "description": "Unique OTP sent to verified device" }
+                },
+                "benefits": {
+                    "title": "Key Benefits",
+                    "li1": "Reliable identification of the signer",
+                    "li2": "A unique link between the signature and the signed document",
+                    "li3": "Tamper-evident technology detects any changes"
+                },
+                "example": {
+                    "title": "Example Use Case",
+                    "p1_prefix": "High-value or sensitive business transactions, such as",
+                    "p1_strong1": "employment contracts",
+                    "p1_connector": "or",
+                    "p1_strong2": "supplier agreements",
+                    "p1_suffix": "where the organization needs stronger assurance of the signer's identity and the document's integrity."
+                },
+                "learnMoreLink": "Learn more about i-sign.eu verification methods →"
+            },
+            "qes": {
+                "title": "Qualified Electronic Signature (QES)",
+                "subtitle": "For highly regulated transactions",
+                "p1": "A Qualified Electronic Signature (QES) is the most secure and trusted form of electronic signature defined under the EU eIDAS Regulation. It requires a face-to-face or equivalent identity verification process carried out by a Qualified Trust Service Provider (QTSP), either in the EU or the UK.",
+                "foundation": {
+                    "title": "Technical Foundation",
+                    "p1_prefix": "QES relies on a",
+                    "p1_strong": "Qualified Signature Creation Device (QSCD)",
+                    "p1_suffix": "and a qualified certificate issued by a recognized provider. This process ensures that:",
+                    "li1": "The signer's identity has been verified to the highest legal standard",
+                    "li2": "The signature is uniquely linked to the signer and the signed document",
+                    "li3": "A complete and tamper-proof audit trail is created"
+                },
+                "equivalence": {
+                    "title": "Legal Equivalence",
+                    "p1_prefix": "Because of these assurances, a QES is considered the",
+                    "p1_strong": "legal equivalent of a handwritten signature",
+                    "p1_suffix": "across all EU Member States.",
+                    "p2": "In fact, legal experts often argue that a QES can be more reliable than a traditional signature witnessed in an unsupervised setting, since the digital process ensures stronger identity verification and document integrity."
+                },
+                "useCases": {
+                    "title": "Common Use Cases",
+                    "p1": "QES is generally required for highly regulated or sensitive transactions, such as:",
+                    "item1": { "icon": "🏦", "text": "Financial services agreements" },
+                    "item2": { "icon": "⚖️", "text": "Notarial acts" },
+                    "item3": { "icon": "🏛️", "text": "Public sector filings" },
+                    "item4": { "icon": "🌍", "text": "Cross-border legal contracts" }
+                }
+            },
+            "faqs": {
+                "title": "Frequently Asked Questions",
+                "q1": {
+                    "title": "How does a Qualified Electronic Signature (QES) work with i-sign.eu?",
+                    "p1": "A QES requires strong identity authentication before a digital certificate can be issued. It provides the highest level of trust through face-to-face, or equivalent, ID verification. During the signing process, customers are asked to electronically confirm their identity. Once verified, a digital certificate proving their identity is automatically attached to the signature behind the scenes.",
+                    "p2": "i-sign.eu offers multiple options for QES with integrated ID verification. Digital certificates are issued by recognized Certificate Authorities (Trust Service Providers), and i-sign.eu accepts qualified certificates issued by providers listed on the official EU Trust List."
+                },
+                "q2": {
+                    "title": "How does an Advanced Electronic Signature (AES) work with i-sign.eu?",
+                    "p1": "An AES with i-sign.eu involves additional steps to authenticate the signer. This may include presenting a valid government-issued document to confirm identity, combined with a one-time access code after the signing process. AES signatures require a PKI-based digital certificate, which is generated and attached to the document as part of the transaction.",
+                    "p2": "i-sign.eu provides flexible ID verification options to meet both Advanced and Qualified levels of electronic signatures under eIDAS."
+                },
+                "q3": {
+                    "title": "How does a Simple Electronic Signature (SES) work with i-sign.eu?",
+                    "p1": "SES is the most commonly used and broadly accepted type of i-sign.eu worldwide. With i-sign.eu, SES can replace handwritten signatures in most low-risk cases. It is particularly suitable for:",
+                    "li1": "Internal documents",
+                    "li2": "Business-to-consumer agreements",
+                    "li3": "Transactions with existing partners",
+                    "p2": "SES is quick, efficient, and requires few steps. However, if stronger signer authentication is needed, an AES or QES may be required instead."
+                },
+                "contact": {
+                    "strong": "Still have questions?",
+                    "text_prefix": "Visit our",
+                    "link": "main FAQ page",
+                    "text_suffix": "or contact our support team for personalized assistance."
+                }
+            }
+        },
+        "disclaimer": {
+            "title": "Disclaimer:",
+            "text": "The content above is for general informational purposes only and is not intended as legal advice. For guidance on your specific situation, please consult a qualified legal professional."
+        },
+        "lastUpdated": "Last updated: {{date}}"
+    },
+    "termsAndPrivacy": {
+        "header": {
+            "subtitle": "Professional Electronic Signature Platform"
+        },
+        "tabs": {
+            "terms": "Terms of Service",
+            "privacy": "Privacy Policy"
+        },
+        "lastUpdated": "Last updated: {{date}}",
+        "terms": {
+            "title": "Terms of Service",
+            "introduction": {
+                "title": "1. Introduction",
+                "p1_prefix": "These Sites and Services Terms and Conditions (the \"Terms\" or \"General Terms\") govern your access to and use of the",
+                "p1_suffix": "websites, products, and services (collectively, the \"Site\" or \"Services\"). By using our Site or Services, you agree to be bound by these Terms, whether on behalf of yourself or a business you represent.",
+                "p2": "If you do not agree with these Terms, you are not authorized to use the Site or Services and must discontinue use immediately."
+            },
+            "scope": {
+                "title": "2. Scope of Application",
+                "p1": "These Terms apply to the following categories of users (collectively referred to as \"you\" or \"your\"):",
+                "li1_strong": "Website Visitors",
+                "li1_text": "Individuals accessing",
+                "li1_suffix": "and related websites.",
+                "li2_strong": "Customers",
+                "li2_text": "Organizations or individuals subscribing to or licensing",
+                "li2_suffix": "Services.",
+                "li3_strong": "Users",
+                "li3_text": "Individuals using",
+                "li3_suffix": "Services under a Customer account (including authorized employees or agents).",
+                "p2_prefix": "If you are a Customer and have entered into a separate Service Agreement or Corporate Contract with",
+                "p2_suffix": "those terms will prevail to the extent they conflict with these Terms. These Terms are designed for business and professional use; consumer protections under applicable law may apply separately."
+            },
+            "compliance": {
+                "title": "3. Compliance with Local Laws",
+                "p1": "If you access the Site or Services from a jurisdiction with specific regulatory requirements or supplemental terms (such as certain EU Member States), those jurisdiction-specific terms will apply in addition to these Terms. In the event of conflict, the jurisdiction-specific terms will prevail."
+            },
+            "acceptance": {
+                "title": "4. Acceptance of Terms",
+                "p1": "By accessing, using, or downloading any part of the Site or Services, you confirm that you:",
+                "li1": "Have read and understood these Terms;",
+                "li2": "Accept these Terms on your own behalf or on behalf of your organization;",
+                "li3": "Are authorized to enter into legally binding agreements in your jurisdiction.",
+                "p2": "If you do not meet these conditions, you must not use the Site or Services."
+            },
+            "access": {
+                "title": "5. Site Access and Use",
+                "eligibility": {
+                    "title": "5.1 Eligibility to Use",
+                    "p1_prefix": "By accessing or using the",
+                    "p1_suffix": "Site or Services, you represent and warrant that:",
+                    "li1": "You are of legal age (18 years or older, or otherwise the age of majority in your country of residence) and have the legal capacity to enter into these Terms on your own behalf or on behalf of the company or organization you represent;",
+                    "li2": "You are authorized to use the Site and Services in compliance with applicable laws and regulations, including EU and local jurisdiction rules on electronic signatures and data protection; and",
+                    "li3": "If you are acting on behalf of a business, you are duly authorized to bind that business to these Terms.",
+                    "p2_prefix": "You acknowledge that you may not use the Site or Services if you do not meet these eligibility requirements, or if your access has previously been suspended or terminated by",
+                    "p2_suffix": "for violations of these Terms."
+                }
+            },
+            "contact": {
+                "title": "6. Contact Information",
+                "p1_prefix": "For questions about these terms, please contact us at",
+                "p1_suffix": "or through our support portal."
+            }
+        },
+        "privacy": {
+            "title": "Privacy Policy",
+            "collection": {
+                "title": "1. Information We Collect",
+                "item1": { "title": "Account Information:", "text": "Name, email address, company information, and authentication credentials." },
+                "item2": { "title": "Document Data:", "text": "Documents uploaded for signature, signature data, IP addresses, and timestamps of signature activities." },
+                "item3": { "title": "Usage Information:", "text": "Log data, browser information, device identifiers, and service usage patterns." }
+            },
+            "use": {
+                "title": "2. How We Use Your Information",
+                "li1": "Provide and maintain the electronic signature service",
+                "li2": "Process and facilitate document signatures",
+                "li3": "Generate audit trails and compliance reports",
+                "li4": "Send service-related notifications and updates",
+                "li5": "Improve our service and develop new features",
+                "li6": "Prevent fraud and ensure service security",
+                "li7": "Comply with legal obligations"
+            },
+            "sharing": {
+                "title": "3. Information Sharing",
+                "p1": "We do not sell, trade, or rent your personal information. We may share information only in the following circumstances:",
+                "li1": "With your explicit consent",
+                "li2": "To facilitate the signature process between designated parties",
+                "li3": "With service providers who assist in platform operations",
+                "li4": "When required by law or legal process",
+                "li5": "To protect our rights, property, or safety"
+            },
+            "security": {
+                "title": "4. Data Security",
+                "p1": "We implement comprehensive security measures including encryption, access controls, regular security audits, and secure data centers. All data is encrypted both in transit and at rest using industry-standard encryption protocols. We maintain ISO 27001 and SOC 2 compliance standards."
+            },
+            "retention": {
+                "title": "5. Data Retention",
+                "p1": "We retain your data as long as your account is active and for the period required by applicable laws. Signed documents are typically retained for 7 years for legal compliance purposes. You may request deletion of your data, subject to legal retention requirements."
+            },
+            "rights": {
+                "title": "6. Your Rights (GDPR)",
+                "p1": "Under GDPR, you have the right to:",
+                "li1": "Access your personal data",
+                "li2": "Rectify inaccurate information",
+                "li3": "Request data deletion (right to be forgotten)",
+                "li4": "Restrict processing of your data",
+                "li5": "Data portability",
+                "li6": "Object to processing",
+                "li7": "Withdraw consent at any time"
+            },
+            "transfers": {
+                "title": "7. International Data Transfers",
+                "p1": "Your data is primarily processed within the European Union. Any international transfers are conducted under appropriate safeguards, including Standard Contractual Clauses approved by the European Commission."
+            },
+            "cookies": {
+                "title": "8. Cookies and Tracking",
+                "p1": "We use essential cookies for service functionality and analytics cookies to improve our service. You can manage cookie preferences through your browser settings. Our cookie policy provides detailed information about our cookie usage."
+            },
+            "contact": {
+                "title": "9. Contact Us",
+                "p1": "For privacy-related questions or to exercise your rights, contact our Data Protection Officer at privacy@i-sign.eu. For EU residents, you may also contact your local data protection authority."
+            },
+            "changes": {
+                "title": "10. Changes to Privacy Policy",
+                "p1": "We will notify you of any material changes to this privacy policy via email or prominent notice on our platform at least 30 days before the changes take effect."
+            }
+        },
+        "footer": {
+            "copyright": "© 2024 I-sign.eu - Professional Electronic Signature Platform",
+            "support_prefix": "For support, contact us at"
+        }
+    },
+    "enterpriseContact": {
+        "messages": {
+            "success": "Your inquiry has been sent successfully!",
+            "error": "Failed to send inquiry. Please try again."
+        },
+        "header": {
+            "title": {
+                "main": "Enterprise",
+                "highlight": "Custom Solutions"
+            },
+            "description": "Get in touch with our sales team for personalized pricing, custom features, and dedicated support tailored to your organization's needs."
+        },
+        "form": {
+            "name": {
+                "label": "Full Name",
+                "placeholder": "John Doe"
+            },
+            "email": {
+                "label": "Business Email",
+                "placeholder": "john.doe@company.com"
+            },
+            "company": {
+                "label": "Company Name",
+                "placeholder": "Acme Corporation"
+            },
+            "phone": {
+                "label": "Phone Number (Optional)"
+            },
+            "message": {
+                "label": "Tell us about your needs",
+                "placeholder": "Describe your requirements, team size, or any specific features you're interested in..."
+            },
+            "button": {
+                "default": "Submit Inquiry",
+                "submitting": "Submitting..."
+            }
+        },
+        "validation": {
+            "name": {
+                "min": "Name must be at least 2 characters",
+                "max": "Name cannot exceed 100 characters",
+                "required": "Full name is required"
+            },
+            "email": {
+                "invalid": "Invalid email format",
+                "required": "Business email is required"
+            },
+            "company": {
+                "min": "Company name must be at least 2 characters",
+                "max": "Company name cannot exceed 200 characters",
+                "required": "Company name is required"
+            },
+            "phone": {
+                "invalid": "Invalid phone number"
+            },
+            "message": {
+                "min": "Message must be at least 10 characters",
+                "max": "Message cannot exceed 2000 characters",
+                "required": "Message is required"
+            }
+        },
+        "footer": {
+            "callPrompt": "Prefer to call? Reach us at",
+            "emailPrompt": "Or email directly:"
+        }
+    },
+    "cookiePolicy": {
+        "title": "Cookie Policy",
+        "intro": "This Cookie Policy explains how E-Sign (\"we\", \"us\", or \"our\") uses cookies and similar technologies when you visit our website or use our services.",
+        "whatAreCookies": {
+            "title": "What Are Cookies?",
+            "text": "Cookies are small text files that are stored on your device when you visit a website. They help us provide you with a better experience by remembering your preferences and enabling certain functionality."
+        },
+        "types": {
+            "title": "Types of Cookies We Use",
+            "essential": {
+                "title": "Essential Cookies",
+                "text": "These cookies are necessary for our website to function properly. They enable core functionality such as authentication, security features, and basic navigation."
+            },
+            "functional": {
+                "title": "Functional Cookies",
+                "text": "These cookies enable enhanced functionality and personalization, such as remembering your language preferences and settings."
+            },
+            "analytics": {
+                "title": "Analytics Cookies",
+                "text": "These cookies help us understand how visitors interact with our website by collecting and reporting information anonymously."
+            },
+            "marketing": {
+                "title": "Marketing Cookies",
+                "text": "These cookies are used to deliver advertisements that are more relevant to you and your interests."
+            }
+        },
+        "managing": {
+            "title": "Managing Your Cookie Preferences",
+            "text": "You can control and manage cookies in various ways. You can set your browser to refuse cookies, or to alert you when cookies are being sent. You can also manage your preferences using our cookie preference center.",
+            "button": "Manage Cookie Preferences"
+        },
+        "contact": {
+            "title": "Contact Us",
+            "text": "If you have any questions about this Cookie Policy, please contact us at privacy@esign.com."
+        },
+        "lastUpdated": "This policy was last updated on {{date}}."
+    },
+    "sidebar": {
+        "headings": {
+            "dashboard": "Dashboard",
+            "settings": "Settings"
+        },
+        "nav": {
+            "allDocuments": "All Documents",
+            "templates": "Templates",
+            "contacts": "Contacts List",
+            "addDocument": "Add Document",
+            "subscriptions": "Subscriptions",
+            "paymentMethods": "Payment Methods",
+            "profile": "Profile"
+        }
+    },
+    "profile": {
+        "title": "Account Settings",
+        "loading": "Loading...",
+        "tabs": {
+            "profile": "Profile",
+            "email": "Email",
+            "password": "Password"
+        },
+        "messages": {
+            "deleteSuccess": "Account deletion requested",
+            "deleteFailed": "Failed to delete account",
+            "updateSuccess": "Profile updated!",
+            "updateFailed": "Update failed"
+        },
+        "form": {
+            "image": {
+                "upload": "Upload",
+                "remove": "Remove"
+            },
+            "firstName": {
+                "label": "First Name"
+            },
+            "lastName": {
+                "label": "Last Name"
+            },
+            "email": {
+                "label": "Current Email",
+                "note": "To change your email, go to the Email tab"
+            },
+            "phone": {
+                "label": "Phone Number"
+            },
+            "language": {
+                "label": "Language"
+            },
+            "button": {
+                "save": "Save Changes",
+                "saving": "Saving...",
+                "delete": "Delete Account"
+            },
+            "validation": {
+                "firstName": {
+                    "required": "First name is required"
+                },
+                "lastName": {
+                    "required": "Last name is required"
+                },
+                "phone": {
+                    "max": "Phone number too long",
+                    "invalid": "Invalid phone"
+                },
+                "language": {
+                    "required": "Language is required"
+                }
+            }
+        },
+        "emailForm": {
+            "title": "Change Email Address",
+            "description": "We'll send a verification code to your current email to confirm the change.",
+            "currentEmailLabel": "Current Email:",
+            "newEmail": {
+                "label": "New Email Address",
+                "placeholder": "Enter your new email address"
+            },
+            "otp": {
+                "sentToLabel": "Verification code sent to:",
+                "label": "Enter 6-digit Verification Code",
+                "button": {
+                    "sending": "Sending...",
+                    "resend": "Resend",
+                    "verifying": "Verifying...",
+                    "verify": "Verify & Update Email",
+                    "cancel": "Cancel"
+                }
+            },
+            "button": {
+                "sending": "Sending...",
+                "sendCode": "Send Verification Code",
+                "clear": "Clear"
+            },
+            "messages": {
+                "invalidNewEmail": "Please enter a valid new email",
+                "otpSentSuccess": "OTP sent to your current email!",
+                "otpSentFailed": "Failed to send OTP",
+                "otpLengthError": "Enter 6-digit OTP",
+                "updateSuccess": "Email updated successfully!",
+                "invalidOtp": "Invalid OTP"
+            },
+            "validation": {
+                "invalid": "Invalid email",
+                "required": "New email is required",
+                "notSame": "New email must be different from current email"
+            }
+        },
+        "passwordForm": {
+            "title": "Change Password",
+            "currentPassword": {
+                "label": "Current Password",
+                "placeholder": "Current"
+            },
+            "newPassword": {
+                "label": "New Password",
+                "placeholder": "New"
+            },
+            "confirmNewPassword": {
+                "label": "Confirm New Password",
+                "placeholder": "Confirm"
+            },
+            "button": {
+                "default": "Change Password",
+                "loading": "Changing..."
+            },
+            "messages": {
+                "success": "Password changed!",
+                "failed": "Failed to change password"
+            },
+            "validation": {
+                "min": "Password must be at least 6 characters",
+                "max": "Password cannot exceed 128 characters",
+                "currentPassword": {
+                    "required": "Current password is required"
+                },
+                "newPassword": {
+                    "required": "New password is required",
+                    "notOneOf": "New password cannot be the same as the current one"
+                },
+                "confirmNewPassword": {
+                    "required": "Please confirm your new password",
+                    "oneOf": "Passwords must match"
+                }
+            }
+        }
+    },
+    "paymentMethods": {
+        "pageTitle": "Payment Methods",
+        "loading": "Loading payment methods...",
+        "header": {
+            "title": "Payment Methods",
+            "description": "Securely manage your payment options for seamless e-signing experiences",
+            "addButton": "Add Payment Method"
+        },
+        "emptyState": {
+            "title": "No Payment Methods Added",
+            "description": "Add a payment method to manage your e-sign subscriptions effortlessly",
+            "addButton": "Add Your First Payment Method"
+        },
+        "addModalTitle": "Add New Payment Method",
+        "addForm": {
+            "cardInfoLabel": "Card Information",
+            "secureNote": "Your payment information is encrypted and securely processed by Stripe.",
+            "buttons": {
+                "cancel": "Cancel",
+                "add": "Add Payment Method",
+                "adding": "Adding..."
+            },
+            "errors": {
+                "cardElementNotFound": "Card element not found",
+                "cardProcessingError": "An error occurred while processing your card.",
+                "addMethodFailed": "Failed to add payment method."
+            }
+        },
+        "card": {
+            "defaultBadge": "Default",
+            "expires": "Expires",
+            "buttons": {
+                "setDefault": "Set as Default",
+                "settingDefault": "Setting...",
+                "remove": "Remove",
+                "removing": "Removing..."
+            }
+        },
+        "deleteConfirm": {
+            "title": "Remove Payment Method?",
+            "text": "Are you sure you want to remove this payment method?",
+            "confirmButton": "Yes, remove it",
+            "cancelButton": "Cancel"
+        },
+        "messages": {
+            "addSuccess": "Payment method added successfully!",
+            "setDefaultSuccess": "Default payment method updated successfully!",
+            "deleteSuccess": "Payment method removed successfully!"
+        }
+    },
+    "subscriptions": {
+        "pageTitle": "Billing & Subscriptions"
+    },
+    "planSelection": {
+        "backButton": "Back to Subscription Management",
+        "header": {
+            "titleChange": "Select a New Plan",
+            "titleChoose": "Choose Your Plan",
+            "descriptionChange": "Choose a new plan to upgrade, downgrade, or change your billing cycle.",
+            "descriptionChoose": "Upgrade your account to unlock more features, higher limits, and dedicated support."
+        },
+        "billing": {
+            "monthly": "Monthly",
+            "yearly": "Yearly",
+            "save": "Save 20%"
+        },
+        "popularBadge": "⭐ Most Popular",
+        "perMonth": "mo",
+        "billedYearly": "Billed as €{{price}} per year",
+        "plans": {
+            "starter": {
+                "description": "Perfect for individuals and small teams getting started."
+            },
+            "pro": {
+                "description": "Best value for growing businesses and professional teams."
+            },
+            "enterprise": {
+                "description": "Complete solution for large organizations needing more."
+            }
+        },
+        "trial": {
+            "title": "14 Days Free Trial Available",
+            "note": "Valid credit card is required !"
+        },
+        "buttons": {
+            "startTrial": "Start 14-Day Free Trial",
+            "choosePlan": "Choose Plan",
+            "topUp": "Top-up",
+            "switchToBilling": "Switch to {{interval}} Billing",
+            "switchToPlan": "Switch to {{planName}}",
+            "contactSales": "Contact Sales"
+        }
+    },
+    "manageSubscription": {
+        "noSubscription": {
+            "title": "No Active Subscription",
+            "description": "Please contact support if you believe this is an error."
+        },
+        "header": {
+            "title": "Subscription Management",
+            "description": "Monitor your plan usage and manage billing preferences"
+        },
+        "buttons": {
+            "reactivating": "Reactivating...",
+            "reactivateTrial": "Reactivate Trial",
+            "reactivatePlan": "Reactivate Plan",
+            "processing": "Processing...",
+            "startSubscription": "Start Subscription",
+            "cancelling": "Cancelling...",
+            "cancelTrial": "Cancel Trial",
+            "cancel": "Cancel"
+        },
+        "plan": {
+            "title": "{{planName}} Plan",
+            "monthly": "Monthly",
+            "yearly": "Yearly"
+        },
+        "status": {
+            "active": "Active",
+            "trialing": "Trial Active",
+            "past_due": "Past Due",
+            "canceled": "Canceled",
+            "cancelsSoon": "Cancels soon"
+        },
+        "trial": {
+            "endsOn": "Your trial ends on {{date}}."
+        },
+        "usage": {
+            "title": "Document Usage",
+            "unlimited": "Unlimited",
+            "enterpriseNote": "No document limits on your enterprise plan",
+            "of": "of {{limit}} documents",
+            "resetsOn": "Usage resets on {{date}}"
+        },
+        "billing": {
+            "title": "Billing Status",
+            "cancellationPending": "Cancellation Pending",
+            "cancelsOn": "Your plan will be cancelled on",
+            "pastDue": "Payment Past Due",
+            "pastDueNote": "Please update your payment method to continue service",
+            "nextRenewal": "Next renewal",
+            "autoRenewalActive": "Auto-renewal is active"
+        },
+        "quickStats": {
+            "started": "Plan Started",
+            "cycle": "Billing Cycle",
+            "documentsLeft": "Documents Left"
+        },
+        "management": {
+            "title": "Plan Management",
+            "description1": "Manage your subscription, view invoices, or change your plan.",
+            "description2": "Changes will take effect according to your billing cycle",
+            "buttons": {
+                "invoices": "Invoices",
+                "upgrade": "Upgrade"
+            }
+        },
+        "cancelModal": {
+            "trial": {
+                "title": "Cancel Free Trial?",
+                "text": "Your trial will remain active until {{date}}, but it will not convert to a paid plan. Are you sure?",
+                "confirmButton": "Yes, cancel trial"
+            },
+            "subscription": {
+                "title": "Cancel Subscription?",
+                "text": "Your subscription will remain active until the end of the current period on {{date}}. Are you sure?",
+                "confirmButton": "Yes, cancel subscription"
+            },
+            "cancelButton": "Keep My Plan"
+        },
+        "endTrialModal": {
+            "title": "Activate Paid Plan Now?",
+            "text": "You will be charged €{{price}} immediately and gain full access to the {{planName}} plan benefits, including your new document limit.",
+            "confirmButton": "Yes, Activate Now",
+            "cancelButton": "Stay on Trial"
+        },
+        "messages": {
+            "cancelSuccess": "Your plan is now set to cancel.",
+            "reactivateSuccess": "Your subscription has been reactivated successfully!",
+            "endTrialSuccess": "Your subscription is now active!"
+        }
+    },
+    "invoiceHistory": {
+        "title": "Invoice History",
+        "closeLabel": "Close modal",
+        "loading": "Loading invoices...",
+        "locale": "en-US",
+        "table": {
+            "headers": {
+                "date": "Date",
+                "amount": "Amount",
+                "status": "Status",
+                "action": "Action"
+            },
+            "viewAction": "View Invoice"
+        },
+        "status": {
+            "paid": "Paid",
+            "open": "Open",
+            "void": "Void",
+            "uncollectible": "Uncollectible"
+        },
+        "empty": {
+            "title": "No Invoices Found",
+            "description": "Your billing history will appear here once you are billed."
+        }
+    },
+    "contacts": {
+        "pageTitle": "Contacts",
+        "header": {
+            "title": "Contacts",
+            "searchPlaceholder": "Search Contacts"
+        },
+        "buttons": {
+            "addContact": "Add Contact"
+        },
+        "table": {
+            "headers": {
+                "name": "Name",
+                "email": "Email",
+                "phone": "Phone",
+                "customInfo": "Custom Info",
+                "actions": "Actions"
+            },
+            "actions": {
+                "edit": "Edit",
+                "delete": "Delete"
+            },
+            "notAvailable": "N/A"
+        },
+        "loading": "Loading...",
+        "emptyState": {
+            "title": "No Contacts Yet",
+            "description": "Start by adding your first contact."
+        },
+        "modal": {
+            "titleAdd": "Add Contact",
+            "titleEdit": "Edit Contact",
+            "form": {
+                "titlePrefix": {
+                    "label": "Title",
+                    "options": {
+                        "none": "None",
+                        "mr": "Mr.",
+                        "mrs": "Mrs.",
+                        "ms": "Ms.",
+                        "dr": "Dr.",
+                        "prof": "Prof."
+                    }
+                },
+                "firstName": { "label": "First Name", "placeholder": "Enter First Name" },
+                "lastName": { "label": "Last Name", "placeholder": "Enter Last Name" },
+                "email": { "label": "Email", "placeholder": "Enter Email" },
+                "phone": { "label": "Phone Number" },
+                "language": { "label": "Language" },
+                "title": { "label": "Title/Occupation", "placeholder": "Enter Title" }
+            },
+            "customFields": {
+                "title": "Additional Information",
+                "keyPlaceholder": "Field Name (e.g., Company)",
+                "valuePlaceholder": "Value (e.g., Acme Inc.)",
+                "addButton": "+ Add Custom Field"
+            },
+            "buttons": {
+                "cancel": "Cancel",
+                "add": "Add",
+                "update": "Update",
+                "saving": "Saving..."
+            }
+        },
+        "deleteConfirm": {
+            "title": "Are you sure?",
+            "text": "You won't be able to revert this!",
+            "confirmButton": "Yes, delete it!",
+            "cancelButton": "Cancel"
+        },
+        "messages": {
+            "addSuccess": "Contact added successfully.",
+            "updateSuccess": "Contact updated successfully.",
+            "deleteSuccess": "Contact has been deleted."
+        },
+        "validation": {
+            "firstName": { "required": "First name is required", "min": "First name must be at least 2 characters", "max": "First name cannot exceed 50 characters" },
+            "lastName": { "required": "Last name is required", "min": "Last name must be at least 2 characters", "max": "Last name cannot exceed 50 characters" },
+            "email": { "invalid": "Invalid email format", "required": "Email is required", "max": "Email cannot exceed 254 characters" },
+            "phone": { "max": "Phone number seems too long", "invalid": "Invalid phone number" },
+            "language": { "required": "Language is required" },
+            "title": { "min": "Title must be at least 2 characters", "max": "Title cannot exceed 100 characters" },
+            "customFields": {
+                "key": { "required": "Field name is required", "min": "Field name must be at least 2 characters", "max": "Field name cannot exceed 50 characters" },
+                "value": { "max": "Value cannot exceed 255 characters" }
+            }
+        },
+        "languages": {
+            "en": "English",
+            "es": "Español (Spanish)",
+            "fr": "Français (French)",
+            "de": "Deutsch (German)",
+            "it": "Italiano (Italian)"
+        }
+    },
+    "templates": {
+        "header": {
+            "title": "Document Templates"
+        },
+        "buttons": {
+            "createNew": "Create New Template",
+            "backToList": "Back to Templates",
+            "saveTemplate": "Save Template",
+            "saving": "Saving..."
+        },
+        "loading": "Loading...",
+        "loadingTemplates": "Loading templates...",
+        "emptyState": {
+            "title": "No Templates Found",
+            "description": "Get started by creating your first document template."
+        },
+        "table": {
+            "headers": {
+                "name": "Name",
+                "uuid": "Attachment UUID",
+                "fields": "Fields",
+                "actions": "Actions"
+            }
+        },
+        "editor": {
+            "title": "Editing: {{templateName}}"
+        },
+        "deleteConfirm": {
+            "title": "Are you sure?",
+            "text": "You won't be able to revert this!",
+            "confirmButton": "Yes, delete it!",
+            "cancelButton": "No, cancel!"
+        },
+        "deleteSuccessAlert": {
+            "title": "Deleted!",
+            "text": "Your template has been deleted."
+        },
+        "deleteErrorAlert": {
+            "title": "Error!"
+        },
+        "messages": {
+            "invalidId": "Invalid template ID.",
+            "deleteSuccess": "Template deleted successfully!",
+            "deleteFailed": "Failed to delete template.",
+            "noTemplateToSave": "No template to save.",
+            "titleRequired": "Template title cannot be empty.",
+            "updateSuccess": "Template updated successfully!",
+            "fileUrlMissing": "File URL is missing. Please upload a document.",
+            "s3KeyMissing": "S3 key is missing. Please re-upload the document.",
+            "saveSuccess": "Template saved successfully!",
+            "saveFailed": "Failed to save template."
+        }
+    },
+    "uploadStep": {
+        "title": "Upload Document & Set Title",
+        "uploadLabel": "Upload PDF Document",
+        "dropzone": {
+            "prompt": "Drop PDF here or click to browse",
+            "uploaded": "PDF Uploaded",
+            "hint": "Supports PDF files up to 50MB"
+        },
+        "processing": "Processing...",
+        "titleLabel": "Document Title",
+        "titlePlaceholder": "e.g., Confidentiality Agreement",
+        "previewLabel": "Document Preview",
+        "pageIndicator": "Page {{page}}",
+        "previewPlaceholder": "Preview will appear here",
+        "button": {
+            "proceed": "Proceed to Editor",
+            "processing": "Processing..."
+        },
+        "messages": {
+            "uploadFailed": "Failed to upload document.",
+            "uploadRequired": "Please upload a PDF document.",
+            "invalidFileType": "Please select a valid PDF file."
+        },
+        "validation": {
+            "titleRequired": "Document title is required",
+            "titleMin": "Title must be at least 3 characters"
+        },
+        "errors": {
+            "fetchFailed": "Failed to fetch PDF",
+            "fetchFromUrlFailed": "Failed to fetch PDF from URL",
+            "noValidPdf": "No valid PDF data or non-blob URL provided.",
+            "renderFailed": "Failed to render PDF preview"
+        }
+    },
+    "editor": {
+        "loading": "Loading template editor...",
+        "properties": {
+            "title": "Field Properties",
+            "prompt": "Select a field to edit its properties."
+        },
+        "fieldDefaults": {
+            "signature": "Signature",
+            "textarea": "Text Area",
+            "textareaPlaceholder": "Enter text...",
+            "checkbox": "Checkbox",
+            "radio": "Radio",
+            "date": "Date Field",
+            "dropdown": "Dropdown",
+            "text": "Text Field",
+            "textPlaceholder": "Enter text here"
+        },
+        "deleteConfirm": {
+            "title": "Delete field?",
+            "text": "This action cannot be undone.",
+            "confirmButton": "Yes, delete it!",
+            "cancelButton": "Cancel"
+        },
+        "messages": {
+            "deleteSuccess": "Field deleted."
+        },
+        "errors": {
+            "fetchFailed": "Failed to fetch PDF",
+            "noValidPdf": "No valid PDF data provided.",
+            "loadFailed": "Failed to load PDF for editing",
+            "renderFailed": "Failed to render PDF pages."
+        }
+    },
+    "documentsDashboard": {
+        "loading": "Loading Documents...",
+        "buttons": {
+            "upload": "Upload Document"
+        },
+        "error": {
+            "title": "Could Not Load Documents"
+        }
+    },
+    "packagesDashboard": {
+        "newPackageName": "New Package",
+        "loadingDraft": "Loading draft package...",
+        "initializing": "Initializing package creation...",
+        "errors": {
+            "notADraft": "This package is not a draft and cannot be edited.",
+            "loadFailed": "Failed to load draft package."
+        }
+    },
+    "documentTable": {
+        "loading": "Loading documents...",
+        "headers": {
+            "documentName": "Document Name",
+            "status": "Status",
+            "initiator": "Initiator",
+            "formFillers": "Form Fillers",
+            "approvers": "Approvers",
+            "signers": "Signers",
+            "receivers": "Receivers",
+            "addedOn": "Added On",
+            "participants": "Participants",
+            "actions": "Actions"
+        },
+        "actions": {
+            "download": "Download",
+            "notify": "Notify/Reminder",
+            "viewDetails": "View Details",
+            "continueEditing": "Continue Editing",
+            "viewHistory": "View History",
+            "reassign": "Reassign",
+            "skip": "Skip",
+            "revoke": "Revoke"
+        },
+        "emptyState": {
+            "title": "No Documents Found",
+            "description": "There are no documents matching your current filters."
+        },
+        "revokeModal": {
+            "title": "Revoke Document",
+            "message": "Are you sure you want to revoke the document \"{{documentName}}\"? This action cannot be undone and will terminate the process for all participants.",
+            "confirmButton": "Yes, Revoke"
+        }
+    },
+    "stepper": {
+        "header": {
+            "createTitle": "Create Package",
+            "editTitle": "Edit Draft Package"
+        },
+        "steps": {
+            "documentSelection": "Document Selection",
+            "fieldAssignment": "Field Assignment",
+            "reviewAndConfirm": "Review & Confirm",
+            "select": "Select",
+            "assign": "Assign",
+            "review": "Review"
+        },
+        "buttons": {
+            "backToDashboard": "Back to Dashboard",
+            "previousStep": "Previous Step",
+            "nextStep": "Next Step",
+            "saveDraft": "Save as Draft",
+            "saveAsTemplate": "Save as Template",
+            "savingPackage": "Saving Package...",
+            "confirmPackage": "Confirm & Send Package"
+        },
+        "messages": {
+            "noPackageToSave": "No package to save.",
+            "savingDraft": "Saving draft...",
+            "draftSaved": "Draft saved successfully!",
+            "draftFailed": "Failed to save draft.",
+            "noPackageForTemplate": "Cannot save as template: No package data available.",
+            "templateSaveFailed": "Failed to save as template.",
+            "noPackageToConfirm": "No package to confirm.",
+            "titleRequired": "Package title cannot be empty.",
+            "documentRequired": "Please upload or select a document.",
+            "unassignedFields": "Please assign users to required fields",
+            "packageSent": "Package saved and sent successfully!",
+            "packageSaveFailed": "Failed to save package."
+        }
+    },
+    "documentSelection": {
+        "mainTitle": "Choose Document Source",
+        "mainSubtitle": "Select an existing template or upload a new PDF document",
+        "template": {
+            "title": "Use Existing Template",
+            "selectPlaceholder": "-- Select an Existing Template --",
+            "loading": "Loading templates..."
+        },
+        "upload": {
+            "title": "Upload New PDF",
+            "dropPrompt": "Drop your PDF here",
+            "dragPrompt": "Drag & Drop PDF or Click to Browse",
+            "hint": "Supports PDF files up to 10MB",
+            "uploading": "Uploading..."
+        },
+        "packageTitle": {
+            "label": "Package Title",
+            "placeholder": "e.g., Onboarding Document for John Doe"
+        },
+        "preview": {
+            "title": "Document Preview",
+            "emptyTitle": "No Document Selected",
+            "emptyDescription": "Choose a template or upload a PDF to see the preview"
+        },
+        "messages": {
+            "invalidFileType": "Please select a valid PDF file.",
+            "uploadFailed": "Failed to upload document.",
+            "templateLoadFailed": "Failed to load selected template.",
+            "selectDocument": "Please upload or select a document before proceeding."
+        },
+        "validation": {
+            "titleRequired": "Package title is required",
+            "titleMin": "Title must be at least 3 characters"
+        },
+        "errors": {
+            "fetchFailed": "Fetch failed",
+            "fetchBlobFailed": "Fetch failed for blob",
+            "renderFailed": "Failed to render PDF preview",
+            "fetchTemplateFailed": "Failed to fetch template PDF"
+        }
+    },
+    "fieldAssignment": {
+        "noDocument": {
+            "title": "No Document Selected",
+            "description": "Please select a document in the previous step to start assigning fields."
+        },
+        "loadError": {
+            "title": "Failed to Load PDF",
+            "button": "Go Back"
+        },
+        "noFieldsWarning": {
+            "title": "No Fields Added Yet",
+            "description": "Drag and drop fields from the toolbar above onto the document to create interactive areas for participants."
+        },
+        "pageIndicator": "Page {{page}} of {{total}}",
+        "properties": {
+            "title": "Field Properties",
+            "subtitle": "Configure field settings",
+            "closeAriaLabel": "Close properties panel",
+            "openAriaLabel": "Open field properties",
+            "noFieldSelected": {
+                "title": "No Field Selected",
+                "description": "Tap on a field in the document to edit its properties and assign users."
+            }
+        },
+        "messages": {
+            "fieldAdded": "Added {{fieldLabel}} field."
+        },
+        "errors": {
+            "fetchFailed": "Failed to fetch PDF",
+            "fetchBlobFailed": "Fetch failed for blob",
+            "loadFailed": "Failed to load PDF",
+            "renderFailed": "Failed to render PDF pages.",
+            "noValidPdf": "No valid PDF data or URL provided."
+        }
+    },
+    "packageReview": {
+        "loading": "Loading package details...",
+        "locale": "en-US",
+        "tabs": {
+            "summary": "Summary",
+            "recipients": "Recipients",
+            "settings": "Settings"
+        },
+        "preview": {
+            "title": "Document Preview",
+            "pageCount": "{{count}} page",
+            "pageCount_plural": "{{count}} pages",
+            "pageIndicator": "Page {{current}} of {{total}}",
+            "actualSize": "Actual Size",
+            "fitWidth": "Fit Width",
+            "rendering": {
+                "title": "Rendering Document...",
+                "subtitle": "Please wait while we prepare your document"
+            }
+        },
+        "summary": {
+            "message": {
+                "title": "Optional Message for Participants",
+                "description": "This message will be included in the initial \"Action Required\" email sent to all participants.",
+                "placeholder": "e.g., Please review and sign this document at your earliest convenience. Thank you!"
+            },
+            "details": {
+                "title": "Details at a Glance",
+                "fields": "Fields",
+                "recipients": "Recipients",
+                "pages": "Pages"
+            },
+            "credits": {
+                "title": "Document Credit Usage",
+                "usageText": "This package will use 1 document credit",
+                "usageText_plural": "This package will use {{count}} document credits",
+                "signerCountText": "No signers assigned yet",
+                "signerCountText_plural": "{{count}} unique signer detected",
+                "signerCountText_plural_plural": "{{count}} unique signers detected",
+                "tip_strong": "Tip:",
+                "tip_text": "Each document credit covers up to 2 unique signers.",
+                "tip_extra": "You have {{signers}} signers, requiring {{credits}} credits."
+            },
+            "progress": {
+                "title": "Assignment Progress",
+                "completeText": "{{rate}}% Complete",
+                "actionRequired": "Action Required",
+                "unassignedFields": "There is 1 unassigned required field.",
+                "unassignedFields_plural": "There are {{count}} unassigned required fields."
+            }
+        },
+        "recipients": {
+            "assigned": {
+                "title": "Assigned Participants",
+                "empty": "No users have been assigned to fields."
+            },
+            "notificationOnly": {
+                "title": "Notification-Only Receivers",
+                "description": "Add contacts who will receive package notifications but are not required to sign.",
+                "addButton": "Add Receiver"
+            }
+        },
+        "settings": {
+            "expiration": {
+                "title": "Package Expiration",
+                "description": "Set a date and time when this package will no longer be accessible.",
+                "okButton": "OK"
+            },
+            "reminders": {
+                "title": "Expiration Reminders",
+                "setExpirationNote": "Please set a package expiration date first to enable expiration reminders.",
+                "enableCheckbox": "Send Expiration Reminders",
+                "timing": {
+                    "label": "Reminder Timing",
+                    "placeholder": "Select reminder timing",
+                    "options": {
+                        "1_hour": "1 Hour Before",
+                        "2_hours": "2 Hours Before",
+                        "1_day": "24 Hours Before",
+                        "2_days": "48 Hours Before"
+                    },
+                    "tooSoonNote": "The expiration date is too soon for any reminder options. Please set a later date to enable reminders."
+                }
+            },
+            "autoReminders": {
+                "title": "Automatic Reminders",
+                "setExpirationNote": "Please set a package expiration date first to enable automatic reminders.",
+                "enableCheckbox": "Enable Automatic Reminders",
+                "first": {
+                    "label": "First reminder",
+                    "suffix": "days before expiration"
+                },
+                "repeat": {
+                    "label": "Follow-up reminders",
+                    "prefix": "Repeat every",
+                    "suffix": "days"
+                },
+                "tooSoonNote": "The expiration date must be set to more than one day in the future to enable automatic reminders."
+            },
+            "permissions": {
+                "title": "Permissions",
+                "allowDownload": "Allow download before signing is complete",
+                "allowReassign": "Allow participants to reassign their role"
+            }
+        },
+        "messages": {
+            "receiverAdded": "{{name}} added as a receiver.",
+            "contactCreated": "{{name}} created and selected as a receiver.",
+            "expirationSet": "Package expiration set to {{date}}",
+            "expirationRemoved": "Package expiration removed - package will not expire",
+            "reminderTimingReset": "The reminder timing was reset as it is no longer valid for the new expiration date.",
+            "firstReminderReset": "The first automatic reminder was reset as it is no longer valid for the new expiration date.",
+            "repeatReminderReset": "The follow-up reminder interval was reset as it is no longer valid."
+        },
+        "errors": {
+            "missingSource": "Document source is missing. Please return to Step 1.",
+            "fetchFailed": "Fetch failed",
+            "fetchBlobFailed": "Fetch failed for blob",
+            "noSource": "No PDF source found in the package data.",
+            "loadFailed": "Failed to load the document preview.",
+            "renderFailed": "Failed to render PDF pages.",
+            "pastDate": "Expiration date cannot be in the past. Please select a future date."
+        }
+    },
+    "packageFieldRenderer": {
+        "fieldTypes": {
+            "text": "Text",
+            "textarea": "Text",
+            "signature": "Signature",
+            "checkbox": "Checkbox",
+            "radio": "Radio",
+            "date": "Date",
+            "dropdown": "Select"
+        },
+        "labelInput": {
+            "placeholder": "Field label"
+        },
+        "labelTitle": {
+            "signature": "Signature field label cannot be edited",
+            "editable": "Click to edit label"
+        },
+        "titles": {
+            "markRequired": "Mark as required",
+            "markOptional": "Mark as optional",
+            "quickAssign": "Quick assign user",
+            "signatureFieldAssigned": "Signature field already has a signer",
+            "deleteField": "Delete field"
+        },
+        "quickAssign": {
+            "title": "Quick Assign",
+            "signatureWarning": "Signature fields can only have one Signer assigned.",
+            "selectContact": "Select Contact",
+            "selectContactPlaceholder": "Choose a contact...",
+            "addNewContact": "Add New Contact",
+            "role": "Role",
+            "signatureRoleNote": "Signature fields require Signer role",
+            "nonSignatureRoleNote": "Signers can only be assigned to signature fields",
+            "authMethods": "Authentication Methods",
+            "authMethodsEmail": "Email OTP Verification",
+            "authMethodsSMS": "SMS OTP Verification",
+            "assignButton": "Assign to Field",
+            "roles": {
+                "Signer": "Signer",
+                "FormFiller": "Form Filler",
+                "Approver": "Approver"
+            }
+        },
+        "assignedUsers": {
+            "title": "{{name}} ({{role}}){{methods}}"
+        },
+        "messages": {
+            "labelUpdated": "Label updated",
+            "markedRequired": "Field marked as required",
+            "markedOptional": "Field marked as optional",
+            "signatureFieldAssigned": "Signature field already has a signer assigned",
+            "userAssigned": "{{name}} assigned as {{role}}",
+            "contactAdded": "{{name}} added successfully"
+        },
+        "errors": {
+            "signatureFieldHasSigner": "Signature fields can only have one signer assigned."
+        }
+    },
+    "addEditContactModal": {
+        "title": {
+            "add": "Add New Contact",
+            "edit": "Edit Contact"
+        },
+        "labels": {
+            "titlePrefix": "Title",
+            "firstName": "First Name",
+            "lastName": "Last Name",
+            "email": "Email",
+            "phone": "Phone Number",
+            "language": "Language",
+            "title": "Title/Occupation",
+            "additionalInfo": "Additional Information"
+        },
+        "placeholders": {
+            "firstName": "Enter First Name",
+            "lastName": "Enter Last Name",
+            "email": "Enter Email",
+            "title": "Enter Title",
+            "customFieldKey": "Field Name (e.g., Company)",
+            "customFieldValue": "Value (e.g., Acme Inc.)"
+        },
+        "titlePrefixOptions": {
+            "none": "None",
+            "mr": "Mr.",
+            "mrs": "Mrs.",
+            "ms": "Ms.",
+            "dr": "Dr.",
+            "prof": "Prof."
+        },
+        "languageOptions": {
+            "en": "English",
+            "es": "Español (Spanish)",
+            "fr": "Français (French)"
+        },
+        "buttons": {
+            "cancel": "Cancel",
+            "saving": "Saving...",
+            "addContact": "Add Contact",
+            "updateContact": "Update Contact",
+            "addCustomField": "+ Add Custom Field"
+        },
+        "errors": {
+            "firstNameRequired": "First name is required",
+            "lastNameRequired": "Last name is required",
+            "emailInvalid": "Invalid email format",
+            "emailRequired": "Email is required",
+            "phoneInvalid": "Invalid phone number",
+            "languageRequired": "Language is required",
+            "customFieldKeyRequired": "Field name is required"
+        },
+        "messages": {
+            "contactAdded": "Contact added successfully.",
+            "contactUpdated": "Contact updated successfully."
+        }
+    },
+    "packageFieldPropertiesPanel": {
+        "fieldTypes": {
+            "text": "Text",
+            "textarea": "Textarea",
+            "signature": "Signature",
+            "checkbox": "Checkbox",
+            "radio": "Radio",
+            "date": "Date",
+            "dropdown": "Dropdown"
+        },
+        "labels": {
+            "fieldType": "Field Type:",
+            "label": "Label:",
+            "placeholder": "Placeholder:",
+            "radioGroupId": "Radio Group ID:",
+            "radioOptions": "Options (comma-separated):",
+            "dropdownOptions": "Options (comma-separated):",
+            "required": "Required",
+            "assignUsers": "Assign Users to Field",
+            "signatureMethods": "Signature Method(s):",
+            "allowedMethods": "Allowed Methods:",
+            "assignedUsers": "Assigned Users:"
+        },
+        "placeholders": {
+            "placeholder": "Enter placeholder text",
+            "radioGroupId": "Unique ID for this radio group",
+            "radioOptions": "Option 1, Option 2",
+            "dropdownOptions": "Option 1, Option 2",
+            "selectRole": "-- Select Role --"
+        },
+        "roles": {
+            "Signer": "Signer",
+            "FormFiller": "Form Filler",
+            "Approver": "Approver"
+        },
+        "signatureMethods": {
+            "emailOTP": "Via Email OTP",
+            "smsOTP": "Via SMS OTP"
+        },
+        "titles": {
+            "removeAssignment": "Remove assignment"
+        },
+        "messages": {
+            "signatureLabelFixed": "Signature field labels cannot be changed",
+            "radioGroupIdNote": "All radio buttons with the same Group ID act as a single choice set.",
+            "radioOptionsNote": "Enter at least two options for a meaningful radio group.",
+            "dropdownOptionsNote": "Enter at least one option for the dropdown.",
+            "signatureFieldNote": "Signature fields can only have one Signer assigned. Use this for digital signature collection.",
+            "signatureRoleNote": "Signature fields can only be assigned to Signers",
+            "nonSignatureRoleNote": "Signers can only be assigned to signature fields",
+            "oneSignerMax": "1 Signer Max",
+            "noUsersAssigned": "No users assigned.",
+            "userAssigned": "{{name}} assigned as {{role}}",
+            "userAssignmentRemoved": "User assignment removed"
+        },
+        "errors": {
+            "labelRequired": "Label is required",
+            "labelEmpty": "Label cannot be empty",
+            "placeholderTooLong": "Placeholder too long",
+            "radioOptionsMin": "At least two comma-separated options are required for Radio Group",
+            "dropdownOptionsMin": "At least one option is required for Dropdown",
+            "groupIdRequired": "Group ID is required for radio buttons",
+            "noAuthMethod": "A signer must have at least one authentication method.",
+            "signatureFieldHasSigner": "Signature fields can only have one signer assigned."
+        }
+    },
+    "packageStatusPage": {
+        "loading": {
+            "title": "Loading Document Status...",
+            "message": "Please wait a moment."
+        },
+        "error": {
+            "title": "Unable to Load Document"
+        }
+    },
+    "packageStatusLayout": {
+        "participants": {
+            "title": "Participants"
+        }
+    },
+    "participantStatusPanel": {
+        "header": {
+            "title": "Participants",
+            "participantCount": "{{count}} participant",
+            "pluralSuffix": "s"
+        },
+        "roles": {
+            "receiver": "Receiver"
+        },
+        "messages": {
+            "noParticipants": "No participants assigned"
+        }
+    },
+    "packageStatusHeader": {
+        "status": {
+            "completed": "Completed",
+            "rejected": "Rejected",
+            "pending": "Pending",
+            "archived": "Archived",
+            "draft": "Draft"
+        },
+        "meta": {
+            "createdAt": "Created",
+            "fieldCount": "{{count}} field",
+            "pluralSuffix": "s"
+        }
+    },
+    "ownerDocumentViewer": {
+        "errors": {
+            "loadFailed": "Failed to load document: {{message}}"
+        },
+        "controls": {
+            "previousPage": "Previous page",
+            "nextPage": "Next page",
+            "zoomOut": "Zoom out",
+            "zoomIn": "Zoom in",
+            "pageNavigation": "Page {{current}} of {{total}}",
+            "zoomLevel": "{{level}}%"
+        },
+        "pageNumber": "Page {{number}}"
+    },
+    "statusFieldRenderer": {
+        "status": {
+            "rejected": "Rejected",
+            "revoked": "Revoked",
+            "draft": "Draft",
+            "signed": "Signed",
+            "signedBy": "Signed by {{signedBy}}",
+            "filled": "Filled",
+            "pending": "Pending"
+        },
+        "unassigned": "Unassigned",
+        "tooltip": "{{label}} - {{type}} - Assigned to: {{assignedTo}} - Status: {{status}}"
+    },
+    "setting": {
+        "toggleCustomizer": "Toggle dashboard customizer",
+        "header": {
+            "title": "DASHBOARD CUSTOMIZER",
+            "description": "Set preferences that will be cookied for your live preview demonstration."
+        },
+        "colorScheme": {
+            "title": "Color Scheme",
+            "description": "Overall light or dark presentation.",
+            "light": "Light",
+            "dark": "Dark",
+            "system": "System"
+        },
+        "navigationPosition": {
+            "title": "Navigation Position",
+            "description": "Select the primary navigation paradigm for your app.",
+            "horizontal": "Horizontal",
+            "vertical": "Vertical",
+            "collapsible": "Collapsible",
+            "semiDark": "Semi Dark (Sidebar & Header)"
+        },
+        "layoutStyle": {
+            "title": "Layout Style",
+            "description": "Select the primary layout style for your app.",
+            "box": "Box",
+            "full": "Full"
+        },
+        "direction": {
+            "title": "Direction",
+            "description": "Select the direction for your app.",
+            "ltr": "LTR",
+            "rtl": "RTL"
+        },
+        "navbarType": {
+            "title": "Navbar Type",
+            "description": "Sticky or Floating.",
+            "sticky": "Sticky",
+            "floating": "Floating",
+            "static": "Static"
+        },
+        "routerTransition": {
+            "title": "Router Transition",
+            "description": "Animation of main content.",
+            "none": "None",
+            "fade": "Fade",
+            "fadeDown": "Fade Down",
+            "fadeUp": "Fade Up",
+            "fadeLeft": "Fade Left",
+            "fadeRight": "Fade Right",
+            "slideDown": "Slide Down",
+            "slideLeft": "Slide Left",
+            "slideRight": "Slide Right",
+            "zoomIn": "Zoom In"
+        }
+    },
+    "reviewPage": {
+        "loading": {
+            "title": "Checking Eligibility",
+            "message": "Please wait while we verify your access..."
+        },
+        "success": {
+            "title": "Thank You! 🎉",
+            "message": "Your feedback has been submitted successfully.",
+            "feedback": "Your review helps us improve the experience for everyone"
+        },
+        "ineligible": {
+            "title": "Review Not Available",
+            "contactSupport": "If you believe this is an error, please contact support"
+        },
+        "form": {
+            "feedbackRequired": "Feedback Required",
+            "title": "How was your",
+            "titleHighlight": "experience",
+            "description": "Your feedback helps us improve the e-signing experience for everyone. Please take a moment to rate your experience.",
+            "progress": "Progress:",
+            "progressStatus": "{{completed}} of {{total}} completed",
+            "ratingInstruction": "Rate from 1 (poor) to 5 (excellent)",
+            "commentsTitle": "Additional Comments",
+            "commentsDescription": "Tell us more about your experience (optional)",
+            "commentsPlaceholder": "Share your thoughts, suggestions, or any specific feedback...",
+            "commentLength": "{{length}}/500",
+            "submitting": "Submitting Feedback...",
+            "submitButton": "Submit Feedback",
+            "submitReady": "All ratings completed! Ready to submit.",
+            "submitIncomplete": "Please complete all ratings before submitting."
+        },
+        "errors": {
+            "allRatingsRequired": "Please provide a rating for all questions.",
+            "submissionError": "Submission Error: {{error}}"
+        }
+    },
+    "subscriptionRequired": {
+        "active": {
+            "title": "Active Subscription Required",
+            "description": "To access this feature, you need an active subscription. Choose from our flexible plans below.",
+            "action": "View Subscription Plans"
+        },
+        "package": {
+            "title": "Upgrade Your Plan",
+            "description": "Your current subscription doesn't include package creation. Upgrade to unlock this powerful feature.",
+            "action": "Upgrade Subscription"
+        },
+        "default": {
+            "title": "Subscription Required",
+            "description": "This feature requires a subscription to continue. Get started with our affordable plans.",
+            "action": "View Plans"
+        },
+        "status": {
+            "current": "Current Status",
+            "packageCreation": "Package Creation",
+            "allowed": "Allowed",
+            "notAllowed": "Not Allowed"
+        },
+        "actions": {
+            "goBack": "Go Back"
+        },
+        "help": {
+            "text": "Need help choosing a plan?",
+            "link": "Contact Support"
+        }
+    },
+    "participantPage": {
+        "loading": {
+            "title": "Loading Secure Document",
+            "message": "Please wait while we prepare your document..."
+        },
+        "error": {
+            "title": "Access Denied",
+            "message": "Please check your link or contact the sender if you believe this is an error.",
+            "action": "Try Again"
+        }
+    },
+    "headerControls": {
+        "navigation": {
+            "previous": "Previous Page",
+            "next": "Next Page",
+            "page": "Page {{current}} of {{total}}"
+        },
+        "zoom": {
+            "title": "Zoom Level",
+            "in": "Zoom In",
+            "out": "Zoom Out",
+            "level": "{{level}}%"
+        },
+        "status": {
+            "completed": "Completed",
+            "sent": "Sent",
+            "draft": "Draft",
+            "archived": "Archived",
+            "rejected": "Rejected"
+        },
+        "fullscreen": {
+            "enter": "Fullscreen View",
+            "exit": "Exit Fullscreen View"
+        },
+        "options": "More options",
+        "participants": {
+            "title": "View Participants",
+            "description": "See completion status"
+        },
+        "download": {
+            "title": "Download PDF",
+            "disabled": "Download is available only after completion",
+            "label": "Download File",
+            "description": "Save PDF copy",
+            "downloading": "Downloading...",
+            "preparing": "Preparing your document for download..."
+        },
+        "errors": {
+            "noPackageData": "Package data is not available. Please refresh the page and try again."
+        },
+        "drawer": {
+            "title": "Participant Status",
+            "description": "Track completion progress",
+            "noParticipants": "No participant information available.",
+            "back": "Back to Document"
+        },
+        "participantStatus": {
+            "pending": "Pending",
+            "completed": "Completed",
+            "not applicable": "Not Applicable",
+            "pendingDesc": "Awaiting action",
+            "completedDesc": "All tasks complete",
+            "notApplicableDesc": "For records only"
+        }
+    },
+    "participantLayout": {
+        "brand": "I-Sign.eu",
+        "help": "Help",
+        "sidebar": {
+            "toggle": "Toggle sidebar",
+            "title": "Document Details",
+            "signAs": "Sign as",
+            "currentUser": "Current User",
+            "documents": "Documents",
+            "pages": "{{count}} page{{#count !== 1 ? 's' : ''}}",
+            "progress": "Progress"
+        },
+        "progress": {
+            "status": "Completion Status",
+            "completed": "Document completed",
+            "rejected": "Document rejected",
+            "expired": "Document expired",
+            "draft": "Document in draft",
+            "archived": "Document archived",
+            "tasksCompleted": "Your tasks completed",
+            "reviewTerms": "Review and accept terms",
+            "fieldsCompleted": "{{completed}}/{{total}} fields completed",
+            "readyForSubmission": "Ready for final submission",
+            "termsAccepted": "Terms accepted",
+            "requiredFields": "Required fields"
+        },
+        "success": {
+            "title": "You're All Set!",
+            "message": "Congratulations! You have successfully completed all your assigned tasks for this document. Your responses have been submitted and the document is ready for the next steps in the process.",
+            "requiredFields": "All required fields completed",
+            "termsAccepted": "Terms of use accepted",
+            "signatureApplied": "Digital signature applied",
+            "nextSteps": "What happens next?",
+            "nextMessage": "The document will proceed to other participants for their review and completion. You will be notified when the entire document process is completed."
+        },
+        "terms": {
+            "part1": "I declare that I have read the document and shall comply with the",
+            "link": "Terms of Use",
+            "part2": ".",
+            "accepted": "Terms accepted"
+        },
+        "defaultParticipant": "Other Participant"
+    },
+    "documentViewer": {
+        "loading": {
+            "title": "Preparing Document",
+            "message": "Please wait while we load your document...",
+            "progress": "{{progress}}%"
+        },
+        "errors": {
+            "title": "Document Loading Error",
+            "missingUrl": "Document URL is missing.",
+            "fetchFailed": "Failed to fetch PDF: {{status}}",
+            "unknown": "An unknown error occurred while loading the PDF.",
+            "loadFailed": "Failed to load document: {{message}}",
+            "tryAgain": "Try Again"
+        },
+        "preparing": "Preparing document...",
+        "rejection": {
+            "title": "Document Rejected",
+            "rejectedBy": "Rejected by:",
+            "ipAddress": "IP Address:",
+            "date": "Date:",
+            "reason": "Reason:"
+        },
+        "pageInfo": "Page {{current}} of {{total}}",
+        "fieldsOnPage": "{{count}} field{{#count !== 1 ? 's' : ''}} on this page",
+        "reviewComplete": {
+            "title": "Document Review Complete",
+            "message": "You have reached the end of the document. Please review all fields and accept the terms below to proceed with signing."
+        }
+    },
+    "actionSidebar": {
+        "save": {
+            "label": "Save",
+            "saving": "Saving...",
+            "saveChanges": "Save your changes",
+            "noChanges": "No changes to save",
+            "finalized": "Document is {{status}}",
+            "success": "Your changes have been saved successfully!",
+            "error": "Failed to save your changes. Please try again."
+        },
+        "sign": {
+            "label": "Sign",
+            "ready": "Sign Document",
+            "finalized": "Document is {{status}}. No further actions are allowed.",
+            "saveFirst": "Save First",
+            "noSignatureFields": "You do not have any signature fields assigned to you.",
+            "agreeTerms": "Please agree to the Terms of Use before signing.",
+            "allSigned": "All of your signature fields have been completed.",
+            "error": "Error: Unable to find participant assignment."
+        },
+        "reject": {
+            "label": "Reject",
+            "finalized": "Document is {{status}}. No further actions are allowed.",
+            "receiversCannot": "Receivers cannot reject"
+        },
+        "reassign": {
+            "label": "Reassign",
+            "finalized": "Document is {{status}}. No further actions are allowed.",
+            "completed": "You cannot reassign after completing your actions."
+        },
+        "addReceiver": {
+            "label": "Add Recipient",
+            "finalized": "Document is {{status}}"
+        },
+        "progress": {
+            "finalized": "Document {{status}}",
+            "unsaved": "Unsaved changes",
+            "readyToSign": "Ready to sign",
+            "noSignature": "No signature required",
+            "reviewTerms": "Review terms"
+        }
+    },
+    "rejectModal": {
+        "title": "Reject this Document",
+        "description": "This action is irreversible. The sender and all other participants will be notified. Please provide a clear reason for the rejection below.",
+        "reasonLabel": "Reason for Rejection",
+        "reasonPlaceholder": "e.g., The contract details are incorrect...",
+        "characterCount": "{{count}} / 500",
+        "submit": "Submit Rejection",
+        "submitting": "Submitting...",
+        "cancel": "Cancel",
+        "close": "Close",
+        "validation": {
+            "emptyReason": "A reason for rejection is required.",
+            "reasonTooLong": "Reason must be 500 characters or less."
+        },
+        "errors": {
+            "missingData": "Essential data is missing. Please refresh the page."
+        }
+    },
+    "reassignDrawer": {
+        "close": "Close",
+        "errors": {
+            "missingFields": "Please provide first name, last name, and email.",
+            "missingReason": "A reason for reassignment is required."
+        },
+        "createContact": {
+            "success": "Contact created successfully!"
+        },
+        "reassign": {
+            "success": "Reassignment completed successfully!"
+        },
+        "steps": {
+            "select": {
+                "title": "Select Contact",
+                "description": "Choose a contact to reassign your responsibility to",
+                "searchPlaceholder": "Search by name or email...",
+                "loading": "Loading Contacts...",
+                "noContacts": "No contacts found.",
+                "addButton": "Add New Contact"
+            },
+            "add": {
+                "title": "Add New Contact",
+                "description": "Enter details for the new contact",
+                "emailLabel": "New Participant's Email",
+                "emailPlaceholder": "name@example.com",
+                "firstNameLabel": "First Name",
+                "firstNamePlaceholder": "First name",
+                "lastNameLabel": "Last Name",
+                "lastNamePlaceholder": "Last name",
+                "phoneLabel": "Phone Number",
+                "phonePlaceholder": "Enter phone number",
+                "backButton": "Back",
+                "createButton": "Create and Select Contact"
+            },
+            "confirm": {
+                "title": "Confirm Reassignment",
+                "description": "You are about to reassign your responsibility to the following contact. This action cannot be undone.",
+                "reasonLabel": "Reason for Reassignment",
+                "reasonPlaceholder": "Please provide a brief reason...",
+                "backButton": "Back",
+                "confirmButton": "Confirm Reassignment"
+            },
+            "success": {
+                "title": "Reassignment Successful",
+                "description": "Your responsibility has been successfully reassigned",
+                "message": "Your responsibility for this document has been transferred to:",
+                "notification": "All parties will be notified of this change.",
+                "backButton": "Back to Document"
+            },
+            "default": {
+                "title": "Reassign Responsibility",
+                "description": "Transfer your tasks to another person"
+            }
+        }
+    },
+    "addReceiverDrawer": {
+        "close": "Close",
+        "errors": {
+            "missingFields": "Please provide first name, last name, and email."
+        },
+        "steps": {
+            "select": {
+                "title": "Select Contact to Add",
+                "description": "Choose an existing contact to add as a receiver",
+                "searchPlaceholder": "Search by name or email...",
+                "loading": "Loading Contacts...",
+                "noContacts": "No contacts found.",
+                "addButton": "Add New Contact"
+            },
+            "add": {
+                "title": "Add New Contact",
+                "description": "Enter the details for a new contact",
+                "emailLabel": "New Receiver's Email",
+                "emailPlaceholder": "name@example.com",
+                "firstNameLabel": "First Name",
+                "firstNamePlaceholder": "First name",
+                "lastNameLabel": "Last Name",
+                "lastNamePlaceholder": "Last name",
+                "phoneLabel": "Phone Number",
+                "phonePlaceholder": "Enter phone number",
+                "backButton": "Back",
+                "createButton": "Create and Add Contact"
+            },
+            "success": {
+                "title": "Receiver Added Successfully",
+                "description": "The contact has been notified and added to the document",
+                "message": "has been added as a receiver and notified.",
+                "notification": "All parties will be notified of this addition.",
+                "backButton": "Back to Document"
+            },
+            "failure": {
+                "title": "Action Failed",
+                "description": "An unexpected error occurred. Please try again.",
+                "closeButton": "Close"
+            },
+            "default": {
+                "title": "Add Receiver",
+                "description": "Add a new read-only participant to this document"
+            }
+        }
+    },
+    "signingDrawer": {
+        "close": "Close",
+        "email": "email",
+        "phone": "phone number",
+        "emailOtp": "Email OTP",
+        "smsOtp": "SMS OTP",
+        "errors": {
+            "missingData": "An error occurred. Cannot identify the document or field.",
+            "missingIdentity": "Please enter your {{method}}.",
+            "resendOtp": "Could not resend OTP. Please go back and confirm your {{method}}.",
+            "invalidOtp": "An error occurred. Missing required information."
+        },
+        "otpSent": {
+            "email": "OTP sent to your email!",
+            "sms": "OTP sent to your phone!"
+        },
+        "steps": {
+            "method": {
+                "title": "Choose Signing Method",
+                "description": "Choose a method to securely verify your identity",
+                "emailOption": "One-Time Code via Email",
+                "emailDescription": "Secure verification through your email",
+                "smsOption": "One-Time Code via SMS",
+                "smsDescription": "Secure verification through your phone"
+            },
+            "identity": {
+                "title": "Verify Your {{method}}",
+                "description": "For security, please enter your {{method}} below",
+                "info": "We will send a verification code to the {{method}} you enter below.",
+                "matchInfo": "It must match the recipient's {{method}}: {{contact}}",
+                "label": "Your {{method}}",
+                "emailPlaceholder": "e.g., yourname@example.com",
+                "phonePlaceholder": "e.g., +1234567890",
+                "backButton": "Back",
+                "requestButton": "Request Code"
+            },
+            "otp": {
+                "title": "Enter Verification Code",
+                "description": "We sent a 6-digit code to {{contact}}. It expires in {{timer}} seconds.",
+                "timerLabel": "seconds remaining",
+                "inputLabel": "Enter 6-digit verification code",
+                "inputPlaceholder": "------",
+                "resendButton": "Resend verification code",
+                "resending": "Sending...",
+                "backButton": "Back",
+                "completeButton": "Complete Signing"
+            },
+            "success": {
+                "title": "Document Signed!",
+                "description": "Your signature has been successfully applied to the document",
+                "message": "Thank you for completing the signing process via {{method}}.",
+                "notification": "All parties will be notified when the document is fully completed.",
+                "backButton": "Back to Document"
+            },
+            "default": {
+                "title": "Signing Process",
+                "description": ""
+            }
+        }
+    },
+    "readOnlyField": {
+        "unknownUser": "Unknown User",
+        "otherParticipant": "Other Participant",
+        "participantRole": "Participant",
+        "signed": "Signed",
+        "rejected": "Rejected",
+        "reason": "Reason:",
+        "otpCode": "OTP: {{code}}",
+        "via": "via {{method}}",
+        "emailOtp": "Email OTP",
+        "signatureField": "Signature Field",
+        "checkbox": "Checkbox",
+        "textarea": "Text Area",
+        "dateField": "Date Field",
+        "textField": "Text Field",
+        "rejectionTooltip": "Field rejected by {{name}}: {{reason}}",
+        "fieldTooltip": "Field for {{name}} ({{contact}}): {{label}}"
+    },
+    "interactiveField": {
+        "unknownUser": "Unknown User",
+        "currentUser": "Current User",
+        "participantRole": "Participant",
+        "signed": "Signed",
+        "rejected": "Rejected",
+        "reason": "Reason:",
+        "rejectedIP": "IP: {{ip}}",
+        "otpCode": "OTP: {{code}}",
+        "via": "via {{method}}",
+        "emailOtp": "Email OTP",
+        "sign": "Sign",
+        "clickToSign": "Click to sign",
+        "chooseMethod": "Choose method",
+        "editField": "Edit field",
+        "saveField": "Save field",
+        "unsupported": "Unsupported",
+        "errors": {
+            "termsNotAgreed": "Please agree to the Terms of Use at the bottom of the document before signing.",
+            "noDocumentData": "Error: Document data not available.",
+            "noParticipantAssignment": "Error: Unable to find participant assignment."
+        },
+        "rejectionTooltip": "Field rejected by {{name}}: {{reason}}"
+    },
+    "subscriptionBanner": {
+        "noSubscription": {
+            "title": "Unlock All Features",
+            "message": "Activate a subscription to start creating and managing documents.",
+            "ctaText": "View Plans"
+        },
+        "limitReached": {
+            "title": "Document Limit Reached",
+            "message": "Please upgrade your plan to continue creating new documents.",
+            "ctaText": "Upgrade Plan"
+        },
+        "lowDocuments": {
+            "title": "Running Low on Documents",
+            "message": "You have only {{remaining}} documents left. Upgrade to get more.",
+            "ctaText": "Upgrade Plan"
+        }
+    },
+    "purchaseModal": {
+        "cardBrands": {
+            "visa": "Visa",
+            "mastercard": "Mastercard",
+            "amex": "American Express"
+        },
+        "expires": "Expires {{month}}/{{year}}",
+        "default": "Default",
+        "topUpTitle": "Top-up Your Plan",
+        "confirmSubscription": "Confirm Your Subscription",
+        "topUpDetails": "Top-up Details",
+        "yourPlan": "Your Plan",
+        "yearly": "Yearly",
+        "monthly": "Monthly",
+        "annually": "annually",
+        "billed": "Billed {{interval}}",
+        "trialEndNote": "Note: Proceeding will end your free trial and charge you immediately.",
+        "selectPaymentMethod": "Select Payment Method",
+        "useDifferentCard": "Use a Different Card",
+        "startingTrial": "Starting Trial...",
+        "startTrial": "Start 14-Day Free Trial",
+        "processing": "Processing...",
+        "topUp": "Top-up",
+        "subscribeNow": "Subscribe",
+        "subscribe": "{{action}} Now (€{{price}})",
+        "termsAgreement": "By continuing, you agree to our Terms of Service.",
+        "success": {
+            "topUp": "Top-up Successful!",
+            "topUpMessage": "You now have more documents available on your {{planName}} plan!",
+            "subscription": "Subscription Successful!",
+            "subscriptionMessage": "Welcome to the {{planName}} plan!",
+            "trial": "Free Trial Started!",
+            "trialMessage": "You have 14 days of access to the {{planName}} plan!"
+        },
+        "errors": {
+            "cardNotFound": "Card details form not found.",
+            "invalidCard": "Invalid card details.",
+            "noPaymentMethod": "Please select or add a payment method to continue.",
+            "planNotAvailable": "This plan is not available for purchase at the moment.",
+            "unknownError": "An unexpected error occurred."
+        }
+    },
+    "fieldPropertiesPanel": {
+        "fieldType": "Field Type:",
+        "fieldTypes": {
+            "text": "Text",
+            "textarea": "Text Area",
+            "radio": "Radio",
+            "dropdown": "Dropdown"
+        },
+        "label": "Label:",
+        "placeholder": "Placeholder:",
+        "radioGroupId": "Radio Group ID:",
+        "radioGroupIdPlaceholder": "Unique ID for this radio group",
+        "radioGroupIdHint": "All radio buttons with the same Group ID act as a single choice set.",
+        "radioOptions": "Options (comma-separated):",
+        "radioOptionsPlaceholder": "Option 1, Option 2",
+        "radioOptionsHint": "Enter at least two options for a meaningful radio group.",
+        "dropdownOptions": "Options (comma-separated):",
+        "dropdownOptionsPlaceholder": "Option 1, Option 2",
+        "dropdownOptionsHint": "Enter at least one option for the dropdown.",
+        "required": "Required",
+        "errors": {
+            "labelRequired": "Label is required",
+            "labelEmpty": "Label cannot be empty",
+            "placeholderTooLong": "Placeholder too long",
+            "radioOptionsMin": "At least two comma-separated options are required for Radio Group",
+            "dropdownOptionsMin": "At least one option is required for Dropdown",
+            "groupIdRequired": "Group ID is required for radio buttons"
+        }
+    },
+    "editorToolbar": {
+        "fieldTypes": {
+            "text": "Text",
+            "textarea": "Text Area",
+            "signature": "Signature",
+            "checkbox": "Checkbox",
+            "date": "Date"
+        }
+    },
+    "messages": {
+        "logoutSuccess": "You've been logged out successfully."
+    },
+    "meta": {
+        "pageTitle": "I-sign.eu - Professional Electronic Signature Platform"
+    },
+    "languageSwitcher": {
+        "title": "Language",
+        "selectLanguage": "Select Language"
+    }
 }

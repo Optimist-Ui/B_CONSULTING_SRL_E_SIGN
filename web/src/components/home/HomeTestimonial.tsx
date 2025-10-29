@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useTranslation } from 'react-i18next';
 import type { Swiper as SwiperType } from 'swiper';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, Navigation, EffectCoverflow } from 'swiper/modules';
-import { AppDispatch, IRootState } from '../../store'; // Adjust import path
-import { fetchFeaturedReviews } from '../../store/thunk/reviewThunks'; // Adjust import path
+import { AppDispatch, IRootState } from '../../store';
+import { fetchFeaturedReviews } from '../../store/thunk/reviewThunks';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/effect-coverflow';
 import { useNavigate } from 'react-router-dom';
 
-// Enhanced Avatar component with gradient backgrounds and better styling
 const Avatar = ({ name }: { name: string }) => {
     const initials = name
         .split(' ')
@@ -19,7 +19,6 @@ const Avatar = ({ name }: { name: string }) => {
         .join('')
         .toUpperCase();
 
-    // Hash function for consistent colors
     const hashCode = (str: string) => {
         let hash = 0;
         for (let i = 0; i < str.length; i++) {
@@ -49,7 +48,6 @@ const Avatar = ({ name }: { name: string }) => {
     );
 };
 
-// Enhanced Star Rating component
 const StarRating = ({ rating }: { rating: number }) => {
     return (
         <div className="flex gap-1 mb-6">
@@ -71,6 +69,7 @@ const StarRating = ({ rating }: { rating: number }) => {
 };
 
 const HomeTestimonial = () => {
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const dispatch = useDispatch<AppDispatch>();
     const { reviews, status } = useSelector((state: IRootState) => state.reviews.featuredReviews);
@@ -82,19 +81,18 @@ const HomeTestimonial = () => {
         setIsVisible(true);
     }, [dispatch]);
 
-    /**
-     * Masks a name for privacy, showing the first 3 characters followed by '***'.
-     * @param name The full name string.
-     * @returns The masked name.
-     */
     const maskName = (name: string): string => {
-        if (!name || name.length <= 3) {
-            return '***';
-        }
+        if (!name || name.length <= 3) return '***';
         return `${name.substring(0, 3)}***`;
     };
 
-    // Enhanced loading state
+    const statsData = [
+        { number: '10,000+', labelKey: 'testimonials.stats.customers', icon: '👥', color: 'from-blue-500 to-blue-600' },
+        { number: '1M+', labelKey: 'testimonials.stats.documents', icon: '📝', color: 'from-green-500 to-green-600' },
+        { number: '99.9%', labelKey: 'testimonials.stats.uptime', icon: '⚡', color: 'from-purple-500 to-purple-600' },
+        { number: '24/7', labelKey: 'testimonials.stats.support', icon: '🚀', color: 'from-orange-500 to-orange-600' },
+    ];
+
     if (status === 'loading' || status === 'idle') {
         return (
             <section className="py-16 lg:py-24 bg-gradient-to-br from-gray-50 to-white">
@@ -102,7 +100,7 @@ const HomeTestimonial = () => {
                     <div className="text-center">
                         <div className="inline-flex items-center gap-3 bg-white rounded-full px-6 py-3 shadow-lg">
                             <div className="w-6 h-6 border-2 border-blue-500/30 border-t-blue-500 rounded-full animate-spin"></div>
-                            <span className="text-gray-600 font-medium">Loading testimonials...</span>
+                            <span className="text-gray-600 font-medium">{t('testimonials.loading')}</span>
                         </div>
                     </div>
                 </div>
@@ -110,7 +108,6 @@ const HomeTestimonial = () => {
         );
     }
 
-    // Enhanced error/empty state
     if (status === 'failed' || reviews.length === 0) {
         return (
             <section className="py-16 lg:py-24 bg-gradient-to-br from-gray-50 to-white">
@@ -126,8 +123,8 @@ const HomeTestimonial = () => {
                                 />
                             </svg>
                         </div>
-                        <h3 className="text-xl font-semibold text-gray-900 mb-2">No testimonials available</h3>
-                        <p className="text-gray-500">Check back soon for customer reviews and feedback.</p>
+                        <h3 className="text-xl font-semibold text-gray-900 mb-2">{t('testimonials.error.title')}</h3>
+                        <p className="text-gray-500">{t('testimonials.error.description')}</p>
                     </div>
                 </div>
             </section>
@@ -136,30 +133,28 @@ const HomeTestimonial = () => {
 
     return (
         <section className="py-16 lg:py-24 bg-gradient-to-br from-gray-50 via-white to-blue-50/30 relative overflow-hidden">
-            {/* Background decoration */}
             <div className="absolute inset-0 opacity-30">
                 <div className="absolute top-10 left-10 w-72 h-72 bg-blue-200/20 rounded-full filter blur-3xl"></div>
                 <div className="absolute bottom-10 right-10 w-96 h-96 bg-purple-200/20 rounded-full filter blur-3xl"></div>
             </div>
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-                {/* Enhanced Section Header */}
                 <div className={`text-center mb-16 transition-all duration-1000 transform ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}>
                     <div className="inline-flex items-center gap-2 bg-blue-100 text-blue-700 px-4 py-2 rounded-full text-sm font-semibold mb-6">
                         <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                             <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                         </svg>
-                        Customer Reviews
+                        {t('testimonials.header.tag')}
                     </div>
                     <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight">
-                        Loved by <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">Thousands</span>
+                        {t('testimonials.header.title.main')}{' '}
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">{t('testimonials.header.title.highlight')}</span>
                         <br />
-                        <span className="text-2xl sm:text-3xl lg:text-4xl text-gray-600 font-normal">of professionals worldwide</span>
+                        <span className="text-2xl sm:text-3xl lg:text-4xl text-gray-600 font-normal">{t('testimonials.header.title.suffix')}</span>
                     </h2>
-                    <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">Join the growing community of businesses who trust our platform for their digital signing needs</p>
+                    <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">{t('testimonials.header.description')}</p>
                 </div>
 
-                {/* Enhanced Testimonials Slider */}
                 <div className={`transition-all duration-1000 delay-300 transform ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}>
                     <Swiper
                         modules={[Autoplay, Navigation, EffectCoverflow]}
@@ -167,21 +162,9 @@ const HomeTestimonial = () => {
                         slidesPerView={1}
                         centeredSlides={true}
                         effect="coverflow"
-                        coverflowEffect={{
-                            rotate: 0,
-                            stretch: 0,
-                            depth: 100,
-                            modifier: 2,
-                            slideShadows: true,
-                        }}
-                        autoplay={{
-                            delay: 5000,
-                            disableOnInteraction: false,
-                        }}
-                        navigation={{
-                            nextEl: '.swiper-button-next-custom',
-                            prevEl: '.swiper-button-prev-custom',
-                        }}
+                        coverflowEffect={{ rotate: 0, stretch: 0, depth: 100, modifier: 2, slideShadows: true }}
+                        autoplay={{ delay: 5000, disableOnInteraction: false }}
+                        navigation={{ nextEl: '.swiper-button-next-custom', prevEl: '.swiper-button-prev-custom' }}
                         onSlideChange={(swiper: SwiperType) => setActiveSlide(swiper.activeIndex)}
                         loop={reviews.length > 2}
                         breakpoints={{
@@ -199,35 +182,25 @@ const HomeTestimonial = () => {
                                         index === activeSlide ? 'border-blue-200 shadow-2xl shadow-blue-100/50 scale-105' : 'border-gray-100 shadow-lg hover:shadow-xl hover:border-blue-100'
                                     }`}
                                 >
-                                    {/* Background gradient overlay */}
                                     <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 to-purple-50/30 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-
-                                    {/* Quote icon */}
                                     <div className="absolute top-6 right-6 opacity-10 group-hover:opacity-20 transition-opacity duration-300">
                                         <svg className="w-12 h-12 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
                                             <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
                                         </svg>
                                     </div>
-
                                     <div className="relative z-10 flex flex-col h-full">
-                                        {/* Enhanced Stars */}
                                         <StarRating rating={review.averageRating} />
-
-                                        {/* Testimonial Text */}
                                         <blockquote className="text-gray-700 mb-8 leading-relaxed text-lg flex-grow relative">
                                             <span className="text-2xl text-blue-300 absolute -top-2 -left-2">"</span>
                                             <span className="relative z-10">{review.comment}</span>
                                             <span className="text-2xl text-blue-300 absolute -bottom-4 -right-2">"</span>
                                         </blockquote>
-
-                                        {/* Enhanced Author section */}
                                         <div className="flex items-center gap-4 mt-auto pt-6 border-t border-gray-100">
                                             <Avatar name={review.reviewerName} />
                                             <div className="flex-1">
                                                 <div className="font-bold text-gray-900 text-lg">{maskName(review.reviewerName)}</div>
                                                 <div className="text-blue-600 font-semibold text-sm bg-blue-50 px-3 py-1 rounded-full inline-block">{review.reviewerRole}</div>
                                             </div>
-                                            {/* Verified badge */}
                                             <div className="text-green-500">
                                                 <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
                                                     <path
@@ -243,8 +216,6 @@ const HomeTestimonial = () => {
                             </SwiperSlide>
                         ))}
                     </Swiper>
-
-                    {/* Enhanced Navigation Buttons */}
                     {reviews.length > 1 && (
                         <div className="flex justify-center gap-6 mt-12">
                             <button className="swiper-button-prev-custom group w-14 h-14 rounded-full bg-white border-2 border-gray-200 shadow-lg flex items-center justify-center hover:border-blue-500 hover:shadow-xl transition-all duration-300 hover:scale-110">
@@ -261,16 +232,10 @@ const HomeTestimonial = () => {
                     )}
                 </div>
 
-                {/* Enhanced Stats Section */}
                 <div className={`mt-20 transition-all duration-1000 delay-500 transform ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}>
                     <div className="bg-white/80 backdrop-blur-sm rounded-3xl border border-white/40 shadow-2xl p-8 lg:p-12">
                         <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
-                            {[
-                                { number: '10,000+', label: 'Happy Customers', icon: '👥', color: 'from-blue-500 to-blue-600' },
-                                { number: '1M+', label: 'Documents Signed', icon: '📝', color: 'from-green-500 to-green-600' },
-                                { number: '99.9%', label: 'Uptime Guarantee', icon: '⚡', color: 'from-purple-500 to-purple-600' },
-                                { number: '24/7', label: 'Expert Support', icon: '🚀', color: 'from-orange-500 to-orange-600' },
-                            ].map((stat, index) => (
+                            {statsData.map((stat, index) => (
                                 <div key={index} className="text-center group hover:scale-105 transition-transform duration-300">
                                     <div
                                         className={`w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-r ${stat.color} flex items-center justify-center text-white text-2xl shadow-lg group-hover:shadow-xl transition-shadow duration-300`}
@@ -278,25 +243,24 @@ const HomeTestimonial = () => {
                                         {stat.icon}
                                     </div>
                                     <div className="text-3xl lg:text-4xl font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors duration-300">{stat.number}</div>
-                                    <div className="text-sm lg:text-base text-gray-600 font-medium">{stat.label}</div>
+                                    <div className="text-sm lg:text-base text-gray-600 font-medium">{t(stat.labelKey)}</div>
                                 </div>
                             ))}
                         </div>
                     </div>
                 </div>
 
-                {/* Call to Action */}
                 <div className={`text-center mt-16 transition-all duration-1000 delay-700 transform ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}>
                     <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-8 lg:p-12 text-white relative overflow-hidden">
                         <div className="absolute inset-0 bg-black/10"></div>
                         <div className="relative z-10">
-                            <h3 className="text-2xl lg:text-3xl font-bold mb-4">Ready to join our satisfied customers?</h3>
-                            <p className="text-blue-100 text-lg mb-8 max-w-2xl mx-auto">Start your free trial today and experience why thousands of professionals choose our platform</p>
+                            <h3 className="text-2xl lg:text-3xl font-bold mb-4">{t('testimonials.cta.title')}</h3>
+                            <p className="text-blue-100 text-lg mb-8 max-w-2xl mx-auto">{t('testimonials.cta.description')}</p>
                             <button
                                 onClick={() => navigate('/subscriptions')}
                                 className="bg-white text-blue-600 px-8 py-4 rounded-xl font-bold text-lg hover:bg-blue-50 transition-all duration-300 hover:scale-105 hover:shadow-xl shadow-lg"
                             >
-                                Start Free Trial
+                                {t('testimonials.cta.button')}
                             </button>
                         </div>
                     </div>

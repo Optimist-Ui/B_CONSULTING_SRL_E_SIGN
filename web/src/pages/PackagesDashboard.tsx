@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { AppDispatch, IRootState } from '../store';
 import { clearPackageState, startPackageCreation, setCurrentPackage } from '../store/slices/packageSlice';
 import { fetchPackageForOwner } from '../store/thunk/packageThunks';
@@ -8,6 +9,7 @@ import PackageCreationStepper from '../components/package-creator/PackageCreatio
 import { toast } from 'react-toastify';
 
 const PackagesDashboard: React.FC = () => {
+    const { t } = useTranslation();
     const dispatch = useDispatch<AppDispatch>();
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
@@ -24,7 +26,7 @@ const PackagesDashboard: React.FC = () => {
 
                     // Verify it's actually a draft
                     if (draftPackage.status !== 'Draft') {
-                        toast.error('This package is not a draft and cannot be edited.');
+                        toast.error(t('packagesDashboard.errors.notADraft') as string);
                         navigate('/dashboard');
                         return;
                     }
@@ -32,20 +34,20 @@ const PackagesDashboard: React.FC = () => {
                     // Load the draft into the editor
                     dispatch(setCurrentPackage(draftPackage));
                 } catch (error: any) {
-                    toast.error(error || 'Failed to load draft package.');
+                    toast.error(error || t('packagesDashboard.errors.loadFailed'));
                     navigate('/dashboard');
                 }
             } else {
                 // No draft ID, start a new package
                 if (!isCreatingOrEditingPackage) {
                     dispatch(clearPackageState());
-                    dispatch(startPackageCreation({ name: 'New Package' }));
+                    dispatch(startPackageCreation({ name: t('packagesDashboard.newPackageName') }));
                 }
             }
         };
 
         initializePackage();
-    }, [draftId, dispatch, navigate, isCreatingOrEditingPackage]);
+    }, [draftId, dispatch, navigate, isCreatingOrEditingPackage, t]);
 
     // Show loading state while fetching draft
     if (loading && draftId) {
@@ -53,7 +55,7 @@ const PackagesDashboard: React.FC = () => {
             <div className="p-6 dark:bg-gray-900 bg-gray-50 min-h-full flex items-center justify-center">
                 <div className="text-center">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                    <p className="text-gray-600 dark:text-gray-400">Loading draft package...</p>
+                    <p className="text-gray-600 dark:text-gray-400">{t('packagesDashboard.loadingDraft')}</p>
                 </div>
             </div>
         );
@@ -65,7 +67,7 @@ const PackagesDashboard: React.FC = () => {
 
     return (
         <div className="p-6 dark:bg-gray-900 bg-gray-50 min-h-full flex items-center justify-center">
-            <div className="text-center text-gray-600">Initializing package creation...</div>
+            <div className="text-center text-gray-600">{t('packagesDashboard.initializing')}</div>
         </div>
     );
 };

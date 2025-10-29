@@ -6,6 +6,7 @@ import { toast } from 'react-toastify';
 import Select from 'react-select';
 import PhoneInput, { isValidPhoneNumber } from 'react-phone-number-input';
 import 'react-phone-number-input/style.css';
+import { useTranslation } from 'react-i18next';
 
 import { IRootState, AppDispatch } from '../../store';
 import { updateUserProfile } from '../../store/thunk/authThunks';
@@ -25,24 +26,25 @@ interface ProfileFormProps {
     onDeleteAccount: () => void;
 }
 
-const ProfileSchema = Yup.object().shape({
-    firstName: Yup.string().required('First name is required').min(2).max(50),
-    lastName: Yup.string().required('Last name is required').min(2).max(50),
-    phone: Yup.string()
-        .max(25, 'Phone number too long')
-        .test('is-valid-phone', 'Invalid phone', (value) => !value || isValidPhoneNumber(value))
-        .nullable(),
-    language: Yup.object().nullable().required('Language is required'),
-});
+const getProfileSchema = (t: (key: string) => string) =>
+    Yup.object().shape({
+        firstName: Yup.string().required(t('profile.form.validation.firstName.required')).min(2).max(50),
+        lastName: Yup.string().required(t('profile.form.validation.lastName.required')).min(2).max(50),
+        phone: Yup.string()
+            .max(25, t('profile.form.validation.phone.max'))
+            .test('is-valid-phone', t('profile.form.validation.phone.invalid'), (value) => !value || isValidPhoneNumber(value || '')),
+        language: Yup.object().nullable().required(t('profile.form.validation.language.required')),
+    });
 
 const ProfileForm = ({ user, onDeleteAccount }: ProfileFormProps) => {
+    const { t } = useTranslation();
     const dispatch: AppDispatch = useDispatch();
     const { loading: authLoading } = useSelector((state: IRootState) => state.auth);
-    
+
     const [imagePreview, setImagePreview] = useState<string>('/assets/images/agent-1.png');
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const ProfileSchema = getProfileSchema(t);
 
-    // Initialize image preview when user changes
     useState(() => {
         if (user?.profileImageUrl) {
             setImagePreview(user.profileImageUrl);
@@ -74,9 +76,9 @@ const ProfileForm = ({ user, onDeleteAccount }: ProfileFormProps) => {
                     email: user.email,
                 })
             ).unwrap();
-            toast.success('Profile updated!');
+            toast.success(t('profile.messages.updateSuccess') as string);
         } catch (err: any) {
-            toast.error(err?.message || 'Update failed');
+            toast.error(err?.message || t('profile.messages.updateFailed'));
         }
     };
 
@@ -107,7 +109,7 @@ const ProfileForm = ({ user, onDeleteAccount }: ProfileFormProps) => {
                                 <input type="file" ref={fileInputRef} className="hidden" accept="image/png, image/jpeg" onChange={(e) => handleImageChange(e, setFieldValue)} />
                                 <div className="mt-4 flex justify-center md:justify-start gap-2">
                                     <button type="button" className="btn btn-outline-primary btn-sm" onClick={() => fileInputRef.current?.click()}>
-                                        Upload
+                                        {t('profile.form.image.upload')}
                                     </button>
                                     <button
                                         type="button"
@@ -117,38 +119,36 @@ const ProfileForm = ({ user, onDeleteAccount }: ProfileFormProps) => {
                                             setFieldValue('profileImage', null);
                                         }}
                                     >
-                                        Remove
+                                        {t('profile.form.image.remove')}
                                     </button>
                                 </div>
                             </div>
 
                             <div className="md:col-span-3 grid grid-cols-1 sm:grid-cols-2 gap-5">
                                 <div>
-                                    <label>First Name</label>
+                                    <label>{t('profile.form.firstName.label')}</label>
                                     <Field name="firstName" type="text" className="form-input" />
                                     <ErrorMessage name="firstName" component="div" className="text-danger text-sm mt-1" />
                                 </div>
                                 <div>
-                                    <label>Last Name</label>
+                                    <label>{t('profile.form.lastName.label')}</label>
                                     <Field name="lastName" type="text" className="form-input" />
                                     <ErrorMessage name="lastName" component="div" className="text-danger text-sm mt-1" />
                                 </div>
 
                                 <div className="sm:col-span-2">
-                                    <label>Current Email</label>
+                                    <label>{t('profile.form.email.label')}</label>
                                     <Field name="email" type="email" className="form-input bg-gray-100 dark:bg-gray-800" value={user.email} disabled />
-                                    <p className="text-xs text-gray-500 mt-1">
-                                        To change your email, go to the <span className="text-primary">Email tab</span>
-                                    </p>
+                                    <p className="text-xs text-gray-500 mt-1">{t('profile.form.email.note')}</p>
                                 </div>
 
                                 <div>
-                                    <label>Phone Number</label>
+                                    <label>{t('profile.form.phone.label')}</label>
                                     <PhoneInput international defaultCountry="BE" className="form-input" value={values.phone} onChange={(v) => setFieldValue('phone', v || '')} />
                                     <ErrorMessage name="phone" component="div" className="text-danger text-sm mt-1" />
                                 </div>
                                 <div>
-                                    <label>Language</label>
+                                    <label>{t('profile.form.language.label')}</label>
                                     <Select
                                         options={languageOptions}
                                         className="react-select-container"
@@ -161,10 +161,10 @@ const ProfileForm = ({ user, onDeleteAccount }: ProfileFormProps) => {
 
                                 <div className="sm:col-span-2 mt-3 flex flex-col sm:flex-row gap-3">
                                     <button type="submit" className="btn btn-primary" disabled={authLoading}>
-                                        {authLoading ? 'Saving...' : 'Save Changes'}
+                                        {authLoading ? t('profile.form.button.saving') : t('profile.form.button.save')}
                                     </button>
                                     <button type="button" className="btn btn-outline-danger" onClick={onDeleteAccount}>
-                                        Delete Account
+                                        {t('profile.form.button.delete')}
                                     </button>
                                 </div>
                             </div>

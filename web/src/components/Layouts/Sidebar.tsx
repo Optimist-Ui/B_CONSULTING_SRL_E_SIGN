@@ -25,8 +25,8 @@ import IconPlus from '../Icon/IconPlus';
 const NavItem: React.FC<{
     to: string;
     icon: React.ComponentType<{ className?: string }>;
-    text: string;
-}> = ({ to, icon: Icon, text }) => {
+    textKey: string; // Changed from 'text' to 'textKey' for clarity
+}> = ({ to, icon: Icon, textKey }) => {
     const navigate = useNavigate();
     const { t } = useTranslation();
     const { subscriptionStatus } = useSelector((state: IRootState) => state.subscription);
@@ -58,7 +58,7 @@ const NavItem: React.FC<{
                 <div className="flex items-center justify-between">
                     <div className="flex items-center">
                         <Icon className="group-hover:!text-primary shrink-0" />
-                        <span className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">{t(text)}</span>
+                        <span className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">{t(textKey)}</span>
                     </div>
                     {isLocked && <IconLockDots className="w-5 ms-6 h-5 text-gray-500" />}
                 </div>
@@ -75,7 +75,7 @@ const Sidebar = () => {
     const dispatch = useDispatch();
     const { t } = useTranslation();
 
-    const { subscriptionStatus, hasActiveSubscription, canCreatePackages } = useSubscription({
+    const { subscriptionStatus } = useSubscription({
         autoFetchStatus: true,
         fetchOnMount: true,
     });
@@ -118,20 +118,20 @@ const Sidebar = () => {
 
                     <PerfectScrollbar className="relative flex-grow">
                         <ul className="relative font-semibold space-y-0.5 p-4 py-0">
-                            <h2 className="py-3 px-4 text-white-dark text-xs font-extrabold uppercase dark:text-gray-500">Dashboard</h2>
+                            <h2 className="py-3 px-4 text-white-dark text-xs font-extrabold uppercase dark:text-gray-500">{t('sidebar.headings.dashboard')}</h2>
 
-                            <NavItem to="/dashboard" icon={IconMenuDocumentation} text="All Documents" />
-                            <NavItem to="/templates" icon={IconMenuElements} text="Templates" />
-                            <NavItem to="/contacts" icon={IconUsersGroup} text="Contacts List" />
-                            <NavItem to="/add-document" icon={IconPlus} text="Add Document" />
+                            <NavItem to="/dashboard" icon={IconMenuDocumentation} textKey="sidebar.nav.allDocuments" />
+                            <NavItem to="/templates" icon={IconMenuElements} textKey="sidebar.nav.templates" />
+                            <NavItem to="/contacts" icon={IconUsersGroup} textKey="sidebar.nav.contacts" />
+                            <NavItem to="/add-document" icon={IconPlus} textKey="sidebar.nav.addDocument" />
 
-                            <h2 className="py-3 px-4 text-white-dark text-xs font-extrabold uppercase dark:text-gray-500">Settings</h2>
+                            <h2 className="py-3 px-4 text-white-dark text-xs font-extrabold uppercase dark:text-gray-500">{t('sidebar.headings.settings')}</h2>
 
                             <li className="nav-item">
                                 <NavLink to="/subscriptions" className="group">
                                     <div className="flex items-center">
                                         <IconCreditCard className="group-hover:!text-primary shrink-0" />
-                                        <span className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">{t('Subscriptions')}</span>
+                                        <span className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">{t('sidebar.nav.subscriptions')}</span>
                                     </div>
                                 </NavLink>
                             </li>
@@ -139,7 +139,7 @@ const Sidebar = () => {
                                 <NavLink to="/payment-methods" className="group">
                                     <div className="flex items-center">
                                         <IconCreditCard className="group-hover:!text-primary shrink-0" />
-                                        <span className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">{t('Payment Methods')}</span>
+                                        <span className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">{t('sidebar.nav.paymentMethods')}</span>
                                     </div>
                                 </NavLink>
                             </li>
@@ -147,7 +147,7 @@ const Sidebar = () => {
                                 <NavLink to="/profile" className="group">
                                     <div className="flex items-center">
                                         <IconUser className="group-hover:!text-primary shrink-0" />
-                                        <span className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">{t('Profile')}</span>
+                                        <span className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">{t('sidebar.nav.profile')}</span>
                                     </div>
                                 </NavLink>
                             </li>

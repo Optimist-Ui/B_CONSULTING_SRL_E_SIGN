@@ -2,6 +2,7 @@ import React, { ComponentType } from 'react';
 import { PackageField } from '../../store/slices/packageSlice';
 import { SignatureValue } from '../../store/slices/participantSlice';
 import { FiCheckCircle, FiClock, FiEdit3, FiXCircle } from 'react-icons/fi';
+import { useTranslation } from 'react-i18next';
 
 const FiCheckCircleTyped = FiCheckCircle as ComponentType<{ className?: string }>;
 const FiClockTyped = FiClock as ComponentType<{ className?: string }>;
@@ -12,23 +13,20 @@ interface Props {
     field: PackageField;
     currentScale: number;
     baseScale: number;
-    packageStatus?: string; // 👈 ADD THIS
+    packageStatus?: string;
 }
 
 const StatusFieldRenderer: React.FC<Props> = ({ field, currentScale, baseScale, packageStatus }) => {
+    const { t } = useTranslation();
     const isSigned = field.type === 'signature' && field.value;
     const isFilled = !isSigned && field.value != null && field.value !== '';
     const assignedUser = field.assignedUsers && field.assignedUsers.length > 0 ? field.assignedUsers[0] : null;
 
-    // Check status at multiple levels
     const isRejected = packageStatus === 'Rejected' || (field as any).status === 'Rejected' || (assignedUser as any)?.status === 'Rejected';
-
     const isRevoked = packageStatus === 'Revoked' || (field as any).status === 'Revoked' || (assignedUser as any)?.status === 'Revoked';
-
     const isDraft = packageStatus === 'Draft';
 
     const getStatusInfo = () => {
-        // Rejected - Red
         if (isRejected) {
             return {
                 bg: 'bg-red-500/20',
@@ -36,7 +34,6 @@ const StatusFieldRenderer: React.FC<Props> = ({ field, currentScale, baseScale, 
                 textColor: 'text-red-800',
             };
         }
-        // Revoked - Orange
         if (isRevoked) {
             return {
                 bg: 'bg-orange-500/20',
@@ -44,7 +41,6 @@ const StatusFieldRenderer: React.FC<Props> = ({ field, currentScale, baseScale, 
                 textColor: 'text-orange-800',
             };
         }
-        // Draft - Yellow
         if (isDraft) {
             return {
                 bg: 'bg-yellow-500/20',
@@ -52,7 +48,6 @@ const StatusFieldRenderer: React.FC<Props> = ({ field, currentScale, baseScale, 
                 textColor: 'text-yellow-800',
             };
         }
-        // Signed - Green
         if (isSigned) {
             return {
                 bg: 'bg-green-500/20',
@@ -60,7 +55,6 @@ const StatusFieldRenderer: React.FC<Props> = ({ field, currentScale, baseScale, 
                 textColor: 'text-green-800',
             };
         }
-        // Filled - Blue
         if (isFilled) {
             return {
                 bg: 'bg-blue-500/20',
@@ -68,7 +62,6 @@ const StatusFieldRenderer: React.FC<Props> = ({ field, currentScale, baseScale, 
                 textColor: 'text-blue-800',
             };
         }
-        // Pending - Gray
         return {
             bg: 'bg-gray-500/20',
             border: 'border-gray-500',
@@ -78,7 +71,6 @@ const StatusFieldRenderer: React.FC<Props> = ({ field, currentScale, baseScale, 
 
     const status = getStatusInfo();
 
-    // Calculate scale ratio
     const scaleRatio = currentScale / baseScale;
 
     const baseStyles: React.CSSProperties = {
@@ -98,40 +90,53 @@ const StatusFieldRenderer: React.FC<Props> = ({ field, currentScale, baseScale, 
         <div
             style={baseStyles}
             className={`absolute border-2 border-dashed rounded backdrop-blur-sm transition-all duration-200 hover:shadow-lg ${status.bg} ${status.border}`}
-            title={`${field.label} - ${field.type} - Assigned to: ${assignedUser?.contactName || 'N/A'} - Status: ${
-                isRejected ? 'Rejected' : isRevoked ? 'Revoked' : isDraft ? 'Draft' : isSigned ? 'Signed' : isFilled ? 'Filled' : 'Pending'
-            }`}
+            title={t('statusFieldRenderer.tooltip', {
+                label: field.label,
+                type: field.type,
+                assignedTo: assignedUser?.contactName || t('statusFieldRenderer.unassigned'),
+                status: isRejected
+                    ? t('statusFieldRenderer.status.rejected')
+                    : isRevoked
+                    ? t('statusFieldRenderer.status.revoked')
+                    : isDraft
+                    ? t('statusFieldRenderer.status.draft')
+                    : isSigned
+                    ? t('statusFieldRenderer.status.signed')
+                    : isFilled
+                    ? t('statusFieldRenderer.status.filled')
+                    : t('statusFieldRenderer.status.pending'),
+            })}
         >
             <div className="w-full h-full flex flex-col p-1 overflow-hidden" style={{ fontSize }}>
                 <div className={`font-semibold truncate leading-tight ${status.textColor}`}>{field.label}</div>
-                <div className={`text-xs truncate opacity-90 ${status.textColor}`}>{assignedUser?.contactName || 'Unassigned'}</div>
+                <div className={`text-xs truncate opacity-90 ${status.textColor}`}>{assignedUser?.contactName || t('statusFieldRenderer.unassigned')}</div>
 
                 <div className="flex-1 flex items-end">
                     {isRejected && (
                         <div className="w-full bg-red-600/30 backdrop-blur-sm px-1 py-0.5 rounded text-xs flex items-center">
                             <FiXCircleTyped className="w-3 h-3 mr-1 flex-shrink-0 text-red-700" />
-                            <span className="truncate text-red-900 font-semibold">Rejected</span>
+                            <span className="truncate text-red-900 font-semibold">{t('statusFieldRenderer.status.rejected')}</span>
                         </div>
                     )}
 
                     {!isRejected && isRevoked && (
                         <div className="w-full bg-orange-600/30 backdrop-blur-sm px-1 py-0.5 rounded text-xs flex items-center">
                             <FiXCircleTyped className="w-3 h-3 mr-1 flex-shrink-0 text-orange-700" />
-                            <span className="truncate text-orange-900 font-semibold">Revoked</span>
+                            <span className="truncate text-orange-900 font-semibold">{t('statusFieldRenderer.status.revoked')}</span>
                         </div>
                     )}
 
                     {!isRejected && !isRevoked && isDraft && (
                         <div className="w-full bg-yellow-600/30 backdrop-blur-sm px-1 py-0.5 rounded text-xs flex items-center">
                             <FiEdit3Typed className="w-3 h-3 mr-1 flex-shrink-0 text-yellow-700" />
-                            <span className="truncate text-yellow-900 font-semibold">Draft</span>
+                            <span className="truncate text-yellow-900 font-semibold">{t('statusFieldRenderer.status.draft')}</span>
                         </div>
                     )}
 
                     {!isRejected && !isRevoked && !isDraft && isSigned && (
                         <div className="w-full bg-black/20 backdrop-blur-sm px-1 py-0.5 rounded text-xs flex items-center">
                             <FiCheckCircleTyped className="w-3 h-3 mr-1 flex-shrink-0" />
-                            <span className="truncate text-white">Signed by {(field.value as SignatureValue)?.signedBy}</span>
+                            <span className="truncate text-white">{t('statusFieldRenderer.status.signedBy', { signedBy: (field.value as SignatureValue)?.signedBy })}</span>
                         </div>
                     )}
 
@@ -145,7 +150,7 @@ const StatusFieldRenderer: React.FC<Props> = ({ field, currentScale, baseScale, 
                     {!isRejected && !isRevoked && !isDraft && !isSigned && !isFilled && (
                         <div className="w-full bg-black/20 backdrop-blur-sm px-1 py-0.5 rounded text-xs flex items-center">
                             <FiClockTyped className="w-3 h-3 mr-1 flex-shrink-0" />
-                            <span className="truncate text-white">Pending</span>
+                            <span className="truncate text-white">{t('statusFieldRenderer.status.pending')}</span>
                         </div>
                     )}
                 </div>

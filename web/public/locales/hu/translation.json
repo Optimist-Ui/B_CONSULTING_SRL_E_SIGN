@@ -1,128 +1,2848 @@
 {
-    "dashboard": "Irányítópult",
-    "sales": "Értékesítés",
-    "analytics": "Analitika",
-    "apps": "Alkalmazások elemre",
-    "components": "Alkatrészek",
-    "elements": "Elemek",
-    "font_icons": "Betűikonok",
-    "widgets": "Widgetek",
-    "tables": "Táblázatok",
-    "datatables": "Adattáblák",
-    "forms": "Űrlapok",
-    "users": "Felhasználók",
-    "pages": "Oldalak",
-    "authentication": "Hitelesítés",
-    "drag_and_drop": "Drag and Drop",
-    "maps": "Térképek",
-    "charts": "Diagramok",
-    "starter_kit": "Kezdő csomag",
-    "documentation": "Dokumentáció",
-    "ui_kit": "UI Kit",
-    "more": "Több",
-    "finance": "Pénzügy",
-    "crypto": "Crypto",
-    "chat": "csevegés",
-    "mailbox": "postafiók",
-    "todo_list": "tennivalók",
-    "notes": "jegyzet",
-    "scrumboard": "scrumboard",
-    "contacts": "Kapcsolatok",
-    "invoice": "számla",
-    "list": "lista",
-    "preview": "Előnézet",
-    "add": "Hozzáadás",
-    "edit": "Szerkesztés",
-    "calendar": "Naptár",
-    "tabs": "lapokat",
-    "accordions": "harmonika",
-    "modals": "modális",
-    "cards": "Kártyák",
-    "carousel": "körhinta",
-    "countdown": "visszaszámlálás",
-    "counter": "számlálók",
-    "sweet_alerts": "Édes figyelmeztetések",
-    "timeline": "Idővonal",
-    "notifications": "értesítéseket",
-    "media_object": "MediaObject",
-    "list_group": "ListGroup",
-    "pricing_tables": "Ártáblázatok",
-    "lightbox": "világító doboz",
-    "alerts": "Figyelmeztetések",
-    "avatar": "avatar",
-    "badges": "jelvényeket",
-    "breadcrumbs": "zsemlemorzsa",
-    "buttons": "gombokat",
-    "button_groups": "Gombcsoportok",
-    "color_library": "ColorLibrary",
-    "dropdown": "ledob",
-    "infobox": "információs doboz",
-    "jumbotron": "jumbotron",
-    "loader": "rakodók",
-    "pagination": "lapszámozás",
-    "popovers": "popovers",
-    "progress_bar": "fejlődésmutató",
-    "search": "Keresés",
-    "tooltips": "szerszám tippek",
-    "treeview": "fanézet",
-    "typography": "Tipográfia",
-    "basic": "alapvető",
-    "order_sorting": "Rendelési rendezés",
-    "multi_column": "Több oszlop",
-    "multiple_tables": "Több asztal",
-    "alt_pagination": "Alt. lapszámozás",
-    "range_search": "Tartomány keresése",
-    "export": "export",
-    "input_group": "Beviteli csoport",
-    "layouts": "elrendezések",
-    "validation": "érvényesítés",
-    "input_mask": "Beviteli maszk",
-    "select2": "Select2",
-    "touchspin": "érintéspörgetés",
-    "checkbox_and_radio": "Jelölőnégyzet és rádió",
-    "switches": "kapcsolók",
-    "wizards": "Varázslók",
-    "file_upload": "fájlfeltöltés",
-    "quill_editor": "Quill szerkesztő",
-    "markdown_editor": "Markdown szerkesztő",
-    "date_and_range_picker": "Dátum- és tartományválasztó",
-    "clipboard": "vágólap",
-    "user_and_pages": "Felhasználók és oldalak",
-    "profile": "profilok",
-    "account_settings": "Fiók beállítások",
-    "knowledge_base": "Tudásbázis",
-    "contact_form": "Kapcsolatfelvételi űrlap",
-    "faq": "GYIK",
-    "coming_soon": "Hamarosan",
-    "error": "hibákat",
-    "maintenence": "karbantartás",
-    "login_boxed": "Bejelentkezés dobozban",
-    "register_boxed": "Regisztráció Dobozban",
-    "unlock_boxed": "Dobozos zár feloldása",
-    "recover_id_boxed": "Helyreállítási azonosító dobozban",
-    "login_cover": "Bejelentkezési borító",
-    "register_cover": "Regisztrációs borító",
-    "unlock_cover": "Nyissa ki a fedelet",
-    "recover_id_cover": "Id Cover helyreállítása",
-    "supports": "Támogatja",
-    "login": "Belépés",
-    "lockscreen": "Lezárási képernyő",
-    "password_recovery": "Jelszó visszaállítás",
-    "register": "Regisztráció",
-    "404": "404",
-    "500": "500",
-    "503": "503",
-    "user_interface": "Felhasználói felület",
-    "tables_and_forms": "Táblázatok és Űrlapok",
-    "columns_filter": "Oszlopok szűrője",
-    "column_chooser": "Oszlopválasztó",
-    "advanced": "Fejlett",
-    "checkbox": "Jelölőnégyzet",
-    "skin": "Bőr",
-    "sticky_header": "Ragadós fejléc",
-    "clone_header": "Fejléc klónozása",
-    "coming_soon_boxed": "Hamarosan Boxed",
-    "coming_soon_cover": "Hamarosan Borító",
-    "contact_us_boxed": "Lépjen kapcsolatba velünk Boxed",
-    "contact_us_cover": "Lépjen kapcsolatba velünk Borító"
+    "navbar": {
+        "home": "Főoldal",
+        "pricing": "Árak",
+        "about": "Rólunk",
+        "faq": "GYIK",
+        "eidas": "eIDAS",
+        "termsAndPrivacy": "Feltételek és Adatvédelem",
+        "signIn": "Bejelentkezés",
+        "dashboard": "Vezérlőpult",
+        "logout": "Kijelentkezés",
+        "loginRegister": "Bejelentkezés / Regisztráció",
+        "goToDashboard": "Ugrás a Vezérlőpultra"
+    },
+    "authModal": {
+        "title": "Csatlakozzon Hozzánk",
+        "description": "Válasszon egy lehetőséget a folytatáshoz és a dokumentumok kezeléséhez.",
+        "loginButton": "Bejelentkezés a Fiókjába",
+        "registerButton": "Új Fiók Létrehozása"
+    },
+    "hero": {
+        "headline": {
+            "signDocuments": "Dokumentumok Aláírása",
+            "secureContracts": "Biztonságos Szerződések",
+            "digitalAgreements": "Digitális Megállapodások",
+            "eSignatures": "E-Aláírások",
+            "suffix": "Digitálisan"
+        },
+        "subheadline": "A legbiztonságosabb és legfelhasználóbarátabb elektronikus aláírási platform minden méretű vállalkozás számára.",
+        "features": {
+            "encryption": "Titkosítás",
+            "encryptionValue": "256-bit",
+            "uptime": "Rendelkezésre állás",
+            "uptimeValue": "99.9%",
+            "binding": "Kötelező érvényű",
+            "bindingValue": "Jogi"
+        },
+        "cta": {
+            "startTrial": "Ingyenes Próbaverzió Indítása",
+            "watchDemo": "Demo Megtekintése"
+        },
+        "documents": {
+            "contractAgreement": "Szerződési Megállapodás",
+            "invoiceDocument": "Számladokumentum",
+            "legalAgreement": "Jogi Megállapodás",
+            "businessProposal": "Üzleti Javaslat",
+            "termsConditions": "Általános Szerződési Feltételek",
+            "signatureRequired": "Aláírás Szükséges:",
+            "clickToSign": "Kattintson az Aláíráshoz",
+            "readyForSignature": "Kész az aláírásra"
+        }
+    },
+    "features": {
+        "tag": "Hatékony Funkciók",
+        "title": {
+            "main": "Minden, amire szüksége van a",
+            "highlight": "Digitális Aláírásokhoz"
+        },
+        "description": "Átfogó platformunk minden eszközt és biztonsági funkciót biztosít, amire szüksége van a dokumentum aláírási folyamatának egyszerűsítéséhez.",
+        "list": {
+            "legallyBinding": {
+                "title": "Jogi Érvényű",
+                "description": "Minden aláírás jogilag érvényes és megfelel a nemzetközi e-aláírási törvényeknek, beleértve az eIDAS-t és az UETA-t."
+            },
+            "bankSecurity": {
+                "title": "Banki Szintű Biztonság",
+                "description": "Fejlett 256-bites SSL titkosítás, többfaktoros hitelesítés és biztonságos felhőalapú tárolás védi a dokumentumait."
+            },
+            "lightningFast": {
+                "title": "Villámgyors",
+                "description": "Fejezze be a dokumentum aláírását kevesebb mint 60 másodperc alatt. Nincs letöltés, nincs nyomtatás, nincs késedelem."
+            },
+            "mobileOptimized": {
+                "title": "Mobilra Optimalizált",
+                "description": "Zökkenőmentesen írjon alá dokumentumokat bármely eszközön – asztali gépen, táblagépen vagy okostelefonon, reszponzív kialakításunkkal."
+            },
+            "multiPartySigning": {
+                "title": "Többoldalú Aláírás",
+                "description": "Gyűjtsön aláírásokat több féltől automatikus emlékeztetőkkel és valós idejű állapotkövetéssel."
+            },
+            "auditTrail": {
+                "title": "Részletes Audit Napló",
+                "description": "Teljes körű audit napló időbélyegzőkkel, IP-címekkel és teljesítési tanúsítvánnyal a teljes átláthatóság érdekében."
+            }
+        },
+        "benefits": {
+            "title": "Ezrek Bizalmát Élvezi",
+            "description": "Csatlakozzon világszerte azokhoz a vállalkozásokhoz, amelyek platformunkkal egyszerűsítették a dokumentumfolyamataikat.",
+            "faster": {
+                "label": "Gyorsabb, mint a papír",
+                "description": "Munkafolyamatok elvégzése percek alatt, nem napok alatt"
+            },
+            "uptime": {
+                "label": "Rendelkezésre állási garancia",
+                "description": "Mindig elérhető, amikor szüksége van rá"
+            },
+            "encryption": {
+                "label": "SSL titkosítás",
+                "description": "Vállalati szintű biztonság"
+            },
+            "support": {
+                "label": "Szakértői támogatás",
+                "description": "Segítség, amikor csak szüksége van rá"
+            }
+        },
+        "cta": {
+            "startTrial": "Ingyenes Próbaverzió Indítása",
+            "learnMore": "Tudjon meg többet"
+        }
+    },
+    "about": {
+        "tag": "✨ Az I-Sign.eu-ról",
+        "title": {
+            "main": "A bizalom újraértelmezése a",
+            "highlight": "Digitális Érában"
+        },
+        "subtitle": {
+            "prefix": "Egy dokumentum aláírásának",
+            "connector": "és"
+        },
+        "keywords": {
+            "effortless": "könnyednek",
+            "secure": "biztonságosnak",
+            "sustainable": "fenntarthatónak"
+        },
+        "quote": "Minden digitális aláírás egy lépés a tisztább, gyorsabb és összekapcsoltabb világ felé.",
+        "mission": {
+            "title": "Küldetésünk",
+            "description": "Tegyük a digitális bizalmat mindenki számára elérhetővé, lehetővé téve a biztonságos, hatékony és fenntartható üzleti munkafolyamatokat."
+        },
+        "vision": {
+            "title": "Jövőképünk",
+            "description": "Egy papírmentes világ, ahol a megállapodások olyan könnyen áramlanak, mint az ötletek, fenntartható innovációval támogatva."
+        },
+        "sustainability": {
+            "title": {
+                "main": "Elkötelezettség egy",
+                "highlight": "Szén-Dioxid-Semleges Jövő Iránt"
+            },
+            "description": "Minden aláírt dokumentum hozzájárul egy fenntartható ökoszisztémához",
+            "features": {
+                "co2": {
+                    "title": "CO₂ Csökkentés",
+                    "description": "Papírhulladék csökkentése"
+                },
+                "greenOps": {
+                    "title": "Zöld Műveletek",
+                    "description": "Megújuló energiát használó adatközpontok"
+                },
+                "reforestation": {
+                    "title": "Újraerdősítés",
+                    "description": "Globális faültetés"
+                },
+                "innovation": {
+                    "title": "Fenntartható Innováció",
+                    "description": "Technológia a környezetért"
+                }
+            }
+        },
+        "whyChooseUs": {
+            "title": "Miért válassza az I-Sign.eu-t?",
+            "description": "Tapasztalja meg a korlátok nélküli zökkenőmentes aláírást",
+            "features": {
+                "secure": {
+                    "title": "Tervezésből Adódó Biztonság",
+                    "description": "eIDAS, GDPR és ISO 27001 kompatibilis"
+                },
+                "fast": {
+                    "title": "Gyors és Egyszerű",
+                    "description": "Aláírás másodpercek alatt, letöltés nélkül"
+                },
+                "integrated": {
+                    "title": "Integrált Munkafolyamatok",
+                    "description": "Csatlakozás 500+ üzleti eszközhöz"
+                },
+                "automation": {
+                    "title": "Intelligens Automatizálás",
+                    "description": "Automatikus emlékeztetők és audit naplók"
+                }
+            }
+        },
+        "cta": {
+            "title": {
+                "main": "Csatlakozzon a",
+                "highlight": "Digitális Bizalom Forradalmához"
+            },
+            "description": "Legyen része a fenntartható jövőnek",
+            "button": "Feliratkozás Most"
+        }
+    },
+    "pricing": {
+        "tag": "Egyszerű és Átlátható Árazás",
+        "title": {
+            "main": "Válassza ki a Tökéletes",
+            "highlight": "Aláírási Élményt"
+        },
+        "description": "Induljon ingyen, és skálázódjon bizalommal. Minden csomag tartalmazza a vállalati szintű biztonságot, dedikált támogatást és az iparágvezető rendelkezésre állási garanciánkat.",
+        "billing": {
+            "monthly": "Havi Számlázás",
+            "yearly": "Éves Számlázás",
+            "save": "Spóroljon 20%-ot"
+        },
+        "plans": {
+            "popularBadge": "⭐ Legnépszerűbb Választás",
+            "perMonth": "/hó",
+            "billedYearly": "Éves díja: €{{price}}",
+            "starter": {
+                "description": "Tökéletes magánszemélyeknek és kisebb csapatoknak, akik most kezdenek."
+            },
+            "pro": {
+                "description": "Legjobb érték a növekvő vállalkozások és professzionális csapatok számára."
+            },
+            "enterprise": {
+                "description": "Teljes körű megoldás nagy szervezetek számára, egyedi igényekkel."
+            }
+        },
+        "buttons": {
+            "contactSales": "Értékesítés Kapcsolat",
+            "startFree": "Kezdje Ingyen Ma",
+            "startTrial": "14 Napos Ingyenes Próbaverzió Indítása"
+        },
+        "footerNotice": "🔒 Nincs beállítási díj • Bármikor lemondható • 30 napos garancia",
+        "enterpriseCta": {
+            "title": "Egyedi Vállalati Megoldásra van szüksége?",
+            "description": "Kérjen személyre szabott árajánlatot és dedikált támogatást szervezete egyedi igényeire szabva.",
+            "button": "Demo Hívás Ütemezése"
+        }
+    },
+    "faq": {
+        "title": {
+            "main": "Gyakran Ismételt",
+            "highlight": "Kérdések"
+        },
+        "description": "Találja meg a válaszokat az i-aláírási platformunkkal és szolgáltatásainkkal kapcsolatos gyakori kérdésekre.",
+        "buttons": {
+            "showMore": "Többet Mutat",
+            "showLess": "Kevesebbet Mutat",
+            "learnMore": "Tudjon meg többet az Aláírásokról"
+        },
+        "visual": {
+            "uptimeLabel": "Rendelkezésre állás",
+            "bindingValue": "Jogi",
+            "bindingLabel": "Kötelező érvényű",
+            "features": {
+                "security": "Banki Szintű Biztonság",
+                "tracking": "Valós idejű Követés",
+                "api": "API Integráció",
+                "storage": "Korlátlan Tárhely"
+            },
+            "cta": "Ingyenes Próbaverzió Indítása"
+        },
+        "questions": {
+            "q1": {
+                "question": "Mi az i-aláírási eszköz?",
+                "answer": "Az i-aláírási eszközünk egy biztonságos digitális megoldás, amely lehetővé teszi a dokumentumok online aláírását, küldését és kezelését, megszüntetve a nyomtatás, szkennelés vagy postázás szükségességét."
+            },
+            "q2": {
+                "question": "Ki használhatja az i-aláírási eszközt?",
+                "answer": "Minden méretű vállalkozás, szabadúszó és magánszemély számára készült, akiknek jogilag alá kell írniuk, vagy aláírást kell kérniük dokumentumokon."
+            },
+            "q3": {
+                "question": "Szükségük van az aláíróknak fiókra a dokumentumok aláírásához?",
+                "answer": "Nem. A címzettek fiók létrehozása nélkül is aláírhatják a dokumentumokat. Csak egy biztonságos linket kapnak az áttekintéshez és aláíráshoz."
+            },
+            "q4": {
+                "question": "Jogi érvényű az i-aláírási eszköz?",
+                "answer": "Igen. Megoldásunk megfelel a főbb i-aláírási szabályozásoknak, beleértve az eIDAS-t (EU), az eSIGN Act-et (USA) és az UETA-t, így az aláírt dokumentumok jogilag érvényesek és végrehajthatók."
+            },
+            "q5": {
+                "question": "Mennyire biztonságosak a dokumentumaim?",
+                "answer": "Minden dokument titkosítva van az átvitel és a tárolás során. SSL/TLS titkosítást és iparági szabványos biztonsági intézkedéseket alkalmazunk adatainak védelme érdekében."
+            },
+            "q6": {
+                "question": "Tudom követni, hogy ki mikor írta alá a dokumentumomat?",
+                "answer": "Igen. Minden dokumenthez tartozik egy részletes audit napló, amely megmutatja, mikor nyitották meg, tekintették meg és írták alá."
+            },
+            "q7": {
+                "question": "A eszköz GDPR-kompatibilis?",
+                "answer": "Abszolút. Követjük a GDPR irányelveit az adatvédelemre, tárolásra és a hozzájárulások kezelésére vonatkozóan."
+            },
+            "q8": {
+                "question": "Világszerte elfogadottak az i-aláírások?",
+                "answer": "Az e-aláírásokat a legtöbb országban jogilag elismerik. Bizonyos speciális dokumentumok (például végrendeletek, tulajdoni lapok vagy bírósági beadványok) azonban továbbra is igényelhetnek kézzel írott aláírást."
+            },
+            "q9": {
+                "question": "Testreszabhatom az aláírási stílusomat?",
+                "answer": "Igen. Rajzolhatja az aláírását, feltölthet egy képet, vagy választhat az előre meghatározott stílusok közül."
+            },
+            "q10": {
+                "question": "Milyen fájltípusok támogatottak?",
+                "answer": "Támogatjuk a PDF, Word, Excel és a leggyakoribb dokumentumformátumokat."
+            },
+            "q11": {
+                "question": "Aláírhatok mobil eszközökön?",
+                "answer": "Igen. Eszközünk teljesen reszponzív, és működik okostelefonokon, táblagépeken és asztali gépeken is."
+            },
+            "q12": {
+                "question": "Kérhetek több aláírást egy dokumentumon?",
+                "answer": "Igen. Kijelölhet aláírási szerepeket, beállíthatja az aláírási sorrendet, és több aláírást gyűjthet."
+            },
+            "q13": {
+                "question": "Beállíthatok emlékeztetőket az aláíratlan dokumentumokhoz?",
+                "answer": "Igen. Automatikus emlékeztetők küldhetők a címzetteknek, amíg alá nem írják."
+            },
+            "q14": {
+                "question": "Megakadályozhatom a dokumentum változásait az aláírás után?",
+                "answer": "Igen. Az aláírás után a dokumentum zárolva van, hogy megakadályozza a további módosításokat."
+            },
+            "q15": {
+                "question": "Van ingyenes próbaverzió?",
+                "answer": "Igen. Korlátozott funkciókkal rendelkező ingyenes próbaverziót kínálunk, hogy tesztelhesse az eszközt a frissítés előtt."
+            },
+            "q16": {
+                "question": "Kínálnak csapat- vagy vállalati terveket?",
+                "answer": "Igen. Rugalmas terveink vannak magánszemélyek, csapatok és nagy szervezetek számára, további funkciókkal, mint például a tömeges küldés, a márkajelzés és az integrációk."
+            },
+            "q17": {
+                "question": "Milyen fizetési módokat fogadnak el?",
+                "answer": "Elfogadjuk a főbb hitel-/betéti kártyákat, a PayPal-t és a számlaalapú fizetéseket vállalati ügyfelek számára."
+            }
+        },
+        "disclaimer": {
+            "title": "Jogi nyilatkozat:",
+            "text": "A fenti tartalom kizárólag általános tájékoztató jellegű, és nem minősül jogi tanácsadásnak. Kérjük, forduljon képzett jogi szakemberhez az Ön konkrét helyzetére vonatkozó útmutatásért."
+        },
+        "lastUpdated": "Utolsó frissítés: {{date}}"
+    },
+    "testimonials": {
+        "loading": "Referenciák betöltése...",
+        "error": {
+            "title": "Nincsenek elérhető referenciák",
+            "description": "Nézzen vissza később a vásárlói véleményekért és visszajelzésekért."
+        },
+        "header": {
+            "tag": "Vásárlói Vélemények",
+            "title": {
+                "main": "Ezrek",
+                "highlight": "Szeretik",
+                "suffix": "világszerte a szakemberek közül"
+            },
+            "description": "Csatlakozzon a növekvő üzleti közösséghez, amely megbízik platformunkban digitális aláírási igényeik kielégítésére"
+        },
+        "stats": {
+            "customers": "Elégedett Ügyfelek",
+            "documents": "Aláírt Dokumentumok",
+            "uptime": "Rendelkezésre állási Garancia",
+            "support": "Szakértői Támogatás"
+        },
+        "cta": {
+            "title": "Készen áll a csatlakozásra elégedett ügyfeleinkhez?",
+            "description": "Indítsa el ingyenes próbaverzióját még ma, és tapasztalja meg, miért választják szakemberek ezrei platformunkat",
+            "button": "Ingyenes Próbaverzió Indítása"
+        }
+    },
+    "footer": {
+        "description": "A legbiztonságosabb és legfelhasználóbarátabb elektronikus aláírási platform minden méretű vállalkozás számára. Írjon alá dokumentumokat digitálisan, magabiztosan.",
+        "certification": "SOC 2 Type II tanúsítvánnyal rendelkezik",
+        "quickLinks": {
+            "title": "Gyors Linkek",
+            "home": "Főoldal",
+            "about": "Rólunk",
+            "pricing": "Árak",
+            "faq": "GYIK"
+        },
+        "legal": {
+            "title": "Jogi & Támogatás",
+            "privacy": "Adatvédelmi Szabályzat",
+            "terms": "Szolgáltatási Feltételek",
+            "security": "Biztonság",
+            "help": "Súgó",
+            "contact": "Kapcsolatfelvétel a Támogatással"
+        },
+        "copyright": "© {{year}} I-Sign. Minden jog fenntartva."
+    },
+    "login": {
+        "meta": {
+            "title": "Bejelentkezés"
+        },
+        "branding": {
+            "welcome": "Üdvözöljük a",
+            "description": "A legbiztonságosabb és legfelhasználóbarátabb elektronikus aláírási platform minden méretű vállalkozás számára.",
+            "features": {
+                "encryption": {
+                    "title": "256-bites Titkosítás",
+                    "description": "Banki szintű biztonság"
+                },
+                "uptime": {
+                    "title": "99.9% Rendelkezésre állás",
+                    "description": "Mindig elérhető"
+                },
+                "binding": {
+                    "title": "Jogi Érvényű",
+                    "description": "Megfelelő aláírások"
+                }
+            }
+        },
+        "form": {
+            "header": {
+                "title": "Bejelentkezés",
+                "description": "Üdvözöljük újra! Kérjük, adja meg adatait."
+            },
+            "email": {
+                "label": "E-mail cím",
+                "placeholder": "Adja meg e-mail címét"
+            },
+            "password": {
+                "label": "Jelszó",
+                "placeholder": "Adja meg jelszavát"
+            },
+            "rememberMe": "Emlékezz rám",
+            "forgotPassword": "Elfelejtette a jelszavát?",
+            "button": {
+                "default": "Bejelentkezés",
+                "loading": "Bejelentkezés folyamatban..."
+            },
+            "divider": "vagy",
+            "signup": {
+                "prompt": "Nincs még fiókja?",
+                "link": "Regisztráció"
+            }
+        },
+        "footer": {
+            "copyright": "© {{year}} i-sign.eu. Minden jog fenntartva."
+        },
+        "messages": {
+            "success": "Sikeres bejelentkezés!",
+            "error": "Sikertelen bejelentkezés. Kérjük, ellenőrizze hitelesítő adatait."
+        }
+    },
+    "register": {
+        "meta": {
+            "title": "Regisztráció"
+        },
+        "messages": {
+            "success": "Sikeres regisztráció!",
+            "error": "Sikertelen regisztráció. Kérjük, próbálja újra."
+        },
+        "branding": {
+            "welcome": "Üdvözöljük a",
+            "description": "Csatlakozzon több ezer vállalkozáshoz, amelyek megbíznak platformunkban a biztonságos elektronikus aláírásokhoz.",
+            "features": {
+                "setup": {
+                    "title": "Gyors Beállítás",
+                    "description": "Kezdje el perceken belül"
+                },
+                "secure": {
+                    "title": "Biztonságos és Megfelelő",
+                    "description": "Iparági szabványú biztonság"
+                },
+                "business": {
+                    "title": "Üzletre Kész",
+                    "description": "Vállalati funkciók is benne vannak"
+                }
+            }
+        },
+        "form": {
+            "header": {
+                "title": "Regisztráció",
+                "description": "Hozza létre fiókját a kezdéshez."
+            },
+            "firstName": {
+                "label": "Keresztnév",
+                "placeholder": "Adja meg keresztnevét"
+            },
+            "lastName": {
+                "label": "Vezetéknév",
+                "placeholder": "Adja meg vezetéknevét"
+            },
+            "email": {
+                "label": "E-mail cím",
+                "placeholder": "Adja meg e-mail címét"
+            },
+            "password": {
+                "label": "Jelszó",
+                "placeholder": "Hozzon létre jelszót (min. 6 karakter)"
+            },
+            "button": {
+                "default": "Fiók Létrehozása",
+                "loading": "Fiók Létrehozása folyamatban..."
+            },
+            "signin": {
+                "prompt": "Már van fiókja?",
+                "link": "Bejelentkezés"
+            }
+        },
+        "validation": {
+            "firstName": {
+                "min": "A keresztnévnek legalább 2 karakter hosszúnak kell lennie",
+                "max": "A keresztnév nem haladhatja meg az 50 karaktert",
+                "matches": "Csak betűk, szóközök, kötőjelek és aposztrófok engedélyezettek",
+                "required": "Keresztnév megadása kötelező"
+            },
+            "lastName": {
+                "min": "A vezetéknévnek legalább 2 karakter hosszúnak kell lennie",
+                "max": "A vezetéknév nem haladhatja meg az 50 karaktert",
+                "matches": "Csak betűk, szóközök, kötőjelek és aposztrófok engedélyezettek",
+                "required": "Vezetéknév megadása kötelező"
+            },
+            "email": {
+                "invalid": "Érvénytelen e-mail formátum",
+                "max": "Az e-mail nem haladhatja meg a 100 karaktert",
+                "required": "E-mail megadása kötelező"
+            },
+            "password": {
+                "min": "A jelszónak legalább 6 karakter hosszúnak kell lennie",
+                "max": "A jelszó nem haladhatja meg a 128 karaktert",
+                "required": "Jelszó megadása kötelező"
+            }
+        },
+        "footer": {
+            "copyright": "© {{year}} i-sign.eu. Minden jog fenntartva."
+        }
+    },
+    "forgotPassword": {
+        "meta": {
+            "title": "Elfelejtett jelszó"
+        },
+        "messages": {
+            "success": "Ha az e-mail regisztrálva van, egy jelszó-visszaállítási linket küldtünk.",
+            "error": "Sikertelen jelszó-visszaállítási link küldése. Kérjük, próbálja újra."
+        },
+        "branding": {
+            "welcome": "Üdvözöljük a",
+            "description": "Állítsa vissza biztonságosan jelszavát, és térjen vissza a dokumentumok aláírásához percek alatt.",
+            "features": {
+                "secure": {
+                    "title": "Biztonságos Visszaállítás",
+                    "description": "Védett helyreállítási folyamat"
+                },
+                "verification": {
+                    "title": "E-mail Ellenőrzés",
+                    "description": "Azonnali link kézbesítés"
+                }
+            }
+        },
+        "form": {
+            "header": {
+                "title": "Jelszó Visszaállítása",
+                "description": "Adja meg e-mail címét a visszaállítási link fogadásához."
+            },
+            "email": {
+                "label": "E-mail cím",
+                "placeholder": "Adja meg e-mail címét"
+            },
+            "button": {
+                "default": "Visszaállítási Link Küldése",
+                "loading": "Visszaállítási Link Küldése folyamatban..."
+            },
+            "backToLogin": "Vissza a Bejelentkezéshez"
+        },
+        "footer": {
+            "copyright": "© {{year}} i-sign.eu. Minden jog fenntartva."
+        }
+    },
+    "resetPassword": {
+        "meta": {
+            "title": "Jelszó Visszaállítása"
+        },
+        "messages": {
+            "noToken": "Nincs visszaállítási token megadva.",
+            "success": "Jelszó sikeresen visszaállítva! Most már bejelentkezhet.",
+            "error": "Sikertelen jelszó-visszaállítás. Lehet, hogy a link lejárt."
+        },
+        "validation": {
+            "passwordMin": "A jelszónak legalább 6 karakter hosszúnak kell lennie.",
+            "passwordsMismatch": "A jelszavak nem egyeznek."
+        },
+        "status": {
+            "verifying": {
+                "title": "Link Ellenőrzése",
+                "description": "Kérjük, várjon, amíg ellenőrizzük a jelszó-visszaállítási linkjét..."
+            },
+            "success": {
+                "title": "Sikeres Ellenőrzés!",
+                "description": "Kérjük, várjon, a űrlap betöltése folyamatban van..."
+            },
+            "error": {
+                "title": "Érvénytelen vagy Lejárt Link",
+                "description": "A jelszó-visszaállítási link nem érvényes. Lehet, hogy már felhasználták, vagy lejárt.",
+                "button": "Vissza a Bejelentkezéshez"
+            }
+        },
+        "form": {
+            "header": {
+                "title": "Új Jelszó Létrehozása",
+                "description": "Kérjük, adja meg új jelszavát alább."
+            },
+            "newPassword": {
+                "label": "Új Jelszó",
+                "placeholder": "Adjon meg új jelszót (min. 6 karakter)"
+            },
+            "confirmPassword": {
+                "label": "Jelszó Megerősítése",
+                "placeholder": "Erősítse meg az új jelszót"
+            },
+            "button": {
+                "default": "Jelszó Visszaállítása",
+                "loading": "Jelszó Visszaállítása folyamatban..."
+            }
+        },
+        "footer": {
+            "copyright": "© {{year}} i-sign.eu. Minden jog fenntartva."
+        }
+    },
+    "reactivate": {
+        "meta": {
+            "title": "Fiók Újraaktiválása folyamatban..."
+        },
+        "messages": {
+            "success": "Fiók sikeresen újraaktiválva! Most már bejelentkezhet.",
+            "error": "A link érvénytelen vagy lejárt.",
+            "noToken": "Nem található újraaktiválási token. A link hiányos."
+        },
+        "branding": {
+            "welcome": "Üdvözöljük a",
+            "description": "Aktiválja újra fiókját, és folytassa a biztonságos elektronikus aláírási platformunk használatát.",
+            "features": {
+                "reactivation": {
+                    "title": "Gyors Újraaktiválás",
+                    "description": "Azonnali fiók-helyreállítás"
+                },
+                "secure": {
+                    "title": "Biztonságos Folyamat",
+                    "description": "Védett ellenőrzés"
+                },
+                "preserved": {
+                    "title": "Adatok Megőrzése",
+                    "description": "Minden dokumentje biztonságban van"
+                }
+            }
+        },
+        "status": {
+            "loading": {
+                "title": "Fiók Újraaktiválása",
+                "description": "Kérjük, várjon, amíg újraaktiváljuk fiókját..."
+            },
+            "success": {
+                "title": "Fiók Újraaktiválva!",
+                "button": "Tovább a Bejelentkezéshez"
+            },
+            "error": {
+                "title": "Újraaktiválás Sikertelen",
+                "button": "Vissza a Bejelentkezéshez"
+            }
+        },
+        "footer": {
+            "copyright": "© {{year}} i-sign.eu. Minden jog fenntartva."
+        }
+    },
+    "verifyEmail": {
+        "meta": {
+            "title": "E-mail Ellenőrzése folyamatban..."
+        },
+        "messages": {
+            "success": "E-mail sikeresen ellenőrizve! Most már bejelentkezhet.",
+            "error": "A link érvénytelen vagy lejárt.",
+            "noToken": "Nem található ellenőrző token. A link hiányos."
+        },
+        "branding": {
+            "welcome": "Üdvözöljük a",
+            "description": "Ellenőrizze e-mail címét, és kezdje el biztonságosan aláírni a dokumentumokat megbízható platformunkkal.",
+            "features": {
+                "verification": {
+                    "title": "E-mail Ellenőrzés",
+                    "description": "Biztonságos fiókbeállítás"
+                },
+                "access": {
+                    "title": "Azonnali Hozzáférés",
+                    "description": "Azonnal elkezdheti az aláírást"
+                },
+                "protected": {
+                    "title": "Védett Fiók",
+                    "description": "Adatai biztonságban vannak"
+                }
+            }
+        },
+        "status": {
+            "loading": {
+                "title": "Fiók Ellenőrzése",
+                "description": "Kérjük, várjon, amíg aktiváljuk fiókját..."
+            },
+            "success": {
+                "title": "Fiók Aktiválva!",
+                "button": "Tovább a Bejelentkezéshez"
+            },
+            "error": {
+                "title": "Ellenőrzés Sikertelen",
+                "button": "Vissza a Regisztrációhoz"
+            }
+        },
+        "footer": {
+            "copyright": "© {{year}} i-sign.eu. Minden jog fenntartva."
+        }
+    },
+    "pendingVerification": {
+        "meta": {
+            "title": "Ellenőrizze E-mail Címét"
+        },
+        "branding": {
+            "welcome": "Üdvözöljük a",
+            "description": "A legbiztonságosabb és legfelhasználóbarátabb elektronikus aláírási platform minden méretű vállalkozás számára."
+        },
+        "content": {
+            "title": "Ellenőrizze Postafiókját",
+            "message": "Küldtünk egy ellenőrző linket az e-mail címére. Kérjük, kattintson a linkre fiókja aktiválásához a bejelentkezés előtt.",
+            "button": "Vissza a Bejelentkezéshez"
+        },
+        "footer": {
+            "copyright": "© {{year}} i-sign.eu. Minden jog fenntartva."
+        }
+    },
+    "eidasGuide": {
+        "header": {
+            "backLink": "Vissza a GYIK-hez",
+            "title": "A Digitális Aláírások Megértése",
+            "subtitle": "Átfogó útmutató az elektronikus aláírásokhoz és azok jogi kereteihez az eIDAS alapján"
+        },
+        "tabs": {
+            "overview": "Áttekintés",
+            "ses": "Egyszerű (SES)",
+            "aes": "Fejlett (AES)",
+            "qes": "Minősített (QES)",
+            "faqs": "GYIK"
+        },
+        "content": {
+            "overview": {
+                "title": "Mi az a Digitális Aláírás?",
+                "p1": "A digitális aláírás az elektronikus aláírás egy speciális formája, amely fejlett kriptográfiai módszereket használ az aláíró biztonságos összekapcsolására egy dokumentummal. Ez biztosítja az aláíró hitelességének és az aláírt dokumentum integritásának legmagasabb szintű garanciáját.",
+                "p2_prefix": "A digitális aláírások alapja a",
+                "p2_link": "Nyilvános Kulcsú Infrastruktúra (PKI)",
+                "p2_suffix": ", amely egy nemzetközileg elismert szabvány, amely biztosítja, hogy az aláírt dokumentumok ne legyenek megváltoztathatók, és az aláíró személyazonossága megbízhatóan ellenőrizhető legyen. Ez különösen fontossá teszi a digitális aláírásokat az erős jogi bizonyosságot igénylő tranzakciókhoz.",
+                "comparison": {
+                    "title": "Elektronikus vs. Digitális Aláírások",
+                    "p1_strong": "Az elektronikus aláírások (i-sign.eus)",
+                    "p1_text": "olyan módszerek széles kategóriája, amelyeket arra használnak, hogy jelezzék egy személy szándékát egy dokumentum digitális formában történő aláírására. Széles körben elterjedtek, mert egyszerűen használhatók, gyorsan bevezethetők, és jogilag elismertek az EU eIDAS rendelete (910/2014 sz.) alapján. Gyakori felhasználási esetek közé tartoznak a munkaszerződések, beszerzési rendelések, számlák és ügyfélmegállapodások.",
+                    "p2_strong": "A digitális aláírások",
+                    "p2_text": "másrészt az elektronikus aláírások egy speciális típusa, amelyek fejlett kriptográfiai technológiát használnak az erősebb biztonság és hitelesítés biztosításához. Különösen fontosak a szigorúan szabályozott iparágakban, és kifejezetten az eIDAS szabályozza őket."
+                },
+                "types": {
+                    "title": "Három Típus az eIDAS Alapján",
+                    "description": "Az EU eIDAS rendelete szerint az elektronikus aláírások három szintre vannak kategorizálva, a legkevésbé szigorútól a legszigorúbbig:",
+                    "ses": {
+                        "title": "Egyszerű (SES)",
+                        "description": "Az i-sign.eus alapvető formái, alkalmasak alacsony kockázatú dokumentumokhoz."
+                    },
+                    "aes": {
+                        "title": "Fejlett (AES)",
+                        "description": "Magasabb biztonság, egyedileg az aláíróhoz kapcsolódik, ellenőrzött személyazonossággal."
+                    },
+                    "qes": {
+                        "title": "Minősített (QES)",
+                        "description": "Legbiztonságosabb, jogilag egyenértékű a kézzel írt aláírásokkal."
+                    }
+                },
+                "tip": {
+                    "strong": "Új a digitális aláírások területén?",
+                    "text": "Bár a digitális aláírások elsőre bonyolultnak tűnhetnek, sokkal világosabbá válnak, amint megértjük a kulcselemeket. Fedezze fel a fenti lapokat, hogy megtudja, mikor használja az egyes aláírási típusokat."
+                }
+            },
+            "ses": {
+                "title": "Egyszerű Elektronikus Aláírás (SES)",
+                "subtitle": "Mindennapi tranzakciókhoz",
+                "p1": "Az Egyszerű Elektronikus Aláírás (SES) az eIDAS rendelet szerinti elektronikus aláírás legegyszerűbb típusa. Nem igényel fejlett aláírói hitelesítési vagy személyazonosság-ellenőrzési módszereket.",
+                "howItWorks": {
+                    "title": "Hogyan működik",
+                    "p1": "A gyakorlatban egy SES magában foglalhat valami olyan egyszerűt, mint:",
+                    "li1": "PIN vagy hozzáférési kód bevitele",
+                    "li2": "Az „Elfogadom” gombra kattintás vagy egy jelölőnégyzet bejelölése",
+                    "li3": "Aláírás megadása e-mailhez kapcsolt aláírási folyamaton keresztül"
+                },
+                "useCases": {
+                    "title": "Gyakori Felhasználási Esetek",
+                    "p1": "Ez a fajta aláírás gyakran elegendő az alacsony kockázatú, mindennapi tranzakciókhoz, mint például:",
+                    "item1": "Értékesítési és beszerzési megállapodások",
+                    "item2": "Általános szerződési feltételek elfogadása",
+                    "item3": "Egyszerű űrlapok és nyilatkozatok"
+                },
+                "warning": {
+                    "strong": "Fontos:",
+                    "text": "Bár az SES sebességet és kényelmet kínál, az aláíró személyazonosságára és a dokumentum integritására vonatkozóan a legalacsonyabb szintű garanciát nyújtja. Magasabb kockázatú vagy szabályozott tranzakciókhoz erősebb aláírási formák, például Fejlett (AES) vagy Minősített (QES) lehetnek szükségesek."
+                },
+                "learnMoreLink": "Tudjon meg többet a szabványos i-sign.eu megvalósításról →"
+            },
+            "aes": {
+                "title": "Fejlett Elektronikus Aláírás (AES)",
+                "subtitle": "Nagy értékű tranzakciókhoz",
+                "p1": "A Fejlett Elektronikus Aláírás (AES) magasabb szintű biztonságot nyújt, mint az Egyszerű Elektronikus Aláírás. További hitelesítési lépéseket igényel annak biztosítására, hogy az aláíró személyazonossága ellenőrizve legyen, és az aláírás egyedileg hozzá kapcsolódjon.",
+                "requirements": {
+                    "title": "eIDAS Követelmények",
+                    "p1": "Ahhoz, hogy az eIDAS alapján AES-nek minősüljön, az aláírásnak meg kell felelnie a következő kritériumoknak:",
+                    "li1": "Egyedileg kapcsolódik az aláíróhoz",
+                    "li2": "Képes az aláíró azonosítására",
+                    "li3": "Olyan elektronikus aláírás-létrehozási adatok felhasználásával készül, amelyeket az aláíró egyedül tarthat ellenőrzése alatt",
+                    "li4": "Olyan módon kapcsolódik az aláírt adatokhoz, hogy az adatok bármely későbbi változása észlelhető legyen"
+                },
+                "authMethods": {
+                    "title": "Hitelesítési Módszerek",
+                    "p1": "A gyakorlatban az AES magában foglalhatja:",
+                    "item1": { "title": "Személyazonosság Ellenőrzése", "description": "Kormány által kibocsátott személyazonosító igazolvány ellenőrzése" },
+                    "item2": { "title": "Biometrikus Ellenőrzések", "description": "Arcfelismerés vagy ujjlenyomat-ellenőrzés" },
+                    "item3": { "title": "Digitális Tanúsítványok", "description": "A tranzakcióhoz generált egyedi tanúsítvány" },
+                    "item4": { "title": "Egyszeri Jelszó (OTP)", "description": "Ellenőrzött eszközre küldött egyedi OTP" }
+                },
+                "benefits": {
+                    "title": "Főbb Előnyök",
+                    "li1": "Az aláíró megbízható azonosítása",
+                    "li2": "Egyedi kapcsolat az aláírás és az aláírt dokumentum között",
+                    "li3": "Manipulációt észlelő technológia észlel minden változást"
+                },
+                "example": {
+                    "title": "Példa Felhasználási Eset",
+                    "p1_prefix": "Nagy értékű vagy érzékeny üzleti tranzakciók, mint például a",
+                    "p1_strong1": "munkaszerződések",
+                    "p1_connector": "vagy",
+                    "p1_strong2": "beszállítói megállapodások",
+                    "p1_suffix": ", ahol a szervezetnek nagyobb garanciára van szüksége az aláíró személyazonosságát és a dokumentum integritását illetően."
+                },
+                "learnMoreLink": "Tudjon meg többet az i-sign.eu ellenőrzési módszereiről →"
+            },
+            "qes": {
+                "title": "Minősített Elektronikus Aláírás (QES)",
+                "subtitle": "Szigorúan szabályozott tranzakciókhoz",
+                "p1": "A Minősített Elektronikus Aláírás (QES) az EU eIDAS rendeletben meghatározott legbiztonságosabb és legmegbízhatóbb elektronikus aláírási forma. Személyes vagy azzal egyenértékű személyazonosság-ellenőrzési folyamatot igényel, amelyet egy Minősített Bizalmi Szolgáltató (QTSP) végez el, akár az EU-ban, akár az Egyesült Királyságban.",
+                "foundation": {
+                    "title": "Technikai Alap",
+                    "p1_prefix": "A QES alapja egy",
+                    "p1_strong": "Minősített Aláírás-Létrehozó Eszköz (QSCD)",
+                    "p1_suffix": "és egy elismert szolgáltató által kiállított minősített tanúsítvány. Ez a folyamat biztosítja, hogy:",
+                    "li1": "Az aláíró személyazonosságát a legmagasabb jogi szabvány szerint ellenőrizték",
+                    "li2": "Az aláírás egyedileg kapcsolódik az aláíróhoz és az aláírt dokumentumhoz",
+                    "li3": "Teljes és manipulációbiztos audit napló jön létre"
+                },
+                "equivalence": {
+                    "title": "Jogi Egyenértékűség",
+                    "p1_prefix": "Ezeknek a garanciáknak köszönhetően a QES az",
+                    "p1_strong": "kézzel írott aláírás jogi megfelelőjének",
+                    "p1_suffix": "tekinthető az összes EU tagállamban.",
+                    "p2": "Valójában a jogi szakértők gyakran érvelnek amellett, hogy a QES megbízhatóbb lehet, mint a felügyelet nélküli környezetben tanúsított hagyományos aláírás, mivel a digitális folyamat erősebb személyazonosság-ellenőrzést és dokumentumintegritást biztosít."
+                },
+                "useCases": {
+                    "title": "Gyakori Felhasználási Esetek",
+                    "p1": "A QES általában a szigorúan szabályozott vagy érzékeny tranzakciókhoz szükséges, mint például:",
+                    "item1": { "icon": "🏦", "text": "Pénzügyi szolgáltatási megállapodások" },
+                    "item2": { "icon": "⚖️", "text": "Közjegyzői okiratok" },
+                    "item3": { "icon": "🏛️", "text": "Közszférabeli beadványok" },
+                    "item4": { "icon": "🌍", "text": "Határokon átnyúló jogi szerződések" }
+                }
+            },
+            "faqs": {
+                "title": "Gyakran Ismételt Kérdések",
+                "q1": {
+                    "title": "Hogyan működik a Minősített Elektronikus Aláírás (QES) az i-sign.eu-val?",
+                    "p1": "A QES erős személyazonossági hitelesítést igényel, mielőtt digitális tanúsítványt lehetne kiállítani. Ez biztosítja a legmagasabb szintű bizalmat személyes vagy azzal egyenértékű személyazonosító ellenőrzés révén. Az aláírási folyamat során az ügyfeleket arra kérik, hogy elektronikusan erősítsék meg személyazonosságukat. Az ellenőrzést követően a személyazonosságukat igazoló digitális tanúsítvány automatikusan csatolódik az aláíráshoz a háttérben.",
+                    "p2": "Az i-sign.eu többféle lehetőséget kínál a QES-re integrált személyazonosító ellenőrzéssel. A digitális tanúsítványokat elismert tanúsító hatóságok (bizalmi szolgáltatók) állítják ki, és az i-sign.eu elfogadja a hivatalos EU Bizalmi Listán szereplő szolgáltatók által kiállított minősített tanúsítványokat."
+                },
+                "q2": {
+                    "title": "Hogyan működik a Fejlett Elektronikus Aláírás (AES) az i-sign.eu-val?",
+                    "p1": "Az i-sign.eu-val történő AES további lépéseket foglal magában az aláíró hitelesítésére. Ez magában foglalhatja érvényes, kormány által kibocsátott dokument bemutatását a személyazonosság megerősítésére, kombinálva egy egyszeri hozzáférési kóddal az aláírási folyamat után. Az AES aláírások PKI alapú digitális tanúsítványt igényelnek, amelyet a tranzakció részeként generálnak és csatolnak a dokumentumhoz.",
+                    "p2": "Az i-sign.eu rugalmas személyazonosító ellenőrzési lehetőségeket biztosít az eIDAS szerinti Fejlett és Minősített elektronikus aláírási szinteknek való megfeleléshez."
+                },
+                "q3": {
+                    "title": "Hogyan működik az Egyszerű Elektronikus Aláírás (SES) az i-sign.eu-val?",
+                    "p1": "Az SES a világszerte leggyakrabban használt és legszélesebb körben elfogadott i-sign.eu típus. Az i-sign.eu-val az SES helyettesítheti a kézzel írott aláírásokat a legtöbb alacsony kockázatú esetben. Különösen alkalmas:",
+                    "li1": "Belső dokumentumok",
+                    "li2": "Vállalat-fogyasztó megállapodások",
+                    "li3": "Tranzakciók meglévő partnerekkel",
+                    "p2": "Az SES gyors, hatékony és kevés lépést igényel. Ha azonban erősebb aláírói hitelesítésre van szükség, helyette AES vagy QES lehet szükséges."
+                },
+                "contact": {
+                    "strong": "További kérdései vannak?",
+                    "text_prefix": "Látogasson el a",
+                    "link": "fő GYIK oldalunkra",
+                    "text_suffix": ", vagy lépjen kapcsolatba támogatási csapatunkkal személyre szabott segítségért."
+                }
+            }
+        }
+    },
+    "termsAndPrivacy": {
+        "header": {
+            "subtitle": "Professzionális Elektronikus Aláírási Platform"
+        },
+        "tabs": {
+            "terms": "Szolgáltatási Feltételek",
+            "privacy": "Adatvédelmi Szabályzat"
+        },
+        "lastUpdated": "Utolsó frissítés: {{date}}",
+        "terms": {
+            "title": "Szolgáltatási Feltételek",
+            "introduction": {
+                "title": "1. Bevezetés",
+                "p1_prefix": "Ezek a webhelyekre és szolgáltatásokra vonatkozó általános szerződési feltételek (a továbbiakban: „Feltételek” vagy „Általános Feltételek”) szabályozzák a",
+                "p1_suffix": "webhelyekhez, termékekhez és szolgáltatásokhoz (együttesen: „Webhely” vagy „Szolgáltatások”) való hozzáférését és azok használatát. Webhelyünk vagy Szolgáltatásaink használatával Ön elfogadja, hogy kötelező érvényűnek tekinti e Feltételeket, akár saját nevében, akár egy Ön által képviselt vállalkozás nevében.",
+                "p2": "Ha nem ért egyet ezekkel a Feltételekkel, nem jogosult a Webhely vagy a Szolgáltatások használatára, és azonnal abba kell hagynia a használatot."
+            },
+            "scope": {
+                "title": "2. Alkalmazási Kör",
+                "p1": "Ezek a Feltételek a következő felhasználói kategóriákra vonatkoznak (együttesen: „Ön” vagy „az Ön”):",
+                "li1_strong": "Webhely Látogatók",
+                "li1_text": "A",
+                "li1_suffix": "és a kapcsolódó webhelyeket elérő magánszemélyek.",
+                "li2_strong": "Ügyfelek",
+                "li2_text": "Szervezetek vagy magánszemélyek, akik előfizetnek a",
+                "li2_suffix": "Szolgáltatásokra vagy licencelik azokat.",
+                "li3_strong": "Felhasználók",
+                "li3_text": "Magánszemélyek, akik az",
+                "li3_suffix": "Szolgáltatásokat Ügyfélfiók alatt használják (beleértve a felhatalmazott alkalmazottakat vagy ügynököket).",
+                "p2_prefix": "Ha Ön Ügyfél, és külön Szolgáltatási Megállapodást vagy Vállalati Szerződést kötött az",
+                "p2_suffix": "-vel, azok a feltételek érvényesülnek, amennyiben ütköznek ezekkel a Feltételekkel. Ezek a Feltételek üzleti és szakmai használatra készültek; a vonatkozó jogszabályok szerinti fogyasztóvédelmi rendelkezések külön is alkalmazandóak lehetnek."
+            },
+            "compliance": {
+                "title": "3. Helyi Jogszabályoknak Való Megfelelés",
+                "p1": "Ha olyan joghatóságból éri el a Webhelyet vagy a Szolgáltatásokat, amely speciális szabályozási követelményeket vagy kiegészítő feltételeket ír elő (például bizonyos EU tagállamok), ezek a joghatóság-specifikus feltételek kiegészítésként érvényesülnek e Feltételek mellett. Ütközés esetén a joghatóság-specifikus feltételek az irányadók."
+            },
+            "acceptance": {
+                "title": "4. Feltételek Elfogadása",
+                "p1": "A Webhely vagy a Szolgáltatások bármely részének elérésével, használatával vagy letöltésével Ön megerősíti, hogy:",
+                "li1": "Elolvasta és megértette ezeket a Feltételeket;",
+                "li2": "Elfogadja ezeket a Feltételeket saját nevében vagy szervezete nevében;",
+                "li3": "Jogosult arra, hogy jogilag kötelező érvényű megállapodásokat kössön az Ön joghatósága szerint.",
+                "p2": "Ha nem felel meg ezeknek a feltételeknek, akkor nem használhatja a Webhelyet vagy a Szolgáltatásokat."
+            },
+            "access": {
+                "title": "5. Webhely Hozzáférés és Használat",
+                "eligibility": {
+                    "title": "5.1 Használatra Való Jogosultság",
+                    "p1_prefix": "A",
+                    "p1_suffix": "Webhely vagy Szolgáltatások elérésével vagy használatával Ön kijelenti és szavatolja, hogy:",
+                    "li1": "Ön nagykorú (18 éves vagy annál idősebb, vagy más módon betöltötte a nagykorúság korhatárát az Ön lakóhelye szerinti országban), és rendelkezik a jogi képességgel e Feltételek megkötéséhez saját nevében vagy az Ön által képviselt vállalat vagy szervezet nevében;",
+                    "li2": "Ön jogosult a Webhely és a Szolgáltatások használatára a vonatkozó jogszabályoknak és rendeleteknek megfelelően, beleértve az EU és a helyi joghatósági szabályokat az elektronikus aláírásokra és az adatvédelemre vonatkozóan; és",
+                    "li3": "Ha Ön vállalkozás nevében jár el, megfelelően felhatalmazott arra, hogy ezt a vállalkozást kötelezze e Feltételekre.",
+                    "p2_prefix": "Ön tudomásul veszi, hogy nem használhatja a Webhelyet vagy a Szolgáltatásokat, ha nem felel meg ezeknek a jogosultsági követelményeknek, vagy ha hozzáférését korábban felfüggesztette vagy megszüntette az",
+                    "p2_suffix": "e Feltételek megsértése miatt."
+                }
+            },
+            "contact": {
+                "title": "6. Kapcsolattartási Adatok",
+                "p1_prefix": "Ezekkel a feltételekkel kapcsolatos kérdések esetén kérjük, vegye fel velünk a kapcsolatot a",
+                "p1_suffix": "címen vagy a támogatási portálunkon keresztül."
+            }
+        },
+        "privacy": {
+            "title": "Adatvédelmi Szabályzat",
+            "collection": {
+                "title": "1. Az Általunk Gyűjtött Információk",
+                "item1": { "title": "Fiókadatok:", "text": "Név, e-mail cím, céges információk és hitelesítő adatok." },
+                "item2": { "title": "Dokumentum Adatok:", "text": "Aláírásra feltöltött dokumentumok, aláírási adatok, IP-címek és az aláírási tevékenységek időbélyegei." },
+                "item3": { "title": "Használati Információk:", "text": "Napló adatok, böngésző információk, eszközazonosítók és szolgáltatás használati minták." }
+            },
+            "use": {
+                "title": "2. Hogyan Használjuk Fel Az Ön Adatait",
+                "li1": "Az elektronikus aláírási szolgáltatás biztosítása és fenntartása",
+                "li2": "Dokumentumok aláírásának feldolgozása és megkönnyítése",
+                "li3": "Audit naplók és megfelelőségi jelentések készítése",
+                "li4": "Szolgáltatással kapcsolatos értesítések és frissítések küldése",
+                "li5": "Szolgáltatásunk fejlesztése és új funkciók fejlesztése",
+                "li6": "Csalás megelőzése és a szolgáltatás biztonságának biztosítása",
+                "li7": "Jogi kötelezettségeknek való megfelelés"
+            },
+            "sharing": {
+                "title": "3. Adatmegosztás",
+                "p1": "Személyes adatait nem értékesítjük, nem cseréljük és nem adjuk bérbe. Információkat csak a következő körülmények között oszthatunk meg:",
+                "li1": "Az Ön kifejezett hozzájárulásával",
+                "li2": "Az aláírási folyamat megkönnyítése érdekében a kijelölt felek között",
+                "li3": "A platform működésében segítő szolgáltatókkal",
+                "li4": "Ha jogszabály vagy jogi eljárás megköveteli",
+                "li5": "Jogaink, tulajdonunk vagy biztonságunk védelme érdekében"
+            },
+            "security": {
+                "title": "4. Adatbiztonság",
+                "p1": "Átfogó biztonsági intézkedéseket alkalmazunk, beleértve a titkosítást, a hozzáférés-szabályozást, a rendszeres biztonsági ellenőrzéseket és a biztonságos adatközpontokat. Minden adat titkosítva van mind átvitel, mind tárolás közben, iparági szabványos titkosítási protokollok használatával. Fenntartjuk az ISO 27001 és SOC 2 megfelelőségi szabványokat."
+            },
+            "retention": {
+                "title": "5. Adatmegőrzés",
+                "p1": "Adatait mindaddig megőrizzük, amíg fiókja aktív, és a vonatkozó jogszabályok által előírt időtartamra. Az aláírt dokumentumokat általában 7 évig őrizzük meg jogi megfelelés céljából. Kérheti adatainak törlését, a jogi megőrzési követelmények függvényében."
+            },
+            "rights": {
+                "title": "6. Az Ön Jogai (GDPR)",
+                "p1": "A GDPR szerint Önnek joga van a következőkhöz:",
+                "li1": "Hozzáférés személyes adataihoz",
+                "li2": "Pontatlan információk helyesbítése",
+                "li3": "Adatok törlésének kérése (elfeledtetéshez való jog)",
+                "li4": "Adatainak feldolgozásának korlátozása",
+                "li5": "Adathordozhatóság",
+                "li6": "Tiltakozás a feldolgozás ellen",
+                "li7": "Bármikor visszavonhatja a hozzájárulást"
+            },
+            "transfers": {
+                "title": "7. Nemzetközi Adatátvitel",
+                "p1": "Az Ön adatai elsősorban az Európai Unión belül kerülnek feldolgozásra. Minden nemzetközi adatátvitel megfelelő biztosítékok mellett történik, beleértve az Európai Bizottság által jóváhagyott általános szerződési feltételeket is."
+            },
+            "cookies": {
+                "title": "8. Sütik (Cookies) és Követés",
+                "p1": "Alapvető sütiket használunk a szolgáltatás működéséhez, és analitikai sütiket a szolgáltatásunk fejlesztésére. A böngésző beállításain keresztül kezelheti a sütikre vonatkozó preferenciáit. Sütiszabályzatunk részletes információkat tartalmaz a sütik használatáról."
+            },
+            "contact": {
+                "title": "9. Kapcsolatfelvétel",
+                "p1": "Adatvédelemmel kapcsolatos kérdések vagy jogai gyakorlása esetén lépjen kapcsolatba adatvédelmi tisztviselőnkkel a privacy@i-sign.eu címen. EU-lakosok esetében kapcsolatba léphet a helyi adatvédelmi hatósággal is."
+            },
+            "changes": {
+                "title": "10. Az Adatvédelmi Szabályzat Módosításai",
+                "p1": "Értesítjük Önt az adatvédelmi szabályzatunk bármilyen lényeges változásáról e-mailben vagy kiemelt értesítésben platformunkon, legalább 30 nappal a változások hatályba lépése előtt."
+            }
+        },
+        "footer": {
+            "copyright": "© {{year}} I-sign.eu - Professzionális Elektronikus Aláírási Platform",
+            "support_prefix": "Támogatásért lépjen velünk kapcsolatba itt:"
+        }
+    },
+    "enterpriseContact": {
+        "messages": {
+            "success": "Érdeklődése sikeresen elküldve!",
+            "error": "Sikertelen érdeklődés küldése. Kérjük, próbálja újra."
+        },
+        "header": {
+            "title": {
+                "main": "Vállalati",
+                "highlight": "Egyedi Megoldások"
+            },
+            "description": "Lépjen kapcsolatba értékesítési csapatunkkal személyre szabott árazásért, egyedi funkciókért és dedikált támogatásért, amely szervezetének igényeire van szabva."
+        },
+        "form": {
+            "name": {
+                "label": "Teljes Név",
+                "placeholder": "John Doe"
+            },
+            "email": {
+                "label": "Üzleti E-mail",
+                "placeholder": "john.doe@company.com"
+            },
+            "company": {
+                "label": "Cégnév",
+                "placeholder": "Acme Corporation"
+            },
+            "phone": {
+                "label": "Telefonszám (Opcionális)"
+            },
+            "message": {
+                "label": "Mondja el nekünk igényeit",
+                "placeholder": "Írja le igényeit, csapatméretét, vagy bármely konkrét funkciót, ami érdekli..."
+            },
+            "button": {
+                "default": "Érdeklődés Elküldése",
+                "submitting": "Küldés folyamatban..."
+            }
+        },
+        "validation": {
+            "name": {
+                "min": "A névnek legalább 2 karakter hosszúnak kell lennie",
+                "max": "A név nem haladhatja meg a 100 karaktert",
+                "required": "Teljes név megadása kötelező"
+            },
+            "email": {
+                "invalid": "Érvénytelen e-mail formátum",
+                "required": "Üzleti e-mail megadása kötelező"
+            },
+            "company": {
+                "min": "A cégneveknek legalább 2 karakter hosszúnak kell lennie",
+                "max": "A cégnév nem haladhatja meg a 200 karaktert",
+                "required": "Cégnév megadása kötelező"
+            },
+            "phone": {
+                "invalid": "Érvénytelen telefonszám"
+            },
+            "message": {
+                "min": "Az üzenetnek legalább 10 karakter hosszúnak kell lennie",
+                "max": "Az üzenet nem haladhatja meg a 2000 karaktert",
+                "required": "Üzenet megadása kötelező"
+            }
+        },
+        "footer": {
+            "callPrompt": "Inkább telefonálna? Elérhet minket a",
+            "emailPrompt": "Vagy e-mailben közvetlenül:"
+        }
+    },
+    "cookiePolicy": {
+        "title": "Süti Szabályzat",
+        "intro": "Ez a Süti Szabályzat elmagyarázza, hogyan használja az E-Sign („mi”, „minket” vagy „miénk”) a sütiket és hasonló technológiákat, amikor meglátogatja weboldalunkat vagy használja szolgáltatásainkat.",
+        "whatAreCookies": {
+            "title": "Mik azok a Sütik?",
+            "text": "A sütik kis szöveges fájlok, amelyek az eszközén tárolódnak, amikor meglátogat egy weboldalt. Segítenek abban, hogy jobb élményt nyújtsunk Önnek azáltal, hogy megjegyzik az Ön preferenciáit és lehetővé teszik bizonyos funkciókat."
+        },
+        "types": {
+            "title": "Az Általunk Használt Sütik Típusai",
+            "essential": {
+                "title": "Alapvető Sütik",
+                "text": "Ezek a sütik szükségesek a weboldalunk megfelelő működéséhez. Lehetővé teszik az alapvető funkciókat, mint például a hitelesítés, a biztonsági funkciók és az alapvető navigáció."
+            },
+            "functional": {
+                "title": "Funkcionális Sütik",
+                "text": "Ezek a sütik lehetővé teszik a továbbfejlesztett funkcionalitást és a személyre szabást, például az Ön nyelvi preferenciáinak és beállításainak megjegyzését."
+            },
+            "analytics": {
+                "title": "Analitikai Sütik",
+                "text": "Ezek a sütik segítenek megérteni, hogyan lépnek kapcsolatba a látogatók weboldalunkkal azáltal, hogy névtelenül gyűjtenek és jelentenek információkat."
+            },
+            "marketing": {
+                "title": "Marketing Sütik",
+                "text": "Ezeket a sütiket arra használjuk, hogy olyan hirdetéseket jelenítsünk meg, amelyek relevánsabbak az Ön számára és az Ön érdeklődési körének."
+            }
+        },
+        "managing": {
+            "title": "Süti Beállításainak Kezelése",
+            "text": "Különféle módokon ellenőrizheti és kezelheti a sütiket. Beállíthatja böngészőjét, hogy elutasítsa a sütiket, vagy figyelmeztesse Önt, amikor sütiket küldenek. A preferenciáit a süti beállítási központunk segítségével is kezelheti.",
+            "button": "Süti Beállítások Kezelése"
+        },
+        "contact": {
+            "title": "Kapcsolatfelvétel",
+            "text": "Ha bármilyen kérdése van ezzel a Süti Szabályzattal kapcsolatban, kérjük, vegye fel velünk a kapcsolatot a privacy@esign.com címen."
+        },
+        "lastUpdated": "Ez a szabályzat utoljára {{date}} időpontban lett frissítve."
+    },
+    "sidebar": {
+        "headings": {
+            "dashboard": "Vezérlőpult",
+            "settings": "Beállítások"
+        },
+        "nav": {
+            "allDocuments": "Összes Dokumentum",
+            "templates": "Sablonok",
+            "contacts": "Névjegyzék",
+            "addDocument": "Dokumentum Hozzáadása",
+            "subscriptions": "Előfizetések",
+            "paymentMethods": "Fizetési Módok",
+            "profile": "Profil"
+        }
+    },
+    "profile": {
+        "title": "Fiókbeállítások",
+        "loading": "Betöltés folyamatban...",
+        "tabs": {
+            "profile": "Profil",
+            "email": "E-mail",
+            "password": "Jelszó"
+        },
+        "messages": {
+            "deleteSuccess": "Fiók törlése kérése elküldve",
+            "deleteFailed": "Sikertelen fióktörlés",
+            "updateSuccess": "Profil frissítve!",
+            "updateFailed": "Sikertelen frissítés"
+        },
+        "form": {
+            "image": {
+                "upload": "Feltöltés",
+                "remove": "Eltávolítás"
+            },
+            "firstName": {
+                "label": "Keresztnév"
+            },
+            "lastName": {
+                "label": "Vezetéknév"
+            },
+            "email": {
+                "label": "Jelenlegi E-mail",
+                "note": "Az e-mail cím megváltoztatásához menjen az E-mail fülre"
+            },
+            "phone": {
+                "label": "Telefonszám"
+            },
+            "language": {
+                "label": "Nyelv"
+            },
+            "button": {
+                "save": "Változtatások Mentése",
+                "saving": "Mentés folyamatban...",
+                "delete": "Fiók Törlése"
+            },
+            "validation": {
+                "firstName": {
+                    "required": "Keresztnév megadása kötelező"
+                },
+                "lastName": {
+                    "required": "Vezetéknév megadása kötelező"
+                },
+                "phone": {
+                    "max": "Telefonszám túl hosszú",
+                    "invalid": "Érvénytelen telefonszám"
+                },
+                "language": {
+                    "required": "Nyelv megadása kötelező"
+                }
+            }
+        },
+        "emailForm": {
+            "title": "E-mail Cím Megváltoztatása",
+            "description": "Küldünk egy ellenőrző kódot a jelenlegi e-mail címére a változás megerősítéséhez.",
+            "currentEmailLabel": "Jelenlegi E-mail:",
+            "newEmail": {
+                "label": "Új E-mail Cím",
+                "placeholder": "Adja meg új e-mail címét"
+            },
+            "otp": {
+                "sentToLabel": "Ellenőrző kód elküldve:",
+                "label": "Adja meg a 6 jegyű Ellenőrző Kódot",
+                "button": {
+                    "sending": "Küldés folyamatban...",
+                    "resend": "Újraküldés",
+                    "verifying": "Ellenőrzés folyamatban...",
+                    "verify": "Ellenőrzés és E-mail Frissítése",
+                    "cancel": "Mégsem"
+                }
+            },
+            "button": {
+                "sending": "Küldés folyamatban...",
+                "sendCode": "Ellenőrző Kód Küldése",
+                "clear": "Törlés"
+            },
+            "messages": {
+                "invalidNewEmail": "Kérjük, adjon meg érvényes új e-mail címet",
+                "otpSentSuccess": "OTP elküldve a jelenlegi e-mail címére!",
+                "otpSentFailed": "Sikertelen OTP küldése",
+                "otpLengthError": "Adja meg a 6 jegyű OTP-t",
+                "updateSuccess": "E-mail sikeresen frissítve!",
+                "invalidOtp": "Érvénytelen OTP"
+            },
+            "validation": {
+                "invalid": "Érvénytelen e-mail",
+                "required": "Új e-mail megadása kötelező",
+                "notSame": "Az új e-mailnek különböznie kell a jelenlegi e-mailtől"
+            }
+        },
+        "passwordForm": {
+            "title": "Jelszó Megváltoztatása",
+            "currentPassword": {
+                "label": "Jelenlegi Jelszó",
+                "placeholder": "Jelenlegi"
+            },
+            "newPassword": {
+                "label": "Új Jelszó",
+                "placeholder": "Új"
+            },
+            "confirmNewPassword": {
+                "label": "Új Jelszó Megerősítése",
+                "placeholder": "Megerősítés"
+            },
+            "button": {
+                "default": "Jelszó Megváltoztatása",
+                "loading": "Módosítás folyamatban..."
+            },
+            "messages": {
+                "success": "Jelszó megváltoztatva!",
+                "failed": "Sikertelen jelszómódosítás"
+            },
+            "validation": {
+                "min": "A jelszónak legalább 6 karakter hosszúnak kell lennie",
+                "max": "A jelszó nem haladhatja meg a 128 karaktert",
+                "currentPassword": {
+                    "required": "Jelenlegi jelszó megadása kötelező"
+                },
+                "newPassword": {
+                    "required": "Új jelszó megadása kötelező",
+                    "notOneOf": "Az új jelszó nem lehet azonos a jelenlegivel"
+                },
+                "confirmNewPassword": {
+                    "required": "Kérjük, erősítse meg új jelszavát",
+                    "oneOf": "A jelszavaknak egyezniük kell"
+                }
+            }
+        }
+    },
+    "paymentMethods": {
+        "pageTitle": "Fizetési Módok",
+        "loading": "Fizetési módok betöltése...",
+        "header": {
+            "title": "Fizetési Módok",
+            "description": "Biztonságosan kezelje fizetési lehetőségeit a zökkenőmentes e-aláírási élményekért",
+            "addButton": "Fizetési Mód Hozzáadása"
+        },
+        "emptyState": {
+            "title": "Nincs Hozzáadott Fizetési Mód",
+            "description": "Adjon hozzá egy fizetési módot az e-aláírási előfizetéseinek egyszerű kezeléséhez",
+            "addButton": "Adja Hozzá Első Fizetési Módját"
+        },
+        "addModalTitle": "Új Fizetési Mód Hozzáadása",
+        "addForm": {
+            "cardInfoLabel": "Kártya Adatok",
+            "secureNote": "Fizetési adatait a Stripe titkosítja és biztonságosan feldolgozza.",
+            "buttons": {
+                "cancel": "Mégsem",
+                "add": "Fizetési Mód Hozzáadása",
+                "adding": "Hozzáadás folyamatban..."
+            },
+            "errors": {
+                "cardElementNotFound": "Kártya elem nem található",
+                "cardProcessingError": "Hiba történt a kártya feldolgozása során.",
+                "addMethodFailed": "Sikertelen fizetési mód hozzáadása."
+            }
+        },
+        "card": {
+            "defaultBadge": "Alapértelmezett",
+            "expires": "Lejár",
+            "buttons": {
+                "setDefault": "Beállítás Alapértelmezettként",
+                "settingDefault": "Beállítás folyamatban...",
+                "remove": "Eltávolítás",
+                "removing": "Eltávolítás folyamatban..."
+            }
+        },
+        "deleteConfirm": {
+            "title": "Fizetési Mód Eltávolítása?",
+            "text": "Biztos benne, hogy el akarja távolítani ezt a fizetési módot?",
+            "confirmButton": "Igen, távolítsa el",
+            "cancelButton": "Mégsem"
+        },
+        "messages": {
+            "addSuccess": "Fizetési mód sikeresen hozzáadva!",
+            "setDefaultSuccess": "Alapértelmezett fizetési mód sikeresen frissítve!",
+            "deleteSuccess": "Fizetési mód sikeresen eltávolítva!"
+        }
+    },
+    "subscriptions": {
+        "pageTitle": "Számlázás és Előfizetések"
+    },
+    "planSelection": {
+        "backButton": "Vissza az Előfizetés Kezeléséhez",
+        "header": {
+            "titleChange": "Új Csomag Kiválasztása",
+            "titleChoose": "Válassza ki a Csomagját",
+            "descriptionChange": "Válasszon új csomagot a frissítéshez, leminősítéshez vagy a számlázási ciklus megváltoztatásához.",
+            "descriptionChoose": "Frissítse fiókját további funkciók, nagyobb korlátok és dedikált támogatás feloldásához."
+        },
+        "billing": {
+            "monthly": "Havi",
+            "yearly": "Éves",
+            "save": "Spóroljon 20%-ot"
+        },
+        "popularBadge": "⭐ Legnépszerűbb",
+        "perMonth": "hó",
+        "billedYearly": "Éves díja: €{{price}}",
+        "plans": {
+            "starter": {
+                "description": "Tökéletes magánszemélyeknek és kisebb csapatoknak, akik most kezdenek."
+            },
+            "pro": {
+                "description": "Legjobb érték a növekvő vállalkozások és professzionális csapatok számára."
+            },
+            "enterprise": {
+                "description": "Teljes körű megoldás nagy szervezetek számára, akiknek többre van szükségük."
+            }
+        },
+        "trial": {
+            "title": "14 napos Ingyenes Próbaverzió Elérhető",
+            "note": "Érvényes hitelkártya szükséges!"
+        },
+        "buttons": {
+            "startTrial": "14 napos Ingyenes Próbaverzió Indítása",
+            "choosePlan": "Csomag Kiválasztása",
+            "topUp": "Feltöltés",
+            "switchToBilling": "Váltás {{interval}} Számlázásra",
+            "switchToPlan": "Váltás {{planName}} Csomagra",
+            "contactSales": "Értékesítés Kapcsolat"
+        }
+    },
+    "manageSubscription": {
+        "noSubscription": {
+            "title": "Nincs Aktív Előfizetés",
+            "description": "Kérjük, vegye fel a kapcsolatot a támogatással, ha úgy gondolja, hogy ez hiba."
+        },
+        "header": {
+            "title": "Előfizetés Kezelése",
+            "description": "Figyelje a csomaghasználatát és kezelje a számlázási preferenciákat"
+        },
+        "buttons": {
+            "reactivating": "Újraaktiválás folyamatban...",
+            "reactivateTrial": "Próbaverzió Újraaktiválása",
+            "reactivatePlan": "Csomag Újraaktiválása",
+            "processing": "Feldolgozás folyamatban...",
+            "startSubscription": "Előfizetés Indítása",
+            "cancelling": "Lemondás folyamatban...",
+            "cancelTrial": "Próbaverzió Lemondása",
+            "cancel": "Lemondás"
+        },
+        "plan": {
+            "title": "{{planName}} Csomag",
+            "monthly": "Havi",
+            "yearly": "Éves"
+        },
+        "status": {
+            "active": "Aktív",
+            "trialing": "Próbaverzió Aktív",
+            "past_due": "Lejárt",
+            "canceled": "Lemondva",
+            "cancelsSoon": "Hamarosan lemondva"
+        },
+        "trial": {
+            "endsOn": "Az Ön próbaverziója {{date}} napon jár le."
+        },
+        "usage": {
+            "title": "Dokumentum Használat",
+            "unlimited": "Korlátlan",
+            "enterpriseNote": "Nincsenek dokumentum korlátok a vállalati csomagban",
+            "of": "{{limit}} dokumentumból",
+            "resetsOn": "A használat {{date}} napon áll vissza"
+        },
+        "billing": {
+            "title": "Számlázási Állapot",
+            "cancellationPending": "Lemondás Függőben",
+            "cancelsOn": "Az Ön csomagja lemondásra kerül",
+            "pastDue": "Fizetés Lejárt",
+            "pastDueNote": "Kérjük, frissítse fizetési módját a szolgáltatás folytatásához",
+            "nextRenewal": "Következő Megújítás",
+            "autoRenewalActive": "Automatikus megújítás aktív"
+        },
+        "quickStats": {
+            "started": "Csomag Indítva",
+            "cycle": "Számlázási Ciklus",
+            "documentsLeft": "Hátralévő Dokumentumok"
+        },
+        "management": {
+            "title": "Csomag Kezelése",
+            "description1": "Kezelje előfizetését, tekintse meg a számlákat, vagy változtassa meg a csomagját.",
+            "description2": "A változások a számlázási ciklusnak megfelelően lépnek életbe",
+            "buttons": {
+                "invoices": "Számlák",
+                "upgrade": "Frissítés"
+            }
+        },
+        "cancelModal": {
+            "trial": {
+                "title": "Ingyenes Próbaverzió Lemondása?",
+                "text": "A próbaverziója {{date}} napig aktív marad, de nem alakul át fizetős csomaggá. Biztos benne?",
+                "confirmButton": "Igen, lemondom a próbaverziót"
+            },
+            "subscription": {
+                "title": "Előfizetés Lemondása?",
+                "text": "Az előfizetése a jelenlegi időszak végéig, {{date}} napon aktív marad. Biztos benne?",
+                "confirmButton": "Igen, lemondom az előfizetést"
+            },
+            "cancelButton": "Megtartom a Csomagomat"
+        },
+        "endTrialModal": {
+            "title": "Aktiválja a Fizetős Csomagot Most?",
+            "text": "Azonnal €{{price}} kerül felszámításra, és teljes hozzáférést kap a {{planName}} csomag előnyeihez, beleértve az új dokumentumkorlátot.",
+            "confirmButton": "Igen, Aktiválom Most",
+            "cancelButton": "Maradok a Próbaverzióban"
+        },
+        "messages": {
+            "cancelSuccess": "Az Ön csomagja most lemondásra van állítva.",
+            "reactivateSuccess": "Az Ön előfizetése sikeresen újraaktiválva!",
+            "endTrialSuccess": "Az Ön előfizetése most aktív!"
+        }
+    },
+    "invoiceHistory": {
+        "title": "Számlaelőzmények",
+        "closeLabel": "Modal bezárása",
+        "loading": "Számlák betöltése folyamatban...",
+        "locale": "hu-HU",
+        "table": {
+            "headers": {
+                "date": "Dátum",
+                "amount": "Összeg",
+                "status": "Állapot",
+                "action": "Művelet"
+            },
+            "viewAction": "Számla Megtekintése"
+        },
+        "status": {
+            "paid": "Kifizetve",
+            "open": "Nyitott",
+            "void": "Érvénytelen",
+            "uncollectible": "Behajthatatlan"
+        },
+        "empty": {
+            "title": "Nincs Számla Található",
+            "description": "A számlázási előzményei itt jelennek meg, miután számlázva lett."
+        }
+    },
+    "contacts": {
+        "pageTitle": "Kapcsolatok",
+        "header": {
+            "title": "Kapcsolatok",
+            "searchPlaceholder": "Kapcsolatok keresése"
+        },
+        "buttons": {
+            "addContact": "Kapcsolat Hozzáadása"
+        },
+        "table": {
+            "headers": {
+                "name": "Név",
+                "email": "E-mail",
+                "phone": "Telefon",
+                "customInfo": "Egyedi Infó",
+                "actions": "Műveletek"
+            },
+            "actions": {
+                "edit": "Szerkesztés",
+                "delete": "Törlés"
+            },
+            "notAvailable": "N/A"
+        },
+        "loading": "Betöltés folyamatban...",
+        "emptyState": {
+            "title": "Még Nincs Kapcsolat",
+            "description": "Kezdje el az első kapcsolat hozzáadásával."
+        },
+        "modal": {
+            "titleAdd": "Kapcsolat Hozzáadása",
+            "titleEdit": "Kapcsolat Szerkesztése",
+            "form": {
+                "titlePrefix": {
+                    "label": "Megszólítás",
+                    "options": {
+                        "none": "Nincs",
+                        "mr": "Úr",
+                        "mrs": "Asszony",
+                        "ms": "Kisasszony",
+                        "dr": "Dr.",
+                        "prof": "Prof."
+                    }
+                },
+                "firstName": { "label": "Keresztnév", "placeholder": "Adja meg a Keresztnevet" },
+                "lastName": { "label": "Vezetéknév", "placeholder": "Adja meg a Vezetéknevet" },
+                "email": { "label": "E-mail", "placeholder": "Adja meg az E-mail címet" },
+                "phone": { "label": "Telefonszám" },
+                "language": { "label": "Nyelv" },
+                "title": { "label": "Beosztás/Foglalkozás", "placeholder": "Adja meg a Beosztást" }
+            },
+            "customFields": {
+                "title": "További Információk",
+                "keyPlaceholder": "Mező Név (pl. Cég)",
+                "valuePlaceholder": "Érték (pl. Acme Inc.)",
+                "addButton": "+ Egyéni Mező Hozzáadása"
+            },
+            "buttons": {
+                "cancel": "Mégsem",
+                "add": "Hozzáadás",
+                "update": "Frissítés",
+                "saving": "Mentés folyamatban..."
+            }
+        },
+        "deleteConfirm": {
+            "title": "Biztos benne?",
+            "text": "Ezt nem tudja visszavonni!",
+            "confirmButton": "Igen, törölje!",
+            "cancelButton": "Mégsem"
+        },
+        "messages": {
+            "addSuccess": "Kapcsolat sikeresen hozzáadva.",
+            "updateSuccess": "Kapcsolat sikeresen frissítve.",
+            "deleteSuccess": "A kapcsolat törölve lett."
+        },
+        "validation": {
+            "firstName": { "required": "Keresztnév megadása kötelező", "min": "A keresztnévnek legalább 2 karakter hosszúnak kell lennie", "max": "A keresztnév nem haladhatja meg az 50 karaktert" },
+            "lastName": { "required": "Vezetéknév megadása kötelező", "min": "A vezetéknévnek legalább 2 karakter hosszúnak kell lennie", "max": "A vezetéknév nem haladhatja meg az 50 karaktert" },
+            "email": { "invalid": "Érvénytelen e-mail formátum", "required": "E-mail megadása kötelező", "max": "Az e-mail nem haladhatja meg a 254 karaktert" },
+            "phone": { "max": "A telefonszám túl hosszúnak tűnik", "invalid": "Érvénytelen telefonszám" },
+            "language": { "required": "Nyelv megadása kötelező" },
+            "title": { "min": "A beosztásnak legalább 2 karakter hosszúnak kell lennie", "max": "A beosztás nem haladhatja meg a 100 karaktert" },
+            "customFields": {
+                "key": { "required": "Mező név megadása kötelező", "min": "A mező névnek legalább 2 karakter hosszúnak kell lennie", "max": "A mező név nem haladhatja meg az 50 karaktert" },
+                "value": { "max": "Az érték nem haladhatja meg a 255 karaktert" }
+            }
+        },
+        "languages": {
+            "en": "Angol",
+            "es": "Spanyol (Español)",
+            "fr": "Francia (Français)",
+            "de": "Német (Deutsch)",
+            "it": "Olasz (Italiano)"
+        }
+    },
+    "templates": {
+        "header": {
+            "title": "Dokumentum Sablonok"
+        },
+        "buttons": {
+            "createNew": "Új Sablon Létrehozása",
+            "backToList": "Vissza a Sablonokhoz",
+            "saveTemplate": "Sablon Mentése",
+            "saving": "Mentés folyamatban..."
+        },
+        "loading": "Betöltés folyamatban...",
+        "loadingTemplates": "Sablonok betöltése folyamatban...",
+        "emptyState": {
+            "title": "Nem Található Sablon",
+            "description": "Kezdje az első dokumentum sablonjának létrehozásával."
+        },
+        "table": {
+            "headers": {
+                "name": "Név",
+                "uuid": "Melléklet UUID",
+                "fields": "Mezők",
+                "actions": "Műveletek"
+            }
+        },
+        "editor": {
+            "title": "Szerkesztés: {{templateName}}"
+        },
+        "deleteConfirm": {
+            "title": "Biztos benne?",
+            "text": "Ezt nem tudja visszavonni!",
+            "confirmButton": "Igen, törölje!",
+            "cancelButton": "Nem, mégsem!"
+        },
+        "deleteSuccessAlert": {
+            "title": "Törölve!",
+            "text": "A sablonja törölve lett."
+        },
+        "deleteErrorAlert": {
+            "title": "Hiba!"
+        },
+        "messages": {
+            "invalidId": "Érvénytelen sablon ID.",
+            "deleteSuccess": "Sablon sikeresen törölve!",
+            "deleteFailed": "Sikertelen sablontörlés.",
+            "noTemplateToSave": "Nincs menthető sablon.",
+            "titleRequired": "A sablon címe nem lehet üres.",
+            "updateSuccess": "Sablon sikeresen frissítve!",
+            "fileUrlMissing": "Hiányzik a fájl URL-je. Kérjük, töltsön fel egy dokumentumot.",
+            "s3KeyMissing": "Hiányzik az S3 kulcs. Kérjük, töltse fel újra a dokumentumot.",
+            "saveSuccess": "Sablon sikeresen elmentve!",
+            "saveFailed": "Sikertelen sablonmentés."
+        }
+    },
+    "uploadStep": {
+        "title": "Dokumentum Feltöltése és Cím Beállítása",
+        "uploadLabel": "PDF Dokumentum Feltöltése",
+        "dropzone": {
+            "prompt": "Dobja ide a PDF-et, vagy kattintson a böngészéshez",
+            "uploaded": "PDF Feltöltve",
+            "hint": "Támogatja az 50 MB-ig terjedő PDF fájlokat"
+        },
+        "processing": "Feldolgozás folyamatban...",
+        "titleLabel": "Dokumentum Címe",
+        "titlePlaceholder": "pl. Titoktartási Megállapodás",
+        "previewLabel": "Dokumentum Előnézet",
+        "pageIndicator": "{{page}}. oldal",
+        "previewPlaceholder": "Az előnézet itt fog megjelenni",
+        "button": {
+            "proceed": "Tovább a Szerkesztőhöz",
+            "processing": "Feldolgozás folyamatban..."
+        },
+        "messages": {
+            "uploadFailed": "Sikertelen dokumentumfeltöltés.",
+            "uploadRequired": "Kérjük, töltsön fel egy PDF dokumentumot.",
+            "invalidFileType": "Kérjük, válasszon érvényes PDF fájlt."
+        },
+        "validation": {
+            "titleRequired": "Dokumentum címe kötelező",
+            "titleMin": "A címnek legalább 3 karakter hosszúnak kell lennie"
+        },
+        "errors": {
+            "fetchFailed": "Sikertelen PDF lekérés",
+            "fetchFromUrlFailed": "Sikertelen PDF lekérés az URL-ről",
+            "noValidPdf": "Nincs érvényes PDF adat vagy nem blob URL megadva.",
+            "renderFailed": "Sikertelen PDF előnézet renderelés"
+        }
+    },
+    "editor": {
+        "loading": "Sablon szerkesztő betöltése folyamatban...",
+        "properties": {
+            "title": "Mező Tulajdonságai",
+            "prompt": "Válasszon ki egy mezőt a tulajdonságainak szerkesztéséhez."
+        },
+        "fieldDefaults": {
+            "signature": "Aláírás",
+            "textarea": "Szövegterület",
+            "textareaPlaceholder": "Szöveg beírása...",
+            "checkbox": "Jelölőnégyzet",
+            "radio": "Rádiógomb",
+            "date": "Dátummező",
+            "dropdown": "Lenyíló lista",
+            "text": "Szövegmező",
+            "textPlaceholder": "Írja be ide a szöveget"
+        },
+        "deleteConfirm": {
+            "title": "Mező törlése?",
+            "text": "Ez a művelet nem vonható vissza.",
+            "confirmButton": "Igen, törölje!",
+            "cancelButton": "Mégsem"
+        },
+        "messages": {
+            "deleteSuccess": "Mező törölve."
+        },
+        "errors": {
+            "fetchFailed": "Sikertelen PDF lekérés",
+            "noValidPdf": "Nincs érvényes PDF adat megadva.",
+            "loadFailed": "Sikertelen PDF betöltés szerkesztéshez",
+            "renderFailed": "Sikertelen PDF oldalak renderelése."
+        }
+    },
+    "documentsDashboard": {
+        "loading": "Dokumentumok betöltése folyamatban...",
+        "buttons": {
+            "upload": "Dokumentum Feltöltése"
+        },
+        "error": {
+            "title": "Nem sikerült betölteni a dokumentumokat"
+        }
+    },
+    "packagesDashboard": {
+        "newPackageName": "Új Csomag",
+        "loadingDraft": "Vázlat csomag betöltése folyamatban...",
+        "initializing": "Csomag létrehozása inicializálva...",
+        "errors": {
+            "notADraft": "Ez a csomag nem vázlat, és nem szerkeszthető.",
+            "loadFailed": "Sikertelen vázlat csomag betöltése."
+        }
+    },
+    "documentTable": {
+        "loading": "Dokumentumok betöltése folyamatban...",
+        "headers": {
+            "documentName": "Dokumentum Neve",
+            "status": "Állapot",
+            "initiator": "Kezdeményező",
+            "formFillers": "Űrlap Kitöltők",
+            "approvers": "Jóváhagyók",
+            "signers": "Aláírók",
+            "receivers": "Címzettek",
+            "addedOn": "Hozzáadva Ekkor",
+            "participants": "Résztvevők",
+            "actions": "Műveletek"
+        },
+        "actions": {
+            "download": "Letöltés",
+            "notify": "Értesítés/Emlékeztető",
+            "viewDetails": "Részletek megtekintése",
+            "continueEditing": "Szerkesztés folytatása",
+            "viewHistory": "Előzmények megtekintése",
+            "reassign": "Újrarendelés",
+            "skip": "Kihagyás",
+            "revoke": "Visszavonás"
+        },
+        "emptyState": {
+            "title": "Nem Található Dokumentum",
+            "description": "Nincs a jelenlegi szűrőknek megfelelő dokumentum."
+        },
+        "revokeModal": {
+            "title": "Dokumentum Visszavonása",
+            "message": "Biztos benne, hogy vissza akarja vonni a \"{{documentName}}\" dokumentumot? Ez a művelet nem vonható vissza, és megszünteti a folyamatot minden résztvevő számára.",
+            "confirmButton": "Igen, visszavonás"
+        }
+    },
+    "stepper": {
+        "header": {
+            "createTitle": "Csomag Létrehozása",
+            "editTitle": "Vázlat Csomag Szerkesztése"
+        },
+        "steps": {
+            "documentSelection": "Dokumentum Kiválasztása",
+            "fieldAssignment": "Mező Hozzárendelés",
+            "reviewAndConfirm": "Áttekintés és Megerősítés",
+            "select": "Kiválasztás",
+            "assign": "Hozzárendelés",
+            "review": "Áttekintés"
+        },
+        "buttons": {
+            "backToDashboard": "Vissza a Vezérlőpulthoz",
+            "previousStep": "Előző Lépés",
+            "nextStep": "Következő Lépés",
+            "saveDraft": "Mentés Vázlatként",
+            "saveAsTemplate": "Mentés Sablonként",
+            "savingPackage": "Csomag Mentése folyamatban...",
+            "confirmPackage": "Megerősítés és Csomag Küldése"
+        },
+        "messages": {
+            "noPackageToSave": "Nincs menthető csomag.",
+            "savingDraft": "Vázlat mentése folyamatban...",
+            "draftSaved": "Vázlat sikeresen elmentve!",
+            "draftFailed": "Sikertelen vázlatmentés.",
+            "noPackageForTemplate": "Nem menthető sablonként: Nincsenek elérhető csomagadatok.",
+            "templateSaveFailed": "Sikertelen mentés sablonként.",
+            "noPackageToConfirm": "Nincs megerősítendő csomag.",
+            "titleRequired": "A csomag címe nem lehet üres.",
+            "documentRequired": "Kérjük, töltsön fel vagy válasszon ki egy dokumentumot.",
+            "unassignedFields": "Kérjük, rendeljen felhasználókat a kötelező mezőkhöz",
+            "packageSent": "Csomag sikeresen elmentve és elküldve!",
+            "packageSaveFailed": "Sikertelen csomagmentés."
+        }
+    },
+    "documentSelection": {
+        "mainTitle": "Válasszon Dokumentum Forrást",
+        "mainSubtitle": "Válasszon egy meglévő sablont, vagy töltsön fel egy új PDF dokumentumot",
+        "template": {
+            "title": "Meglévő Sablon Használata",
+            "selectPlaceholder": "-- Válasszon egy Meglévő Sablont --",
+            "loading": "Sablonok betöltése folyamatban..."
+        },
+        "upload": {
+            "title": "Új PDF Feltöltése",
+            "dropPrompt": "Dobja ide a PDF-et",
+            "dragPrompt": "Húzza ide a PDF-et, vagy Kattintson a Böngészéshez",
+            "hint": "Támogatja a 10 MB-ig terjedő PDF fájlokat",
+            "uploading": "Feltöltés folyamatban..."
+        },
+        "packageTitle": {
+            "label": "Csomag Címe",
+            "placeholder": "pl. Belépési Dokumentum John Doe számára"
+        },
+        "preview": {
+            "title": "Dokumentum Előnézet",
+            "emptyTitle": "Nincs Dokumentum Kiválasztva",
+            "emptyDescription": "Válasszon egy sablont, vagy töltsön fel egy PDF-et az előnézet megtekintéséhez"
+        },
+        "messages": {
+            "invalidFileType": "Kérjük, válasszon érvényes PDF fájlt.",
+            "uploadFailed": "Sikertelen dokumentumfeltöltés.",
+            "templateLoadFailed": "Sikertelen a kiválasztott sablon betöltése.",
+            "selectDocument": "Kérjük, töltsön fel vagy válasszon ki egy dokumentumot, mielőtt továbblép."
+        },
+        "validation": {
+            "titleRequired": "Csomag címe kötelező",
+            "titleMin": "A címnek legalább 3 karakter hosszúnak kell lennie"
+        },
+        "errors": {
+            "fetchFailed": "Sikertelen lekérés",
+            "fetchBlobFailed": "Sikertelen lekérés a blobnál",
+            "renderFailed": "Sikertelen PDF előnézet renderelés",
+            "fetchTemplateFailed": "Sikertelen sablon PDF lekérés"
+        }
+    },
+    "fieldAssignment": {
+        "noDocument": {
+            "title": "Nincs Dokumentum Kiválasztva",
+            "description": "Kérjük, válasszon egy dokumentumot az előző lépésben a mezők hozzárendelésének megkezdéséhez."
+        },
+        "loadError": {
+            "title": "Sikertelen PDF Betöltés",
+            "button": "Vissza"
+        },
+        "noFieldsWarning": {
+            "title": "Még Nincs Hozzáadva Mező",
+            "description": "Húzza át a mezőket a fenti eszköztárból a dokumentumra a résztvevők interaktív területeinek létrehozásához."
+        },
+        "pageIndicator": "{{page}}. oldal a {{total}} oldalból",
+        "properties": {
+            "title": "Mező Tulajdonságai",
+            "subtitle": "Mezőbeállítások konfigurálása",
+            "closeAriaLabel": "Tulajdonságok panel bezárása",
+            "openAriaLabel": "Mező tulajdonságainak megnyitása",
+            "noFieldSelected": {
+                "title": "Nincs Mező Kiválasztva",
+                "description": "Érintsen meg egy mezőt a dokumentumban a tulajdonságainak szerkesztéséhez és a felhasználók hozzárendeléséhez."
+            }
+        },
+        "messages": {
+            "fieldAdded": "{{fieldLabel}} mező hozzáadva."
+        },
+        "errors": {
+            "fetchFailed": "Sikertelen PDF lekérés",
+            "fetchBlobFailed": "Sikertelen lekérés a blobnál",
+            "loadFailed": "Sikertelen PDF betöltés",
+            "renderFailed": "Sikertelen PDF oldalak renderelése.",
+            "noValidPdf": "Nincs érvényes PDF adat vagy URL megadva."
+        }
+    },
+    "packageReview": {
+        "loading": "Csomag részletek betöltése folyamatban...",
+        "locale": "hu-HU",
+        "tabs": {
+            "summary": "Összegzés",
+            "recipients": "Címzettek",
+            "settings": "Beállítások"
+        },
+        "preview": {
+            "title": "Dokumentum Előnézet",
+            "pageCount": "{{count}} oldal",
+            "pageCount_plural": "{{count}} oldal",
+            "pageIndicator": "{{current}}. oldal a {{total}} oldalból",
+            "actualSize": "Tényleges Méret",
+            "fitWidth": "Szélességhez Illesztés",
+            "rendering": {
+                "title": "Dokumentum Renderelése folyamatban...",
+                "subtitle": "Kérjük, várjon, amíg előkészítjük a dokumentumot"
+            }
+        },
+        "summary": {
+            "message": {
+                "title": "Opcionális Üzenet a Résztvevőknek",
+                "description": "Ez az üzenet szerepelni fog a \"Művelet szükséges\" kezdeti e-mailben, amelyet minden résztvevőnek elküldünk.",
+                "placeholder": "pl. Kérjük, tekintse át és írja alá ezt a dokumentumot a lehető leghamarabb. Köszönjük!"
+            },
+            "details": {
+                "title": "Részletek Egy Pillantásra",
+                "fields": "Mezők",
+                "recipients": "Címzettek",
+                "pages": "Oldalak"
+            },
+            "credits": {
+                "title": "Dokumentum Kredit Felhasználás",
+                "usageText": "Ez a csomag 1 dokumentum kreditet fog használni",
+                "usageText_plural": "Ez a csomag {{count}} dokumentum kreditet fog használni",
+                "signerCountText": "Még nincs aláíró hozzárendelve",
+                "signerCountText_plural": "{{count}} egyedi aláíró észlelve",
+                "signerCountText_plural_plural": "{{count}} egyedi aláíró észlelve",
+                "tip_strong": "Tipp:",
+                "tip_text": "Minden dokumentum kredit legfeljebb 2 egyedi aláírót fedez.",
+                "tip_extra": "{{signers}} aláírója van, ami {{credits}} kreditet igényel."
+            },
+            "progress": {
+                "title": "Hozzárendelési Folyamat",
+                "completeText": "{{rate}}% Elkészült",
+                "actionRequired": "Művelet Szükséges",
+                "unassignedFields": "Van 1 hozzá nem rendelt kötelező mező.",
+                "unassignedFields_plural": "Van {{count}} hozzá nem rendelt kötelező mező."
+            }
+        },
+        "recipients": {
+            "assigned": {
+                "title": "Hozzárendelt Résztvevők",
+                "empty": "Nincsenek felhasználók hozzárendelve a mezőkhöz."
+            },
+            "notificationOnly": {
+                "title": "Csak Értesítési Címzettek",
+                "description": "Adjon hozzá olyan kontaktokat, akik kapnak csomagértesítéseket, de nem kell aláírniuk.",
+                "addButton": "Címzett Hozzáadása"
+            }
+        },
+        "settings": {
+            "expiration": {
+                "title": "Csomag Lejárata",
+                "description": "Állítson be egy dátumot és időt, amikor ez a csomag már nem lesz elérhető.",
+                "okButton": "OK"
+            },
+            "reminders": {
+                "title": "Lejárati Emlékeztetők",
+                "setExpirationNote": "Kérjük, először állítson be egy csomag lejárati dátumot, hogy engedélyezze a lejárati emlékeztetőket.",
+                "enableCheckbox": "Lejárati Emlékeztetők Küldése",
+                "timing": {
+                    "label": "Emlékeztető Időzítése",
+                    "placeholder": "Emlékeztető időzítésének kiválasztása",
+                    "options": {
+                        "1_hour": "1 Órával Előtte",
+                        "2_hours": "2 Órával Előtte",
+                        "1_day": "24 Órával Előtte",
+                        "2_days": "48 Órával Előtte"
+                    },
+                    "tooSoonNote": "A lejárati dátum túl közel van a bármelyik emlékeztető opcióhoz. Kérjük, állítson be későbbi dátumot az emlékeztetők engedélyezéséhez."
+                }
+            },
+            "autoReminders": {
+                "title": "Automatikus Emlékeztetők",
+                "setExpirationNote": "Kérjük, először állítson be egy csomag lejárati dátumot, hogy engedélyezze az automatikus emlékeztetőket.",
+                "enableCheckbox": "Automatikus Emlékeztetők Engedélyezése",
+                "first": {
+                    "label": "Első emlékeztető",
+                    "suffix": "nappal a lejárat előtt"
+                },
+                "repeat": {
+                    "label": "Utánkövető emlékeztetők",
+                    "prefix": "Ismételje minden",
+                    "suffix": "nap"
+                },
+                "tooSoonNote": "A lejárati dátumot több mint egy napra a jövőbe kell beállítani az automatikus emlékeztetők engedélyezéséhez."
+            },
+            "permissions": {
+                "title": "Engedélyek",
+                "allowDownload": "Letöltés engedélyezése az aláírás befejezése előtt",
+                "allowReassign": "Engedélyezze a résztvevőknek a szerepük újrarendelését"
+            }
+        },
+        "messages": {
+            "receiverAdded": "{{name}} hozzáadva címzettként.",
+            "contactCreated": "{{name}} létrehozva és kiválasztva címzettként.",
+            "expirationSet": "Csomag lejárata {{date}} napra beállítva",
+            "expirationRemoved": "Csomag lejárata eltávolítva - a csomag nem jár le",
+            "reminderTimingReset": "Az emlékeztető időzítése visszaállítva, mivel már nem érvényes az új lejárati dátumra.",
+            "firstReminderReset": "Az első automatikus emlékeztető visszaállítva, mivel már nem érvényes az új lejárati dátumra.",
+            "repeatReminderReset": "Az utánkövető emlékeztető intervalluma visszaállítva, mivel már nem érvényes."
+        },
+        "errors": {
+            "missingSource": "Hiányzik a dokumentum forrása. Kérjük, térjen vissza az 1. lépéshez.",
+            "fetchFailed": "Sikertelen lekérés",
+            "fetchBlobFailed": "Sikertelen lekérés a blobnál",
+            "noSource": "Nem található PDF forrás a csomag adatokban.",
+            "loadFailed": "Sikertelen a dokumentum előnézetének betöltése.",
+            "renderFailed": "Sikertelen PDF oldalak renderelése.",
+            "pastDate": "A lejárati dátum nem lehet a múltban. Kérjük, válasszon egy jövőbeli dátumot."
+        }
+    },
+    "packageFieldRenderer": {
+        "fieldTypes": {
+            "text": "Szöveg",
+            "textarea": "Szöveg",
+            "signature": "Aláírás",
+            "checkbox": "Jelölőnégyzet",
+            "radio": "Rádiógomb",
+            "date": "Dátum",
+            "dropdown": "Kiválasztás"
+        },
+        "labelInput": {
+            "placeholder": "Mező címkéje"
+        },
+        "labelTitle": {
+            "signature": "Az aláírási mező címkéje nem szerkeszthető",
+            "editable": "Kattintson a címke szerkesztéséhez"
+        },
+        "titles": {
+            "markRequired": "Megjelölés kötelezőként",
+            "markOptional": "Megjelölés opcionálisként",
+            "quickAssign": "Gyors felhasználó hozzárendelés",
+            "signatureFieldAssigned": "Az aláírási mezőhöz már van aláíró rendelve",
+            "deleteField": "Mező törlése"
+        },
+        "quickAssign": {
+            "title": "Gyors Hozzárendelés",
+            "signatureWarning": "Az aláírási mezőkhöz csak egy aláíró rendelhető.",
+            "selectContact": "Kontakt Kiválasztása",
+            "selectContactPlaceholder": "Válasszon egy kontaktot...",
+            "addNewContact": "Új Kontakt Hozzáadása",
+            "role": "Szerepkör",
+            "signatureRoleNote": "Az aláírási mezők aláírói szerepkört igényelnek",
+            "nonSignatureRoleNote": "Aláírók csak aláírási mezőkhöz rendelhetők",
+            "authMethods": "Hitelesítési Módszerek",
+            "authMethodsEmail": "E-mail OTP Ellenőrzés",
+            "authMethodsSMS": "SMS OTP Ellenőrzés",
+            "assignButton": "Mező Hozzárendelése",
+            "roles": {
+                "Signer": "Aláíró",
+                "FormFiller": "Űrlap Kitöltő",
+                "Approver": "Jóváhagyó"
+            }
+        },
+        "assignedUsers": {
+            "title": "{{name}} ({{role}}){{methods}}"
+        },
+        "messages": {
+            "labelUpdated": "Címke frissítve",
+            "markedRequired": "Mező kötelezőként megjelölve",
+            "markedOptional": "Mező opcionálisként megjelölve",
+            "signatureFieldAssigned": "Az aláírási mezőhöz már hozzá van rendelve aláíró",
+            "userAssigned": "{{name}} hozzárendelve mint {{role}}",
+            "contactAdded": "{{name}} sikeresen hozzáadva"
+        },
+        "errors": {
+            "signatureFieldHasSigner": "Az aláírási mezőkhöz csak egy aláíró rendelhető."
+        }
+    },
+    "addEditContactModal": {
+        "title": {
+            "add": "Új Kontakt Hozzáadása",
+            "edit": "Kontakt Szerkesztése"
+        },
+        "labels": {
+            "titlePrefix": "Megszólítás",
+            "firstName": "Keresztnév",
+            "lastName": "Vezetéknév",
+            "email": "E-mail",
+            "phone": "Telefonszám",
+            "language": "Nyelv",
+            "title": "Beosztás/Foglalkozás",
+            "additionalInfo": "További Információk"
+        },
+        "placeholders": {
+            "firstName": "Adja meg a Keresztnevet",
+            "lastName": "Adja meg a Vezetéknevet",
+            "email": "Adja meg az E-mail címet",
+            "title": "Adja meg a Beosztást",
+            "customFieldKey": "Mező Név (pl. Cég)",
+            "customFieldValue": "Érték (pl. Acme Inc.)"
+        },
+        "titlePrefixOptions": {
+            "none": "Nincs",
+            "mr": "Úr",
+            "mrs": "Asszony",
+            "ms": "Kisasszony",
+            "dr": "Dr.",
+            "prof": "Prof."
+        },
+        "languageOptions": {
+            "en": "Angol",
+            "es": "Spanyol (Español)",
+            "fr": "Francia (Français)"
+        },
+        "buttons": {
+            "cancel": "Mégsem",
+            "saving": "Mentés folyamatban...",
+            "addContact": "Kontakt Hozzáadása",
+            "updateContact": "Kontakt Frissítése",
+            "addCustomField": "+ Egyéni Mező Hozzáadása"
+        },
+        "errors": {
+            "firstNameRequired": "Keresztnév megadása kötelező",
+            "lastNameRequired": "Vezetéknév megadása kötelező",
+            "emailInvalid": "Érvénytelen e-mail formátum",
+            "emailRequired": "E-mail megadása kötelező",
+            "phoneInvalid": "Érvénytelen telefonszám",
+            "languageRequired": "Nyelv megadása kötelező",
+            "customFieldKeyRequired": "Mező név megadása kötelező"
+        },
+        "messages": {
+            "contactAdded": "Kontakt sikeresen hozzáadva.",
+            "contactUpdated": "Kontakt sikeresen frissítve."
+        }
+    },
+    "packageFieldPropertiesPanel": {
+        "fieldTypes": {
+            "text": "Szöveg",
+            "textarea": "Szövegterület",
+            "signature": "Aláírás",
+            "checkbox": "Jelölőnégyzet",
+            "radio": "Rádiógomb",
+            "date": "Dátum",
+            "dropdown": "Lenyíló lista"
+        },
+        "labels": {
+            "fieldType": "Mező Típusa:",
+            "label": "Címke:",
+            "placeholder": "Helyőrző:",
+            "radioGroupId": "Rádiócsoport ID:",
+            "radioOptions": "Opciók (vesszővel elválasztva):",
+            "dropdownOptions": "Opciók (vesszővel elválasztva):",
+            "required": "Kötelező",
+            "assignUsers": "Felhasználók Hozzárendelése a Mezőhöz",
+            "signatureMethods": "Aláírási Módszer(ek):",
+            "allowedMethods": "Engedélyezett Módszerek:",
+            "assignedUsers": "Hozzárendelt Felhasználók:"
+        },
+        "placeholders": {
+            "placeholder": "Írja be a helyőrző szöveget",
+            "radioGroupId": "Egyedi ID ehhez a rádiócsoporthoz",
+            "radioOptions": "1. opció, 2. opció",
+            "dropdownOptions": "1. opció, 2. opció",
+            "selectRole": "-- Szerepkör Kiválasztása --"
+        },
+        "roles": {
+            "Signer": "Aláíró",
+            "FormFiller": "Űrlap Kitöltő",
+            "Approver": "Jóváhagyó"
+        },
+        "signatureMethods": {
+            "emailOTP": "E-mail OTP-n Keresztül",
+            "smsOTP": "SMS OTP-n Keresztül"
+        },
+        "titles": {
+            "removeAssignment": "Hozzárendelés eltávolítása"
+        },
+        "messages": {
+            "signatureLabelFixed": "Az aláírási mező címkéi nem módosíthatók",
+            "radioGroupIdNote": "Az azonos csoport ID-vel rendelkező összes rádiógomb egyetlen választási csoportként működik.",
+            "radioOptionsNote": "Adjon meg legalább két opciót egy értelmes rádiócsoporthoz.",
+            "dropdownOptionsNote": "Adjon meg legalább egy opciót a legördülő listához.",
+            "signatureFieldNote": "Az aláírási mezőkhöz csak egy aláíró rendelhető. Ezt használja a digitális aláírás gyűjtéséhez.",
+            "signatureRoleNote": "Az aláírási mezők csak aláírókhoz rendelhetők",
+            "nonSignatureRoleNote": "Aláírók csak aláírási mezőkhöz rendelhetők",
+            "oneSignerMax": "Max. 1 Aláíró",
+            "noUsersAssigned": "Nincs hozzárendelt felhasználó.",
+            "userAssigned": "{{name}} hozzárendelve mint {{role}}",
+            "userAssignmentRemoved": "Felhasználói hozzárendelés eltávolítva"
+        },
+        "errors": {
+            "labelRequired": "Címke megadása kötelező",
+            "labelEmpty": "A címke nem lehet üres",
+            "placeholderTooLong": "A helyőrző túl hosszú",
+            "radioOptionsMin": "Legalább két vesszővel elválasztott opció szükséges a Rádiócsoporthoz",
+            "dropdownOptionsMin": "Legalább egy opció szükséges a Legördülő listához",
+            "groupIdRequired": "Csoport ID kötelező a rádiógombokhoz",
+            "noAuthMethod": "Egy aláírónak legalább egy hitelesítési módszerrel rendelkeznie kell.",
+            "signatureFieldHasSigner": "Az aláírási mezőkhöz csak egy aláíró rendelhető."
+        }
+    },
+    "packageStatusPage": {
+        "loading": {
+            "title": "Dokumentum Állapotának Betöltése...",
+            "message": "Kérjük, várjon egy pillanatot."
+        },
+        "error": {
+            "title": "Nem sikerült betölteni a dokumentumot"
+        }
+    },
+    "packageStatusLayout": {
+        "participants": {
+            "title": "Résztvevők"
+        }
+    },
+    "participantStatusPanel": {
+        "header": {
+            "title": "Résztvevők",
+            "participantCount": "{{count}} résztvevő",
+            "pluralSuffix": ""
+        },
+        "roles": {
+            "receiver": "Címzett"
+        },
+        "messages": {
+            "noParticipants": "Nincs hozzárendelt résztvevő"
+        }
+    },
+    "packageStatusHeader": {
+        "status": {
+            "completed": "Befejezett",
+            "rejected": "Elutasított",
+            "pending": "Függőben",
+            "archived": "Archivált",
+            "draft": "Vázlat"
+        },
+        "meta": {
+            "createdAt": "Létrehozva",
+            "fieldCount": "{{count}} mező",
+            "pluralSuffix": ""
+        }
+    },
+    "ownerDocumentViewer": {
+        "errors": {
+            "loadFailed": "Sikertelen dokumentum betöltése: {{message}}"
+        },
+        "controls": {
+            "previousPage": "Előző oldal",
+            "nextPage": "Következő oldal",
+            "zoomOut": "Kicsinyítés",
+            "zoomIn": "Nagyítás",
+            "pageNavigation": "{{current}}. oldal a {{total}} oldalból",
+            "zoomLevel": "{{level}}%"
+        },
+        "pageNumber": "{{number}}. oldal"
+    },
+    "statusFieldRenderer": {
+        "status": {
+            "rejected": "Elutasítva",
+            "revoked": "Visszavonva",
+            "draft": "Vázlat",
+            "signed": "Aláírva",
+            "signedBy": "Aláírta: {{signedBy}}",
+            "filled": "Kitöltve",
+            "pending": "Függőben"
+        },
+        "unassigned": "Nincs hozzárendelve",
+        "tooltip": "{{label}} - {{type}} - Hozzárendelve: {{assignedTo}} - Állapot: {{status}}"
+    },
+    "setting": {
+        "toggleCustomizer": "Vezérlőpult testreszabás váltása",
+        "header": {
+            "title": "VEZÉRLŐPULT TESTRESZABÓ",
+            "description": "Állítson be preferenciákat, amelyek a süti-ben tárolódnak az élő előnézeti bemutatóhoz."
+        },
+        "colorScheme": {
+            "title": "Színséma",
+            "description": "Általános világos vagy sötét megjelenítés.",
+            "light": "Világos",
+            "dark": "Sötét",
+            "system": "Rendszer"
+        },
+        "navigationPosition": {
+            "title": "Navigációs Pozíció",
+            "description": "Válassza ki az alkalmazás fő navigációs paradigmáját.",
+            "horizontal": "Vízszintes",
+            "vertical": "Függőleges",
+            "collapsible": "Összecsukható",
+            "semiDark": "Félig Sötét (Oldalsáv és Fejléc)"
+        },
+        "layoutStyle": {
+            "title": "Elrendezési Stílus",
+            "description": "Válassza ki az alkalmazás fő elrendezési stílusát.",
+            "box": "Doboz",
+            "full": "Teljes"
+        },
+        "direction": {
+            "title": "Irány",
+            "description": "Válassza ki az alkalmazás irányát.",
+            "ltr": "LTR",
+            "rtl": "RTL"
+        },
+        "navbarType": {
+            "title": "Navigációs Sáv Típusa",
+            "description": "Rögzített vagy Lebegő.",
+            "sticky": "Rögzített",
+            "floating": "Lebegő",
+            "static": "Statikus"
+        },
+        "routerTransition": {
+            "title": "Útválasztó Átmenet",
+            "description": "A fő tartalom animációja.",
+            "none": "Nincs",
+            "fade": "Halványítás",
+            "fadeDown": "Halványítás Le",
+            "fadeUp": "Halványítás Fel",
+            "fadeLeft": "Halványítás Balra",
+            "fadeRight": "Halványítás Jobbra",
+            "slideDown": "Csúszás Le",
+            "slideLeft": "Csúszás Balra",
+            "slideRight": "Csúszás Jobbra",
+            "zoomIn": "Nagyítás"
+        }
+    },
+    "reviewPage": {
+        "loading": {
+            "title": "Jogosultság Ellenőrzése",
+            "message": "Kérjük, várjon, amíg ellenőrizzük a hozzáférését..."
+        },
+        "success": {
+            "title": "Köszönjük! 🎉",
+            "message": "Visszajelzését sikeresen elküldtük.",
+            "feedback": "Az Ön véleménye segít nekünk javítani a felhasználói élményt mindenki számára"
+        },
+        "ineligible": {
+            "title": "Értékelés Nem Elérhető",
+            "contactSupport": "Ha úgy gondolja, hogy ez hiba, kérjük, vegye fel a kapcsolatot a támogatással"
+        },
+        "form": {
+            "feedbackRequired": "Visszajelzés Szükséges",
+            "title": "Milyen volt a",
+            "titleHighlight": "tapasztalata",
+            "description": "Az Ön visszajelzése segít nekünk javítani az e-aláírási élményt mindenki számára. Kérjük, szánjon egy percet tapasztalatának értékelésére.",
+            "progress": "Folyamat:",
+            "progressStatus": "{{completed}} / {{total}} elkészült",
+            "ratingInstruction": "Értékelés 1 (rossz) és 5 (kiváló) között",
+            "commentsTitle": "További Megjegyzések",
+            "commentsDescription": "Mondjon többet a tapasztalatáról (opcionális)",
+            "commentsPlaceholder": "Ossza meg gondolatait, javaslatait vagy bármilyen konkrét visszajelzését...",
+            "commentLength": "{{length}}/500",
+            "submitting": "Visszajelzés Küldése folyamatban...",
+            "submitButton": "Visszajelzés Küldése",
+            "submitReady": "Minden értékelés elkészült! Készen áll a küldésre.",
+            "submitIncomplete": "Kérjük, töltse ki az összes értékelést a küldés előtt."
+        },
+        "errors": {
+            "allRatingsRequired": "Kérjük, adjon meg értékelést minden kérdésre.",
+            "submissionError": "Küldési Hiba: {{error}}"
+        }
+    },
+    "subscriptionRequired": {
+        "active": {
+            "title": "Aktív Előfizetés Szükséges",
+            "description": "A funkció eléréséhez aktív előfizetésre van szüksége. Válasszon az alábbi rugalmas csomagjaink közül.",
+            "action": "Előfizetési Csomagok Megtekintése"
+        },
+        "package": {
+            "title": "Frissítse Csomagját",
+            "description": "Jelenlegi előfizetése nem tartalmazza a csomagkészítést. Frissítsen, hogy feloldja ezt az erőteljes funkciót.",
+            "action": "Előfizetés Frissítése"
+        },
+        "default": {
+            "title": "Előfizetés Szükséges",
+            "description": "Ez a funkció előfizetést igényel a folytatáshoz. Kezdje megfizethető csomagjainkkal.",
+            "action": "Csomagok Megtekintése"
+        },
+        "status": {
+            "current": "Jelenlegi Állapot",
+            "packageCreation": "Csomag Létrehozása",
+            "allowed": "Engedélyezett",
+            "notAllowed": "Nem Engedélyezett"
+        },
+        "actions": {
+            "goBack": "Vissza"
+        },
+        "help": {
+            "text": "Segítségre van szüksége a csomagválasztásban?",
+            "link": "Kapcsolatfelvétel a Támogatással"
+        }
+    },
+    "participantPage": {
+        "loading": {
+            "title": "Biztonságos Dokumentum Betöltése",
+            "message": "Kérjük, várjon, amíg előkészítjük a dokumentumot..."
+        },
+        "error": {
+            "title": "Hozzáférés Megtagadva",
+            "message": "Kérjük, ellenőrizze a linket, vagy vegye fel a kapcsolatot a feladóval, ha úgy gondolja, hogy ez hiba.",
+            "action": "Próbálja újra"
+        }
+    },
+    "headerControls": {
+        "navigation": {
+            "previous": "Előző Oldal",
+            "next": "Következő Oldal",
+            "page": "{{current}}. oldal a {{total}} oldalból"
+        },
+        "zoom": {
+            "title": "Nagyítási Szint",
+            "in": "Nagyítás",
+            "out": "Kicsinyítés",
+            "level": "{{level}}%"
+        },
+        "status": {
+            "completed": "Befejezett",
+            "sent": "Elküldött",
+            "draft": "Vázlat",
+            "archived": "Archivált",
+            "rejected": "Elutasított"
+        },
+        "fullscreen": {
+            "enter": "Teljes Képernyős Nézet",
+            "exit": "Kilépés a Teljes Képernyős Nézetből"
+        },
+        "options": "Több opció",
+        "participants": {
+            "title": "Résztvevők Megtekintése",
+            "description": "Végrehajtási állapot megtekintése"
+        },
+        "download": {
+            "title": "PDF Letöltése",
+            "disabled": "A letöltés csak a befejezés után érhető el",
+            "label": "Fájl Letöltése",
+            "description": "PDF másolat mentése",
+            "downloading": "Letöltés folyamatban...",
+            "preparing": "Dokumentum előkészítése a letöltéshez..."
+        },
+        "errors": {
+            "noPackageData": "A csomag adatok nem állnak rendelkezésre. Kérjük, frissítse az oldalt, és próbálja újra."
+        },
+        "drawer": {
+            "title": "Résztvevői Állapot",
+            "description": "Kövesse nyomon a teljesítés előrehaladását",
+            "noParticipants": "Nincs elérhető résztvevői információ.",
+            "back": "Vissza a Dokumentumhoz"
+        },
+        "participantStatus": {
+            "pending": "Függőben",
+            "completed": "Befejezett",
+            "not applicable": "Nem alkalmazható",
+            "pendingDesc": "Műveletre vár",
+            "completedDesc": "Minden feladat kész",
+            "notApplicableDesc": "Csak nyilvántartásra"
+        }
+    },
+    "participantLayout": {
+        "brand": "I-Sign.eu",
+        "help": "Segítség",
+        "sidebar": {
+            "toggle": "Oldalsáv váltása",
+            "title": "Dokumentum Részletek",
+            "signAs": "Aláírás mint",
+            "currentUser": "Jelenlegi Felhasználó",
+            "documents": "Dokumentumok",
+            "pages": "{{count}} oldal{{#count !== 1 ? '' : ''}}",
+            "progress": "Folyamat"
+        },
+        "progress": {
+            "status": "Teljesítési Állapot",
+            "completed": "Dokumentum elkészült",
+            "rejected": "Dokumentum elutasítva",
+            "expired": "Dokumentum lejárt",
+            "draft": "Dokumentum vázlatban",
+            "archived": "Dokumentum archiválva",
+            "tasksCompleted": "Az Ön feladatai elkészültek",
+            "reviewTerms": "Feltételek áttekintése és elfogadása",
+            "fieldsCompleted": "{{completed}}/{{total}} mező kitöltve",
+            "readyForSubmission": "Kész a végső beküldésre",
+            "termsAccepted": "Feltételek elfogadva",
+            "requiredFields": "Kötelező mezők"
+        },
+        "success": {
+            "title": "Minden Kész!",
+            "message": "Gratulálunk! Sikeresen befejezte az összes hozzárendelt feladatát ehhez a dokumentumhoz. Válaszait elküldtük, és a dokumentum készen áll a folyamat következő lépéseire.",
+            "requiredFields": "Minden kötelező mező kitöltve",
+            "termsAccepted": "Felhasználási feltételek elfogadva",
+            "signatureApplied": "Digitális aláírás alkalmazva",
+            "nextSteps": "Mi történik ezután?",
+            "nextMessage": "A dokumentum továbbítva lesz a többi résztvevőnek áttekintésre és befejezésre. Értesítést kap, amikor a teljes dokumentumfolyamat befejeződött."
+        },
+        "terms": {
+            "part1": "Kijelentem, hogy elolvastam a dokumentumot, és betartom a",
+            "link": "Felhasználási Feltételeket",
+            "part2": ".",
+            "accepted": "Feltételek elfogadva"
+        },
+        "defaultParticipant": "Egyéb Résztvevő"
+    },
+    "documentViewer": {
+        "loading": {
+            "title": "Dokumentum Előkészítése",
+            "message": "Kérjük, várjon, amíg betöltjük a dokumentumot...",
+            "progress": "{{progress}}%"
+        },
+        "errors": {
+            "title": "Dokumentum Betöltési Hiba",
+            "missingUrl": "Hiányzik a dokumentum URL-je.",
+            "fetchFailed": "Sikertelen PDF lekérés: {{status}}",
+            "unknown": "Ismeretlen hiba történt a PDF betöltése során.",
+            "loadFailed": "Sikertelen dokumentum betöltése: {{message}}",
+            "tryAgain": "Próbálja újra"
+        },
+        "preparing": "Dokumentum előkészítése folyamatban...",
+        "rejection": {
+            "title": "Dokumentum Elutasítva",
+            "rejectedBy": "Elutasította:",
+            "ipAddress": "IP cím:",
+            "date": "Dátum:",
+            "reason": "Ok:"
+        },
+        "pageInfo": "{{current}}. oldal a {{total}} oldalból",
+        "fieldsOnPage": "{{count}} mező{{#count !== 1 ? '' : ''}} ezen az oldalon",
+        "reviewComplete": {
+            "title": "Dokumentum Áttekintés Befejezve",
+            "message": "Elérte a dokumentum végét. Kérjük, tekintse át az összes mezőt, és fogadja el az alábbi feltételeket az aláírás folytatásához."
+        }
+    },
+    "actionSidebar": {
+        "save": {
+            "label": "Mentés",
+            "saving": "Mentés folyamatban...",
+            "saveChanges": "Mentse a változtatásait",
+            "noChanges": "Nincsenek mentendő változtatások",
+            "finalized": "A dokumentum {{status}}",
+            "success": "A változtatásai sikeresen elmentve!",
+            "error": "Sikertelen a változtatások mentése. Kérjük, próbálja újra."
+        },
+        "sign": {
+            "label": "Aláírás",
+            "ready": "Dokumentum Aláírása",
+            "finalized": "A dokumentum {{status}}. További műveletek nem engedélyezettek.",
+            "saveFirst": "Mentés Először",
+            "noSignatureFields": "Nincs Önhöz rendelt aláírási mező.",
+            "agreeTerms": "Kérjük, fogadja el a Felhasználási Feltételeket az aláírás előtt.",
+            "allSigned": "Az összes aláírási mezője elkészült.",
+            "error": "Hiba: Nem található résztvevői hozzárendelés."
+        },
+        "reject": {
+            "label": "Elutasítás",
+            "finalized": "A dokumentum {{status}}. További műveletek nem engedélyezettek.",
+            "receiversCannot": "A címzettek nem utasíthatják el"
+        },
+        "reassign": {
+            "label": "Újrarendelés",
+            "finalized": "A dokumentum {{status}}. További műveletek nem engedélyezettek.",
+            "completed": "Nem rendelhet újra, miután befejezte a műveleteket."
+        },
+        "addReceiver": {
+            "label": "Címzett Hozzáadása",
+            "finalized": "A dokumentum {{status}}"
+        },
+        "progress": {
+            "finalized": "Dokumentum {{status}}",
+            "unsaved": "Nem mentett változtatások",
+            "readyToSign": "Kész az aláírásra",
+            "noSignature": "Nem szükséges aláírás",
+            "reviewTerms": "Feltételek áttekintése"
+        }
+    },
+    "rejectModal": {
+        "title": "Dokumentum Elutasítása",
+        "description": "Ez a művelet visszavonhatatlan. A feladót és az összes többi résztvevőt értesítjük. Kérjük, adjon meg egy világos indokot az elutasításra alább.",
+        "reasonLabel": "Elutasítás Oka",
+        "reasonPlaceholder": "pl. A szerződés részletei helytelenek...",
+        "characterCount": "{{count}} / 500",
+        "submit": "Elutasítás Elküldése",
+        "submitting": "Küldés folyamatban...",
+        "cancel": "Mégsem",
+        "close": "Bezárás",
+        "validation": {
+            "emptyReason": "Az elutasítás oka kötelező.",
+            "reasonTooLong": "Az ok legfeljebb 500 karakter lehet."
+        },
+        "errors": {
+            "missingData": "Hiányoznak alapvető adatok. Kérjük, frissítse az oldalt."
+        }
+    },
+    "reassignDrawer": {
+        "close": "Bezárás",
+        "errors": {
+            "missingFields": "Kérjük, adja meg a keresztnevet, vezetéknevet és e-mail címet.",
+            "missingReason": "Az újrarendelés oka kötelező."
+        },
+        "createContact": {
+            "success": "Kontakt sikeresen létrehozva!"
+        },
+        "reassign": {
+            "success": "Újrarendelés sikeresen befejezve!"
+        },
+        "steps": {
+            "select": {
+                "title": "Kontakt Kiválasztása",
+                "description": "Válasszon egy kontaktot, akinek újrarendeli a felelősségét",
+                "searchPlaceholder": "Keresés név vagy e-mail alapján...",
+                "loading": "Kontaktok Betöltése folyamatban...",
+                "noContacts": "Nem található kontakt.",
+                "addButton": "Új Kontakt Hozzáadása"
+            },
+            "add": {
+                "title": "Új Kontakt Hozzáadása",
+                "description": "Adja meg az új kontakt adatait",
+                "emailLabel": "Új Résztvevő E-mail címe",
+                "emailPlaceholder": "nev@pelda.com",
+                "firstNameLabel": "Keresztnév",
+                "firstNamePlaceholder": "Keresztnév",
+                "lastNameLabel": "Vezetéknév",
+                "lastNamePlaceholder": "Vezetéknév",
+                "phoneLabel": "Telefonszám",
+                "phonePlaceholder": "Adja meg a telefonszámot",
+                "backButton": "Vissza",
+                "createButton": "Kontakt Létrehozása és Kiválasztása"
+            },
+            "confirm": {
+                "title": "Újrarendelés Megerősítése",
+                "description": "Ön most át fogja rendelni a felelősségét a következő kontakthoz. Ez a művelet nem vonható vissza.",
+                "reasonLabel": "Újrarendelés Oka",
+                "reasonPlaceholder": "Kérjük, adjon meg egy rövid okot...",
+                "backButton": "Vissza",
+                "confirmButton": "Újrarendelés Megerősítése"
+            },
+            "success": {
+                "title": "Sikeres Újrarendelés",
+                "description": "A felelőssége sikeresen újrarendelve",
+                "message": "Az Ön felelőssége e dokumentummal kapcsolatban át lett ruházva ide:",
+                "notification": "Minden felet értesítünk erről a változásról.",
+                "backButton": "Vissza a Dokumentumhoz"
+            },
+            "default": {
+                "title": "Felelősség Újrarendelése",
+                "description": "Adja át feladatait egy másik személynek"
+            }
+        }
+    },
+    "addReceiverDrawer": {
+        "close": "Bezárás",
+        "errors": {
+            "missingFields": "Kérjük, adja meg a keresztnevet, vezetéknevet és e-mail címet."
+        },
+        "steps": {
+            "select": {
+                "title": "Válasszon Kontaktot a Hozzáadáshoz",
+                "description": "Válasszon egy meglévő kontaktot címzettként való hozzáadáshoz",
+                "searchPlaceholder": "Keresés név vagy e-mail alapján...",
+                "loading": "Kontaktok Betöltése folyamatban...",
+                "noContacts": "Nem található kontakt.",
+                "addButton": "Új Kontakt Hozzáadása"
+            },
+            "add": {
+                "title": "Új Kontakt Hozzáadása",
+                "description": "Adja meg az új kontakt adatait",
+                "emailLabel": "Új Címzett E-mail címe",
+                "emailPlaceholder": "nev@pelda.com",
+                "firstNameLabel": "Keresztnév",
+                "firstNamePlaceholder": "Keresztnév",
+                "lastNameLabel": "Vezetéknév",
+                "lastNamePlaceholder": "Vezetéknév",
+                "phoneLabel": "Telefonszám",
+                "phonePlaceholder": "Adja meg a telefonszámot",
+                "backButton": "Vissza",
+                "createButton": "Kontakt Létrehozása és Hozzáadása"
+            },
+            "success": {
+                "title": "Címzett Sikeresen Hozzáadva",
+                "description": "A kontakt értesítve lett és hozzáadva a dokumentumhoz",
+                "message": "hozzá lett adva címzettként és értesítve lett.",
+                "notification": "Minden felet értesítünk erről a kiegészítésről.",
+                "backButton": "Vissza a Dokumentumhoz"
+            },
+            "failure": {
+                "title": "Művelet Sikertelen",
+                "description": "Váratlan hiba történt. Kérjük, próbálja újra.",
+                "closeButton": "Bezárás"
+            },
+            "default": {
+                "title": "Címzett Hozzáadása",
+                "description": "Adjon hozzá egy új, csak olvasható résztvevőt ehhez a dokumentumhoz"
+            }
+        }
+    },
+    "signingDrawer": {
+        "close": "Bezárás",
+        "email": "e-mail",
+        "phone": "telefonszám",
+        "emailOtp": "E-mail OTP",
+        "smsOtp": "SMS OTP",
+        "errors": {
+            "missingData": "Hiba történt. Nem azonosítható a dokumentum vagy a mező.",
+            "missingIdentity": "Kérjük, adja meg a/az {{method}} címét/számát.",
+            "resendOtp": "Nem sikerült újraküldeni az OTP-t. Kérjük, menjen vissza, és erősítse meg a/az {{method}} címét/számát.",
+            "invalidOtp": "Hiba történt. Hiányzik a szükséges információ."
+        },
+        "otpSent": {
+            "email": "OTP elküldve az e-mail címére!",
+            "sms": "OTP elküldve a telefonszámára!"
+        },
+        "steps": {
+            "method": {
+                "title": "Aláírási Módszer Kiválasztása",
+                "description": "Válasszon egy módszert a személyazonosságának biztonságos ellenőrzéséhez",
+                "emailOption": "Egyszeri Kód E-mailen Keresztül",
+                "emailDescription": "Biztonságos ellenőrzés az Ön e-mail címén keresztül",
+                "smsOption": "Egyszeri Kód SMS-en Keresztül",
+                "smsDescription": "Biztonságos ellenőrzés az Ön telefonszámán keresztül"
+            },
+            "identity": {
+                "title": "Ellenőrizze a/az {{method}} címét/számát",
+                "description": "Biztonsági okokból kérjük, adja meg a/az {{method}} címét/számát alább",
+                "info": "Küldünk egy ellenőrző kódot a/az {{method}} címre/számra, amelyet alább megad.",
+                "matchInfo": "Meg kell egyeznie a címzett {{method}} címével/számával: {{contact}}",
+                "label": "Az Ön {{method}} címe/száma",
+                "emailPlaceholder": "pl. azonneve@pelda.com",
+                "phonePlaceholder": "pl. +1234567890",
+                "backButton": "Vissza",
+                "requestButton": "Kód Kérése"
+            },
+            "otp": {
+                "title": "Ellenőrző Kód Megadása",
+                "description": "Küldtünk egy 6-jegyű kódot a/az {{contact}} címre/számra. {{timer}} másodperc múlva lejár.",
+                "timerLabel": "másodperc maradt",
+                "inputLabel": "Adja meg a 6-jegyű ellenőrző kódot",
+                "inputPlaceholder": "------",
+                "resendButton": "Ellenőrző kód újraküldése",
+                "resending": "Küldés folyamatban...",
+                "backButton": "Vissza",
+                "completeButton": "Aláírás Befejezése"
+            },
+            "success": {
+                "title": "Dokumentum Aláírva!",
+                "description": "Az aláírását sikeresen alkalmaztuk a dokumentumon",
+                "message": "Köszönjük, hogy befejezte az aláírási folyamatot a/az {{method}} útján.",
+                "notification": "Minden felet értesítünk, amikor a dokumentum teljesen elkészül.",
+                "backButton": "Vissza a Dokumentumhoz"
+            },
+            "default": {
+                "title": "Aláírási Folyamat",
+                "description": ""
+            }
+        }
+    },
+    "readOnlyField": {
+        "unknownUser": "Ismeretlen Felhasználó",
+        "otherParticipant": "Egyéb Résztvevő",
+        "participantRole": "Résztvevő",
+        "signed": "Aláírva",
+        "rejected": "Elutasítva",
+        "reason": "Ok:",
+        "otpCode": "OTP: {{code}}",
+        "via": "via {{method}}",
+        "emailOtp": "E-mail OTP",
+        "signatureField": "Aláírási Mező",
+        "checkbox": "Jelölőnégyzet",
+        "textarea": "Szövegterület",
+        "dateField": "Dátummező",
+        "textField": "Szövegmező",
+        "rejectionTooltip": "Mező elutasítva: {{name}}: {{reason}}",
+        "fieldTooltip": "Mező: {{name}} ({{contact}}): {{label}}"
+    },
+    "interactiveField": {
+        "unknownUser": "Ismeretlen Felhasználó",
+        "currentUser": "Jelenlegi Felhasználó",
+        "participantRole": "Résztvevő",
+        "signed": "Aláírva",
+        "rejected": "Elutasítva",
+        "reason": "Ok:",
+        "rejectedIP": "IP: {{ip}}",
+        "otpCode": "OTP: {{code}}",
+        "via": "via {{method}}",
+        "emailOtp": "E-mail OTP",
+        "sign": "Aláírás",
+        "clickToSign": "Kattintson az aláíráshoz",
+        "chooseMethod": "Válasszon módszert",
+        "editField": "Mező szerkesztése",
+        "saveField": "Mező mentése",
+        "unsupported": "Nem támogatott",
+        "errors": {
+            "termsNotAgreed": "Kérjük, fogadja el a Felhasználási Feltételeket a dokumentum alján az aláírás előtt.",
+            "noDocumentData": "Hiba: Dokumentum adatok nem állnak rendelkezésre.",
+            "noParticipantAssignment": "Hiba: Nem található résztvevői hozzárendelés."
+        },
+        "rejectionTooltip": "Mező elutasítva: {{name}}: {{reason}}"
+    },
+    "subscriptionBanner": {
+        "noSubscription": {
+            "title": "Az Összes Funkció Feloldása",
+            "message": "Aktiváljon egy előfizetést a dokumentumok létrehozásának és kezelésének megkezdéséhez.",
+            "ctaText": "Csomagok Megtekintése"
+        },
+        "limitReached": {
+            "title": "Dokumentumkorlát Elérve",
+            "message": "Kérjük, frissítse csomagját az új dokumentumok létrehozásának folytatásához.",
+            "ctaText": "Csomag Frissítése"
+        },
+        "lowDocuments": {
+            "title": "Alacsony Dokumentumszám",
+            "message": "Már csak {{remaining}} dokumentuma maradt. Frissítsen a többért.",
+            "ctaText": "Csomag Frissítése"
+        }
+    },
+    "purchaseModal": {
+        "cardBrands": {
+            "visa": "Visa",
+            "mastercard": "Mastercard",
+            "amex": "American Express"
+        },
+        "expires": "Lejár: {{month}}/{{year}}",
+        "default": "Alapértelmezett",
+        "topUpTitle": "Csomag Feltöltése",
+        "confirmSubscription": "Előfizetés Megerősítése",
+        "topUpDetails": "Feltöltési Részletek",
+        "yourPlan": "Az Ön Csomagja",
+        "yearly": "Éves",
+        "monthly": "Havi",
+        "annually": "évente",
+        "billed": "Számlázva {{interval}}",
+        "trialEndNote": "Megjegyzés: A folytatás befejezi az ingyenes próbaverziót, és azonnal terheljük fiókját.",
+        "selectPaymentMethod": "Fizetési Mód Kiválasztása",
+        "useDifferentCard": "Más Kártya Használata",
+        "startingTrial": "Próbaverzió Indítása folyamatban...",
+        "startTrial": "14 napos Ingyenes Próbaverzió Indítása",
+        "processing": "Feldolgozás folyamatban...",
+        "topUp": "Feltöltés",
+        "subscribeNow": "Feliratkozás",
+        "subscribe": "{{action}} Most (€{{price}})",
+        "termsAgreement": "A folytatással elfogadja a Szolgáltatási Feltételeinket.",
+        "success": {
+            "topUp": "Sikeres Feltöltés!",
+            "topUpMessage": "Mostantól több dokumentuma érhető el a {{planName}} csomagjában!",
+            "subscription": "Sikeres Előfizetés!",
+            "subscriptionMessage": "Üdvözöljük a {{planName}} csomagban!",
+            "trial": "Ingyenes Próbaverzió Elindítva!",
+            "trialMessage": "14 napos hozzáférése van a {{planName}} csomaghoz!"
+        },
+        "errors": {
+            "cardNotFound": "Kártya részletek űrlap nem található.",
+            "invalidCard": "Érvénytelen kártya részletek.",
+            "noPaymentMethod": "Kérjük, válasszon vagy adjon hozzá fizetési módot a folytatáshoz.",
+            "planNotAvailable": "Ez a csomag jelenleg nem vásárolható meg.",
+            "unknownError": "Váratlan hiba történt."
+        }
+    },
+    "fieldPropertiesPanel": {
+        "fieldType": "Mező Típusa:",
+        "fieldTypes": {
+            "text": "Szöveg",
+            "textarea": "Szövegterület",
+            "radio": "Rádiógomb",
+            "dropdown": "Lenyíló lista"
+        },
+        "label": "Címke:",
+        "placeholder": "Helyőrző:",
+        "radioGroupId": "Rádiócsoport ID:",
+        "radioGroupIdPlaceholder": "Egyedi ID ehhez a rádiócsoporthoz",
+        "radioGroupIdHint": "Az azonos csoport ID-vel rendelkező összes rádiógomb egyetlen választási csoportként működik.",
+        "radioOptions": "Opciók (vesszővel elválasztva):",
+        "radioOptionsPlaceholder": "1. opció, 2. opció",
+        "radioOptionsHint": "Adjon meg legalább két opciót egy értelmes rádiócsoporthoz.",
+        "dropdownOptions": "Opciók (vesszővel elválasztva):",
+        "dropdownOptionsPlaceholder": "1. opció, 2. opció",
+        "dropdownOptionsHint": "Adjon meg legalább egy opciót a legördülő listához.",
+        "required": "Kötelező",
+        "errors": {
+            "labelRequired": "Címke megadása kötelező",
+            "labelEmpty": "A címke nem lehet üres",
+            "placeholderTooLong": "A helyőrző túl hosszú",
+            "radioOptionsMin": "Legalább két vesszővel elválasztott opció szükséges a Rádiócsoporthoz",
+            "dropdownOptionsMin": "Legalább egy opció szükséges a Legördülő listához",
+            "groupIdRequired": "Csoport ID kötelező a rádiógombokhoz"
+        }
+    },
+    "editorToolbar": {
+        "fieldTypes": {
+            "text": "Szöveg",
+            "textarea": "Szövegterület",
+            "signature": "Aláírás",
+            "checkbox": "Jelölőnégyzet",
+            "date": "Dátum"
+        }
+    },
+    "messages": {
+        "logoutSuccess": "Sikeresen kijelentkezett."
+    },
+    "meta": {
+        "pageTitle": "I-sign.eu - Professzionális Elektronikus Aláírási Platform"
+    },
+    "languageSwitcher": {
+        "title": "Nyelv",
+        "selectLanguage": "Nyelv Kiválasztása"
+    }
 }

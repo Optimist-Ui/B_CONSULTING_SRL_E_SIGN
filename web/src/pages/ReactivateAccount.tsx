@@ -2,6 +2,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
+import { useTranslation } from 'react-i18next';
 import { AppDispatch } from '../store';
 import { reactivateAccount } from '../store/thunk/authThunks';
 import { setPageTitle } from '../store/slices/themeConfigSlice';
@@ -11,6 +12,7 @@ import IconCircleCheck from '../components/Icon/IconCircleCheck';
 import IconXCircle from '../components/Icon/IconXCircle';
 
 const ReactivateAccount = () => {
+    const { t } = useTranslation();
     const dispatch: AppDispatch = useDispatch();
     const navigate = useNavigate();
     const { token } = useParams<{ token: string }>();
@@ -22,34 +24,38 @@ const ReactivateAccount = () => {
     const effectRan = useRef(false);
 
     useEffect(() => {
-        dispatch(setPageTitle('Reactivating Account...'));
+        dispatch(setPageTitle(t('reactivate.meta.title')));
         setIsVisible(true);
 
-        if (effectRan.current === true) {
-            return;
-        }
+        if (effectRan.current === true) return;
 
         if (token) {
             dispatch(reactivateAccount(token))
                 .unwrap()
                 .then((response) => {
                     setStatus('success');
-                    setMessage(response.message || 'Account reactivated successfully! You may now log in.');
+                    setMessage(response.message || t('reactivate.messages.success'));
                     setTimeout(() => navigate('/login'), 3000);
                 })
                 .catch((error) => {
                     setStatus('error');
-                    setMessage(error || 'The link is invalid or has expired.');
+                    setMessage(error || t('reactivate.messages.error'));
                 });
         } else {
             setStatus('error');
-            setMessage('No reactivation token was found. The link is incomplete.');
+            setMessage(t('reactivate.messages.noToken'));
         }
 
         return () => {
             effectRan.current = true;
         };
-    }, [dispatch, token, navigate]);
+    }, [dispatch, token, navigate, t]);
+
+    const brandingFeatures = [
+        { icon: '🔄', titleKey: 'reactivate.branding.features.reactivation.title', descKey: 'reactivate.branding.features.reactivation.description' },
+        { icon: '🔒', titleKey: 'reactivate.branding.features.secure.title', descKey: 'reactivate.branding.features.secure.description' },
+        { icon: '✓', titleKey: 'reactivate.branding.features.preserved.title', descKey: 'reactivate.branding.features.preserved.description' },
+    ];
 
     const renderContent = () => {
         switch (status) {
@@ -62,8 +68,8 @@ const ReactivateAccount = () => {
                                 <div className="w-10 h-10 bg-blue-500/20 rounded-full animate-pulse"></div>
                             </div>
                         </div>
-                        <h2 className="text-3xl font-bold mb-4 text-white">Reactivating Account</h2>
-                        <p className="text-gray-300 text-lg">Please wait while we reactivate your account...</p>
+                        <h2 className="text-3xl font-bold mb-4 text-white">{t('reactivate.status.loading.title')}</h2>
+                        <p className="text-gray-300 text-lg">{t('reactivate.status.loading.description')}</p>
                         <div className="mt-6 flex gap-1">
                             <span className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
                             <span className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
@@ -80,13 +86,13 @@ const ReactivateAccount = () => {
                                 <IconCircleCheck className="w-20 h-20" />
                             </div>
                         </div>
-                        <h2 className="text-3xl font-bold mb-4 text-white">Account Reactivated!</h2>
+                        <h2 className="text-3xl font-bold mb-4 text-white">{t('reactivate.status.success.title')}</h2>
                         <p className="text-gray-300 text-lg mb-8 max-w-md">{message}</p>
                         <Link
                             to="/login"
                             className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-green-500/25 transform flex items-center justify-center gap-2"
                         >
-                            <span>Proceed to Login</span>
+                            <span>{t('reactivate.status.success.button')}</span>
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                             </svg>
@@ -102,13 +108,13 @@ const ReactivateAccount = () => {
                                 <IconXCircle className="w-20 h-20" />
                             </div>
                         </div>
-                        <h2 className="text-3xl font-bold mb-4 text-red-400">Reactivation Failed</h2>
+                        <h2 className="text-3xl font-bold mb-4 text-red-400">{t('reactivate.status.error.title')}</h2>
                         <p className="text-gray-300 text-lg mb-8 max-w-md">{message}</p>
                         <Link
                             to="/login"
                             className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-blue-500/25 transform flex items-center justify-center gap-2"
                         >
-                            <span>Back to Login</span>
+                            <span>{t('reactivate.status.error.button')}</span>
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                             </svg>
@@ -122,48 +128,36 @@ const ReactivateAccount = () => {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-blue-900 flex items-center justify-center px-4 py-8 relative overflow-hidden">
-            {/* Animated background elements */}
             <div className="absolute inset-0 overflow-hidden">
                 <div className="absolute top-20 left-10 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
                 <div className="absolute bottom-20 right-10 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '700ms' }}></div>
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-cyan-500/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1000ms' }}></div>
             </div>
-
-            {/* Floating particles */}
             <div className="absolute top-1/4 left-1/4 w-2 h-2 bg-blue-400/40 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
             <div className="absolute top-3/4 right-1/4 w-3 h-3 bg-purple-400/40 rounded-full animate-bounce" style={{ animationDelay: '500ms' }}></div>
             <div className="absolute bottom-1/4 left-1/3 w-2 h-2 bg-cyan-400/40 rounded-full animate-bounce" style={{ animationDelay: '700ms' }}></div>
-
             <div className="relative w-full max-w-6xl mx-auto">
                 <div className="grid lg:grid-cols-2 gap-8 items-center">
-                    {/* Left side - Branding */}
                     <div className={`hidden lg:block transition-all duration-1000 transform ${isVisible ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0'}`}>
                         <div className="bg-white/5 backdrop-blur-xl rounded-3xl p-12 border border-white/10 shadow-2xl">
                             <div className="space-y-8">
                                 <div>
                                     <Link to="/" className="block">
-                                        <h2 className="text-5xl font-bold text-white mb-4">Welcome to</h2>
+                                        <h2 className="text-5xl font-bold text-white mb-4">{t('reactivate.branding.welcome')}</h2>
                                         <h1 className="text-6xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">i-sign.eu</h1>
                                     </Link>
                                 </div>
-
-                                <p className="text-xl text-gray-300 leading-relaxed">Reactivate your account and continue using our secure electronic signature platform.</p>
-
-                                {/* Feature highlights */}
+                                <p className="text-xl text-gray-300 leading-relaxed">{t('reactivate.branding.description')}</p>
                                 <div className="space-y-4 pt-8">
-                                    {[
-                                        { icon: '🔄', title: 'Quick Reactivation', desc: 'Instant account recovery' },
-                                        { icon: '🔒', title: 'Secure Process', desc: 'Protected verification' },
-                                        { icon: '✓', title: 'Data Preserved', desc: 'All your documents safe' },
-                                    ].map((feature, index) => (
+                                    {brandingFeatures.map((feature, index) => (
                                         <div
                                             key={index}
                                             className="flex items-center gap-4 bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-white/10 hover:bg-white/10 transition-all duration-300 hover:scale-105 transform"
                                         >
                                             <div className="text-3xl">{feature.icon}</div>
                                             <div>
-                                                <h3 className="text-white font-semibold">{feature.title}</h3>
-                                                <p className="text-gray-400 text-sm">{feature.desc}</p>
+                                                <h3 className="text-white font-semibold">{t(feature.titleKey)}</h3>
+                                                <p className="text-gray-400 text-sm">{t(feature.descKey)}</p>
                                             </div>
                                         </div>
                                     ))}
@@ -171,22 +165,15 @@ const ReactivateAccount = () => {
                             </div>
                         </div>
                     </div>
-
-                    {/* Right side - Reactivation Status */}
                     <div className={`transition-all duration-1000 delay-300 transform ${isVisible ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'}`}>
                         <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-8 md:p-12 border border-white/20 shadow-2xl">
-                            {/* Mobile Logo */}
                             <div className="lg:hidden text-center mb-8">
                                 <Link to="/">
                                     <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">i-sign.eu</h1>
                                 </Link>
                             </div>
-
-                            {/* Content */}
                             <div className="min-h-[400px] flex items-center justify-center">{renderContent()}</div>
-
-                            {/* Footer */}
-                            <div className="mt-8 pt-6 border-t border-white/10 text-center text-sm text-gray-400">© {new Date().getFullYear()} i-sign.eu. All Rights Reserved.</div>
+                            <div className="mt-8 pt-6 border-t border-white/10 text-center text-sm text-gray-400">{t('reactivate.footer.copyright', { year: new Date().getFullYear() })}</div>
                         </div>
                     </div>
                 </div>

@@ -6,6 +6,7 @@ import { useEffect, useState, ComponentType } from 'react';
 import { toast } from 'react-toastify';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
+import { useTranslation } from 'react-i18next';
 
 // Redux Imports for Authentication
 import { signupUser } from '../store/thunk/authThunks';
@@ -20,23 +21,25 @@ import IconEye from '../components/Icon/IconEye';
 import { FaEyeSlash } from 'react-icons/fa';
 const FaEyeSlashTyped = FaEyeSlash as ComponentType<{ className?: string }>;
 
-// Validation Schema
-const validationSchema = Yup.object().shape({
-    firstName: Yup.string()
-        .min(2, 'First name must be at least 2 characters')
-        .max(50, 'First name cannot exceed 50 characters')
-        .matches(/^[a-zA-Z\s'-]+$/, 'Only letters, spaces, hyphens, and apostrophes allowed')
-        .required('First name is required'),
-    lastName: Yup.string()
-        .min(2, 'Last name must be at least 2 characters')
-        .max(50, 'Last name cannot exceed 50 characters')
-        .matches(/^[a-zA-Z\s'-]+$/, 'Only letters, spaces, hyphens, and apostrophes allowed')
-        .required('Last name is required'),
-    email: Yup.string().email('Invalid email format').max(100, 'Email cannot exceed 100 characters').required('Email is required'),
-    password: Yup.string().min(6, 'Password must be at least 6 characters').max(128, 'Password cannot exceed 128 characters').required('Password is required'),
-});
+// Validation Schema Function
+const getValidationSchema = (t: (key: string) => string) =>
+    Yup.object().shape({
+        firstName: Yup.string()
+            .min(2, t('register.validation.firstName.min'))
+            .max(50, t('register.validation.firstName.max'))
+            .matches(/^[a-zA-Z\s'-]+$/, t('register.validation.firstName.matches'))
+            .required(t('register.validation.firstName.required')),
+        lastName: Yup.string()
+            .min(2, t('register.validation.lastName.min'))
+            .max(50, t('register.validation.lastName.max'))
+            .matches(/^[a-zA-Z\s'-]+$/, t('register.validation.lastName.matches'))
+            .required(t('register.validation.lastName.required')),
+        email: Yup.string().email(t('register.validation.email.invalid')).max(100, t('register.validation.email.max')).required(t('register.validation.email.required')),
+        password: Yup.string().min(6, t('register.validation.password.min')).max(128, t('register.validation.password.max')).required(t('register.validation.password.required')),
+    });
 
 const Register = () => {
+    const { t } = useTranslation();
     const dispatch: AppDispatch = useDispatch();
     const navigate = useNavigate();
 
@@ -51,17 +54,12 @@ const Register = () => {
     const [isVisible, setIsVisible] = useState(false);
 
     // Initial form values
-    const initialValues = {
-        firstName: '',
-        lastName: '',
-        email: '',
-        password: '',
-    };
+    const initialValues = { firstName: '', lastName: '', email: '', password: '' };
 
     useEffect(() => {
-        dispatch(setPageTitle('Register'));
+        dispatch(setPageTitle(t('register.meta.title')));
         setIsVisible(true);
-    }, [dispatch]);
+    }, [dispatch, t]);
 
     // Handlers
     const setLocale = (newFlag: string) => {
@@ -73,59 +71,55 @@ const Register = () => {
     const handleSubmit = async (values: typeof initialValues, { setSubmitting }: any) => {
         try {
             const resultAction = await dispatch(signupUser(values)).unwrap();
-            toast.success(resultAction.message || 'Registration successful!');
+            toast.success(resultAction.message || (t('register.messages.success') as string));
             navigate('/pending-verification');
         } catch (error: any) {
-            toast.error(error || 'Registration failed. Please try again.');
+            toast.error(error || t('register.messages.error'));
         } finally {
             setSubmitting(false);
         }
     };
 
+    const brandingFeatures = [
+        { icon: '🚀', titleKey: 'register.branding.features.setup.title', descKey: 'register.branding.features.setup.description' },
+        { icon: '🔐', titleKey: 'register.branding.features.secure.title', descKey: 'register.branding.features.secure.description' },
+        { icon: '💼', titleKey: 'register.branding.features.business.title', descKey: 'register.branding.features.business.description' },
+    ];
+
+    const validationSchema = getValidationSchema(t);
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-blue-900 flex items-center justify-center px-4 py-8 relative overflow-hidden">
-            {/* Animated background elements */}
             <div className="absolute inset-0 overflow-hidden">
                 <div className="absolute top-20 left-10 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
                 <div className="absolute bottom-20 right-10 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '700ms' }}></div>
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-cyan-500/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1000ms' }}></div>
             </div>
-
-            {/* Floating particles */}
             <div className="absolute top-1/4 left-1/4 w-2 h-2 bg-blue-400/40 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
             <div className="absolute top-3/4 right-1/4 w-3 h-3 bg-purple-400/40 rounded-full animate-bounce" style={{ animationDelay: '500ms' }}></div>
             <div className="absolute bottom-1/4 left-1/3 w-2 h-2 bg-cyan-400/40 rounded-full animate-bounce" style={{ animationDelay: '700ms' }}></div>
-
             <div className="relative w-full max-w-6xl mx-auto">
                 <div className="grid lg:grid-cols-2 gap-8 items-center">
-                    {/* Left side - Branding */}
                     <div className={`hidden lg:block transition-all duration-1000 transform ${isVisible ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0'}`}>
                         <div className="bg-white/5 backdrop-blur-xl rounded-3xl p-12 border border-white/10 shadow-2xl">
                             <div className="space-y-8">
                                 <div>
                                     <Link to="/" className="block">
-                                        <h2 className="text-5xl font-bold text-white mb-4">Welcome to</h2>
+                                        <h2 className="text-5xl font-bold text-white mb-4">{t('register.branding.welcome')}</h2>
                                         <h1 className="text-6xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">i-sign.eu</h1>
                                     </Link>
                                 </div>
-
-                                <p className="text-xl text-gray-300 leading-relaxed">Join thousands of businesses that trust our platform for secure electronic signatures.</p>
-
-                                {/* Feature highlights */}
+                                <p className="text-xl text-gray-300 leading-relaxed">{t('register.branding.description')}</p>
                                 <div className="space-y-4 pt-8">
-                                    {[
-                                        { icon: '🚀', title: 'Quick Setup', desc: 'Get started in minutes' },
-                                        { icon: '🔐', title: 'Secure & Compliant', desc: 'Industry-standard security' },
-                                        { icon: '💼', title: 'Business Ready', desc: 'Enterprise features included' },
-                                    ].map((feature, index) => (
+                                    {brandingFeatures.map((feature, index) => (
                                         <div
                                             key={index}
                                             className="flex items-center gap-4 bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-white/10 hover:bg-white/10 transition-all duration-300 hover:scale-105 transform"
                                         >
                                             <div className="text-3xl">{feature.icon}</div>
                                             <div>
-                                                <h3 className="text-white font-semibold">{feature.title}</h3>
-                                                <p className="text-gray-400 text-sm">{feature.desc}</p>
+                                                <h3 className="text-white font-semibold">{t(feature.titleKey)}</h3>
+                                                <p className="text-gray-400 text-sm">{t(feature.descKey)}</p>
                                             </div>
                                         </div>
                                     ))}
@@ -133,18 +127,13 @@ const Register = () => {
                             </div>
                         </div>
                     </div>
-
-                    {/* Right side - Register Form */}
                     <div className={`transition-all duration-1000 delay-300 transform ${isVisible ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'}`}>
                         <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-8 md:p-12 border border-white/20 shadow-2xl">
-                            {/* Header */}
                             <div className="flex justify-between items-start mb-8">
                                 <div>
-                                    <h2 className="text-3xl md:text-4xl font-bold text-white mb-2">Sign Up</h2>
-                                    <p className="text-gray-300">Create your account to get started.</p>
+                                    <h2 className="text-3xl md:text-4xl font-bold text-white mb-2">{t('register.form.header.title')}</h2>
+                                    <p className="text-gray-300">{t('register.form.header.description')}</p>
                                 </div>
-
-                                {/* Language Dropdown */}
                                 <div className="dropdown ms-auto w-max">
                                     <Dropdown
                                         offset={[0, 8]}
@@ -179,29 +168,24 @@ const Register = () => {
                                     </Dropdown>
                                 </div>
                             </div>
-
-                            {/* Mobile Logo */}
                             <div className="lg:hidden text-center mb-8">
                                 <Link to="/">
                                     <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">i-sign.eu</h1>
                                 </Link>
                             </div>
-
-                            {/* Formik Form */}
                             <Formik initialValues={initialValues} validationSchema={validationSchema} onSubmit={handleSubmit}>
                                 {({ errors, touched, isSubmitting }) => (
                                     <Form className="space-y-5">
-                                        {/* First Name Input */}
                                         <div className="space-y-2">
                                             <label htmlFor="firstName" className="text-white font-medium block">
-                                                First Name
+                                                {t('register.form.firstName.label')}
                                             </label>
                                             <div className="relative group">
                                                 <Field
                                                     id="firstName"
                                                     name="firstName"
                                                     type="text"
-                                                    placeholder="Enter your first name"
+                                                    placeholder={t('register.form.firstName.placeholder')}
                                                     maxLength={50}
                                                     className={`w-full bg-white/10 border ${
                                                         errors.firstName && touched.firstName ? 'border-red-400' : 'border-white/20'
@@ -219,18 +203,16 @@ const Register = () => {
                                             </div>
                                             <ErrorMessage name="firstName" component="p" className="text-red-400 text-sm mt-1 flex items-center gap-1" />
                                         </div>
-
-                                        {/* Last Name Input */}
                                         <div className="space-y-2">
                                             <label htmlFor="lastName" className="text-white font-medium block">
-                                                Last Name
+                                                {t('register.form.lastName.label')}
                                             </label>
                                             <div className="relative group">
                                                 <Field
                                                     id="lastName"
                                                     name="lastName"
                                                     type="text"
-                                                    placeholder="Enter your last name"
+                                                    placeholder={t('register.form.lastName.placeholder')}
                                                     maxLength={50}
                                                     className={`w-full bg-white/10 border ${
                                                         errors.lastName && touched.lastName ? 'border-red-400' : 'border-white/20'
@@ -248,18 +230,16 @@ const Register = () => {
                                             </div>
                                             <ErrorMessage name="lastName" component="p" className="text-red-400 text-sm mt-1 flex items-center gap-1" />
                                         </div>
-
-                                        {/* Email Input */}
                                         <div className="space-y-2">
                                             <label htmlFor="email" className="text-white font-medium block">
-                                                Email Address
+                                                {t('register.form.email.label')}
                                             </label>
                                             <div className="relative group">
                                                 <Field
                                                     id="email"
                                                     name="email"
                                                     type="email"
-                                                    placeholder="Enter your email"
+                                                    placeholder={t('register.form.email.placeholder')}
                                                     maxLength={100}
                                                     className={`w-full bg-white/10 border ${
                                                         errors.email && touched.email ? 'border-red-400' : 'border-white/20'
@@ -277,18 +257,16 @@ const Register = () => {
                                             </div>
                                             <ErrorMessage name="email" component="p" className="text-red-400 text-sm mt-1 flex items-center gap-1" />
                                         </div>
-
-                                        {/* Password Input */}
                                         <div className="space-y-2">
                                             <label htmlFor="password" className="text-white font-medium block">
-                                                Password
+                                                {t('register.form.password.label')}
                                             </label>
                                             <div className="relative group">
                                                 <Field
                                                     id="password"
                                                     name="password"
                                                     type={showPassword ? 'text' : 'password'}
-                                                    placeholder="Create a password (min. 6 characters)"
+                                                    placeholder={t('register.form.password.placeholder')}
                                                     maxLength={128}
                                                     className={`w-full bg-white/10 border ${
                                                         errors.password && touched.password ? 'border-red-400' : 'border-white/20'
@@ -320,8 +298,6 @@ const Register = () => {
                                             </div>
                                             <ErrorMessage name="password" component="p" className="text-red-400 text-sm mt-1 flex items-center gap-1" />
                                         </div>
-
-                                        {/* Submit Button */}
                                         <button
                                             type="submit"
                                             disabled={loading || isSubmitting}
@@ -330,11 +306,11 @@ const Register = () => {
                                             {loading || isSubmitting ? (
                                                 <>
                                                     <span className="animate-spin border-2 border-white border-l-transparent rounded-full w-5 h-5 inline-block"></span>
-                                                    <span>Creating Account...</span>
+                                                    <span>{t('register.form.button.loading')}</span>
                                                 </>
                                             ) : (
                                                 <>
-                                                    <span>Create Account</span>
+                                                    <span>{t('register.form.button.default')}</span>
                                                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                                                     </svg>
@@ -344,19 +320,15 @@ const Register = () => {
                                     </Form>
                                 )}
                             </Formik>
-
-                            {/* Sign In Link */}
                             <div className="mt-8 text-center">
                                 <p className="text-gray-300">
-                                    Already have an account?{' '}
+                                    {t('register.form.signin.prompt')}{' '}
                                     <Link to="/login" className="text-blue-400 hover:text-blue-300 font-semibold transition-colors duration-300">
-                                        Sign In
+                                        {t('register.form.signin.link')}
                                     </Link>
                                 </p>
                             </div>
-
-                            {/* Footer */}
-                            <div className="mt-8 pt-6 border-t border-white/10 text-center text-sm text-gray-400">© {new Date().getFullYear()} i-sign.eu. All Rights Reserved.</div>
+                            <div className="mt-8 pt-6 border-t border-white/10 text-center text-sm text-gray-400">{t('register.footer.copyright', { year: new Date().getFullYear() })}</div>
                         </div>
                     </div>
                 </div>

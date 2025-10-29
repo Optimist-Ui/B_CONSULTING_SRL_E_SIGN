@@ -3,6 +3,7 @@ import { DocumentField } from '../../store/slices/templateSlice';
 import { FaSignature, FaRegCalendarAlt, FaRegListAlt } from 'react-icons/fa';
 import { BsTextareaResize, BsInputCursorText } from 'react-icons/bs';
 import { IoIosCheckboxOutline, IoIosRadioButtonOn } from 'react-icons/io';
+import { useTranslation } from 'react-i18next';
 
 const FaSignatureTyped = FaSignature as ComponentType<{ className?: string }>;
 const FaRegCalendarAltTyped = FaRegCalendarAlt as ComponentType<{ className?: string }>;
@@ -19,6 +20,8 @@ interface FieldToolProps {
 }
 
 const FieldTool: React.FC<FieldToolProps> = ({ type, label, icon }) => {
+    const { t } = useTranslation();
+
     const handleDragStart = (e: React.DragEvent<HTMLDivElement>) => {
         e.dataTransfer.setData('field-type', type);
         e.dataTransfer.effectAllowed = 'copy';
@@ -39,12 +42,16 @@ const FieldTool: React.FC<FieldToolProps> = ({ type, label, icon }) => {
             onDragStart={handleDragStart}
         >
             <div className="text-base xs:text-lg sm:text-2xl lg:text-3xl">{icon}</div>
-            <span className="mt-0.5 xs:mt-1 sm:mt-1.5 lg:mt-2 text-[8px] xs:text-[9px] sm:text-xs lg:text-sm font-semibold text-center leading-tight whitespace-nowrap">{label}</span>
+            <span className="mt-0.5 xs:mt-1 sm:mt-1.5 lg:mt-2 text-[8px] xs:text-[9px] sm:text-xs lg:text-sm font-semibold text-center leading-tight whitespace-nowrap">
+                {t(`editorToolbar.fieldTypes.${type}`)}
+            </span>
         </div>
     );
 };
 
 const EditorToolbar: React.FC = () => {
+    const { t } = useTranslation();
+
     return (
         <div
             className="flex items-center justify-center 
@@ -54,11 +61,11 @@ const EditorToolbar: React.FC = () => {
                         dark:bg-gray-900 bg-white 
                         rounded-md shadow-sm"
         >
-            <FieldTool type="text" label="Text" icon={<BsInputCursorTextTyped />} />
-            <FieldTool type="textarea" label="Text Area" icon={<BsTextareaResizeTyped />} />
-            <FieldTool type="signature" label="Signature" icon={<FaSignatureTyped />} />
-            <FieldTool type="checkbox" label="Checkbox" icon={<IoIosCheckboxOutlineTyped />} />
-            <FieldTool type="date" label="Date" icon={<FaRegCalendarAltTyped />} />
+            <FieldTool type="text" label={t('editorToolbar.fieldTypes.text')} icon={<BsInputCursorTextTyped />} />
+            <FieldTool type="textarea" label={t('editorToolbar.fieldTypes.textarea')} icon={<BsTextareaResizeTyped />} />
+            <FieldTool type="signature" label={t('editorToolbar.fieldTypes.signature')} icon={<FaSignatureTyped />} />
+            <FieldTool type="checkbox" label={t('editorToolbar.fieldTypes.checkbox')} icon={<IoIosCheckboxOutlineTyped />} />
+            <FieldTool type="date" label={t('editorToolbar.fieldTypes.date')} icon={<FaRegCalendarAltTyped />} />
         </div>
     );
 };

@@ -9,6 +9,7 @@ import { toast } from 'react-toastify';
 import PhoneInput from 'react-phone-number-input';
 import 'react-phone-number-input/style.css';
 import { E164Number } from 'libphonenumber-js/core';
+import { useTranslation } from 'react-i18next';
 
 // Typed Icons
 const FiXTyped = FiX as ComponentType<{ className?: string }>;
@@ -21,6 +22,7 @@ const FiLoaderTyped = FiLoader as ComponentType<{ className?: string }>;
 const FiAlertTriangleTyped = FiAlertTriangle as ComponentType<{ className?: string }>;
 
 const ReassignDrawer: React.FC = () => {
+    const { t } = useTranslation();
     const dispatch = useDispatch<AppDispatch>();
     const { packageData } = useSelector((state: IRootState) => state.participant);
     const { isReassignDrawerOpen, reassignStep, reassignFormData, reassignmentContacts, selectedReassignContact, reassignmentLoading, reassignmentError } = useSelector(
@@ -55,7 +57,7 @@ const ReassignDrawer: React.FC = () => {
     const handleCreateContact = async () => {
         const { email, firstName, lastName } = reassignFormData;
         if (!email.trim() || !firstName.trim() || !lastName.trim()) {
-            return toast.error('Please provide first name, last name, and email.');
+            return toast.error(t('reassignDrawer.errors.missingFields') as string);
         }
         if (!packageData) return;
 
@@ -67,7 +69,7 @@ const ReassignDrawer: React.FC = () => {
                     contactData: reassignFormData,
                 })
             ).unwrap();
-            toast.success('Contact created successfully!');
+            toast.success(t('reassignDrawer.createContact.success') as string);
         } catch (err) {
             console.error('Failed to create contact:', err);
         }
@@ -75,7 +77,7 @@ const ReassignDrawer: React.FC = () => {
 
     const handlePerformReassignment = async () => {
         if (!reassignFormData.reason.trim()) {
-            return toast.error('A reason for reassignment is required.');
+            return toast.error(t('reassignDrawer.errors.missingReason') as string);
         }
         if (!packageData || !selectedReassignContact) return;
 
@@ -88,7 +90,7 @@ const ReassignDrawer: React.FC = () => {
                     reason: reassignFormData.reason,
                 })
             ).unwrap();
-            toast.success('Reassignment completed successfully!');
+            toast.success(t('reassignDrawer.reassign.success') as string);
         } catch (err) {
             console.error('Failed to perform reassignment:', err);
         }
@@ -101,30 +103,30 @@ const ReassignDrawer: React.FC = () => {
     const getStepTitle = () => {
         switch (reassignStep) {
             case 'select':
-                return 'Select Contact';
+                return t('reassignDrawer.steps.select.title');
             case 'add':
-                return 'Add New Contact';
+                return t('reassignDrawer.steps.add.title');
             case 'confirm':
-                return 'Confirm Reassignment';
+                return t('reassignDrawer.steps.confirm.title');
             case 'success':
-                return 'Reassignment Successful';
+                return t('reassignDrawer.steps.success.title');
             default:
-                return 'Reassign Responsibility';
+                return t('reassignDrawer.steps.default.title');
         }
     };
 
     const getStepDescription = () => {
         switch (reassignStep) {
             case 'select':
-                return 'Choose a contact to reassign your responsibility to';
+                return t('reassignDrawer.steps.select.description');
             case 'add':
-                return 'Enter details for the new contact';
+                return t('reassignDrawer.steps.add.description');
             case 'confirm':
-                return 'Review and confirm the reassignment';
+                return t('reassignDrawer.steps.confirm.description');
             case 'success':
-                return 'Your responsibility has been successfully reassigned';
+                return t('reassignDrawer.steps.success.description');
             default:
-                return 'Transfer your tasks to another person';
+                return t('reassignDrawer.steps.default.description');
         }
     };
 
@@ -153,7 +155,7 @@ const ReassignDrawer: React.FC = () => {
                 <FiSearchTyped className="absolute top-1/2 left-4 -translate-y-1/2 text-gray-400 w-5 h-5" />
                 <input
                     type="text"
-                    placeholder="Search by name or email..."
+                    placeholder={t('reassignDrawer.steps.select.searchPlaceholder')}
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="w-full px-4 py-3 pl-12 border border-gray-300 rounded-xl focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-all duration-200 shadow-sm"
@@ -163,7 +165,7 @@ const ReassignDrawer: React.FC = () => {
                 {reassignmentLoading ? (
                     <div className="flex items-center justify-center py-10 bg-gradient-to-r from-gray-50 to-slate-50 border border-gray-200 rounded-xl">
                         <FiLoaderTyped className="animate-spin w-6 h-6 text-[#1e293b] mr-2" />
-                        <span className="text-gray-600">Loading Contacts...</span>
+                        <span className="text-gray-600">{t('reassignDrawer.steps.select.loading')}</span>
                     </div>
                 ) : filteredContacts.length > 0 ? (
                     filteredContacts.map((contact) => (
@@ -189,7 +191,7 @@ const ReassignDrawer: React.FC = () => {
                 ) : (
                     <div className="bg-gradient-to-r from-yellow-50 to-amber-50 border border-yellow-200 rounded-xl p-4 text-center">
                         <FiAlertTriangleTyped className="w-6 h-6 text-yellow-600 mx-auto mb-2" />
-                        <p className="text-sm text-gray-600">No contacts found.</p>
+                        <p className="text-sm text-gray-600">{t('reassignDrawer.steps.select.noContacts')}</p>
                     </div>
                 )}
             </div>
@@ -199,7 +201,7 @@ const ReassignDrawer: React.FC = () => {
                 onClick={() => dispatch(setReassignStep('add'))}
                 className="w-full px-4 py-3 bg-[#1e293b] text-white font-medium rounded-xl hover:bg-opacity-90 transition-all duration-200 shadow-sm hover:shadow-md flex items-center justify-center"
             >
-                <FiUserPlusTyped className="w-5 h-5 mr-2" /> Add New Contact
+                <FiUserPlusTyped className="w-5 h-5 mr-2" /> {t('reassignDrawer.steps.select.addButton')}
             </button>
         </div>
     );
@@ -207,44 +209,44 @@ const ReassignDrawer: React.FC = () => {
     const renderAddStep = () => (
         <div className="space-y-6" onKeyPress={handleAddStepKeyPress}>
             <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-4">
-                <p className="text-sm text-gray-600">Enter the details of the new contact to whom you want to reassign your responsibility.</p>
+                <p className="text-sm text-gray-600">{t('reassignDrawer.steps.add.description')}</p>
             </div>
             <div>
-                <label className="block text-sm font-medium text-[#1e293b] mb-2">New Participant's Email*</label>
+                <label className="block text-sm font-medium text-[#1e293b] mb-2">{t('reassignDrawer.steps.add.emailLabel')}*</label>
                 <input
                     type="email"
                     value={reassignFormData.email}
                     onChange={(e) => handleFieldChange('email', e.target.value)}
                     className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-all duration-200 shadow-sm"
-                    placeholder="name@example.com"
+                    placeholder={t('reassignDrawer.steps.add.emailPlaceholder')}
                 />
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                    <label className="block text-sm font-medium text-[#1e293b] mb-2">First Name*</label>
+                    <label className="block text-sm font-medium text-[#1e293b] mb-2">{t('reassignDrawer.steps.add.firstNameLabel')}*</label>
                     <input
                         type="text"
                         value={reassignFormData.firstName}
                         onChange={(e) => handleFieldChange('firstName', e.target.value)}
                         className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-all duration-200 shadow-sm"
-                        placeholder="First name"
+                        placeholder={t('reassignDrawer.steps.add.firstNamePlaceholder')}
                     />
                 </div>
                 <div>
-                    <label className="block text-sm font-medium text-[#1e293b] mb-2">Last Name*</label>
+                    <label className="block text-sm font-medium text-[#1e293b] mb-2">{t('reassignDrawer.steps.add.lastNameLabel')}*</label>
                     <input
                         type="text"
                         value={reassignFormData.lastName}
                         onChange={(e) => handleFieldChange('lastName', e.target.value)}
                         className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-all duration-200 shadow-sm"
-                        placeholder="Last name"
+                        placeholder={t('reassignDrawer.steps.add.lastNamePlaceholder')}
                     />
                 </div>
             </div>
             <div>
-                <label className="block text-sm font-medium text-[#1e293b] mb-2">Phone Number</label>
+                <label className="block text-sm font-medium text-[#1e293b] mb-2">{t('reassignDrawer.steps.add.phoneLabel')}</label>
                 <PhoneInput
-                    placeholder="Enter phone number"
+                    placeholder={t('reassignDrawer.steps.add.phonePlaceholder')}
                     value={reassignFormData.phone as E164Number}
                     onChange={(value) => handleFieldChange('phone', value || '')}
                     defaultCountry="US"
@@ -259,14 +261,14 @@ const ReassignDrawer: React.FC = () => {
                     onClick={() => dispatch(setReassignStep('select'))}
                     className="px-6 py-3 border border-gray-300 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition-all duration-200 shadow-sm"
                 >
-                    Back
+                    {t('reassignDrawer.steps.add.backButton')}
                 </button>
                 <button
                     onClick={handleCreateContact}
                     disabled={reassignmentLoading || !reassignFormData.email.trim() || !reassignFormData.firstName.trim() || !reassignFormData.lastName.trim()}
                     className="flex-1 px-6 py-3 bg-[#1e293b] text-white font-medium rounded-xl hover:bg-opacity-90 transition-all duration-200 shadow-sm hover:shadow-md disabled:bg-gray-300 disabled:cursor-not-allowed disabled:hover:shadow-sm flex items-center justify-center"
                 >
-                    {reassignmentLoading ? <FiLoaderTyped className="animate-spin w-5 h-5" /> : 'Create and Select Contact'}
+                    {reassignmentLoading ? <FiLoaderTyped className="animate-spin w-5 h-5" /> : t('reassignDrawer.steps.add.createButton')}
                 </button>
             </div>
         </div>
@@ -275,20 +277,20 @@ const ReassignDrawer: React.FC = () => {
     const renderConfirmStep = () => (
         <div className="space-y-6" onKeyPress={handleConfirmStepKeyPress}>
             <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-4">
-                <p className="text-sm text-gray-600 mb-2">You are about to reassign your responsibility to the following contact. This action cannot be undone.</p>
+                <p className="text-sm text-gray-600 mb-2">{t('reassignDrawer.steps.confirm.description')}</p>
                 <p className="font-semibold text-[#1e293b] text-lg">
                     {selectedReassignContact?.firstName} {selectedReassignContact?.lastName}
                 </p>
                 <p className="text-sm text-gray-500">{selectedReassignContact?.email}</p>
             </div>
             <div>
-                <label className="block text-sm font-medium text-[#1e293b] mb-2">Reason for Reassignment*</label>
+                <label className="block text-sm font-medium text-[#1e293b] mb-2">{t('reassignDrawer.steps.confirm.reasonLabel')}*</label>
                 <textarea
                     value={reassignFormData.reason}
                     onChange={(e) => dispatch(setReassignmentReason(e.target.value))}
                     rows={4}
                     className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-all duration-200 shadow-sm resize-none"
-                    placeholder="Please provide a brief reason..."
+                    placeholder={t('reassignDrawer.steps.confirm.reasonPlaceholder')}
                 />
             </div>
 
@@ -298,14 +300,14 @@ const ReassignDrawer: React.FC = () => {
                     onClick={() => dispatch(setReassignStep('select'))}
                     className="px-6 py-3 border border-gray-300 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition-all duration-200 shadow-sm"
                 >
-                    Back
+                    {t('reassignDrawer.steps.confirm.backButton')}
                 </button>
                 <button
                     onClick={handlePerformReassignment}
                     disabled={reassignmentLoading || !reassignFormData.reason.trim()}
                     className="flex-1 px-6 py-3 bg-green-600 text-white font-medium rounded-xl hover:bg-opacity-90 transition-all duration-200 shadow-sm hover:shadow-md disabled:bg-gray-300 disabled:cursor-not-allowed disabled:hover:shadow-sm flex items-center justify-center"
                 >
-                    {reassignmentLoading ? <FiLoaderTyped className="animate-spin w-5 h-5" /> : 'Confirm Reassignment'}
+                    {reassignmentLoading ? <FiLoaderTyped className="animate-spin w-5 h-5" /> : t('reassignDrawer.steps.confirm.confirmButton')}
                 </button>
             </div>
         </div>
@@ -316,16 +318,16 @@ const ReassignDrawer: React.FC = () => {
             <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-6 animate-pulse">
                 <FiCheckCircleTyped className="w-10 h-10" />
             </div>
-            <h3 className="text-xl font-semibold text-[#1e293b] mb-3">Reassignment Successful!</h3>
+            <h3 className="text-xl font-semibold text-[#1e293b] mb-3">{t('reassignDrawer.steps.success.title')}</h3>
             <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl p-4 mb-6">
-                <p className="text-sm text-gray-600">Your responsibility for this document has been transferred to:</p>
+                <p className="text-sm text-gray-600">{t('reassignDrawer.steps.success.message')}</p>
                 <p className="font-semibold text-[#1e293b] mt-1">{selectedReassignContact?.email}</p>
-                <p className="text-xs text-gray-500 mt-2">All parties will be notified of this change.</p>
+                <p className="text-xs text-gray-500 mt-2">{t('reassignDrawer.steps.success.notification')}</p>
             </div>
 
             {/* Action Button - Inline with content */}
             <button onClick={closeDrawer} className="w-full px-6 py-3 bg-[#1e293b] text-white font-medium rounded-xl hover:bg-opacity-90 transition-all duration-200 shadow-sm hover:shadow-md">
-                Back to Document
+                {t('reassignDrawer.steps.success.backButton')}
             </button>
         </div>
     );
@@ -366,7 +368,11 @@ const ReassignDrawer: React.FC = () => {
                                                 <h2 className="text-lg sm:text-xl font-semibold text-[#1e293b]">{getStepTitle()}</h2>
                                                 <p className="text-sm text-gray-500 mt-1">{getStepDescription()}</p>
                                             </div>
-                                            <button onClick={closeDrawer} className="p-2 rounded-lg text-gray-500 hover:text-[#1e293b] hover:bg-gray-100 transition-all duration-200">
+                                            <button
+                                                onClick={closeDrawer}
+                                                className="p-2 rounded-lg text-gray-500 hover:text-[#1e293b] hover:bg-gray-100 transition-all duration-200"
+                                                title={t('reassignDrawer.close')}
+                                            >
                                                 <FiChevronRightTyped className="w-5 h-5" />
                                             </button>
                                         </div>

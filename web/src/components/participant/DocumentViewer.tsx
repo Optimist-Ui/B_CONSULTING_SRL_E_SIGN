@@ -8,6 +8,7 @@ import { loadPdfDocument, renderPdfPageToCanvas } from '../../utils/pdf-utils';
 import { ParticipantPackageView, SignatureValue } from '../../store/slices/participantSlice';
 import InteractiveField from './fields/InteractiveField';
 import ReadOnlyField from './fields/ReadOnlyField';
+import { useTranslation } from 'react-i18next';
 
 const BACKEND_URL = import.meta.env.VITE_BASE_URL;
 
@@ -23,6 +24,7 @@ interface DocumentViewerProps {
 }
 
 const DocumentViewer: React.FC<DocumentViewerProps> = ({ packageData, fieldValues }) => {
+    const { t } = useTranslation();
     const dispatch = useDispatch<AppDispatch>();
     const numPages = useSelector((state: IRootState) => state.participant.numPages);
     const currentPage = useSelector((state: IRootState) => state.participant.currentPage);
@@ -58,7 +60,7 @@ const DocumentViewer: React.FC<DocumentViewerProps> = ({ packageData, fieldValue
     useEffect(() => {
         const loadPdf = async () => {
             if (!packageData.fileUrl) {
-                setPdfLoadError('Document URL is missing.');
+                setPdfLoadError(t('documentViewer.errors.missingUrl'));
                 setIsLoading(false);
                 return;
             }
@@ -77,7 +79,7 @@ const DocumentViewer: React.FC<DocumentViewerProps> = ({ packageData, fieldValue
 
                 setLoadingProgress(30);
                 const response = await fetch(fullUrl, { mode: 'cors' });
-                if (!response.ok) throw new Error(`Failed to fetch PDF: ${response.statusText}`);
+                if (!response.ok) throw new Error(t('documentViewer.errors.fetchFailed', { status: response.statusText }));
 
                 setLoadingProgress(50);
                 const arrayBuffer = await response.arrayBuffer();
@@ -92,14 +94,14 @@ const DocumentViewer: React.FC<DocumentViewerProps> = ({ packageData, fieldValue
                 setLoadingProgress(100);
                 setTimeout(() => setIsLoading(false), 300);
             } catch (err: any) {
-                setPdfLoadError(err.message || 'An unknown error occurred while loading the PDF.');
-                toast.error(`Failed to load document: ${err.message}`);
+                setPdfLoadError(err.message || t('documentViewer.errors.unknown'));
+                toast.error(t('documentViewer.errors.loadFailed', { message: err.message }) as string);
                 setIsLoading(false);
             }
         };
 
         loadPdf();
-    }, [packageData.fileUrl, packageData.downloadUrl, dispatch]);
+    }, [packageData.fileUrl, packageData.downloadUrl, dispatch, t]);
 
     useEffect(() => {
         const computePageInfos = async () => {
@@ -181,14 +183,14 @@ const DocumentViewer: React.FC<DocumentViewerProps> = ({ packageData, fieldValue
                         </div>
                     </div>
                     <div className="text-center mb-4">
-                        <h3 className="text-lg font-semibold text-[#1e293b] mb-2">Preparing Document</h3>
-                        <p className="text-gray-600 text-sm">Please wait while we load your document...</p>
+                        <h3 className="text-lg font-semibold text-[#1e293b] mb-2">{t('documentViewer.loading.title')}</h3>
+                        <p className="text-gray-600 text-sm">{t('documentViewer.loading.message')}</p>
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-3 mb-4">
                         <div className="bg-gradient-to-r from-[#1e293b] to-blue-600 h-3 rounded-full transition-all duration-500 ease-out" style={{ width: `${loadingProgress}%` }}></div>
                     </div>
                     <div className="text-center">
-                        <span className="text-sm font-medium text-gray-700">{loadingProgress}%</span>
+                        <span className="text-sm font-medium text-gray-700">{t('documentViewer.loading.progress', { progress: loadingProgress })}</span>
                     </div>
                 </div>
             </div>
@@ -204,10 +206,10 @@ const DocumentViewer: React.FC<DocumentViewerProps> = ({ packageData, fieldValue
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                         </svg>
                     </div>
-                    <h3 className="text-lg font-semibold text-red-800 mb-2">Document Loading Error</h3>
+                    <h3 className="text-lg font-semibold text-red-800 mb-2">{t('documentViewer.errors.title')}</h3>
                     <p className="text-red-600 text-sm mb-4">{pdfLoadError}</p>
                     <button onClick={() => window.location.reload()} className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200 text-sm font-medium">
-                        Try Again
+                        {t('documentViewer.errors.tryAgain')}
                     </button>
                 </div>
             </div>
@@ -228,7 +230,7 @@ const DocumentViewer: React.FC<DocumentViewerProps> = ({ packageData, fieldValue
                             />
                         </svg>
                     </div>
-                    <p className="text-gray-600">Preparing document...</p>
+                    <p className="text-gray-600">{t('documentViewer.preparing')}</p>
                 </div>
             </div>
         );
@@ -245,21 +247,21 @@ const DocumentViewer: React.FC<DocumentViewerProps> = ({ packageData, fieldValue
                             </svg>
                         </div>
                         <div className="flex-1">
-                            <h3 className="text-lg font-semibold text-red-800 mb-2">Document Rejected</h3>
+                            <h3 className="text-lg font-semibold text-red-800 mb-2">{t('documentViewer.rejection.title')}</h3>
                             <div className="space-y-2 text-sm text-red-700">
                                 <p>
-                                    <span className="font-medium">Rejected by:</span> {packageData.rejectionDetails.rejectedBy.contactName}
+                                    <span className="font-medium">{t('documentViewer.rejection.rejectedBy')}</span> {packageData.rejectionDetails.rejectedBy.contactName}
                                 </p>
                                 {packageData.rejectionDetails.rejectedIP && (
                                     <p>
-                                        <span className="font-medium">IP Address:</span> {packageData.rejectionDetails.rejectedIP}
+                                        <span className="font-medium">{t('documentViewer.rejection.ipAddress')}</span> {packageData.rejectionDetails.rejectedIP}
                                     </p>
                                 )}
                                 <p>
-                                    <span className="font-medium">Date:</span> {new Date(packageData.rejectionDetails.rejectedAt).toLocaleString()}
+                                    <span className="font-medium">{t('documentViewer.rejection.date')}</span> {new Date(packageData.rejectionDetails.rejectedAt).toLocaleString()}
                                 </p>
                                 <p>
-                                    <span className="font-medium">Reason:</span> {packageData.rejectionDetails.reason}
+                                    <span className="font-medium">{t('documentViewer.rejection.reason')}</span> {packageData.rejectionDetails.reason}
                                 </p>
                             </div>
                         </div>
@@ -288,7 +290,7 @@ const DocumentViewer: React.FC<DocumentViewerProps> = ({ packageData, fieldValue
                             }}
                         >
                             <div className="absolute top-4 left-4 z-10 bg-[#1e293b] text-white px-3 py-1.5 rounded-full text-xs font-semibold shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                Page {pageNumber} of {numPages}
+                                {t('documentViewer.pageInfo', { current: pageNumber, total: numPages })}
                             </div>
                             <div
                                 style={{
@@ -332,7 +334,7 @@ const DocumentViewer: React.FC<DocumentViewerProps> = ({ packageData, fieldValue
                             <div className="absolute inset-0 rounded-lg shadow-inner pointer-events-none opacity-20 group-hover:opacity-30 transition-opacity duration-300"></div>
                         </div>
                         <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-3 py-1 rounded-full text-xs opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none">
-                            {fieldsOnPage.length} field{fieldsOnPage.length !== 1 ? 's' : ''} on this page
+                            {t('documentViewer.fieldsOnPage', { count: fieldsOnPage.length })}
                         </div>
                     </div>
                 );
@@ -344,9 +346,9 @@ const DocumentViewer: React.FC<DocumentViewerProps> = ({ packageData, fieldValue
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                     </div>
-                    <h3 className="text-lg font-semibold text-[#1e293b]">Document Review Complete</h3>
+                    <h3 className="text-lg font-semibold text-[#1e293b]">{t('documentViewer.reviewComplete.title')}</h3>
                 </div>
-                <p className="text-center text-gray-600 text-sm">You have reached the end of the document. Please review all fields and accept the terms below to proceed with signing.</p>
+                <p className="text-center text-gray-600 text-sm">{t('documentViewer.reviewComplete.message')}</p>
             </div>
         </div>
     );

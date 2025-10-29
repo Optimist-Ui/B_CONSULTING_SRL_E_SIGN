@@ -4,6 +4,7 @@ import { loadPdfDocument, renderPdfPageToCanvas } from '../../utils/pdf-utils';
 import { DocumentPackage } from '../../store/slices/packageSlice';
 import StatusFieldRenderer from './StatusFieldRenderer';
 import { toast } from 'react-toastify';
+import { useTranslation } from 'react-i18next';
 
 const BACKEND_URL = import.meta.env.VITE_BASE_URL;
 
@@ -18,6 +19,7 @@ interface PageInfo {
 }
 
 const OwnerDocumentViewer: React.FC<Props> = ({ packageData }) => {
+    const { t } = useTranslation();
     const [pdfInstance, setPdfInstance] = useState<PDFDocumentProxy | null>(null);
     const [numPages, setNumPages] = useState(0);
     const [currentPage, setCurrentPage] = useState(1);
@@ -70,13 +72,13 @@ const OwnerDocumentViewer: React.FC<Props> = ({ packageData }) => {
                 setPdfInstance(pdf);
                 setNumPages(pdf.numPages);
             } catch (err: any) {
-                toast.error(`Failed to load document: ${err.message}`);
+                toast.error(t('ownerDocumentViewer.errors.loadFailed', { message: err.message }) as string);
             } finally {
                 setIsLoading(false);
             }
         };
         loadPdf();
-    }, [packageData.fileUrl, packageData.downloadUrl]);
+    }, [packageData.fileUrl, packageData.downloadUrl, t]);
 
     useEffect(() => {
         const computePageInfos = async () => {
@@ -125,20 +127,20 @@ const OwnerDocumentViewer: React.FC<Props> = ({ packageData }) => {
                             onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
                             disabled={currentPage <= 1}
                             className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                            aria-label={t('ownerDocumentViewer.controls.previousPage')}
                         >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                             </svg>
                         </button>
 
-                        <span className="text-sm font-medium text-gray-700">
-                            Page {currentPage} of {numPages}
-                        </span>
+                        <span className="text-sm font-medium text-gray-700">{t('ownerDocumentViewer.controls.pageNavigation', { current: currentPage, total: numPages })}</span>
 
                         <button
                             onClick={() => setCurrentPage(Math.min(numPages, currentPage + 1))}
                             disabled={currentPage >= numPages}
                             className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                            aria-label={t('ownerDocumentViewer.controls.nextPage')}
                         >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -148,15 +150,23 @@ const OwnerDocumentViewer: React.FC<Props> = ({ packageData }) => {
 
                     {/* Zoom Controls */}
                     <div className="flex items-center gap-2">
-                        <button onClick={() => setZoomLevel(Math.max(50, zoomLevel - 25))} className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors">
+                        <button
+                            onClick={() => setZoomLevel(Math.max(50, zoomLevel - 25))}
+                            className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors"
+                            aria-label={t('ownerDocumentViewer.controls.zoomOut')}
+                        >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
                             </svg>
                         </button>
 
-                        <span className="text-sm font-medium text-gray-700 min-w-[4rem] text-center">{zoomLevel}%</span>
+                        <span className="text-sm font-medium text-gray-700 min-w-[4rem] text-center">{t('ownerDocumentViewer.controls.zoomLevel', { level: zoomLevel })}</span>
 
-                        <button onClick={() => setZoomLevel(Math.min(200, zoomLevel + 25))} className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors">
+                        <button
+                            onClick={() => setZoomLevel(Math.min(200, zoomLevel + 25))}
+                            className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors"
+                            aria-label={t('ownerDocumentViewer.controls.zoomIn')}
+                        >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                             </svg>
@@ -189,7 +199,9 @@ const OwnerDocumentViewer: React.FC<Props> = ({ packageData }) => {
                             }}
                         >
                             {/* Page Number Badge */}
-                            <div className="absolute top-4 left-4 z-10 bg-black bg-opacity-70 text-white px-2 py-1 rounded text-xs font-medium">{pageNumber}</div>
+                            <div className="absolute top-4 left-4 z-10 bg-black bg-opacity-70 text-white px-2 py-1 rounded text-xs font-medium">
+                                {t('ownerDocumentViewer.pageNumber', { number: pageNumber })}
+                            </div>
 
                             <div
                                 style={{
@@ -215,13 +227,7 @@ const OwnerDocumentViewer: React.FC<Props> = ({ packageData }) => {
                                 {packageData.fields
                                     .filter((f) => f.page === pageNumber)
                                     .map((field) => (
-                                        <StatusFieldRenderer
-                                            key={field.id}
-                                            field={field}
-                                            currentScale={scale}
-                                            baseScale={BASE_SCALE}
-                                            packageStatus={packageData.status} // 👈 ADD THIS
-                                        />
+                                        <StatusFieldRenderer key={field.id} field={field} currentScale={scale} baseScale={BASE_SCALE} packageStatus={packageData.status} />
                                     ))}
                             </div>
                         </div>

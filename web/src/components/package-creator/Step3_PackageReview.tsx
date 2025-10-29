@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState, ComponentType } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useTranslation } from 'react-i18next'; // Import useTranslation
 import { IRootState, AppDispatch } from '../../store';
 import { PackageField, addReceiverToPackage, removeReceiverFromPackage, updatePackageOptions, setPackageCustomMessage } from '../../store/slices/packageSlice';
 import { Contact } from '../../store/slices/contactSlice';
@@ -40,6 +41,7 @@ interface PageInfo {
 type ActiveTab = 'summary' | 'recipients' | 'settings';
 
 const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
+    const { t } = useTranslation(); // Initialize translation hook
     const dispatch = useDispatch<AppDispatch>();
     const { currentPackage, error, loading } = useSelector((state: IRootState) => state.packages);
     const { contacts } = useSelector((state: IRootState) => state.contacts);
@@ -62,47 +64,33 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
 
     // Options for reminderPeriod dropdown
     const reminderPeriodOptions = [
-        { value: '1_hour_before', label: '1 Hour Before', durationMs: 3600000 },
-        { value: '2_hours_before', label: '2 Hours Before', durationMs: 7200000 },
-        { value: '1_day_before', label: '24 Hours Before', durationMs: 86400000 },
-        { value: '2_days_before', label: '48 Hours Before', durationMs: 172800000 },
+        { value: '1_hour_before', label: t('packageReview.settings.reminders.timing.options.1_hour'), durationMs: 3600000 },
+        { value: '2_hours_before', label: t('packageReview.settings.reminders.timing.options.2_hours'), durationMs: 7200000 },
+        { value: '1_day_before', label: t('packageReview.settings.reminders.timing.options.1_day'), durationMs: 86400000 },
+        { value: '2_days_before', label: t('packageReview.settings.reminders.timing.options.2_days'), durationMs: 172800000 },
     ];
 
     const availableReminderOptions = useMemo(() => {
         const expiresAt = currentPackage?.options.expiresAt;
-
-        // If no expiration date is set, show all options (they will be disabled by the checkbox anyway)
         if (!expiresAt) {
             return reminderPeriodOptions;
         }
-
         const timeUntilExpiry = new Date(expiresAt).getTime() - Date.now();
-
-        // If expiry is in the past, no reminders are possible
         if (timeUntilExpiry <= 0) {
             return [];
         }
-
-        // A reminder is valid only if the time until expiry is greater than the reminder period
-        // e.g., You can't set a "1 day before" reminder if expiry is in 12 hours.
         return reminderPeriodOptions.filter((option) => timeUntilExpiry > option.durationMs);
-    }, [currentPackage?.options.expiresAt]);
+    }, [currentPackage?.options.expiresAt, t]);
 
     const maxFirstReminderDays = useMemo(() => {
         const expiresAt = currentPackage?.options.expiresAt;
-        // If no date is set, the field is disabled anyway, so return a high number.
         if (!expiresAt) {
             return 999;
         }
-
         const timeUntilExpiryMs = new Date(expiresAt).getTime() - Date.now();
-
-        // If expired or will expire within 24 hours, no automatic reminders are possible.
         if (timeUntilExpiryMs <= 86400000) {
             return 0;
         }
-
-        // Calculate the number of full days until expiry. A reminder can be set N days before if the doc expires in > N days.
         return Math.floor(timeUntilExpiryMs / (1000 * 60 * 60 * 24));
     }, [currentPackage?.options.expiresAt]);
 
@@ -115,8 +103,6 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
     }, [currentPackage?.options.firstReminderDays, maxFirstReminderDays]);
 
     useEffect(() => {
-        // Initialize tempExpiresAt with currentPackage.options.expiresAt
-        // Convert from UTC ISO string to local datetime-local format
         if (currentPackage?.options.expiresAt) {
             const date = new Date(currentPackage.options.expiresAt);
             const year = date.getFullYear();
@@ -124,7 +110,6 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
             const day = String(date.getDate()).padStart(2, '0');
             const hours = String(date.getHours()).padStart(2, '0');
             const minutes = String(date.getMinutes()).padStart(2, '0');
-
             setTempExpiresAt(`${year}-${month}-${day}T${hours}:${minutes}`);
         }
     }, [currentPackage?.options.expiresAt]);
@@ -141,7 +126,7 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
         };
 
         if (!currentPackage || (!currentPackage.fileData && !currentPackage.fileUrl)) {
-            setPdfLoadError('Document source is missing. Please return to Step 1.');
+            setPdfLoadError(t('packageReview.errors.missingSource'));
             setIsRendering(false);
             return cleanup;
         }
@@ -154,16 +139,16 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
             if (currentPackage.fileData?.byteLength) return currentPackage.fileData.slice(0);
             if (currentPackage.downloadUrl) {
                 const response = await fetch(currentPackage.downloadUrl, { mode: 'cors' });
-                if (!response.ok) throw new Error(`Fetch failed: ${response.statusText}`);
+                if (!response.ok) throw new Error(t('packageReview.errors.fetchFailed'));
                 return response.arrayBuffer();
             } else if (currentPackage.fileUrl) {
                 const correctedFileUrl = currentPackage.fileUrl.startsWith('/public') ? currentPackage.fileUrl : `/public${currentPackage.fileUrl}`;
                 const fullUrl = `${BACKEND_URL}${correctedFileUrl}`;
                 const response = await fetch(fullUrl, { mode: 'cors' });
-                if (!response.ok) throw new Error(`Fetch failed: ${response.statusText}`);
+                if (!response.ok) throw new Error(t('packageReview.errors.fetchFailed'));
                 return response.arrayBuffer();
             }
-            throw new Error('No PDF source found in the package data.');
+            throw new Error(t('packageReview.errors.noSource'));
         };
 
         const loadPdf = async () => {
@@ -190,7 +175,7 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
                 }
             } catch (err: any) {
                 if (isMounted) {
-                    setPdfLoadError(err.message || 'Failed to load the document preview.');
+                    setPdfLoadError(err.message || t('packageReview.errors.loadFailed'));
                     setIsRendering(false);
                     console.error('PDF load error:', err);
                 }
@@ -202,7 +187,7 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
             isMounted = false;
             cleanup();
         };
-    }, [currentPackage?.fileUrl, currentPackage?.fileData, currentPackage?.downloadUrl]);
+    }, [currentPackage?.fileUrl, currentPackage?.fileData, currentPackage?.downloadUrl, t]);
 
     useEffect(() => {
         if (!pdfProxyRef.current || numPages === 0 || pageInfos.length === 0 || !isCanvasReady) {
@@ -232,7 +217,7 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
             } catch (err: any) {
                 if (err.name !== 'RenderingCancelledException') {
                     console.error('Rendering error:', err);
-                    toast.error('Failed to render PDF pages.');
+                    toast.error(t('packageReview.errors.renderFailed') as string);
                 }
             } finally {
                 setIsRendering(false);
@@ -244,48 +229,36 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
             renderTasksRef.current.forEach((task) => task?.cancel?.());
             renderTasksRef.current = [];
         };
-    }, [numPages, pageInfos, isCanvasReady]);
+    }, [numPages, pageInfos, isCanvasReady, t]);
 
     useEffect(() => {
         const selectedPeriod = currentPackage?.options.reminderPeriod;
-
-        // Do nothing if no reminder is selected or if options haven't been calculated
         if (!selectedPeriod || !availableReminderOptions) {
             return;
         }
-
-        // Check if the selected reminder is still in the valid options list
         const isSelectedPeriodValid = availableReminderOptions.some((option) => option.value === selectedPeriod);
-
-        // If it's no longer valid, reset it in the Redux store and notify the user
         if (!isSelectedPeriodValid) {
             dispatch(updatePackageOptions({ reminderPeriod: null }));
-            toast.info('The reminder timing was reset as it is no longer valid for the new expiration date.', { autoClose: 6000 });
+            toast.info(t('packageReview.messages.reminderTimingReset') as string, { autoClose: 6000 });
         }
-    }, [availableReminderOptions, currentPackage?.options.reminderPeriod, dispatch]);
+    }, [availableReminderOptions, currentPackage?.options.reminderPeriod, dispatch, t]);
 
-    // This effect validates and resets automatic reminder days if they become invalid
     useEffect(() => {
-        // Safely access the nested property without destructuring from a potentially undefined object.
         const firstReminderDays = currentPackage?.options?.firstReminderDays;
-
-        // Check if the current value for 'firstReminderDays' exceeds the new maximum allowed
         if (firstReminderDays && firstReminderDays > maxFirstReminderDays) {
-            // Reset the invalid value in the Redux store
             dispatch(updatePackageOptions({ firstReminderDays: null }));
-            toast.info('The first automatic reminder was reset as it is no longer valid for the new expiration date.', { autoClose: 6000 });
+            toast.info(t('packageReview.messages.firstReminderReset') as string, { autoClose: 6000 });
         }
-        // Also use optional chaining in the dependency array for full type safety.
-    }, [maxFirstReminderDays, currentPackage?.options?.firstReminderDays, dispatch]);
+    }, [maxFirstReminderDays, currentPackage?.options?.firstReminderDays, dispatch, t]);
 
     useEffect(() => {
         const repeatDays = currentPackage?.options?.repeatReminderDays;
         const maxRepeat = currentPackage?.options.firstReminderDays || maxFirstReminderDays;
         if (repeatDays && repeatDays > maxRepeat) {
             dispatch(updatePackageOptions({ repeatReminderDays: null }));
-            toast.info('The follow-up reminder interval was reset as it is no longer valid.', { autoClose: 6000 });
+            toast.info(t('packageReview.messages.repeatReminderReset') as string, { autoClose: 6000 });
         }
-    }, [currentPackage?.options?.repeatReminderDays, currentPackage?.options.firstReminderDays, maxFirstReminderDays, dispatch]);
+    }, [currentPackage?.options?.repeatReminderDays, currentPackage?.options.firstReminderDays, maxFirstReminderDays, dispatch, t]);
 
     useEffect(() => {
         if (error) {
@@ -299,8 +272,6 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
         const assignedFields = fields.filter((f) => f.assignedUsers?.length).length;
         const allUsers = new Set(fields.flatMap((f) => f.assignedUsers || []).map((u) => u.contactId));
         const uniqueRecipients = allUsers.size + (currentPackage?.receivers.length || 0);
-
-        // New validation check
         const unassignedRequiredFields = fields.filter((field) => field.required && (!field.assignedUsers || field.assignedUsers.length === 0));
 
         return {
@@ -308,17 +279,13 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
             assignedFields,
             uniqueRecipients,
             completionRate: totalFields > 0 ? Math.round((assignedFields / totalFields) * 100) : 0,
-            unassignedRequiredFields: unassignedRequiredFields,
+            unassignedRequiredFields,
         };
     };
 
-    // 🔥 NEW: Add credit calculation function
     const calculateDocumentCredits = () => {
         const fields = currentPackage?.fields || [];
-
-        // Get all unique signer contact IDs across all signature fields
         const uniqueSignerIds = new Set<string>();
-
         fields.forEach((field) => {
             if (field.type === 'signature') {
                 (field.assignedUsers || []).forEach((user) => {
@@ -328,11 +295,7 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
                 });
             }
         });
-
         const uniqueSignerCount = uniqueSignerIds.size;
-
-        // Calculate credits: 1 credit per 2 signers (rounded up)
-        // Math.ceil ensures: 1-2 signers = 1, 3-4 = 2, 5-6 = 3, etc.
         const creditsNeeded = uniqueSignerCount > 0 ? Math.ceil(uniqueSignerCount / 2) : 1;
 
         return {
@@ -351,7 +314,7 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
                 })
             );
             setSelectedReceiver(null);
-            toast.success(`${selectedReceiver.firstName} added as a receiver.`);
+            toast.success(t('packageReview.messages.receiverAdded', { name: `${selectedReceiver.firstName} ${selectedReceiver.lastName}` }) as string);
         }
     };
 
@@ -365,24 +328,18 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
 
     const handleConfirmDate = () => {
         if (tempExpiresAt) {
-            // Parse the datetime-local value and preserve the local time
             const [datePart, timePart] = tempExpiresAt.split('T');
             const [year, month, day] = datePart.split('-').map(Number);
             const [hours, minutes] = timePart.split(':').map(Number);
-
-            // Create date in local timezone
             const selectedDate = new Date(year, month - 1, day, hours, minutes);
             const now = new Date();
 
-            // Check if the selected date is in the past
             if (selectedDate <= now) {
-                toast.error('Expiration date cannot be in the past. Please select a future date.');
+                toast.error(t('packageReview.errors.pastDate') as string);
                 return;
             }
 
             handleOptionsChange({ expiresAt: selectedDate.toISOString() });
-
-            // Format the date for user-friendly display
             const formatOptions: Intl.DateTimeFormatOptions = {
                 year: 'numeric',
                 month: 'short',
@@ -392,11 +349,10 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
                 hour12: true,
             };
             const formattedDate = selectedDate.toLocaleDateString('en-US', formatOptions);
-
-            toast.success(`Package expiration set to ${formattedDate}`);
+            toast.success(t('packageReview.messages.expirationSet', { date: formattedDate }) as string);
         } else {
             handleOptionsChange({ expiresAt: null });
-            toast.info('Package expiration removed - package will not expire');
+            toast.info(t('packageReview.messages.expirationRemoved') as string);
         }
 
         if (dateInputRef.current) {
@@ -409,7 +365,7 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
             <div className="flex justify-center items-center h-full">
                 <div className="text-center">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                    <p className="font-medium">Loading package details...</p>
+                    <p className="font-medium">{t('packageReview.loading')}</p>
                 </div>
             </div>
         );
@@ -420,10 +376,10 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
             <div className="flex flex-col justify-center items-center h-full max-w-md mx-auto text-center">
                 <div className="bg-red-50 border border-red-200 rounded-xl p-8 shadow-lg">
                     <FiAlertCircleTyped className="w-16 h-16 text-red-500 mx-auto mb-4" />
-                    <h3 className="text-xl font-bold text-red-800 mb-2">Unable to Load Document</h3>
+                    <h3 className="text-xl font-bold text-red-800 mb-2">{t('packageReview.errors.loadFailed')}</h3>
                     <p className="text-red-600 mb-6">{pdfLoadError}</p>
                     <button onClick={onPrevious} className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg font-medium transition-colors duration-200">
-                        Return to Previous Step
+                        {t('packagesDashboard.returnToPrevious')} {/* Assuming this key exists elsewhere */}
                     </button>
                 </div>
             </div>
@@ -454,9 +410,9 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
                         <div className="flex justify-between items-center px-4 py-3 dark:bg-gray-900 bg-gray-50 border-b border-gray-200">
                             <div className="flex items-center gap-2">
                                 <FiEyeTyped className="w-5 h-5" />
-                                <h3 className="font-semibold">Document Preview</h3>
+                                <h3 className="font-semibold">{t('packageReview.preview.title')}</h3>
                                 <span className="text-sm">
-                                    ({numPages} {numPages === 1 ? 'page' : 'pages'})
+                                    ({numPages} {numPages === 1 ? t('packageReview.preview.pageCount', { count: numPages }) : t('packageReview.preview.pageCount_plural', { count: numPages })})
                                 </span>
                             </div>
                             <div className="flex items-center gap-2">
@@ -465,7 +421,7 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
                                     className="flex items-center gap-2 px-3 py-1 text-sm bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg transition-colors duration-200"
                                 >
                                     <FiZoomInTyped className="w-4 h-4" />
-                                    {viewMode === 'fit' ? 'Actual Size' : 'Fit Width'}
+                                    {viewMode === 'fit' ? t('packageReview.preview.actualSize') : t('packageReview.preview.fitWidth')}
                                 </button>
                             </div>
                         </div>
@@ -475,8 +431,8 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
                             {isRendering && (
                                 <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex flex-col justify-center items-center z-20">
                                     <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-600 border-t-transparent"></div>
-                                    <p className="mt-4  font-semibold">Rendering Document...</p>
-                                    <p className="text-sm mt-1">Please wait while we prepare your document</p>
+                                    <p className="mt-4 font-semibold">{t('packageReview.preview.rendering.title')}</p>
+                                    <p className="text-sm mt-1">{t('packageReview.preview.rendering.subtitle')}</p>
                                 </div>
                             )}
 
@@ -497,9 +453,7 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
                                         return (
                                             <div key={`review-page-${index}`} className="relative">
                                                 <div className="flex justify-between items-center mb-3">
-                                                    <span className="text-sm font-medium">
-                                                        Page {index + 1} of {numPages}
-                                                    </span>
+                                                    <span className="text-sm font-medium">{t('packageReview.preview.pageIndicator', { current: index + 1, total: numPages })}</span>
                                                 </div>
                                                 <div
                                                     className="relative dark:bg-gray-900 bg-white shadow-2xl border border-gray-200 mx-auto overflow-hidden rounded-lg"
@@ -562,8 +516,6 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
                                                                         <span className="truncate">{field.placeholder}</span>
                                                                     </div>
                                                                 )}
-
-                                                                {/* NEW: Show assigned users with signature methods */}
                                                                 {hasAssignments && (
                                                                     <div className="absolute -bottom-7 left-0 right-0 flex flex-wrap gap-1.5">
                                                                         {assignedUsers.map((user, idx) => (
@@ -576,7 +528,6 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
                                                                                     user.signatureMethods ? '\nAuth: ' + user.signatureMethods.join(', ') : ''
                                                                                 }`}
                                                                             >
-                                                                                {/* Show signature methods if available */}
                                                                                 {user.signatureMethods && user.signatureMethods.length > 0 && (
                                                                                     <span className="inline-flex items-center gap-0.5 px-1 py-0.5 bg-white/20 rounded text-[9px] font-semibold">
                                                                                         {user.signatureMethods.includes('Email OTP') && <span>Email</span>}
@@ -605,9 +556,9 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
                     <div className="w-96 dark:bg-gray-900 bg-white flex flex-col shadow-xl">
                         <div className="px-3 pt-3 border-b border-gray-200">
                             <div className="flex items-center rounded-t-lg overflow-hidden">
-                                <TabButton tab="summary" label="Summary" icon={<FiInfoTyped />} />
-                                <TabButton tab="recipients" label="Recipients" icon={<FiUsersTyped />} />
-                                <TabButton tab="settings" label="Settings" icon={<FiSettingsTyped />} />
+                                <TabButton tab="summary" label={t('packageReview.tabs.summary')} icon={<FiInfoTyped />} />
+                                <TabButton tab="recipients" label={t('packageReview.tabs.recipients')} icon={<FiUsersTyped />} />
+                                <TabButton tab="settings" label={t('packageReview.tabs.settings')} icon={<FiSettingsTyped />} />
                             </div>
                         </div>
 
@@ -620,15 +571,13 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
                                     <div>
                                         <h4 className="font-semibold mb-2 flex items-center gap-2">
                                             <FiMessageSquareTyped />
-                                            Optional Message for Participants
+                                            {t('packageReview.summary.message.title')}
                                         </h4>
                                         <div className="p-4 bg-white dark:bg-gray-800 border rounded-lg">
-                                            <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
-                                                This message will be included in the initial "Action Required" email sent to all participants.
-                                            </p>
+                                            <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">{t('packageReview.summary.message.description')}</p>
                                             <textarea
                                                 className="w-full h-24 p-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                                placeholder="e.g., Please review and sign this document at your earliest convenience. Thank you!"
+                                                placeholder={t('packageReview.summary.message.placeholder')}
                                                 value={currentPackage.customMessage || ''}
                                                 onChange={(e) => dispatch(setPackageCustomMessage(e.target.value))}
                                             />
@@ -637,28 +586,28 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
 
                                     {/* Details at a Glance */}
                                     <div>
-                                        <h4 className="font-semibold mb-2">Details at a Glance</h4>
+                                        <h4 className="font-semibold mb-2">{t('packageReview.summary.details.title')}</h4>
                                         <div className="p-4 dark:bg-gray-900 bg-white border rounded-lg grid grid-cols-3 gap-4 text-center">
                                             <div className="p-2">
                                                 <div className="text-2xl font-bold text-blue-600">{stats.totalFields}</div>
-                                                <div className="text-xs mt-1">Fields</div>
+                                                <div className="text-xs mt-1">{t('packageReview.summary.details.fields')}</div>
                                             </div>
                                             <div className="p-2">
                                                 <div className="text-2xl font-bold text-green-600">{stats.uniqueRecipients}</div>
-                                                <div className="text-xs mt-1">Recipients</div>
+                                                <div className="text-xs mt-1">{t('packageReview.summary.details.recipients')}</div>
                                             </div>
                                             <div className="p-2">
                                                 <div className="text-2xl font-bold">{numPages}</div>
-                                                <div className="text-xs mt-1">Pages</div>
+                                                <div className="text-xs mt-1">{t('packageReview.summary.details.pages')}</div>
                                             </div>
                                         </div>
                                     </div>
 
-                                    {/* 🔥 NEW: Credit Usage Information */}
+                                    {/* Credit Usage Information */}
                                     <div>
                                         <h4 className="font-semibold mb-2 flex items-center gap-2">
                                             <FiInfoTyped />
-                                            Document Credit Usage
+                                            {t('packageReview.summary.credits.title')}
                                         </h4>
                                         <div
                                             className={`p-4 border rounded-lg ${
@@ -680,23 +629,26 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
                                                 <div className="flex-1">
                                                     <p className="font-semibold text-sm mb-1">
                                                         {creditInfo.creditsNeeded === 1
-                                                            ? 'This package will use 1 document credit'
-                                                            : `This package will use ${creditInfo.creditsNeeded} document credits`}
+                                                            ? t('packageReview.summary.credits.usageText')
+                                                            : t('packageReview.summary.credits.usageText_plural', { count: creditInfo.creditsNeeded })}
                                                     </p>
                                                     <p className="text-xs text-gray-600 dark:text-gray-400">
                                                         {creditInfo.uniqueSignerCount === 0
-                                                            ? 'No signers assigned yet'
+                                                            ? t('packageReview.summary.credits.signerCountText')
                                                             : creditInfo.uniqueSignerCount === 1
-                                                            ? '1 unique signer detected'
-                                                            : `${creditInfo.uniqueSignerCount} unique signers detected`}
+                                                            ? t('packageReview.summary.credits.signerCountText_plural', { count: creditInfo.uniqueSignerCount })
+                                                            : t('packageReview.summary.credits.signerCountText_plural_plural', { count: creditInfo.uniqueSignerCount })}
                                                     </p>
                                                     <div className="mt-2 pt-2 border-t border-gray-200 dark:border-gray-700">
                                                         <p className="text-xs text-gray-500 dark:text-gray-400">
-                                                            💡 <span className="font-medium">Tip:</span> Each document credit covers up to 2 unique signers.
+                                                            💡 <span className="font-medium">{t('packageReview.summary.credits.tip_strong')}</span> {t('packageReview.summary.credits.tip_text')}
                                                             {creditInfo.uniqueSignerCount > 2 && (
                                                                 <span>
                                                                     {' '}
-                                                                    You have {creditInfo.uniqueSignerCount} signers, requiring {creditInfo.creditsNeeded} credits.
+                                                                    {t('packageReview.summary.credits.tip_extra', {
+                                                                        signers: creditInfo.uniqueSignerCount,
+                                                                        credits: creditInfo.creditsNeeded,
+                                                                    })}
                                                                 </span>
                                                             )}
                                                         </p>
@@ -708,7 +660,7 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
 
                                     {/* Assignment Progress */}
                                     <div>
-                                        <h4 className="font-semibold mb-2">Assignment Progress</h4>
+                                        <h4 className="font-semibold mb-2">{t('packageReview.summary.progress.title')}</h4>
                                         <div className="w-full bg-gray-200 rounded-full h-2.5">
                                             <div
                                                 className={`h-2.5 rounded-full transition-all duration-500 ${
@@ -717,11 +669,15 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
                                                 style={{ width: `${stats.completionRate}%` }}
                                             ></div>
                                         </div>
-                                        <p className="text-xs text-right mt-1">{stats.completionRate}% Complete</p>
+                                        <p className="text-xs text-right mt-1">{t('packageReview.summary.progress.completeText', { rate: stats.completionRate })}</p>
                                         {stats.unassignedRequiredFields.length > 0 && (
                                             <div className="mt-3 bg-red-50 border-l-4 border-red-500 text-red-700 p-3 rounded-r-lg">
-                                                <p className="font-bold text-sm">Action Required</p>
-                                                <p className="text-xs">There are {stats.unassignedRequiredFields.length} unassigned required fields.</p>
+                                                <p className="font-bold text-sm">{t('packageReview.summary.progress.actionRequired')}</p>
+                                                <p className="text-xs">
+                                                    {stats.unassignedRequiredFields.length === 1
+                                                        ? t('packageReview.summary.progress.unassignedFields')
+                                                        : t('packageReview.summary.progress.unassignedFields_plural', { count: stats.unassignedRequiredFields.length })}
+                                                </p>
                                             </div>
                                         )}
                                     </div>
@@ -731,7 +687,7 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
                             {activeTab === 'recipients' && (
                                 <div className="space-y-6 animate-fadeIn">
                                     <div>
-                                        <h4 className="font-semibold mb-2">Assigned Participants</h4>
+                                        <h4 className="font-semibold mb-2">{t('packageReview.recipients.assigned.title')}</h4>
                                         <div className="space-y-2 p-3 dark:bg-gray-900 bg-white border rounded-lg max-h-60 overflow-y-auto">
                                             {currentPackage.fields.flatMap((f) => f.assignedUsers || []).length > 0 ? (
                                                 currentPackage.fields
@@ -743,17 +699,17 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
                                                         </div>
                                                     ))
                                             ) : (
-                                                <div className="text-center text-smpy-6">
+                                                <div className="text-center text-sm py-6">
                                                     <FiUsersTyped className="mx-auto text-3xl mb-2" />
-                                                    No users have been assigned to fields.
+                                                    {t('packageReview.recipients.assigned.empty')}
                                                 </div>
                                             )}
                                         </div>
                                     </div>
                                     <div>
-                                        <h4 className="font-semibold mb-2">Notification-Only Receivers</h4>
+                                        <h4 className="font-semibold mb-2">{t('packageReview.recipients.notificationOnly.title')}</h4>
                                         <div className="space-y-3 p-4 dark:bg-gray-900 bg-white border rounded-lg">
-                                            <p className="text-xs">Add contacts who will receive package notifications but are not required to sign.</p>
+                                            <p className="text-xs">{t('packageReview.recipients.notificationOnly.description')}</p>
                                             <SearchableContactDropdown
                                                 contacts={contacts}
                                                 selectedContact={selectedReceiver}
@@ -765,7 +721,7 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
                                                 disabled={!selectedReceiver}
                                                 className="w-full px-3 py-2 dark:bg-gray-900 bg-green-600 hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-sm rounded-lg font-medium transition-colors duration-200"
                                             >
-                                                Add Receiver
+                                                {t('packageReview.recipients.notificationOnly.addButton')}
                                             </button>
                                             <div className="mt-4 space-y-2 max-h-32 overflow-y-auto">
                                                 {currentPackage.receivers.map((rec) => (
@@ -786,9 +742,9 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
                                 <div className="space-y-6 animate-fadeIn">
                                     <div className="p-4 dark:bg-gray-900 bg-white border rounded-lg">
                                         <label className="font-semibold flex items-center gap-2 mb-2">
-                                            <FiClockTyped /> Package Expiration
+                                            <FiClockTyped /> {t('packageReview.settings.expiration.title')}
                                         </label>
-                                        <p className="text-xs mb-3">Set a date and time when this package will no longer be accessible.</p>
+                                        <p className="text-xs mb-3">{t('packageReview.settings.expiration.description')}</p>
                                         <div className="flex items-center gap-2">
                                             <input
                                                 type="datetime-local"
@@ -801,18 +757,16 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
                                                 onClick={handleConfirmDate}
                                                 className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg font-medium transition-colors duration-200"
                                             >
-                                                OK
+                                                {t('packageReview.settings.expiration.okButton')}
                                             </button>
                                         </div>
                                     </div>
                                     <div className="p-4 dark:bg-gray-900 bg-white border rounded-lg space-y-3">
                                         <label className="font-semibold flex items-center gap-2">
-                                            <FiBellTyped /> Expiration Reminders
+                                            <FiBellTyped /> {t('packageReview.settings.reminders.title')}
                                         </label>
                                         {!currentPackage.options.expiresAt && (
-                                            <p className="text-xs text-amber-700 p-2 bg-amber-50 dark:bg-gray-800 rounded-md">
-                                                Please set a package expiration date first to enable expiration reminders.
-                                            </p>
+                                            <p className="text-xs text-amber-700 p-2 bg-amber-50 dark:bg-gray-800 rounded-md">{t('packageReview.settings.reminders.setExpirationNote')}</p>
                                         )}
                                         <label className={`flex items-center dark:bg-gray-900 text-sm gap-3 p-2 rounded-md hover:bg-gray-50 ${!currentPackage.options.expiresAt ? 'opacity-40' : ''}`}>
                                             <input
@@ -822,7 +776,7 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
                                                 onChange={(e) => handleOptionsChange({ sendExpirationReminders: e.target.checked })}
                                                 disabled={!currentPackage.options.expiresAt}
                                             />
-                                            Send Expiration Reminders
+                                            {t('packageReview.settings.reminders.enableCheckbox')}
                                         </label>
                                         <div
                                             className={`space-y-4 pl-8 border-l-2 ml-2 transition-opacity ${
@@ -830,14 +784,14 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
                                             }`}
                                         >
                                             <div>
-                                                <label className="text-xs font-medium block mb-1">Reminder Timing</label>
+                                                <label className="text-xs font-medium block mb-1">{t('packageReview.settings.reminders.timing.label')}</label>
                                                 <select
                                                     className="w-full dark:bg-gray-900 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100"
                                                     value={currentPackage.options.reminderPeriod || ''}
                                                     onChange={(e) => handleOptionsChange({ reminderPeriod: e.target.value || null })}
                                                     disabled={!currentPackage.options.sendExpirationReminders || !currentPackage.options.expiresAt || availableReminderOptions.length === 0}
                                                 >
-                                                    <option value="">Select reminder timing</option>
+                                                    <option value="">{t('packageReview.settings.reminders.timing.placeholder')}</option>
                                                     {availableReminderOptions.map((option) => (
                                                         <option key={option.value} value={option.value}>
                                                             {option.label}
@@ -846,7 +800,7 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
                                                 </select>
                                                 {currentPackage?.options.sendExpirationReminders && availableReminderOptions.length === 0 && currentPackage?.options.expiresAt && (
                                                     <p className="text-xs text-amber-700 mt-2 p-2 dark:bg-gray-900 bg-amber-50 rounded-md">
-                                                        The expiration date is too soon for any reminder options. Please set a later date to enable reminders.
+                                                        {t('packageReview.settings.reminders.timing.tooSoonNote')}
                                                     </p>
                                                 )}
                                             </div>
@@ -854,12 +808,10 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
                                     </div>
                                     <div className="p-4 dark:bg-gray-900 bg-white border rounded-lg space-y-3">
                                         <label className="font-semibold flex items-center gap-2">
-                                            <FiRepeatTyped /> Automatic Reminders
+                                            <FiRepeatTyped /> {t('packageReview.settings.autoReminders.title')}
                                         </label>
                                         {!currentPackage.options.expiresAt && (
-                                            <p className="text-xs text-amber-700 p-2 bg-amber-50 dark:bg-gray-800 rounded-md">
-                                                Please set a package expiration date first to enable automatic reminders.
-                                            </p>
+                                            <p className="text-xs text-amber-700 p-2 bg-amber-50 dark:bg-gray-800 rounded-md">{t('packageReview.settings.autoReminders.setExpirationNote')}</p>
                                         )}
                                         <label className={`flex items-center dark:bg-gray-900 text-sm gap-3 p-2 rounded-md hover:bg-gray-50 ${!currentPackage.options.expiresAt ? 'opacity-40' : ''}`}>
                                             <input
@@ -869,7 +821,7 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
                                                 onChange={(e) => handleOptionsChange({ sendAutomaticReminders: e.target.checked })}
                                                 disabled={!currentPackage.options.expiresAt}
                                             />
-                                            Enable Automatic Reminders
+                                            {t('packageReview.settings.autoReminders.enableCheckbox')}
                                         </label>
                                         <div
                                             className={`space-y-4 pl-8 border-l-2 ml-2 transition-opacity ${
@@ -879,7 +831,7 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
                                             }`}
                                         >
                                             <div>
-                                                <label className="text-xs font-medium block mb-1">First reminder</label>
+                                                <label className="text-xs font-medium block mb-1">{t('packageReview.settings.autoReminders.first.label')}</label>
                                                 <div className="flex items-center gap-2 text-sm">
                                                     <input
                                                         type="number"
@@ -896,18 +848,18 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
                                                         }}
                                                         disabled={!currentPackage.options.sendAutomaticReminders || !currentPackage.options.expiresAt || maxFirstReminderDays < 1}
                                                     />
-                                                    days before expiration
+                                                    {t('packageReview.settings.autoReminders.first.suffix')}
                                                 </div>
                                             </div>
                                             <div>
-                                                <label className="text-xs font-medium block mb-1">Follow-up reminders</label>
+                                                <label className="text-xs font-medium block mb-1">{t('packageReview.settings.autoReminders.repeat.label')}</label>
                                                 <div className="flex items-center gap-2 text-sm">
-                                                    Repeat every
+                                                    {t('packageReview.settings.autoReminders.repeat.prefix')}
                                                     <input
                                                         type="number"
                                                         min="1"
                                                         max={maxRepeatReminderDays}
-                                                        className="w-20 px-2 py-1  dark:bg-gray-900 border border-gray-300 rounded text-sm disabled:bg-gray-100"
+                                                        className="w-20 px-2 py-1 dark:bg-gray-900 border border-gray-300 rounded text-sm disabled:bg-gray-100"
                                                         value={currentPackage.options.repeatReminderDays || ''}
                                                         onChange={(e) => {
                                                             let value = parseInt(e.target.value);
@@ -918,20 +870,18 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
                                                         }}
                                                         disabled={!currentPackage.options.sendAutomaticReminders || !currentPackage.options.expiresAt || maxFirstReminderDays < 1}
                                                     />
-                                                    days
+                                                    {t('packageReview.settings.autoReminders.repeat.suffix')}
                                                 </div>
                                             </div>
                                         </div>
                                         {currentPackage.options.sendAutomaticReminders && maxFirstReminderDays < 1 && currentPackage.options.expiresAt && (
                                             <div className="pl-8 ml-2">
-                                                <p className="text-xs text-amber-700 dark:bg-gray-900 mt-2 p-2 bg-amber-50 rounded-md">
-                                                    The expiration date must be set to more than one day in the future to enable automatic reminders.
-                                                </p>
+                                                <p className="text-xs text-amber-700 dark:bg-gray-900 mt-2 p-2 bg-amber-50 rounded-md">{t('packageReview.settings.autoReminders.tooSoonNote')}</p>
                                             </div>
                                         )}
                                     </div>
                                     <div className="p-4 dark:bg-gray-900 bg-white border rounded-lg space-y-3">
-                                        <label className="font-semibold ">Permissions</label>
+                                        <label className="font-semibold">{t('packageReview.settings.permissions.title')}</label>
                                         <label className="flex items-center text-sm gap-3 p-2 rounded-md dark:bg-gray-900 hover:bg-gray-50">
                                             <input
                                                 type="checkbox"
@@ -939,16 +889,16 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
                                                 checked={currentPackage.options.allowDownloadUnsigned}
                                                 onChange={(e) => handleOptionsChange({ allowDownloadUnsigned: e.target.checked })}
                                             />
-                                            Allow download before signing is complete
+                                            {t('packageReview.settings.permissions.allowDownload')}
                                         </label>
-                                        <label className="flex items-center text-sm gap-3 p-2  dark:bg-gray-900 rounded-md hover:bg-gray-50">
+                                        <label className="flex items-center text-sm gap-3 p-2 dark:bg-gray-900 rounded-md hover:bg-gray-50">
                                             <input
                                                 type="checkbox"
                                                 className="mr-2 rounded"
                                                 checked={currentPackage.options.allowReassign}
                                                 onChange={(e) => handleOptionsChange({ allowReassign: e.target.checked })}
                                             />
-                                            Allow participants to reassign their role
+                                            {t('packageReview.settings.permissions.allowReassign')}
                                         </label>
                                     </div>
                                 </div>
@@ -962,10 +912,9 @@ const Step3_PackageReview: React.FC<StepProps> = ({ onPrevious }) => {
                 isOpen={isAddContactModalOpen}
                 onClose={() => setAddContactModalOpen(false)}
                 onSaveSuccess={(newContact) => {
-                    // When a new contact is saved, automatically select it as the receiver
                     setSelectedReceiver(newContact);
-                    setAddContactModalOpen(false); // Close the modal
-                    toast.success(`${newContact.firstName} created and selected as a receiver.`);
+                    setAddContactModalOpen(false);
+                    toast.success(t('packageReview.messages.contactCreated', { name: `${newContact.firstName} ${newContact.lastName}` }) as string);
                 }}
             />
         </>
