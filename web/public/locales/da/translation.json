@@ -1,128 +1,2848 @@
 {
-    "dashboard": "Dashboard",
-    "sales": "Salg",
-    "analytics": "Analytics",
-    "apps": "Apps",
-    "components": "Komponenter",
-    "elements": "Elementer",
-    "font_icons": "Skrifttype ikoner",
-    "widgets": "Widgets",
-    "tables": "Tabeller",
-    "datatables": "Datatabeller",
-    "forms": "Former",
-    "users": "Brugere",
-    "pages": "sider",
-    "authentication": "Godkendelse",
-    "drag_and_drop": "Træk og slip",
-    "maps": "Kort",
-    "charts": "Diagrammer",
-    "starter_kit": "Startsæt",
-    "documentation": "Dokumentation",
-    "ui_kit": "UI Kit",
-    "more": "Mere",
-    "finance": "Finansiere",
-    "crypto": "Krypto",
-    "chat": "Snak",
-    "mailbox": "Postkasse",
-    "todo_list": "Todo liste",
-    "notes": "Noter",
-    "scrumboard": "Scrumboard",
-    "contacts": "Kontaktpersoner",
-    "invoice": "Faktura",
-    "list": "Liste",
-    "preview": "Forhåndsvisning",
-    "add": "Tilføje",
-    "edit": "Redigere",
-    "calendar": "Kalender",
-    "tabs": "Faner",
-    "accordions": "Harmonikaer",
-    "modals": "Modaler",
-    "cards": "Kort",
-    "carousel": "Karrusel",
-    "countdown": "Nedtælling",
-    "counter": "Tæller",
-    "sweet_alerts": "Søde advarsler",
-    "timeline": "Tidslinje",
-    "notifications": "Meddelelser",
-    "media_object": "Medieobjekt",
-    "list_group": "Listegruppe",
-    "pricing_tables": "Pristabeller",
-    "lightbox": "Lyskasse",
-    "alerts": "Advarsler",
-    "avatar": "Avatar",
-    "badges": "Badges",
-    "breadcrumbs": "Brødkrummer",
-    "buttons": "Knapper",
-    "button_groups": "Knapgrupper",
-    "color_library": "Farvebibliotek",
-    "dropdown": "Drop ned",
-    "infobox": "Infoboks",
-    "jumbotron": "Jumbotron",
-    "loader": "Loader",
-    "pagination": "Sideinddeling",
-    "popovers": "Popovers",
-    "progress_bar": "Fremskridtslinje",
-    "search": "Søg",
-    "tooltips": "Værktøjstip",
-    "treeview": "Trævisning",
-    "typography": "Typografi",
-    "basic": "Grundlæggende",
-    "order_sorting": "Ordre sortering",
-    "multi_column": "Multisøjle",
-    "multiple_tables": "Flere borde",
-    "alt_pagination": "Alt. Sideinddeling",
-    "range_search": "Rækkeviddesøgning",
-    "export": "Eksport",
-    "input_group": "Inputgruppe",
-    "layouts": "Layouts",
-    "validation": "Validering",
-    "input_mask": "Indgangsmaske",
-    "select2": "Vælg 2",
-    "touchspin": "Tryk på spin",
-    "checkbox_and_radio": "Afkrydsningsfelt og radio",
-    "switches": "Afbrydere",
-    "wizards": "Troldmænd",
-    "file_upload": "Fil upload",
-    "quill_editor": "Quill Editor",
-    "markdown_editor": "Markdown Editor",
-    "date_and_range_picker": "Dato- og områdevælger",
-    "clipboard": "Udklipsholder",
-    "user_and_pages": "Brugere og sider",
-    "profile": "Profil",
-    "account_settings": "Bruger indstillinger",
-    "knowledge_base": "Vidensbase",
-    "contact_form": "Kontaktformular",
-    "faq": "Faq",
-    "coming_soon": "Kommer snart",
-    "error": "Fejl",
-    "maintenence": "Vedligeholdelse",
-    "login_boxed": "Login Boxed",
-    "register_boxed": "Registrer Boxed",
-    "unlock_boxed": "Lås Boxed op",
-    "recover_id_boxed": "Gendan ID Boxed",
-    "login_cover": "Log ind cover",
-    "register_cover": "Register Cover",
-    "unlock_cover": "Lås låget op",
-    "recover_id_cover": "Gendan ID-dækning",
-    "supports": "Bakker op",
-    "login": "Log på",
-    "lockscreen": "Låse skærm",
-    "password_recovery": "Gendan adgangskode",
-    "register": "Tilmeld",
-    "404": "404",
-    "500": "500",
-    "503": "503",
-    "user_interface": "Brugergrænseflade",
-    "tables_and_forms": "Tabeller og formularer",
-    "columns_filter": "Kolonnefilter",
-    "column_chooser": "Kolonnevælger",
-    "advanced": "Fremskreden",
-    "checkbox": "Afkrydsningsfelt",
-    "skin": "Hud",
-    "sticky_header": "Sticky Header",
-    "clone_header": "Klon header",
-    "coming_soon_boxed": "Kommer snart i boks",
-    "coming_soon_cover": "Kommer snart cover",
-    "contact_us_boxed": "Kontakt os Boxed",
-    "contact_us_cover": "Kontakt os Cover"
+    "navbar": {
+        "home": "Hjem",
+        "pricing": "Priser",
+        "about": "Om Os",
+        "faq": "OSS",
+        "eidas": "eIDAS",
+        "termsAndPrivacy": "Vilkår & Privatliv",
+        "signIn": "Log Ind",
+        "dashboard": "Dashboard",
+        "logout": "Log Ud",
+        "loginRegister": "Log Ind / Registrer",
+        "goToDashboard": "Gå til Dashboard"
+    },
+    "authModal": {
+        "title": "Tilmeld Dig",
+        "description": "Vælg en mulighed for at fortsætte og administrere dine dokumenter.",
+        "loginButton": "Log Ind på Din Konto",
+        "registerButton": "Opret en Ny Konto"
+    },
+    "hero": {
+        "headline": {
+            "signDocuments": "Underskriv Dokumenter",
+            "secureContracts": "Sikre Kontrakter",
+            "digitalAgreements": "Digitale Aftaler",
+            "eSignatures": "E-Underskrifter",
+            "suffix": "Digitalt"
+        },
+        "subheadline": "Den mest sikre og brugervenlige platform for elektroniske underskrifter til virksomheder i alle størrelser.",
+        "features": {
+            "encryption": "Kryptering",
+            "encryptionValue": "256-bit",
+            "uptime": "Oppetid",
+            "uptimeValue": "99,9%",
+            "binding": "Bindende",
+            "bindingValue": "Juridisk"
+        },
+        "cta": {
+            "startTrial": "Start Gratis Prøveperiode",
+            "watchDemo": "Se Demo"
+        },
+        "documents": {
+            "contractAgreement": "Kontraktaftale",
+            "invoiceDocument": "Fakturadokument",
+            "legalAgreement": "Juridisk Aftale",
+            "businessProposal": "Forretningsforslag",
+            "termsConditions": "Vilkår & Betingelser",
+            "signatureRequired": "Underskrift Påkrævet:",
+            "clickToSign": "Klik for at Underskrive",
+            "readyForSignature": "Klar til underskrift"
+        }
+    },
+    "features": {
+        "tag": "Kraftfulde Funktioner",
+        "title": {
+            "main": "Alt Hvad Du Har Brug For Til",
+            "highlight": "Digitale Underskrifter"
+        },
+        "description": "Vores omfattende platform leverer alle de værktøjer og sikkerhedsfunktioner, du har brug for, til at strømline din dokumentunderskriftsproces.",
+        "list": {
+            "legallyBinding": {
+                "title": "Juridisk Bindende",
+                "description": "Alle underskrifter er juridisk gyldige og i overensstemmelse med internationale e-signaturlove, herunder eIDAS og UETA."
+            },
+            "bankSecurity": {
+                "title": "Sikkerhed På Bankniveau",
+                "description": "Avanceret 256-bit SSL-kryptering, multi-faktor-autentificering og sikker cloud-lagring beskytter dine dokumenter."
+            },
+            "lightningFast": {
+                "title": "Lynhurtigt",
+                "description": "Gennemfør dokumentunderskrifter på under 60 sekunder. Ingen downloads, ingen udskrivning, ingen forsinkelser."
+            },
+            "mobileOptimized": {
+                "title": "Mobiloptimeret",
+                "description": "Underskriv dokumenter problemfrit på enhver enhed - desktop, tablet eller smartphone med vores responsive design."
+            },
+            "multiPartySigning": {
+                "title": "Underskrift af Flere Parter",
+                "description": "Indsaml underskrifter fra flere parter med automatiserede påmindelser og statussporing i realtid."
+            },
+            "auditTrail": {
+                "title": "Detaljeret Revisionsspor",
+                "description": "Komplet revisionsspor med tidsstempler, IP-adresser og færdiggørelsescertifikat for fuld gennemsigtighed."
+            }
+        },
+        "benefits": {
+            "title": "Betroet af Tusindvis",
+            "description": "Slut dig til virksomheder verden over, der har strømlinet deres dokumentprocesser med vores platform.",
+            "faster": {
+                "label": "Hurtigere end papir",
+                "description": "Gennemfør arbejdsgange på minutter, ikke dage"
+            },
+            "uptime": {
+                "label": "Oppetidsgaranti",
+                "description": "Altid tilgængelig, når du har brug for det"
+            },
+            "encryption": {
+                "label": "SSL-kryptering",
+                "description": "Sikkerhed i virksomhedsklasse"
+            },
+            "support": {
+                "label": "Ekspertsupport",
+                "description": "Hjælp når som helst du har brug for det"
+            }
+        },
+        "cta": {
+            "startTrial": "Start Gratis Prøveperiode",
+            "learnMore": "Lær Mere"
+        }
+    },
+    "about": {
+        "tag": "✨ Om I-Sign.eu",
+        "title": {
+            "main": "Genopfindelse af Tillid i den",
+            "highlight": "Digitale Æra"
+        },
+        "subtitle": {
+            "prefix": "At underskrive et dokument skal være",
+            "connector": "og"
+        },
+        "keywords": {
+            "effortless": "ubesværet",
+            "secure": "sikkert",
+            "sustainable": "bæredygtigt"
+        },
+        "quote": "Hver digital underskrift er et skridt mod en renere, hurtigere og mere forbundet verden.",
+        "mission": {
+            "title": "Vores Mission",
+            "description": "Gøre digital tillid tilgængelig for alle, hvilket muliggør sikre, effektive og bæredygtige forretningsgange."
+        },
+        "vision": {
+            "title": "Vores Vision",
+            "description": "En verden uden papir, hvor aftaler flyder lige så let som idéer, drevet af bæredygtig innovation."
+        },
+        "sustainability": {
+            "title": {
+                "main": "Forpligtet til en",
+                "highlight": "CO2-Neutral Fremtid"
+            },
+            "description": "Hvert underskrevet dokument bidrager til et bæredygtigt økosystem",
+            "features": {
+                "co2": {
+                    "title": "CO₂-Reduktion",
+                    "description": "Reducerer papirspild"
+                },
+                "greenOps": {
+                    "title": "Grøn Drift",
+                    "description": "Vedvarende energidata-centre"
+                },
+                "reforestation": {
+                    "title": "Genplantning af Skov",
+                    "description": "Global træplantning"
+                },
+                "innovation": {
+                    "title": "Bæredygtig Innovation",
+                    "description": "Teknologi for miljøet"
+                }
+            }
+        },
+        "whyChooseUs": {
+            "title": "Hvorfor Vælge I-Sign.eu",
+            "description": "Oplev problemfri underskrift uden begrænsninger",
+            "features": {
+                "secure": {
+                    "title": "Sikker fra Design",
+                    "description": "eIDAS, GDPR og ISO 27001-kompatibel"
+                },
+                "fast": {
+                    "title": "Hurtigt & Simpelt",
+                    "description": "Underskriv på sekunder uden downloads"
+                },
+                "integrated": {
+                    "title": "Integrerede Arbejdsgange",
+                    "description": "Forbind med 500+ forretningsværktøjer"
+                },
+                "automation": {
+                    "title": "Smart Automatisering",
+                    "description": "Automatiserede påmindelser og revisionsspor"
+                }
+            }
+        },
+        "cta": {
+            "title": {
+                "main": "Deltag i den",
+                "highlight": "Digitale Tillidsrevolution"
+            },
+            "description": "Vær en del af den bæredygtige fremtid",
+            "button": "Tilmeld Dig Nu"
+        }
+    },
+    "pricing": {
+        "tag": "Enkle & Gennemsigtige Priser",
+        "title": {
+            "main": "Vælg Din Perfekte",
+            "highlight": "Underskriftsoplevelse"
+        },
+        "description": "Start gratis og skaler med tillid. Hver plan inkluderer sikkerhed i virksomhedsklasse, dedikeret support og vores brancheførende oppetidsgaranti.",
+        "billing": {
+            "monthly": "Månedlig Fakturering",
+            "yearly": "Årlig Fakturering",
+            "save": "Spar 20%"
+        },
+        "plans": {
+            "popularBadge": "⭐ Mest Populære Valg",
+            "perMonth": "/md",
+            "billedYearly": "Faktureres som €{{price}} om året",
+            "starter": {
+                "description": "Perfekt til enkeltpersoner og små teams, der er ved at starte."
+            },
+            "pro": {
+                "description": "Bedste værdi for voksende virksomheder og professionelle teams."
+            },
+            "enterprise": {
+                "description": "Komplet løsning til store organisationer med tilpassede behov."
+            }
+        },
+        "buttons": {
+            "contactSales": "Kontakt Salg",
+            "startFree": "Start Gratis I Dag",
+            "startTrial": "Start 14-dages Gratis Prøveperiode"
+        },
+        "footerNotice": "🔒 Ingen oprettelsesgebyrer • Annuller når som helst • 30-dages garanti",
+        "enterpriseCta": {
+            "title": "Brug for en Skræddersyet Virksomhedsløsning?",
+            "description": "Få personlig prissætning og dedikeret support til din organisations unikke krav.",
+            "button": "Planlæg et Demoopkald"
+        }
+    },
+    "faq": {
+        "title": {
+            "main": "Ofte Stillede",
+            "highlight": "Spørgsmål"
+        },
+        "description": "Find svar på almindelige spørgsmål om vores i-signaturplatform og tjenester.",
+        "buttons": {
+            "showMore": "Vis Mere",
+            "showLess": "Vis Mindre",
+            "learnMore": "Lær om Underskrifter"
+        },
+        "visual": {
+            "uptimeLabel": "Oppetid",
+            "bindingValue": "Juridisk",
+            "bindingLabel": "Bindende",
+            "features": {
+                "security": "Sikkerhed på Bankniveau",
+                "tracking": "Sporing i Real-tid",
+                "api": "API-Integration",
+                "storage": "Ubegrænset Lagring"
+            },
+            "cta": "Start Gratis Prøveperiode"
+        },
+        "questions": {
+            "q1": {
+                "question": "Hvad er i-underskriftsværktøjet?",
+                "answer": "Vores i-underskriftsværktøj er en sikker digital løsning, der giver dig mulighed for at underskrive, sende og administrere dokumenter online, hvilket eliminerer behovet for udskrivning, scanning eller forsendelse."
+            },
+            "q2": {
+                "question": "Hvem kan bruge i-underskriftsværktøjet?",
+                "answer": "Det er designet til virksomheder i alle størrelser, freelancere og enkeltpersoner, der har brug for juridisk at underskrive eller anmode om underskrifter på dokumenter."
+            },
+            "q3": {
+                "question": "Skal underskrivere have en konto for at underskrive dokumenter?",
+                "answer": "Nej. Modtagere kan underskrive dokumenter uden at oprette en konto. De modtager blot et sikkert link til at gennemgå og underskrive."
+            },
+            "q4": {
+                "question": "Er i-underskriftsværktøjet juridisk bindende?",
+                "answer": "Ja. Vores løsning overholder de vigtigste i-signaturregler, herunder eIDAS (EU), eSIGN Act (USA) og UETA, hvilket gør underskrevne dokumenter juridisk gyldige og håndhævelige."
+            },
+            "q5": {
+                "question": "Hvor sikre er mine dokumenter?",
+                "answer": "Alle dokumenter krypteres under overførsel og lagring. Vi bruger SSL/TLS-kryptering og industristandard sikkerhedsforanstaltninger til at beskytte dine data."
+            },
+            "q6": {
+                "question": "Kan jeg spore, hvem der underskrev mit dokument og hvornår?",
+                "answer": "Ja. Hvert dokument leveres med et detaljeret revisionsspor, der viser, hvornår det blev åbnet, vist og underskrevet."
+            },
+            "q7": {
+                "question": "Er værktøjet GDPR-kompatibelt?",
+                "answer": "Absolut. Vi følger GDPR-retningslinjer for databeskyttelse, lagring og samtykkehåndtering."
+            },
+            "q8": {
+                "question": "Er i-underskrifter accepteret verden over?",
+                "answer": "E-underskrifter er juridisk anerkendt i de fleste lande. Nogle specifikke dokumenter (som testamenter, skøder eller retsdokumenter) kan dog stadig kræve underskrifter med vådt blæk."
+            },
+            "q9": {
+                "question": "Kan jeg tilpasse min underskriftstype?",
+                "answer": "Ja. Du kan tegne din underskrift, uploade et billede eller vælge mellem foruddefinerede stilarter."
+            },
+            "q10": {
+                "question": "Hvilke filtyper understøttes?",
+                "answer": "Vi understøtter PDF, Word, Excel og de fleste almindelige dokumentformater."
+            },
+            "q11": {
+                "question": "Kan jeg underskrive på mobile enheder?",
+                "answer": "Ja. Vores værktøj er fuldt responsivt og fungerer på smartphones, tablets og desktops."
+            },
+            "q12": {
+                "question": "Kan jeg anmode om flere underskrifter på ét dokument?",
+                "answer": "Ja. Du kan tildele underskriftsroller, indstille underskriftsrækkefølge og indsamle flere underskrifter."
+            },
+            "q13": {
+                "question": "Kan jeg indstille påmindelser for ikke-underskrevne dokumenter?",
+                "answer": "Ja. Automatiske påmindelser kan sendes til modtagere, indtil de underskriver."
+            },
+            "q14": {
+                "question": "Kan jeg forhindre dokumentændringer efter underskrift?",
+                "answer": "Ja. Når dokumentet er underskrevet, er det låst for at forhindre yderligere ændringer."
+            },
+            "q15": {
+                "question": "Er der en gratis prøveperiode?",
+                "answer": "Ja. Vi tilbyder en gratis prøveperiode med begrænsede funktioner, så du kan teste værktøjet, før du opgraderer."
+            },
+            "q16": {
+                "question": "Tilbyder I team- eller virksomhedsplaner?",
+                "answer": "Ja. Vi har fleksible planer for enkeltpersoner, teams og store organisationer med yderligere funktioner som masseafsendelse, branding og integrationer."
+            },
+            "q17": {
+                "question": "Hvilke betalingsmetoder accepterer I?",
+                "answer": "Vi accepterer store kredit-/betalingskort, PayPal og fakturabaserede betalinger for virksomhedskunder."
+            }
+        },
+        "disclaimer": {
+            "title": "Ansvarsfraskrivelse:",
+            "text": "Ovenstående indhold er kun til generel informationsformål og er ikke beregnet som juridisk rådgivning. For vejledning i din specifikke situation bedes du kontakte en kvalificeret juridisk professionel."
+        },
+        "lastUpdated": "Sidst opdateret: {{date}}"
+    },
+    "testimonials": {
+        "loading": "Indlæser udtalelser...",
+        "error": {
+            "title": "Ingen udtalelser tilgængelige",
+            "description": "Kom tilbage snart for kundeanmeldelser og feedback."
+        },
+        "header": {
+            "tag": "Kundeanmeldelser",
+            "title": {
+                "main": "Elsket af",
+                "highlight": "Tusindvis",
+                "suffix": "af fagfolk verden over"
+            },
+            "description": "Slut dig til det voksende fællesskab af virksomheder, der stoler på vores platform til deres digitale underskriftsbehov"
+        },
+        "stats": {
+            "customers": "Glade Kunder",
+            "documents": "Underskrevne Dokumenter",
+            "uptime": "Oppetidsgaranti",
+            "support": "Ekspertsupport"
+        },
+        "cta": {
+            "title": "Klar til at slutte dig til vores tilfredse kunder?",
+            "description": "Start din gratis prøveperiode i dag og oplev, hvorfor tusindvis af fagfolk vælger vores platform",
+            "button": "Start Gratis Prøveperiode"
+        }
+    },
+    "footer": {
+        "description": "Den mest sikre og brugervenlige platform for elektroniske underskrifter til virksomheder i alle størrelser. Underskriv dokumenter digitalt med tillid.",
+        "certification": "SOC 2 Type II Certificeret",
+        "quickLinks": {
+            "title": "Hurtige Links",
+            "home": "Hjem",
+            "about": "Om Os",
+            "pricing": "Priser",
+            "faq": "OSS"
+        },
+        "legal": {
+            "title": "Juridisk & Support",
+            "privacy": "Fortrolighedspolitik",
+            "terms": "Servicevilkår",
+            "security": "Sikkerhed",
+            "help": "Hjælpecenter",
+            "contact": "Kontakt Support"
+        },
+        "copyright": "© {{year}} I-Sign. Alle rettigheder forbeholdes."
+    },
+    "login": {
+        "meta": {
+            "title": "Log Ind"
+        },
+        "branding": {
+            "welcome": "Velkommen til",
+            "description": "Den mest sikre og brugervenlige platform for elektroniske underskrifter til virksomheder i alle størrelser.",
+            "features": {
+                "encryption": {
+                    "title": "256-bit Kryptering",
+                    "description": "Sikkerhed på bankniveau"
+                },
+                "uptime": {
+                    "title": "99,9% Oppetid",
+                    "description": "Altid tilgængelig"
+                },
+                "binding": {
+                    "title": "Juridisk Bindende",
+                    "description": "Overholdende underskrifter"
+                }
+            }
+        },
+        "form": {
+            "header": {
+                "title": "Log Ind",
+                "description": "Velkommen tilbage! Indtast venligst dine oplysninger."
+            },
+            "email": {
+                "label": "E-mailadresse",
+                "placeholder": "Indtast din e-mail"
+            },
+            "password": {
+                "label": "Adgangskode",
+                "placeholder": "Indtast din adgangskode"
+            },
+            "rememberMe": "Husk mig",
+            "forgotPassword": "Glemt din adgangskode?",
+            "button": {
+                "default": "Log Ind",
+                "loading": "Logger Ind..."
+            },
+            "divider": "eller",
+            "signup": {
+                "prompt": "Har du ikke en konto?",
+                "link": "Tilmeld Dig"
+            }
+        },
+        "footer": {
+            "copyright": "© {{year}} i-sign.eu. Alle Rettigheder Forbeholdes."
+        },
+        "messages": {
+            "success": "Login lykkedes!",
+            "error": "Login mislykkedes. Kontroller venligst dine legitimationsoplysninger."
+        }
+    },
+    "register": {
+        "meta": {
+            "title": "Registrer"
+        },
+        "messages": {
+            "success": "Registrering lykkedes!",
+            "error": "Registrering mislykkedes. Prøv venligst igen."
+        },
+        "branding": {
+            "welcome": "Velkommen til",
+            "description": "Slut dig til tusindvis af virksomheder, der stoler på vores platform til sikre elektroniske underskrifter.",
+            "features": {
+                "setup": {
+                    "title": "Hurtig Opsætning",
+                    "description": "Kom i gang på få minutter"
+                },
+                "secure": {
+                    "title": "Sikker & Overholdende",
+                    "description": "Industristandard sikkerhed"
+                },
+                "business": {
+                    "title": "Klar til Erhvervslivet",
+                    "description": "Virksomhedsfunktioner inkluderet"
+                }
+            }
+        },
+        "form": {
+            "header": {
+                "title": "Tilmeld Dig",
+                "description": "Opret din konto for at komme i gang."
+            },
+            "firstName": {
+                "label": "Fornavn",
+                "placeholder": "Indtast dit fornavn"
+            },
+            "lastName": {
+                "label": "Efternavn",
+                "placeholder": "Indtast dit efternavn"
+            },
+            "email": {
+                "label": "E-mailadresse",
+                "placeholder": "Indtast din e-mail"
+            },
+            "password": {
+                "label": "Adgangskode",
+                "placeholder": "Opret en adgangskode (min. 6 tegn)"
+            },
+            "button": {
+                "default": "Opret Konto",
+                "loading": "Opretter Konto..."
+            },
+            "signin": {
+                "prompt": "Har du allerede en konto?",
+                "link": "Log Ind"
+            }
+        },
+        "validation": {
+            "firstName": {
+                "min": "Fornavn skal være mindst 2 tegn",
+                "max": "Fornavn må ikke overstige 50 tegn",
+                "matches": "Kun bogstaver, mellemrum, bindestreger og apostroffer er tilladt",
+                "required": "Fornavn er påkrævet"
+            },
+            "lastName": {
+                "min": "Efternavn skal være mindst 2 tegn",
+                "max": "Efternavn må ikke overstige 50 tegn",
+                "matches": "Kun bogstaver, mellemrum, bindestreger og apostroffer er tilladt",
+                "required": "Efternavn er påkrævet"
+            },
+            "email": {
+                "invalid": "Ugyldigt e-mailformat",
+                "max": "E-mail må ikke overstige 100 tegn",
+                "required": "E-mail er påkrævet"
+            },
+            "password": {
+                "min": "Adgangskode skal være mindst 6 tegn",
+                "max": "Adgangskode må ikke overstige 128 tegn",
+                "required": "Adgangskode er påkrævet"
+            }
+        },
+        "footer": {
+            "copyright": "© {{year}} i-sign.eu. Alle Rettigheder Forbeholdes."
+        }
+    },
+    "forgotPassword": {
+        "meta": {
+            "title": "Glemt Adgangskode"
+        },
+        "messages": {
+            "success": "Hvis e-mailen er registreret, er der sendt et nulstillingslink.",
+            "error": "Mislykkedes at sende nulstillingslink. Prøv venligst igen."
+        },
+        "branding": {
+            "welcome": "Velkommen til",
+            "description": "Nulstil din adgangskode sikkert, og kom tilbage til at underskrive dokumenter på få minutter.",
+            "features": {
+                "secure": {
+                    "title": "Sikker Nulstilling",
+                    "description": "Beskyttet gendannelsesproces"
+                },
+                "verification": {
+                    "title": "E-mail Verifikation",
+                    "description": "Øjeblikkelig linklevering"
+                }
+            }
+        },
+        "form": {
+            "header": {
+                "title": "Nulstil Adgangskode",
+                "description": "Indtast din e-mail for at modtage et nulstillingslink."
+            },
+            "email": {
+                "label": "E-mailadresse",
+                "placeholder": "Indtast din e-mail"
+            },
+            "button": {
+                "default": "Send Nulstillingslink",
+                "loading": "Sender Nulstillingslink..."
+            },
+            "backToLogin": "Tilbage til Log Ind"
+        },
+        "footer": {
+            "copyright": "© {{year}} i-sign.eu. Alle Rettigheder Forbeholdes."
+        }
+    },
+    "resetPassword": {
+        "meta": {
+            "title": "Nulstil Adgangskode"
+        },
+        "messages": {
+            "noToken": "Intet nulstillingstoken leveret.",
+            "success": "Adgangskode er nulstillet! Du kan nu logge ind.",
+            "error": "Kunne ikke nulstille adgangskoden. Linket er muligvis udløbet."
+        },
+        "validation": {
+            "passwordMin": "Adgangskode skal være mindst 6 tegn.",
+            "passwordsMismatch": "Adgangskoder stemmer ikke overens."
+        },
+        "status": {
+            "verifying": {
+                "title": "Bekræfter Link",
+                "description": "Vent venligst, mens vi kontrollerer dit link til nulstilling af adgangskode..."
+            },
+            "success": {
+                "title": "Bekræftelse Lykkedes!",
+                "description": "Vent venligst, indlæser formularen..."
+            },
+            "error": {
+                "title": "Ugyldigt eller Udløbet Link",
+                "description": "Linket til nulstilling af adgangskode er ikke gyldigt. Det er muligvis blevet brugt eller er udløbet.",
+                "button": "Tilbage til Log Ind"
+            }
+        },
+        "form": {
+            "header": {
+                "title": "Opret Ny Adgangskode",
+                "description": "Indtast venligst din nye adgangskode nedenfor."
+            },
+            "newPassword": {
+                "label": "Ny Adgangskode",
+                "placeholder": "Indtast ny adgangskode (min. 6 tegn)"
+            },
+            "confirmPassword": {
+                "label": "Bekræft Adgangskode",
+                "placeholder": "Bekræft ny adgangskode"
+            },
+            "button": {
+                "default": "Nulstil Adgangskode",
+                "loading": "Nulstiller Adgangskode..."
+            }
+        },
+        "footer": {
+            "copyright": "© {{year}} i-sign.eu. Alle Rettigheder Forbeholdes."
+        }
+    },
+    "reactivate": {
+        "meta": {
+            "title": "Genaktiverer Konto..."
+        },
+        "messages": {
+            "success": "Konto genaktiveret! Du kan nu logge ind.",
+            "error": "Linket er ugyldigt eller udløbet.",
+            "noToken": "Intet genaktiveringstoken blev fundet. Linket er ufuldstændigt."
+        },
+        "branding": {
+            "welcome": "Velkommen til",
+            "description": "Genaktiver din konto, og fortsæt med at bruge vores sikre platform for elektroniske underskrifter.",
+            "features": {
+                "reactivation": {
+                    "title": "Hurtig Genaktivering",
+                    "description": "Øjeblikkelig gendannelse af konto"
+                },
+                "secure": {
+                    "title": "Sikker Proces",
+                    "description": "Beskyttet bekræftelse"
+                },
+                "preserved": {
+                    "title": "Data Bevaret",
+                    "description": "Alle dine dokumenter er sikre"
+                }
+            }
+        },
+        "status": {
+            "loading": {
+                "title": "Genaktiverer Konto",
+                "description": "Vent venligst, mens vi genaktiverer din konto..."
+            },
+            "success": {
+                "title": "Konto Genaktiveret!",
+                "button": "Fortsæt til Log Ind"
+            },
+            "error": {
+                "title": "Genaktivering Mislykkedes",
+                "button": "Tilbage til Log Ind"
+            }
+        },
+        "footer": {
+            "copyright": "© {{year}} i-sign.eu. Alle Rettigheder Forbeholdes."
+        }
+    },
+    "verifyEmail": {
+        "meta": {
+            "title": "Bekræfter E-mail..."
+        },
+        "messages": {
+            "success": "E-mail bekræftet! Du kan nu logge ind.",
+            "error": "Linket er ugyldigt eller udløbet.",
+            "noToken": "Intet bekræftelsestoken blev fundet. Linket er ufuldstændigt."
+        },
+        "branding": {
+            "welcome": "Velkommen til",
+            "description": "Bekræft din e-mail, og begynd at underskrive dokumenter sikkert med vores betroede platform.",
+            "features": {
+                "verification": {
+                    "title": "E-mail Bekræftelse",
+                    "description": "Sikker kontoopsætning"
+                },
+                "access": {
+                    "title": "Øjeblikkelig Adgang",
+                    "description": "Begynd at underskrive med det samme"
+                },
+                "protected": {
+                    "title": "Beskyttet Konto",
+                    "description": "Dine data er sikre"
+                }
+            }
+        },
+        "status": {
+            "loading": {
+                "title": "Bekræfter Konto",
+                "description": "Vent venligst, mens vi aktiverer din konto..."
+            },
+            "success": {
+                "title": "Konto Aktiveret!",
+                "button": "Fortsæt til Log Ind"
+            },
+            "error": {
+                "title": "Bekræftelse Mislykkedes",
+                "button": "Tilbage til Registrering"
+            }
+        },
+        "footer": {
+            "copyright": "© {{year}} i-sign.eu. Alle Rettigheder Forbeholdes."
+        }
+    },
+    "pendingVerification": {
+        "meta": {
+            "title": "Tjek Din E-mail"
+        },
+        "branding": {
+            "welcome": "Velkommen til",
+            "description": "Den mest sikre og brugervenlige platform for elektroniske underskrifter til virksomheder i alle størrelser."
+        },
+        "content": {
+            "title": "Tjek Din Indbakke",
+            "message": "Vi har sendt et bekræftelseslink til din e-mailadresse. Klik venligst på linket for at aktivere din konto, før du logger ind.",
+            "button": "Vend Tilbage til Log Ind"
+        },
+        "footer": {
+            "copyright": "© {{year}} i-sign.eu. Alle Rettigheder Forbeholdes."
+        }
+    },
+    "eidasGuide": {
+        "header": {
+            "backLink": "Tilbage til OSS",
+            "title": "Forståelse af Digitale Underskrifter",
+            "subtitle": "En omfattende guide til elektroniske underskrifter og deres juridiske ramme under eIDAS"
+        },
+        "tabs": {
+            "overview": "Oversigt",
+            "ses": "Simpel (SES)",
+            "aes": "Avanceret (AES)",
+            "qes": "Kvalificeret (QES)",
+            "faqs": "OSS"
+        },
+        "content": {
+            "overview": {
+                "title": "Hvad er en Digital Underskrift?",
+                "p1": "En digital underskrift er en specifik form for elektronisk underskrift, der bruger avancerede kryptografiske metoder til sikkert at knytte en underskriver til et dokument. Den giver det højeste niveau af sikkerhed for underskriverens ægthed og integriteten af det underskrevne dokument.",
+                "p2_prefix": "Digitale underskrifter er baseret på",
+                "p2_link": "Public Key Infrastructure (PKI)",
+                "p2_suffix": "en internationalt anerkendt standard, der sikrer, at dokumenter ikke kan ændres, når de først er underskrevet, og at underskriverens identitet pålideligt kan verificeres. Dette gør digitale underskrifter særligt vigtige for transaktioner, der kræver stærk juridisk sikkerhed.",
+                "comparison": {
+                    "title": "Elektroniske vs. Digitale Underskrifter",
+                    "p1_strong": "Elektroniske underskrifter (i-sign.eus)",
+                    "p1_text": "er en bred kategori af metoder, der bruges til at indikere en persons hensigt om at underskrive et dokument i digital form. De er bredt vedtaget, fordi de er enkle at bruge, hurtige at implementere og juridisk anerkendt under EU's eIDAS-forordning (nr. 910/2014). Almindelige anvendelsestilfælde inkluderer ansættelseskontrakter, indkøbsordrer, fakturaer og kundeaftaler.",
+                    "p2_strong": "Digitale underskrifter",
+                    "p2_text": "er derimod en specifik type elektronisk underskrift, der bruger avanceret kryptografisk teknologi til at give stærkere sikkerhed og autentificering. De er særligt vigtige i stærkt regulerede industrier og er eksplicit defineret under eIDAS."
+                },
+                "types": {
+                    "title": "Tre Typer Under eIDAS",
+                    "description": "Under EU's eIDAS-forordning er elektroniske underskrifter kategoriseret i tre niveauer, fra det mindst til det mest strenge:",
+                    "ses": {
+                        "title": "Simpel (SES)",
+                        "description": "Grundlæggende former for i-sign.eus, egnet til lavrisiko dokumenter."
+                    },
+                    "aes": {
+                        "title": "Avanceret (AES)",
+                        "description": "Højere sikkerhed, unikt knyttet til underskriveren med bekræftet identitet."
+                    },
+                    "qes": {
+                        "title": "Kvalificeret (QES)",
+                        "description": "Mest sikre, juridisk ligeværdig med håndskrevne underskrifter."
+                    }
+                },
+                "tip": {
+                    "strong": "Ny inden for digitale underskrifter?",
+                    "text": "Selvom digitale underskrifter i starten kan virke komplekse, bliver de meget klarere, når nøgleelementerne forstås. Udforsk hver fane ovenfor for at lære, hvornår du skal bruge hver type underskrift."
+                }
+            },
+            "ses": {
+                "title": "Simpel Elektronisk Underskrift (SES)",
+                "subtitle": "Til hverdags transaktioner",
+                "p1": "En Simpel Elektronisk Underskrift (SES) er den mest grundlæggende type elektronisk underskrift under eIDAS-forordningen. Den kræver ikke avancerede metoder til underskriverautentificering eller identitetsbekræftelse.",
+                "howItWorks": {
+                    "title": "Sådan Fungerer Det",
+                    "p1": "I praksis kan en SES involvere noget så ligetil som:",
+                    "li1": "Indtastning af en PIN-kode eller adgangskode",
+                    "li2": "Klikke på \"Jeg accepterer\" eller afkrydsning af en boks",
+                    "li3": "Angivelse af en underskrift gennem en e-mail-tilknyttet underskriftsproces"
+                },
+                "useCases": {
+                    "title": "Almindelige Anvendelsestilfælde",
+                    "p1": "Denne type underskrift er ofte tilstrækkelig til lavrisiko, dagligdags transaktioner, såsom:",
+                    "item1": "Salgs- og indkøbsaftaler",
+                    "item2": "Accept af vilkår og betingelser",
+                    "item3": "Simple formularer og erklæringer"
+                },
+                "warning": {
+                    "strong": "Vigtigt:",
+                    "text": "Selvom SES tilbyder hurtighed og bekvemmelighed, giver den det laveste niveau af sikkerhed vedrørende underskriverens identitet og dokumentets integritet. For højere risiko eller regulerede transaktioner kan stærkere former for underskrift som Avanceret (AES) eller Kvalificeret (QES) være påkrævet."
+                },
+                "learnMoreLink": "Lær mere om standard i-sign.eu implementering →"
+            },
+            "aes": {
+                "title": "Avanceret Elektronisk Underskrift (AES)",
+                "subtitle": "Til transaktioner af høj værdi",
+                "p1": "En Avanceret Elektronisk Underskrift (AES) tilbyder et højere sikkerhedsniveau end en Simpel Elektronisk Underskrift. Den kræver yderligere autentificeringstrin for at sikre, at underskriverens identitet bekræftes, og at underskriften er unikt knyttet til dem.",
+                "requirements": {
+                    "title": "eIDAS Krav",
+                    "p1": "For at kvalificere sig som AES under eIDAS skal underskriften opfylde følgende kriterier:",
+                    "li1": "Den er unikt knyttet til underskriveren",
+                    "li2": "Den er i stand til at identificere underskriveren",
+                    "li3": "Den er oprettet ved hjælp af elektroniske underskriftsoprettelsesdata, som underskriveren kan opretholde under deres eneste kontrol",
+                    "li4": "Den er knyttet til de underskrevne data på en sådan måde, at enhver efterfølgende ændring af dataene er detekterbar"
+                },
+                "authMethods": {
+                    "title": "Autentificeringsmetoder",
+                    "p1": "I praksis kan AES involvere:",
+                    "item1": { "title": "Identitetsbekræftelse", "description": "Offentligt udstedt ID-bekræftelse" },
+                    "item2": { "title": "Biometriske Kontroller", "description": "Ansigtsgenkendelse eller fingeraftryksscanning" },
+                    "item3": { "title": "Digitale Certifikater", "description": "Unikt certifikat genereret for transaktionen" },
+                    "item4": { "title": "Engangskode (OTP)", "description": "Unik OTP sendt til bekræftet enhed" }
+                },
+                "benefits": {
+                    "title": "Nøglefordele",
+                    "li1": "Pålidelig identifikation af underskriveren",
+                    "li2": "En unik forbindelse mellem underskriften og det underskrevne dokument",
+                    "li3": "Manipulationssikker teknologi registrerer eventuelle ændringer"
+                },
+                "example": {
+                    "title": "Eksempel på Anvendelsestilfælde",
+                    "p1_prefix": "Højværdi- eller følsomme forretningstransaktioner, såsom",
+                    "p1_strong1": "ansættelseskontrakter",
+                    "p1_connector": "eller",
+                    "p1_strong2": "leverandøraftaler",
+                    "p1_suffix": "hvor organisationen har brug for stærkere sikkerhed for underskriverens identitet og dokumentets integritet."
+                },
+                "learnMoreLink": "Lær mere om i-sign.eu bekræftelsesmetoder →"
+            },
+            "qes": {
+                "title": "Kvalificeret Elektronisk Underskrift (QES)",
+                "subtitle": "Til stærkt regulerede transaktioner",
+                "p1": "En Kvalificeret Elektronisk Underskrift (QES) er den mest sikre og betroede form for elektronisk underskrift defineret under EU's eIDAS-forordning. Den kræver en ansigt-til-ansigt eller tilsvarende identitetsbekræftelsesproces udført af en Kvalificeret Trust Service Provider (QTSP), enten i EU eller Storbritannien.",
+                "foundation": {
+                    "title": "Teknisk Grundlag",
+                    "p1_prefix": "QES er afhængig af en",
+                    "p1_strong": "Qualified Signature Creation Device (QSCD)",
+                    "p1_suffix": "og et kvalificeret certifikat udstedt af en anerkendt udbyder. Denne proces sikrer, at:",
+                    "li1": "Underskriverens identitet er blevet bekræftet efter den højeste juridiske standard",
+                    "li2": "Underskriften er unikt knyttet til underskriveren og det underskrevne dokument",
+                    "li3": "Et komplet og manipulationssikkert revisionsspor oprettes"
+                },
+                "equivalence": {
+                    "title": "Juridisk Ligeværdighed",
+                    "p1_prefix": "På grund af disse sikkerheder betragtes en QES som den",
+                    "p1_strong": "juridiske ækvivalent til en håndskrevet underskrift",
+                    "p1_suffix": "i alle EU-medlemsstater.",
+                    "p2": "Faktisk hævder juridiske eksperter ofte, at en QES kan være mere pålidelig end en traditionel underskrift bevidnet i en usupperviseret indstilling, da den digitale proces sikrer stærkere identitetsbekræftelse og dokumentintegritet."
+                },
+                "useCases": {
+                    "title": "Almindelige Anvendelsestilfælde",
+                    "p1": "QES er generelt påkrævet for stærkt regulerede eller følsomme transaktioner, såsom:",
+                    "item1": { "icon": "🏦", "text": "Aftaler om finansielle tjenester" },
+                    "item2": { "icon": "⚖️", "text": "Notarielle handlinger" },
+                    "item3": { "icon": "🏛️", "text": "Offentlige indgivelser" },
+                    "item4": { "icon": "🌍", "text": "Grænseoverskridende juridiske kontrakter" }
+                }
+            },
+            "faqs": {
+                "title": "Ofte Stillede Spørgsmål",
+                "q1": {
+                    "title": "Hvordan fungerer en Kvalificeret Elektronisk Underskrift (QES) med i-sign.eu?",
+                    "p1": "En QES kræver stærk identitetsautentificering, før et digitalt certifikat kan udstedes. Det giver det højeste tillidsniveau gennem ansigt-til-ansigt eller tilsvarende ID-bekræftelse. Under underskriftsprocessen bliver kunder bedt om elektronisk at bekræfte deres identitet. Når den er bekræftet, vedhæftes et digitalt certifikat, der beviser deres identitet, automatisk til underskriften bag kulisserne.",
+                    "p2": "i-sign.eu tilbyder flere muligheder for QES med integreret ID-bekræftelse. Digitale certifikater udstedes af anerkendte Certifikatmyndigheder (Trust Service Providers), og i-sign.eu accepterer kvalificerede certifikater udstedt af udbydere, der er opført på den officielle EU Trust List."
+                },
+                "q2": {
+                    "title": "Hvordan fungerer en Avanceret Elektronisk Underskrift (AES) med i-sign.eu?",
+                    "p1": "En AES med i-sign.eu involverer yderligere trin for at autentificere underskriveren. Dette kan omfatte fremvisning af et gyldigt offentligt udstedt dokument for at bekræfte identiteten, kombineret med en engangsadgangskode efter underskriftsprocessen. AES-underskrifter kræver et PKI-baseret digitalt certifikat, som genereres og vedhæftes dokumentet som en del af transaktionen.",
+                    "p2": "i-sign.eu leverer fleksible ID-bekræftelsesmuligheder for at opfylde både avancerede og kvalificerede niveauer af elektroniske underskrifter under eIDAS."
+                },
+                "q3": {
+                    "title": "Hvordan fungerer en Simpel Elektronisk Underskrift (SES) med i-sign.eu?",
+                    "p1": "SES er den mest almindeligt anvendte og bredt accepterede type i-sign.eu verden over. Med i-sign.eu kan SES erstatte håndskrevne underskrifter i de fleste lavrisikotilfælde. Det er særligt velegnet til:",
+                    "li1": "Interne dokumenter",
+                    "li2": "Aftaler mellem virksomheder og forbrugere",
+                    "li3": "Transaktioner med eksisterende partnere",
+                    "p2": "SES er hurtig, effektiv og kræver få trin. Men hvis der er behov for stærkere underskriverautentificering, kan en AES eller QES være påkrævet i stedet."
+                },
+                "contact": {
+                    "strong": "Har du stadig spørgsmål?",
+                    "text_prefix": "Besøg vores",
+                    "link": "hoved OSS-side",
+                    "text_suffix": "eller kontakt vores supportteam for personlig assistance."
+                }
+            }
+        },
+        "termsAndPrivacy": {
+            "header": {
+                "subtitle": "Professionel Elektronisk Underskrift Platform"
+            },
+            "tabs": {
+                "terms": "Servicevilkår",
+                "privacy": "Fortrolighedspolitik"
+            },
+            "lastUpdated": "Sidst opdateret: {{date}}",
+            "terms": {
+                "title": "Servicevilkår",
+                "introduction": {
+                    "title": "1. Introduktion",
+                    "p1_prefix": "Disse Vilkår og Betingelser for Sites og Tjenester (\"Vilkårene\" eller \"Generelle Vilkår\") styrer din adgang til og brug af",
+                    "p1_suffix": "websteder, produkter og tjenester (samlet, \"Sitet\" eller \"Tjenesterne\"). Ved at bruge vores Site eller Tjenester accepterer du at være bundet af disse Vilkår, uanset om det er på dine egne vegne eller en virksomhed, du repræsenterer.",
+                    "p2": "Hvis du ikke accepterer disse Vilkår, er du ikke autoriseret til at bruge Sitet eller Tjenesterne og skal straks stoppe brugen."
+                },
+                "scope": {
+                    "title": "2. Anvendelsesområde",
+                    "p1": "Disse Vilkår gælder for følgende kategorier af brugere (samlet benævnt \"du\" eller \"din\"):",
+                    "li1_strong": "Webstedsbesøgende",
+                    "li1_text": "Enkeltpersoner, der får adgang til",
+                    "li1_suffix": "og relaterede websteder.",
+                    "li2_strong": "Kunder",
+                    "li2_text": "Organisationer eller enkeltpersoner, der abonnerer på eller licenserer",
+                    "li2_suffix": "Tjenester.",
+                    "li3_strong": "Brugere",
+                    "li3_text": "Enkeltpersoner, der bruger",
+                    "li3_suffix": "Tjenester under en Kundekonto (inklusive autoriserede medarbejdere eller agenter).",
+                    "p2_prefix": "Hvis du er en Kunde og har indgået en separat Serviceaftale eller Virksomhedskontrakt med",
+                    "p2_suffix": "vil disse vilkår have forrang i det omfang, de er i konflikt med disse Vilkår. Disse Vilkår er designet til forretningsmæssig og professionel brug; forbrugerbeskyttelse i henhold til gældende lovgivning kan gælde separat."
+                },
+                "compliance": {
+                    "title": "3. Overholdelse af Lokale Love",
+                    "p1": "Hvis du får adgang til Sitet eller Tjenesterne fra en jurisdiktion med specifikke lovgivningsmæssige krav eller supplerende vilkår (såsom visse EU-medlemsstater), vil disse jurisdiktionsspecifikke vilkår gælde ud over disse Vilkår. I tilfælde af konflikt har de jurisdiktionsspecifikke vilkår forrang."
+                },
+                "acceptance": {
+                    "title": "4. Accept af Vilkår",
+                    "p1": "Ved at få adgang til, bruge eller downloade nogen del af Sitet eller Tjenesterne bekræfter du, at du:",
+                    "li1": "Har læst og forstået disse Vilkår;",
+                    "li2": "Accepterer disse Vilkår på dine egne vegne eller på vegne af din organisation;",
+                    "li3": "Er autoriseret til at indgå juridisk bindende aftaler i din jurisdiktion.",
+                    "p2": "Hvis du ikke opfylder disse betingelser, må du ikke bruge Sitet eller Tjenesterne."
+                },
+                "access": {
+                    "title": "5. Adgang til Site og Brug",
+                    "eligibility": {
+                        "title": "5.1 Berettigelse til Brug",
+                        "p1_prefix": "Ved at få adgang til eller bruge",
+                        "p1_suffix": "Sitet eller Tjenesterne, erklærer og garanterer du, at:",
+                        "li1": "Du er myndig (18 år eller ældre, eller på anden måde myndighedsalderen i dit bopælsland) og har den juridiske kapacitet til at indgå disse Vilkår på dine egne vegne eller på vegne af det firma eller den organisation, du repræsenterer;",
+                        "li2": "Du er autoriseret til at bruge Sitet og Tjenesterne i overensstemmelse med gældende love og regler, herunder EU og lokale jurisdiktionsregler om elektroniske underskrifter og databeskyttelse; og",
+                        "li3": "Hvis du handler på vegne af en virksomhed, er du behørigt autoriseret til at binde denne virksomhed til disse Vilkår.",
+                        "p2_prefix": "Du anerkender, at du ikke må bruge Sitet eller Tjenesterne, hvis du ikke opfylder disse berettigelseskrav, eller hvis din adgang tidligere er blevet suspenderet eller opsagt af",
+                        "p2_suffix": "for overtrædelser af disse Vilkår."
+                    }
+                },
+                "contact": {
+                    "title": "6. Kontaktoplysninger",
+                    "p1_prefix": "For spørgsmål om disse vilkår, kontakt os venligst på",
+                    "p1_suffix": "eller via vores supportportal."
+                }
+            },
+            "privacy": {
+                "title": "Fortrolighedspolitik",
+                "collection": {
+                    "title": "1. Information vi indsamler",
+                    "item1": { "title": "Kontooplysninger:", "text": "Navn, e-mailadresse, virksomhedsoplysninger og autentificeringsoplysninger." },
+                    "item2": { "title": "Dokumentdata:", "text": "Dokumenter uploadet til underskrift, underskriftsdata, IP-adresser og tidsstempler for underskriftsaktiviteter." },
+                    "item3": { "title": "Brugsinformation:", "text": "Logdata, browseroplysninger, enhedsidentifikatorer og servicemønstre for brug." }
+                },
+                "use": {
+                    "title": "2. Hvordan vi bruger dine oplysninger",
+                    "li1": "Levere og vedligeholde den elektroniske underskriftstjeneste",
+                    "li2": "Behandle og lette dokumentunderskrifter",
+                    "li3": "Generere revisionsspor og overholdelsesrapporter",
+                    "li4": "Sende service-relaterede notifikationer og opdateringer",
+                    "li5": "Forbedre vores service og udvikle nye funktioner",
+                    "li6": "Forhindre svindel og sikre tjenestens sikkerhed",
+                    "li7": "Overholde juridiske forpligtelser"
+                },
+                "sharing": {
+                    "title": "3. Informationsdeling",
+                    "p1": "Vi sælger, handler eller udlejer ikke dine personlige oplysninger. Vi kan kun dele oplysninger under følgende omstændigheder:",
+                    "li1": "Med dit udtrykkelige samtykke",
+                    "li2": "For at lette underskriftsprocessen mellem udpegede parter",
+                    "li3": "Med serviceudbydere, der hjælper med platformens drift",
+                    "li4": "Når det kræves i henhold til lov eller retsproces",
+                    "li5": "For at beskytte vores rettigheder, ejendom eller sikkerhed"
+                },
+                "security": {
+                    "title": "4. Datasikkerhed",
+                    "p1": "Vi implementerer omfattende sikkerhedsforanstaltninger, herunder kryptering, adgangskontrol, regelmæssige sikkerhedsrevisioner og sikre datacentre. Alle data krypteres både under overførsel og i hvile ved hjælp af industristandard krypteringsprotokoller. Vi opretholder ISO 27001 og SOC 2 overholdelsesstandarder."
+                },
+                "retention": {
+                    "title": "5. Dataopbevaring",
+                    "p1": "Vi opbevarer dine data, så længe din konto er aktiv, og i den periode, der kræves af gældende lovgivning. Underskrevne dokumenter opbevares typisk i 7 år af hensyn til juridisk overholdelse. Du kan anmode om sletning af dine data, underlagt lovmæssige opbevaringskrav."
+                },
+                "rights": {
+                    "title": "6. Dine Rettigheder (GDPR)",
+                    "p1": "Under GDPR har du ret til at:",
+                    "li1": "Få adgang til dine personlige data",
+                    "li2": "Berigtige unøjagtige oplysninger",
+                    "li3": "Anmode om sletning af data (retten til at blive glemt)",
+                    "li4": "Begrænse behandlingen af dine data",
+                    "li5": "Dataportabilitet",
+                    "li6": "Gøre indsigelse mod behandling",
+                    "li7": "Trække samtykke tilbage til enhver tid"
+                },
+                "transfers": {
+                    "title": "7. Internationale Dataoverførsler",
+                    "p1": "Dine data behandles primært inden for Den Europæiske Union. Enhver international overførsel udføres under passende sikkerhedsforanstaltninger, herunder standardkontraktbestemmelser godkendt af Europa-Kommissionen."
+                },
+                "cookies": {
+                    "title": "8. Cookies og Sporing",
+                    "p1": "Vi bruger væsentlige cookies til servicefunktionalitet og analysecookies til at forbedre vores service. Du kan administrere cookiepræferencer via dine browserindstillinger. Vores cookiepolitik giver detaljerede oplysninger om vores cookiebrug."
+                },
+                "contact": {
+                    "title": "9. Kontakt Os",
+                    "p1": "For spørgsmål relateret til privatlivets fred eller for at udøve dine rettigheder, kontakt vores Databeskyttelsesansvarlige på privacy@i-sign.eu. For EU-borgere kan du også kontakte din lokale databeskyttelsesmyndighed."
+                },
+                "changes": {
+                    "title": "10. Ændringer i Fortrolighedspolitikken",
+                    "p1": "Vi giver dig besked om væsentlige ændringer i denne fortrolighedspolitik via e-mail eller tydelig meddelelse på vores platform mindst 30 dage før ændringerne træder i kraft."
+                }
+            },
+            "footer": {
+                "copyright": "© 2024 I-sign.eu - Professionel Elektronisk Underskrift Platform",
+                "support_prefix": "For support, kontakt os på"
+            }
+        },
+        "enterpriseContact": {
+            "messages": {
+                "success": "Din forespørgsel er sendt!",
+                "error": "Mislykkedes at sende forespørgsel. Prøv venligst igen."
+            },
+            "header": {
+                "title": {
+                    "main": "Virksomheds",
+                    "highlight": "Tilpassede Løsninger"
+                },
+                "description": "Kontakt vores salgsteam for personlig prissætning, tilpassede funktioner og dedikeret support, skræddersyet til din organisations behov."
+            },
+            "form": {
+                "name": {
+                    "label": "Fulde Navn",
+                    "placeholder": "John Doe"
+                },
+                "email": {
+                    "label": "Erhvervs-E-mail",
+                    "placeholder": "john.doe@company.com"
+                },
+                "company": {
+                    "label": "Virksomhedsnavn",
+                    "placeholder": "Acme Corporation"
+                },
+                "phone": {
+                    "label": "Telefonnummer (Valgfrit)"
+                },
+                "message": {
+                    "label": "Fortæl os om dine behov",
+                    "placeholder": "Beskriv dine krav, teamstørrelse eller specifikke funktioner, du er interesseret i..."
+                },
+                "button": {
+                    "default": "Send Forespørgsel",
+                    "submitting": "Sender..."
+                }
+            },
+            "validation": {
+                "name": {
+                    "min": "Navn skal være mindst 2 tegn",
+                    "max": "Navn må ikke overstige 100 tegn",
+                    "required": "Fulde navn er påkrævet"
+                },
+                "email": {
+                    "invalid": "Ugyldigt e-mailformat",
+                    "required": "Erhvervs-e-mail er påkrævet"
+                },
+                "company": {
+                    "min": "Virksomhedsnavn skal være mindst 2 tegn",
+                    "max": "Virksomhedsnavn må ikke overstige 200 tegn",
+                    "required": "Virksomhedsnavn er påkrævet"
+                },
+                "phone": {
+                    "invalid": "Ugyldigt telefonnummer"
+                },
+                "message": {
+                    "min": "Besked skal være mindst 10 tegn",
+                    "max": "Besked må ikke overstige 2000 tegn",
+                    "required": "Besked er påkrævet"
+                }
+            },
+            "footer": {
+                "callPrompt": "Foretrækker du at ringe? Nå os på",
+                "emailPrompt": "Eller e-mail direkte:"
+            }
+        },
+        "cookiePolicy": {
+            "title": "Cookiepolitik",
+            "intro": "Denne Cookiepolitik forklarer, hvordan E-Sign (\"vi\", \"os\" eller \"vores\") bruger cookies og lignende teknologier, når du besøger vores hjemmeside eller bruger vores tjenester.",
+            "whatAreCookies": {
+                "title": "Hvad er Cookies?",
+                "text": "Cookies er små tekstfiler, der gemmes på din enhed, når du besøger et websted. De hjælper os med at give dig en bedre oplevelse ved at huske dine præferencer og muliggøre visse funktioner."
+            },
+            "types": {
+                "title": "Typer af Cookies Vi Bruger",
+                "essential": {
+                    "title": "Væsentlige Cookies",
+                    "text": "Disse cookies er nødvendige for, at vores websted fungerer korrekt. De muliggør kernefunktionalitet såsom autentificering, sikkerhedsfunktioner og grundlæggende navigation."
+                },
+                "functional": {
+                    "title": "Funktionelle Cookies",
+                    "text": "Disse cookies muliggør forbedret funktionalitet og personalisering, såsom at huske dine sprogpræferencer og indstillinger."
+                },
+                "analytics": {
+                    "title": "Analyse-Cookies",
+                    "text": "Disse cookies hjælper os med at forstå, hvordan besøgende interagerer med vores websted ved at indsamle og rapportere oplysninger anonymt."
+                },
+                "marketing": {
+                    "title": "Marketing-Cookies",
+                    "text": "Disse cookies bruges til at levere annoncer, der er mere relevante for dig og dine interesser."
+                }
+            },
+            "managing": {
+                "title": "Administration af Dine Cookiepræferencer",
+                "text": "Du kan styre og administrere cookies på forskellige måder. Du kan indstille din browser til at afvise cookies eller til at advare dig, når cookies sendes. Du kan også administrere dine præferencer ved hjælp af vores cookiepræferencecenter.",
+                "button": "Administrer Cookiepræferencer"
+            },
+            "contact": {
+                "title": "Kontakt Os",
+                "text": "Hvis du har spørgsmål om denne Cookiepolitik, bedes du kontakte os på privacy@esign.com."
+            },
+            "lastUpdated": "Denne politik blev sidst opdateret den {{date}}."
+        },
+        "sidebar": {
+            "headings": {
+                "dashboard": "Dashboard",
+                "settings": "Indstillinger"
+            },
+            "nav": {
+                "allDocuments": "Alle Dokumenter",
+                "templates": "Skabeloner",
+                "contacts": "Kontaktliste",
+                "addDocument": "Tilføj Dokument",
+                "subscriptions": "Abonnementer",
+                "paymentMethods": "Betalingsmetoder",
+                "profile": "Profil"
+            }
+        },
+        "profile": {
+            "title": "Kontoindstillinger",
+            "loading": "Indlæser...",
+            "tabs": {
+                "profile": "Profil",
+                "email": "E-mail",
+                "password": "Adgangskode"
+            },
+            "messages": {
+                "deleteSuccess": "Anmodning om sletning af konto er sendt",
+                "deleteFailed": "Mislykkedes at slette konto",
+                "updateSuccess": "Profil opdateret!",
+                "updateFailed": "Opdatering mislykkedes"
+            },
+            "form": {
+                "image": {
+                    "upload": "Upload",
+                    "remove": "Fjern"
+                },
+                "firstName": {
+                    "label": "Fornavn"
+                },
+                "lastName": {
+                    "label": "Efternavn"
+                },
+                "email": {
+                    "label": "Nuværende E-mail",
+                    "note": "For at ændre din e-mail, gå til fanen E-mail"
+                },
+                "phone": {
+                    "label": "Telefonnummer"
+                },
+                "language": {
+                    "label": "Sprog"
+                },
+                "button": {
+                    "save": "Gem Ændringer",
+                    "saving": "Gemmer...",
+                    "delete": "Slet Konto"
+                },
+                "validation": {
+                    "firstName": {
+                        "required": "Fornavn er påkrævet"
+                    },
+                    "lastName": {
+                        "required": "Efternavn er påkrævet"
+                    },
+                    "phone": {
+                        "max": "Telefonnummer er for langt",
+                        "invalid": "Ugyldigt telefonnummer"
+                    },
+                    "language": {
+                        "required": "Sprog er påkrævet"
+                    }
+                }
+            },
+            "emailForm": {
+                "title": "Skift E-mailadresse",
+                "description": "Vi sender en bekræftelseskode til din nuværende e-mail for at bekræfte ændringen.",
+                "currentEmailLabel": "Nuværende E-mail:",
+                "newEmail": {
+                    "label": "Ny E-mailadresse",
+                    "placeholder": "Indtast din nye e-mailadresse"
+                },
+                "otp": {
+                    "sentToLabel": "Bekræftelseskode sendt til:",
+                    "label": "Indtast 6-cifret Bekræftelseskode",
+                    "button": {
+                        "sending": "Sender...",
+                        "resend": "Send Igen",
+                        "verifying": "Bekræfter...",
+                        "verify": "Bekræft & Opdater E-mail",
+                        "cancel": "Annuller"
+                    }
+                },
+                "button": {
+                    "sending": "Sender...",
+                    "sendCode": "Send Bekræftelseskode",
+                    "clear": "Ryd"
+                },
+                "messages": {
+                    "invalidNewEmail": "Indtast venligst en gyldig ny e-mail",
+                    "otpSentSuccess": "OTP sendt til din nuværende e-mail!",
+                    "otpSentFailed": "Mislykkedes at sende OTP",
+                    "otpLengthError": "Indtast 6-cifret OTP",
+                    "updateSuccess": "E-mail opdateret!",
+                    "invalidOtp": "Ugyldig OTP"
+                },
+                "validation": {
+                    "invalid": "Ugyldig e-mail",
+                    "required": "Ny e-mail er påkrævet",
+                    "notSame": "Ny e-mail skal være forskellig fra nuværende e-mail"
+                }
+            },
+            "passwordForm": {
+                "title": "Skift Adgangskode",
+                "currentPassword": {
+                    "label": "Nuværende Adgangskode",
+                    "placeholder": "Nuværende"
+                },
+                "newPassword": {
+                    "label": "Ny Adgangskode",
+                    "placeholder": "Ny"
+                },
+                "confirmNewPassword": {
+                    "label": "Bekræft Ny Adgangskode",
+                    "placeholder": "Bekræft"
+                },
+                "button": {
+                    "default": "Skift Adgangskode",
+                    "loading": "Ændrer..."
+                },
+                "messages": {
+                    "success": "Adgangskode er ændret!",
+                    "failed": "Mislykkedes at ændre adgangskode"
+                },
+                "validation": {
+                    "min": "Adgangskode skal være mindst 6 tegn",
+                    "max": "Adgangskode må ikke overstige 128 tegn",
+                    "currentPassword": {
+                        "required": "Nuværende adgangskode er påkrævet"
+                    },
+                    "newPassword": {
+                        "required": "Ny adgangskode er påkrævet",
+                        "notOneOf": "Ny adgangskode må ikke være den samme som den nuværende"
+                    },
+                    "confirmNewPassword": {
+                        "required": "Bekræft venligst din nye adgangskode",
+                        "oneOf": "Adgangskoder skal matche"
+                    }
+                }
+            }
+        },
+        "paymentMethods": {
+            "pageTitle": "Betalingsmetoder",
+            "loading": "Indlæser betalingsmetoder...",
+            "header": {
+                "title": "Betalingsmetoder",
+                "description": "Administrer sikkert dine betalingsmuligheder for problemfrie e-underskriftsoplevelser",
+                "addButton": "Tilføj Betalingsmetode"
+            },
+            "emptyState": {
+                "title": "Ingen Betalingsmetoder Tilføjet",
+                "description": "Tilføj en betalingsmetode for ubesværet at administrere dine e-underskriftsabonnementer",
+                "addButton": "Tilføj Din Første Betalingsmetode"
+            },
+            "addModalTitle": "Tilføj Ny Betalingsmetode",
+            "addForm": {
+                "cardInfoLabel": "Kortinformation",
+                "secureNote": "Dine betalingsoplysninger er krypterede og sikkert behandlet af Stripe.",
+                "buttons": {
+                    "cancel": "Annuller",
+                    "add": "Tilføj Betalingsmetode",
+                    "adding": "Tilføjer..."
+                },
+                "errors": {
+                    "cardElementNotFound": "Kortelement ikke fundet",
+                    "cardProcessingError": "Der opstod en fejl under behandlingen af dit kort.",
+                    "addMethodFailed": "Mislykkedes at tilføje betalingsmetode."
+                }
+            },
+            "card": {
+                "defaultBadge": "Standard",
+                "expires": "Udløber",
+                "buttons": {
+                    "setDefault": "Indstil som Standard",
+                    "settingDefault": "Indstiller...",
+                    "remove": "Fjern",
+                    "removing": "Fjerner..."
+                }
+            },
+            "deleteConfirm": {
+                "title": "Fjern Betalingsmetode?",
+                "text": "Er du sikker på, at du vil fjerne denne betalingsmetode?",
+                "confirmButton": "Ja, fjern den",
+                "cancelButton": "Annuller"
+            },
+            "messages": {
+                "addSuccess": "Betalingsmetode tilføjet!",
+                "setDefaultSuccess": "Standard betalingsmetode opdateret!",
+                "deleteSuccess": "Betalingsmetode fjernet!"
+            }
+        },
+        "subscriptions": {
+            "pageTitle": "Fakturering & Abonnementer"
+        },
+        "planSelection": {
+            "backButton": "Tilbage til Abonnementsstyring",
+            "header": {
+                "titleChange": "Vælg en Ny Plan",
+                "titleChoose": "Vælg Din Plan",
+                "descriptionChange": "Vælg en ny plan for at opgradere, nedgradere eller ændre din faktureringscyklus.",
+                "descriptionChoose": "Opgrader din konto for at låse op for flere funktioner, højere grænser og dedikeret support."
+            },
+            "billing": {
+                "monthly": "Månedlig",
+                "yearly": "Årlig",
+                "save": "Spar 20%"
+            },
+            "popularBadge": "⭐ Mest Populære",
+            "perMonth": "md",
+            "billedYearly": "Faktureres som €{{price}} om året",
+            "plans": {
+                "starter": {
+                    "description": "Perfekt til enkeltpersoner og små teams, der er ved at starte."
+                },
+                "pro": {
+                    "description": "Bedste værdi for voksende virksomheder og professionelle teams."
+                },
+                "enterprise": {
+                    "description": "Komplet løsning til store organisationer, der har brug for mere."
+                }
+            },
+            "trial": {
+                "title": "14 Dages Gratis Prøveperiode Tilgængelig",
+                "note": "Gyldigt kreditkort er påkrævet!"
+            },
+            "buttons": {
+                "startTrial": "Start 14-dages Gratis Prøveperiode",
+                "choosePlan": "Vælg Plan",
+                "topUp": "Tank Op",
+                "switchToBilling": "Skift til {{interval}} Fakturering",
+                "switchToPlan": "Skift til {{planName}}",
+                "contactSales": "Kontakt Salg"
+            }
+        },
+        "manageSubscription": {
+            "noSubscription": {
+                "title": "Intet Aktivt Abonnement",
+                "description": "Kontakt venligst support, hvis du mener, at dette er en fejl."
+            },
+            "header": {
+                "title": "Abonnementsstyring",
+                "description": "Overvåg dit planforbrug og administrer faktureringspræferencer"
+            },
+            "buttons": {
+                "reactivating": "Genaktiverer...",
+                "reactivateTrial": "Genaktiver Prøveperiode",
+                "reactivatePlan": "Genaktiver Plan",
+                "processing": "Behandler...",
+                "startSubscription": "Start Abonnement",
+                "cancelling": "Annullerer...",
+                "cancelTrial": "Annuller Prøveperiode",
+                "cancel": "Annuller"
+            },
+            "plan": {
+                "title": "{{planName}} Plan",
+                "monthly": "Månedlig",
+                "yearly": "Årlig"
+            },
+            "status": {
+                "active": "Aktiv",
+                "trialing": "Prøveperiode Aktiv",
+                "past_due": "Forfalden",
+                "canceled": "Annulleret",
+                "cancelsSoon": "Annulleres snart"
+            },
+            "trial": {
+                "endsOn": "Din prøveperiode slutter den {{date}}."
+            },
+            "usage": {
+                "title": "Dokumentforbrug",
+                "unlimited": "Ubegrænset",
+                "enterpriseNote": "Ingen dokumentgrænser på din virksomhedsplan",
+                "of": "af {{limit}} dokumenter",
+                "resetsOn": "Forbruget nulstilles den {{date}}"
+            },
+            "billing": {
+                "title": "Faktureringsstatus",
+                "cancellationPending": "Annullering Afventer",
+                "cancelsOn": "Din plan annulleres den",
+                "pastDue": "Betaling Forfalden",
+                "pastDueNote": "Opdater venligst din betalingsmetode for at fortsætte tjenesten",
+                "nextRenewal": "Næste fornyelse",
+                "autoRenewalActive": "Automatisk fornyelse er aktiv"
+            },
+            "quickStats": {
+                "started": "Plan Startet",
+                "cycle": "Faktureringscyklus",
+                "documentsLeft": "Dokumenter Tilbage"
+            },
+            "management": {
+                "title": "Planstyring",
+                "description1": "Administrer dit abonnement, se fakturaer, eller skift din plan.",
+                "description2": "Ændringer træder i kraft i henhold til din faktureringscyklus",
+                "buttons": {
+                    "invoices": "Fakturaer",
+                    "upgrade": "Opgrader"
+                }
+            },
+            "cancelModal": {
+                "trial": {
+                    "title": "Annuller Gratis Prøveperiode?",
+                    "text": "Din prøveperiode forbliver aktiv indtil {{date}}, men den konverteres ikke til en betalt plan. Er du sikker?",
+                    "confirmButton": "Ja, annuller prøveperiode"
+                },
+                "subscription": {
+                    "title": "Annuller Abonnement?",
+                    "text": "Dit abonnement forbliver aktivt indtil slutningen af den nuværende periode den {{date}}. Er du sikker?",
+                    "confirmButton": "Ja, annuller abonnement"
+                },
+                "cancelButton": "Behold Min Plan"
+            },
+            "endTrialModal": {
+                "title": "Aktiver Betalt Plan Nu?",
+                "text": "Du vil blive opkrævet €{{price}} med det samme og få fuld adgang til {{planName}} planfordelene, herunder din nye dokumentgrænse.",
+                "confirmButton": "Ja, Aktiver Nu",
+                "cancelButton": "Bliv på Prøveperioden"
+            },
+            "messages": {
+                "cancelSuccess": "Din plan er nu indstillet til annullering.",
+                "reactivateSuccess": "Dit abonnement er genaktiveret!",
+                "endTrialSuccess": "Dit abonnement er nu aktivt!"
+            }
+        },
+        "invoiceHistory": {
+            "title": "Faktura Historik",
+            "closeLabel": "Luk modal",
+            "loading": "Indlæser fakturaer...",
+            "locale": "da-DK",
+            "table": {
+                "headers": {
+                    "date": "Dato",
+                    "amount": "Beløb",
+                    "status": "Status",
+                    "action": "Handling"
+                },
+                "viewAction": "Se Faktura"
+            },
+            "status": {
+                "paid": "Betalt",
+                "open": "Åben",
+                "void": "Ugyldig",
+                "uncollectible": "Uopkrævelig"
+            },
+            "empty": {
+                "title": "Ingen Fakturaer Fundet",
+                "description": "Din faktureringshistorik vises her, når du er blevet faktureret."
+            }
+        },
+        "contacts": {
+            "pageTitle": "Kontakter",
+            "header": {
+                "title": "Kontakter",
+                "searchPlaceholder": "Søg Kontakter"
+            },
+            "buttons": {
+                "addContact": "Tilføj Kontakt"
+            },
+            "table": {
+                "headers": {
+                    "name": "Navn",
+                    "email": "E-mail",
+                    "phone": "Telefon",
+                    "customInfo": "Brugerdefineret Info",
+                    "actions": "Handlinger"
+                },
+                "actions": {
+                    "edit": "Rediger",
+                    "delete": "Slet"
+                },
+                "notAvailable": "Ikke Tilgængelig"
+            },
+            "loading": "Indlæser...",
+            "emptyState": {
+                "title": "Ingen Kontakter Endnu",
+                "description": "Start med at tilføje din første kontakt."
+            },
+            "modal": {
+                "titleAdd": "Tilføj Kontakt",
+                "titleEdit": "Rediger Kontakt",
+                "form": {
+                    "titlePrefix": {
+                        "label": "Titel",
+                        "options": {
+                            "none": "Ingen",
+                            "mr": "Hr.",
+                            "mrs": "Fru.",
+                            "ms": "Frk.",
+                            "dr": "Dr.",
+                            "prof": "Prof."
+                        }
+                    },
+                    "firstName": { "label": "Fornavn", "placeholder": "Indtast Fornavn" },
+                    "lastName": { "label": "Efternavn", "placeholder": "Indtast Efternavn" },
+                    "email": { "label": "E-mail", "placeholder": "Indtast E-mail" },
+                    "phone": { "label": "Telefonnummer" },
+                    "language": { "label": "Sprog" },
+                    "title": { "label": "Titel/Beskæftigelse", "placeholder": "Indtast Titel" }
+                },
+                "customFields": {
+                    "title": "Yderligere Information",
+                    "keyPlaceholder": "Feltnavn (f.eks. Virksomhed)",
+                    "valuePlaceholder": "Værdi (f.eks. Acme Inc.)",
+                    "addButton": "+ Tilføj Brugerdefineret Felt"
+                },
+                "buttons": {
+                    "cancel": "Annuller",
+                    "add": "Tilføj",
+                    "update": "Opdater",
+                    "saving": "Gemmer..."
+                }
+            },
+            "deleteConfirm": {
+                "title": "Er du sikker?",
+                "text": "Du vil ikke være i stand til at fortryde dette!",
+                "confirmButton": "Ja, slet det!",
+                "cancelButton": "Annuller"
+            },
+            "messages": {
+                "addSuccess": "Kontakt tilføjet!",
+                "updateSuccess": "Kontakt opdateret!",
+                "deleteSuccess": "Kontakt er blevet slettet."
+            },
+            "validation": {
+                "firstName": { "required": "Fornavn er påkrævet", "min": "Fornavn skal være mindst 2 tegn", "max": "Fornavn må ikke overstige 50 tegn" },
+                "lastName": { "required": "Efternavn er påkrævet", "min": "Efternavn skal være mindst 2 tegn", "max": "Efternavn må ikke overstige 50 tegn" },
+                "email": { "invalid": "Ugyldigt e-mailformat", "required": "E-mail er påkrævet", "max": "E-mail må ikke overstige 254 tegn" },
+                "phone": { "max": "Telefonnummer ser for langt ud", "invalid": "Ugyldigt telefonnummer" },
+                "language": { "required": "Sprog er påkrævet" },
+                "title": { "min": "Titel skal være mindst 2 tegn", "max": "Titel må ikke overstige 100 tegn" },
+                "customFields": {
+                    "key": { "required": "Feltnavn er påkrævet", "min": "Feltnavn skal være mindst 2 tegn", "max": "Feltnavn må ikke overstige 50 tegn" },
+                    "value": { "max": "Værdi må ikke overstige 255 tegn" }
+                }
+            },
+            "languages": {
+                "en": "Engelsk",
+                "es": "Spansk (Spansk)",
+                "fr": "Fransk (Fransk)",
+                "de": "Tysk (Tysk)",
+                "it": "Italiensk (Italiensk)"
+            }
+        }
+    },
+    "templates": {
+        "header": {
+            "title": "Dokumentskabeloner"
+        },
+        "buttons": {
+            "createNew": "Opret Ny Skabelon",
+            "backToList": "Tilbage til Skabeloner",
+            "saveTemplate": "Gem Skabelon",
+            "saving": "Gemmer..."
+        },
+        "loading": "Indlæser...",
+        "loadingTemplates": "Indlæser skabeloner...",
+        "emptyState": {
+            "title": "Ingen Skabeloner Fundet",
+            "description": "Kom i gang ved at oprette din første dokumentskabelon."
+        },
+        "table": {
+            "headers": {
+                "name": "Navn",
+                "uuid": "Vedhæftnings-UUID",
+                "fields": "Felter",
+                "actions": "Handlinger"
+            }
+        },
+        "editor": {
+            "title": "Redigerer: {{templateName}}"
+        },
+        "deleteConfirm": {
+            "title": "Er du sikker?",
+            "text": "Dette kan ikke fortrydes!",
+            "confirmButton": "Ja, slet det!",
+            "cancelButton": "Nej, annuller!"
+        },
+        "deleteSuccessAlert": {
+            "title": "Slettet!",
+            "text": "Din skabelon er blevet slettet."
+        },
+        "deleteErrorAlert": {
+            "title": "Fejl!"
+        },
+        "messages": {
+            "invalidId": "Ugyldigt skabelon-ID.",
+            "deleteSuccess": "Skabelon slettet!",
+            "deleteFailed": "Mislykkedes at slette skabelon.",
+            "noTemplateToSave": "Ingen skabelon at gemme.",
+            "titleRequired": "Skabelontitel må ikke være tom.",
+            "updateSuccess": "Skabelon opdateret!",
+            "fileUrlMissing": "Fil-URL mangler. Upload venligst et dokument.",
+            "s3KeyMissing": "S3-nøgle mangler. Upload venligst dokumentet igen.",
+            "saveSuccess": "Skabelon gemt!",
+            "saveFailed": "Mislykkedes at gemme skabelon."
+        }
+    },
+    "uploadStep": {
+        "title": "Upload Dokument & Angiv Titel",
+        "uploadLabel": "Upload PDF-Dokument",
+        "dropzone": {
+            "prompt": "Slip PDF her eller klik for at gennemse",
+            "uploaded": "PDF Uploadet",
+            "hint": "Understøtter PDF-filer op til 50MB"
+        },
+        "processing": "Behandler...",
+        "titleLabel": "Dokumenttitel",
+        "titlePlaceholder": "f.eks. Fortrolighedsaftale",
+        "previewLabel": "Dokumentforhåndsvisning",
+        "pageIndicator": "Side {{page}}",
+        "previewPlaceholder": "Forhåndsvisning vises her",
+        "button": {
+            "proceed": "Fortsæt til Redigering",
+            "processing": "Behandler..."
+        },
+        "messages": {
+            "uploadFailed": "Mislykkedes at uploade dokument.",
+            "uploadRequired": "Upload venligst et PDF-dokument.",
+            "invalidFileType": "Vælg venligst en gyldig PDF-fil."
+        },
+        "validation": {
+            "titleRequired": "Dokumenttitel er påkrævet",
+            "titleMin": "Titlen skal være mindst 3 tegn"
+        },
+        "errors": {
+            "fetchFailed": "Mislykkedes at hente PDF",
+            "fetchFromUrlFailed": "Mislykkedes at hente PDF fra URL",
+            "noValidPdf": "Ingen gyldig PDF-data eller ikke-blob URL angivet.",
+            "renderFailed": "Mislykkedes at gengive PDF-forhåndsvisning"
+        }
+    },
+    "editor": {
+        "loading": "Indlæser skabelonredigering...",
+        "properties": {
+            "title": "Feltegenskaber",
+            "prompt": "Vælg et felt for at redigere dets egenskaber."
+        },
+        "fieldDefaults": {
+            "signature": "Underskrift",
+            "textarea": "Tekstfelt",
+            "textareaPlaceholder": "Indtast tekst...",
+            "checkbox": "Afkrydsningsfelt",
+            "radio": "Radio",
+            "date": "Datofelt",
+            "dropdown": "Rullemenu",
+            "text": "Tekstfelt",
+            "textPlaceholder": "Indtast tekst her"
+        },
+        "deleteConfirm": {
+            "title": "Slet felt?",
+            "text": "Denne handling kan ikke fortrydes.",
+            "confirmButton": "Ja, slet det!",
+            "cancelButton": "Annuller"
+        },
+        "messages": {
+            "deleteSuccess": "Felt slettet."
+        },
+        "errors": {
+            "fetchFailed": "Mislykkedes at hente PDF",
+            "noValidPdf": "Ingen gyldig PDF-data angivet.",
+            "loadFailed": "Mislykkedes at indlæse PDF til redigering",
+            "renderFailed": "Mislykkedes at gengive PDF-sider."
+        }
+    },
+    "documentsDashboard": {
+        "loading": "Indlæser Dokumenter...",
+        "buttons": {
+            "upload": "Upload Dokument"
+        },
+        "error": {
+            "title": "Kunne ikke Indlæse Dokumenter"
+        }
+    },
+    "packagesDashboard": {
+        "newPackageName": "Ny Pakke",
+        "loadingDraft": "Indlæser kladde-pakke...",
+        "initializing": "Initialiserer pakkeoprettelse...",
+        "errors": {
+            "notADraft": "Denne pakke er ikke en kladde og kan ikke redigeres.",
+            "loadFailed": "Mislykkedes at indlæse kladde-pakke."
+        }
+    },
+    "documentTable": {
+        "loading": "Indlæser dokumenter...",
+        "headers": {
+            "documentName": "Dokumentnavn",
+            "status": "Status",
+            "initiator": "Initiator",
+            "formFillers": "Formularudfyldere",
+            "approvers": "Godkendere",
+            "signers": "Underskrivere",
+            "receivers": "Modtagere",
+            "addedOn": "Tilføjet Den",
+            "participants": "Deltagere",
+            "actions": "Handlinger"
+        },
+        "actions": {
+            "download": "Download",
+            "notify": "Underret/Påmindelse",
+            "viewDetails": "Se Detaljer",
+            "continueEditing": "Fortsæt Redigering",
+            "viewHistory": "Se Historik",
+            "reassign": "Omfordel",
+            "skip": "Spring Over",
+            "revoke": "Tilbagekald"
+        },
+        "emptyState": {
+            "title": "Ingen Dokumenter Fundet",
+            "description": "Der er ingen dokumenter, der matcher dine nuværende filtre."
+        },
+        "revokeModal": {
+            "title": "Tilbagekald Dokument",
+            "message": "Er du sikker på, at du vil tilbagekalde dokumentet \"{{documentName}}\"? Denne handling kan ikke fortrydes og vil afslutte processen for alle deltagere.",
+            "confirmButton": "Ja, Tilbagekald"
+        }
+    },
+    "stepper": {
+        "header": {
+            "createTitle": "Opret Pakke",
+            "editTitle": "Rediger Kladde-Pakke"
+        },
+        "steps": {
+            "documentSelection": "Dokumentvalg",
+            "fieldAssignment": "Feltildeling",
+            "reviewAndConfirm": "Gennemse & Bekræft",
+            "select": "Vælg",
+            "assign": "Tildel",
+            "review": "Gennemse"
+        },
+        "buttons": {
+            "backToDashboard": "Tilbage til Dashboard",
+            "previousStep": "Forrige Trin",
+            "nextStep": "Næste Trin",
+            "saveDraft": "Gem som Kladde",
+            "saveAsTemplate": "Gem som Skabelon",
+            "savingPackage": "Gemmer Pakke...",
+            "confirmPackage": "Bekræft & Send Pakke"
+        },
+        "messages": {
+            "noPackageToSave": "Ingen pakke at gemme.",
+            "savingDraft": "Gemmer kladde...",
+            "draftSaved": "Kladde gemt!",
+            "draftFailed": "Mislykkedes at gemme kladde.",
+            "noPackageForTemplate": "Kan ikke gemme som skabelon: Ingen pakkedata tilgængelig.",
+            "templateSaveFailed": "Mislykkedes at gemme som skabelon.",
+            "noPackageToConfirm": "Ingen pakke at bekræfte.",
+            "titleRequired": "Pakketitel må ikke være tom.",
+            "documentRequired": "Upload eller vælg venligst et dokument.",
+            "unassignedFields": "Tildel venligst brugere til påkrævede felter",
+            "packageSent": "Pakke gemt og sendt!",
+            "packageSaveFailed": "Mislykkedes at gemme pakke."
+        }
+    },
+    "documentSelection": {
+        "mainTitle": "Vælg Dokumentkilde",
+        "mainSubtitle": "Vælg en eksisterende skabelon eller upload et nyt PDF-dokument",
+        "template": {
+            "title": "Brug Eksisterende Skabelon",
+            "selectPlaceholder": "-- Vælg en Eksisterende Skabelon --",
+            "loading": "Indlæser skabeloner..."
+        },
+        "upload": {
+            "title": "Upload Ny PDF",
+            "dropPrompt": "Slip din PDF her",
+            "dragPrompt": "Træk & Slip PDF eller Klik for at Gennemse",
+            "hint": "Understøtter PDF-filer op til 10MB",
+            "uploading": "Uploader..."
+        },
+        "packageTitle": {
+            "label": "Pakketitel",
+            "placeholder": "f.eks. Onboarding-dokument for John Doe"
+        },
+        "preview": {
+            "title": "Dokumentforhåndsvisning",
+            "emptyTitle": "Intet Dokument Valgt",
+            "emptyDescription": "Vælg en skabelon eller upload en PDF for at se forhåndsvisningen"
+        },
+        "messages": {
+            "invalidFileType": "Vælg venligst en gyldig PDF-fil.",
+            "uploadFailed": "Mislykkedes at uploade dokument.",
+            "templateLoadFailed": "Mislykkedes at indlæse valgt skabelon.",
+            "selectDocument": "Upload eller vælg venligst et dokument, før du fortsætter."
+        },
+        "validation": {
+            "titleRequired": "Pakketitel er påkrævet",
+            "titleMin": "Titlen skal være mindst 3 tegn"
+        },
+        "errors": {
+            "fetchFailed": "Hentning mislykkedes",
+            "fetchBlobFailed": "Hentning mislykkedes for blob",
+            "renderFailed": "Mislykkedes at gengive PDF-forhåndsvisning",
+            "fetchTemplateFailed": "Mislykkedes at hente skabelon-PDF"
+        }
+    },
+    "fieldAssignment": {
+        "noDocument": {
+            "title": "Intet Dokument Valgt",
+            "description": "Vælg venligst et dokument i det forrige trin for at starte tildeling af felter."
+        },
+        "loadError": {
+            "title": "Mislykkedes at Indlæse PDF",
+            "button": "Gå Tilbage"
+        },
+        "noFieldsWarning": {
+            "title": "Ingen Felter Tilføjet Endnu",
+            "description": "Træk og slip felter fra værktøjslinjen ovenfor på dokumentet for at oprette interaktive områder for deltagere."
+        },
+        "pageIndicator": "Side {{page}} af {{total}}",
+        "properties": {
+            "title": "Feltegenskaber",
+            "subtitle": "Konfigurer feltindstillinger",
+            "closeAriaLabel": "Luk egenskabspanelet",
+            "openAriaLabel": "Åbn feltegenskaber",
+            "noFieldSelected": {
+                "title": "Intet Felt Valgt",
+                "description": "Tryk på et felt i dokumentet for at redigere dets egenskaber og tildele brugere."
+            }
+        },
+        "messages": {
+            "fieldAdded": "Tilføjede {{fieldLabel}} felt."
+        },
+        "errors": {
+            "fetchFailed": "Mislykkedes at hente PDF",
+            "fetchBlobFailed": "Hentning mislykkedes for blob",
+            "loadFailed": "Mislykkedes at indlæse PDF",
+            "renderFailed": "Mislykkedes at gengive PDF-sider.",
+            "noValidPdf": "Ingen gyldig PDF-data eller URL angivet."
+        }
+    },
+    "packageReview": {
+        "loading": "Indlæser pakkedetaljer...",
+        "locale": "da-DK",
+        "tabs": {
+            "summary": "Oversigt",
+            "recipients": "Modtagere",
+            "settings": "Indstillinger"
+        },
+        "preview": {
+            "title": "Dokumentforhåndsvisning",
+            "pageCount": "{{count}} side",
+            "pageCount_plural": "{{count}} sider",
+            "pageIndicator": "Side {{current}} af {{total}}",
+            "actualSize": "Faktisk Størrelse",
+            "fitWidth": "Tilpas Bredde",
+            "rendering": {
+                "title": "Gengiver Dokument...",
+                "subtitle": "Vent venligst, mens vi forbereder dit dokument"
+            }
+        },
+        "summary": {
+            "message": {
+                "title": "Valgfri Besked til Deltagere",
+                "description": "Denne besked vil blive inkluderet i den indledende \"Handling Påkrævet\" e-mail sendt til alle deltagere.",
+                "placeholder": "f.eks. Gennemgå og underskriv venligst dette dokument hurtigst muligt. Tak!"
+            },
+            "details": {
+                "title": "Detaljer i Korthed",
+                "fields": "Felter",
+                "recipients": "Modtagere",
+                "pages": "Sider"
+            },
+            "credits": {
+                "title": "Dokumentkreditforbrug",
+                "usageText": "Denne pakke vil bruge 1 dokumentkredit",
+                "usageText_plural": "Denne pakke vil bruge {{count}} dokumentkreditter",
+                "signerCountText": "Ingen underskrivere tildelt endnu",
+                "signerCountText_plural": "{{count}} unik underskriver fundet",
+                "signerCountText_plural_plural": "{{count}} unikke underskrivere fundet",
+                "tip_strong": "Tip:",
+                "tip_text": "Hver dokumentkredit dækker op til 2 unikke underskrivere.",
+                "tip_extra": "Du har {{signers}} underskrivere, hvilket kræver {{credits}} kreditter."
+            },
+            "progress": {
+                "title": "Tildelingsfremskridt",
+                "completeText": "{{rate}}% Fuldført",
+                "actionRequired": "Handling Påkrævet",
+                "unassignedFields": "Der er 1 utildelt påkrævet felt.",
+                "unassignedFields_plural": "Der er {{count}} utildelte påkrævede felter."
+            }
+        },
+        "recipients": {
+            "assigned": {
+                "title": "Tildelte Deltagere",
+                "empty": "Ingen brugere er blevet tildelt felter."
+            },
+            "notificationOnly": {
+                "title": "Kun Underretnings-Modtagere",
+                "description": "Tilføj kontakter, der vil modtage pakkeunderretninger, men som ikke skal underskrive.",
+                "addButton": "Tilføj Modtager"
+            }
+        },
+        "settings": {
+            "expiration": {
+                "title": "Pakkeudløb",
+                "description": "Angiv en dato og tid, hvor denne pakke ikke længere vil være tilgængelig.",
+                "okButton": "OK"
+            },
+            "reminders": {
+                "title": "Udløbspåmindelser",
+                "setExpirationNote": "Angiv venligst en pakkeudløbsdato først for at aktivere udløbspåmindelser.",
+                "enableCheckbox": "Send Udløbspåmindelser",
+                "timing": {
+                    "label": "Påmindelsestidspunkt",
+                    "placeholder": "Vælg påmindelsestidspunkt",
+                    "options": {
+                        "1_hour": "1 Time Før",
+                        "2_hours": "2 Timer Før",
+                        "1_day": "24 Timer Før",
+                        "2_days": "48 Timer Før"
+                    },
+                    "tooSoonNote": "Udløbsdatoen er for tæt på for alle påmindelsesmuligheder. Angiv venligst en senere dato for at aktivere påmindelser."
+                }
+            },
+            "autoReminders": {
+                "title": "Automatiske Påmindelser",
+                "setExpirationNote": "Angiv venligst en pakkeudløbsdato først for at aktivere automatiske påmindelser.",
+                "enableCheckbox": "Aktiver Automatiske Påmindelser",
+                "first": {
+                    "label": "Første påmindelse",
+                    "suffix": "dage før udløb"
+                },
+                "repeat": {
+                    "label": "Opfølgende påmindelser",
+                    "prefix": "Gentag hver",
+                    "suffix": "dag(e)"
+                },
+                "tooSoonNote": "Udløbsdatoen skal sættes til mere end én dag i fremtiden for at aktivere automatiske påmindelser."
+            },
+            "permissions": {
+                "title": "Tilladelser",
+                "allowDownload": "Tillad download før underskrift er fuldført",
+                "allowReassign": "Tillad deltagere at omfordele deres rolle"
+            }
+        },
+        "messages": {
+            "receiverAdded": "{{name}} tilføjet som modtager.",
+            "contactCreated": "{{name}} oprettet og valgt som modtager.",
+            "expirationSet": "Pakkeudløb sat til {{date}}",
+            "expirationRemoved": "Pakkeudløb fjernet - pakken udløber ikke",
+            "reminderTimingReset": "Påmindelsestidspunktet blev nulstillet, da det ikke længere er gyldigt for den nye udløbsdato.",
+            "firstReminderReset": "Den første automatiske påmindelse blev nulstillet, da den ikke længere er gyldig for den nye udløbsdato.",
+            "repeatReminderReset": "Opfølgningspåmindelsesintervallet blev nulstillet, da det ikke længere er gyldigt."
+        },
+        "errors": {
+            "missingSource": "Dokumentkilde mangler. Vend venligst tilbage til Trin 1.",
+            "fetchFailed": "Hentning mislykkedes",
+            "fetchBlobFailed": "Hentning mislykkedes for blob",
+            "noSource": "Ingen PDF-kilde fundet i pakkedata.",
+            "loadFailed": "Mislykkedes at indlæse dokumentforhåndsvisningen.",
+            "renderFailed": "Mislykkedes at gengive PDF-sider.",
+            "pastDate": "Udløbsdato kan ikke være i fortiden. Vælg venligst en fremtidig dato."
+        }
+    },
+    "packageFieldRenderer": {
+        "fieldTypes": {
+            "text": "Tekst",
+            "textarea": "Tekst",
+            "signature": "Underskrift",
+            "checkbox": "Afkrydsningsfelt",
+            "radio": "Radio",
+            "date": "Dato",
+            "dropdown": "Vælg"
+        },
+        "labelInput": {
+            "placeholder": "Feltetiket"
+        },
+        "labelTitle": {
+            "signature": "Underskriftsfeltetiket kan ikke redigeres",
+            "editable": "Klik for at redigere etiket"
+        },
+        "titles": {
+            "markRequired": "Marker som påkrævet",
+            "markOptional": "Marker som valgfri",
+            "quickAssign": "Hurtigt tildel bruger",
+            "signatureFieldAssigned": "Underskriftsfelt har allerede en underskriver",
+            "deleteField": "Slet felt"
+        },
+        "quickAssign": {
+            "title": "Hurtig Tildeling",
+            "signatureWarning": "Underskriftsfelter kan kun have én Underskriver tildelt.",
+            "selectContact": "Vælg Kontakt",
+            "selectContactPlaceholder": "Vælg en kontakt...",
+            "addNewContact": "Tilføj Ny Kontakt",
+            "role": "Rolle",
+            "signatureRoleNote": "Underskriftsfelter kræver rollen Underskriver",
+            "nonSignatureRoleNote": "Underskrivere kan kun tildeles til underskriftsfelter",
+            "authMethods": "Autentificeringsmetoder",
+            "authMethodsEmail": "E-mail OTP-Bekræftelse",
+            "authMethodsSMS": "SMS OTP-Bekræftelse",
+            "assignButton": "Tildel til Felt",
+            "roles": {
+                "Signer": "Underskriver",
+                "FormFiller": "Formularudfylder",
+                "Approver": "Godkender"
+            }
+        },
+        "assignedUsers": {
+            "title": "{{name}} ({{role}}){{methods}}"
+        },
+        "messages": {
+            "labelUpdated": "Etiket opdateret",
+            "markedRequired": "Felt markeret som påkrævet",
+            "markedOptional": "Felt markeret som valgfrit",
+            "signatureFieldAssigned": "Underskriftsfelt har allerede en underskriver tildelt",
+            "userAssigned": "{{name}} tildelt som {{role}}",
+            "contactAdded": "{{name}} tilføjet"
+        },
+        "errors": {
+            "signatureFieldHasSigner": "Underskriftsfelter kan kun have én underskriver tildelt."
+        }
+    },
+    "addEditContactModal": {
+        "title": {
+            "add": "Tilføj Ny Kontakt",
+            "edit": "Rediger Kontakt"
+        },
+        "labels": {
+            "titlePrefix": "Titel",
+            "firstName": "Fornavn",
+            "lastName": "Efternavn",
+            "email": "E-mail",
+            "phone": "Telefonnummer",
+            "language": "Sprog",
+            "title": "Titel/Beskæftigelse",
+            "additionalInfo": "Yderligere Information"
+        },
+        "placeholders": {
+            "firstName": "Indtast Fornavn",
+            "lastName": "Indtast Efternavn",
+            "email": "Indtast E-mail",
+            "title": "Indtast Titel",
+            "customFieldKey": "Feltnavn (f.eks. Virksomhed)",
+            "customFieldValue": "Værdi (f.eks. Acme Inc.)"
+        },
+        "titlePrefixOptions": {
+            "none": "Ingen",
+            "mr": "Hr.",
+            "mrs": "Fru.",
+            "ms": "Frk.",
+            "dr": "Dr.",
+            "prof": "Prof."
+        },
+        "languageOptions": {
+            "en": "Engelsk",
+            "es": "Spansk (Español)",
+            "fr": "Fransk (Français)"
+        },
+        "buttons": {
+            "cancel": "Annuller",
+            "saving": "Gemmer...",
+            "addContact": "Tilføj Kontakt",
+            "updateContact": "Opdater Kontakt",
+            "addCustomField": "+ Tilføj Brugerdefineret Felt"
+        },
+        "errors": {
+            "firstNameRequired": "Fornavn er påkrævet",
+            "lastNameRequired": "Efternavn er påkrævet",
+            "emailInvalid": "Ugyldigt e-mailformat",
+            "emailRequired": "E-mail er påkrævet",
+            "phoneInvalid": "Ugyldigt telefonnummer",
+            "languageRequired": "Sprog er påkrævet",
+            "customFieldKeyRequired": "Feltnavn er påkrævet"
+        },
+        "messages": {
+            "contactAdded": "Kontakt tilføjet.",
+            "contactUpdated": "Kontakt opdateret."
+        }
+    },
+    "packageFieldPropertiesPanel": {
+        "fieldTypes": {
+            "text": "Tekst",
+            "textarea": "Tekstfelt",
+            "signature": "Underskrift",
+            "checkbox": "Afkrydsningsfelt",
+            "radio": "Radio",
+            "date": "Dato",
+            "dropdown": "Rullemenu"
+        },
+        "labels": {
+            "fieldType": "Felttype:",
+            "label": "Etiket:",
+            "placeholder": "Pladsholder:",
+            "radioGroupId": "Radiogruppe-ID:",
+            "radioOptions": "Muligheder (kommasepareret):",
+            "dropdownOptions": "Muligheder (kommasepareret):",
+            "required": "Påkrævet",
+            "assignUsers": "Tildel Brugere til Felt",
+            "signatureMethods": "Underskriftsmetode(r):",
+            "allowedMethods": "Tilladte Metoder:",
+            "assignedUsers": "Tildelte Brugere:"
+        },
+        "placeholders": {
+            "placeholder": "Indtast pladsholdertekst",
+            "radioGroupId": "Unikt ID for denne radiogruppe",
+            "radioOptions": "Mulighed 1, Mulighed 2",
+            "dropdownOptions": "Mulighed 1, Mulighed 2",
+            "selectRole": "-- Vælg Rolle --"
+        },
+        "roles": {
+            "Signer": "Underskriver",
+            "FormFiller": "Formularudfylder",
+            "Approver": "Godkender"
+        },
+        "signatureMethods": {
+            "emailOTP": "Via E-mail OTP",
+            "smsOTP": "Via SMS OTP"
+        },
+        "titles": {
+            "removeAssignment": "Fjern tildeling"
+        },
+        "messages": {
+            "signatureLabelFixed": "Underskriftsfeltetiketter kan ikke ændres",
+            "radioGroupIdNote": "Alle radio knapper med samme Gruppe-ID fungerer som et enkelt valg.",
+            "radioOptionsNote": "Indtast mindst to muligheder for en meningsfuld radiogruppe.",
+            "dropdownOptionsNote": "Indtast mindst én mulighed for rullemenuen.",
+            "signatureFieldNote": "Underskriftsfelter kan kun have én Underskriver tildelt. Brug dette til indsamling af digital underskrift.",
+            "signatureRoleNote": "Underskriftsfelter kan kun tildeles til Underskrivere",
+            "nonSignatureRoleNote": "Underskrivere kan kun tildeles til underskriftsfelter",
+            "oneSignerMax": "Max 1 Underskriver",
+            "noUsersAssigned": "Ingen brugere tildelt.",
+            "userAssigned": "{{name}} tildelt som {{role}}",
+            "userAssignmentRemoved": "Brugertildeling fjernet"
+        },
+        "errors": {
+            "labelRequired": "Etiket er påkrævet",
+            "labelEmpty": "Etiket må ikke være tom",
+            "placeholderTooLong": "Pladsholder er for lang",
+            "radioOptionsMin": "Mindst to kommaseparerede muligheder er påkrævet for Radiogruppe",
+            "dropdownOptionsMin": "Mindst én mulighed er påkrævet for Rullemenu",
+            "groupIdRequired": "Gruppe-ID er påkrævet for radio knapper",
+            "noAuthMethod": "En underskriver skal have mindst én autentificeringsmetode.",
+            "signatureFieldHasSigner": "Underskriftsfelter kan kun have én underskriver tildelt."
+        }
+    },
+    "packageStatusPage": {
+        "loading": {
+            "title": "Indlæser Dokumentstatus...",
+            "message": "Vent venligst et øjeblik."
+        },
+        "error": {
+            "title": "Kan ikke Indlæse Dokument"
+        }
+    },
+    "packageStatusLayout": {
+        "participants": {
+            "title": "Deltagere"
+        }
+    },
+    "participantStatusPanel": {
+        "header": {
+            "title": "Deltagere",
+            "participantCount": "{{count}} deltager",
+            "pluralSuffix": "e"
+        },
+        "roles": {
+            "receiver": "Modtager"
+        },
+        "messages": {
+            "noParticipants": "Ingen deltagere tildelt"
+        }
+    },
+    "packageStatusHeader": {
+        "status": {
+            "completed": "Fuldført",
+            "rejected": "Afvist",
+            "pending": "Afventer",
+            "archived": "Arkiveret",
+            "draft": "Kladde"
+        },
+        "meta": {
+            "createdAt": "Oprettet",
+            "fieldCount": "{{count}} felt",
+            "pluralSuffix": "er"
+        }
+    },
+    "ownerDocumentViewer": {
+        "errors": {
+            "loadFailed": "Mislykkedes at indlæse dokument: {{message}}"
+        },
+        "controls": {
+            "previousPage": "Forrige side",
+            "nextPage": "Næste side",
+            "zoomOut": "Zoom ud",
+            "zoomIn": "Zoom ind",
+            "pageNavigation": "Side {{current}} af {{total}}",
+            "zoomLevel": "{{level}}%"
+        },
+        "pageNumber": "Side {{number}}"
+    },
+    "statusFieldRenderer": {
+        "status": {
+            "rejected": "Afvist",
+            "revoked": "Tilbagekaldt",
+            "draft": "Kladde",
+            "signed": "Underskrevet",
+            "signedBy": "Underskrevet af {{signedBy}}",
+            "filled": "Udfyldt",
+            "pending": "Afventer"
+        },
+        "unassigned": "Utildelt",
+        "tooltip": "{{label}} - {{type}} - Tildelt til: {{assignedTo}} - Status: {{status}}"
+    },
+    "setting": {
+        "toggleCustomizer": "Slå dashboard-tilpasser til/fra",
+        "header": {
+            "title": "DASHBOARD-TILPASSER",
+            "description": "Indstil præferencer, der gemmes i cookies til din live forhåndsvisningsdemonstration."
+        },
+        "colorScheme": {
+            "title": "Farveskema",
+            "description": "Overordnet lys eller mørk præsentation.",
+            "light": "Lys",
+            "dark": "Mørk",
+            "system": "System"
+        },
+        "navigationPosition": {
+            "title": "Navigationsposition",
+            "description": "Vælg det primære navigationsparadigme for din app.",
+            "horizontal": "Vandret",
+            "vertical": "Lodret",
+            "collapsible": "Sammenklappelig",
+            "semiDark": "Semi Mørk (Sidestolpe & Overskrift)"
+        },
+        "layoutStyle": {
+            "title": "Layoutstil",
+            "description": "Vælg den primære layoutstil for din app.",
+            "box": "Boks",
+            "full": "Fuld"
+        },
+        "direction": {
+            "title": "Retning",
+            "description": "Vælg retningen for din app.",
+            "ltr": "VTH",
+            "rtl": "HTV"
+        },
+        "navbarType": {
+            "title": "Navigationslinjetype",
+            "description": "Klistret eller Flydende.",
+            "sticky": "Klistret",
+            "floating": "Flydende",
+            "static": "Statisk"
+        },
+        "routerTransition": {
+            "title": "Routerovergang",
+            "description": "Animation af hovedindhold.",
+            "none": "Ingen",
+            "fade": "Toning",
+            "fadeDown": "Toning Ned",
+            "fadeUp": "Toning Op",
+            "fadeLeft": "Toning Venstre",
+            "fadeRight": "Toning Højre",
+            "slideDown": "Slide Ned",
+            "slideLeft": "Slide Venstre",
+            "slideRight": "Slide Højre",
+            "zoomIn": "Zoom Ind"
+        }
+    },
+    "reviewPage": {
+        "loading": {
+            "title": "Kontrollerer Berettigelse",
+            "message": "Vent venligst, mens vi verificerer din adgang..."
+        },
+        "success": {
+            "title": "Tak! 🎉",
+            "message": "Din feedback er blevet indsendt.",
+            "feedback": "Din anmeldelse hjælper os med at forbedre oplevelsen for alle"
+        },
+        "ineligible": {
+            "title": "Anmeldelse Ikke Tilgængelig",
+            "contactSupport": "Hvis du mener, dette er en fejl, kontakt venligst support"
+        },
+        "form": {
+            "feedbackRequired": "Feedback Påkrævet",
+            "title": "Hvordan var din",
+            "titleHighlight": "oplevelse",
+            "description": "Din feedback hjælper os med at forbedre e-underskriftsoplevelsen for alle. Brug venligst et øjeblik på at bedømme din oplevelse.",
+            "progress": "Fremskridt:",
+            "progressStatus": "{{completed}} af {{total}} fuldført",
+            "ratingInstruction": "Bedøm fra 1 (dårlig) til 5 (fremragende)",
+            "commentsTitle": "Yderligere Kommentarer",
+            "commentsDescription": "Fortæl os mere om din oplevelse (valgfri)",
+            "commentsPlaceholder": "Del dine tanker, forslag eller specifik feedback...",
+            "commentLength": "{{length}}/500",
+            "submitting": "Indsender Feedback...",
+            "submitButton": "Indsend Feedback",
+            "submitReady": "Alle bedømmelser fuldført! Klar til indsendelse.",
+            "submitIncomplete": "Fuldfør venligst alle bedømmelser før indsendelse."
+        },
+        "errors": {
+            "allRatingsRequired": "Angiv venligst en bedømmelse for alle spørgsmål.",
+            "submissionError": "Indsendelsesfejl: {{error}}"
+        }
+    },
+    "subscriptionRequired": {
+        "active": {
+            "title": "Aktivt Abonnement Påkrævet",
+            "description": "For at få adgang til denne funktion skal du have et aktivt abonnement. Vælg mellem vores fleksible planer nedenfor.",
+            "action": "Se Abonnementsplaner"
+        },
+        "package": {
+            "title": "Opgrader Din Plan",
+            "description": "Dit nuværende abonnement inkluderer ikke oprettelse af pakker. Opgrader for at låse op for denne kraftfulde funktion.",
+            "action": "Opgrader Abonnement"
+        },
+        "default": {
+            "title": "Abonnement Påkrævet",
+            "description": "Denne funktion kræver et abonnement for at fortsætte. Kom i gang med vores overkommelige planer.",
+            "action": "Se Planer"
+        },
+        "status": {
+            "current": "Nuværende Status",
+            "packageCreation": "Pakkeoprettelse",
+            "allowed": "Tilladt",
+            "notAllowed": "Ikke Tilladt"
+        },
+        "actions": {
+            "goBack": "Gå Tilbage"
+        },
+        "help": {
+            "text": "Brug for hjælp til at vælge en plan?",
+            "link": "Kontakt Support"
+        }
+    },
+    "participantPage": {
+        "loading": {
+            "title": "Indlæser Sikker Dokument",
+            "message": "Vent venligst, mens vi forbereder dit dokument..."
+        },
+        "error": {
+            "title": "Adgang Nægtet",
+            "message": "Tjek venligst dit link eller kontakt afsenderen, hvis du mener, dette er en fejl.",
+            "action": "Prøv Igen"
+        }
+    },
+    "headerControls": {
+        "navigation": {
+            "previous": "Forrige Side",
+            "next": "Næste Side",
+            "page": "Side {{current}} af {{total}}"
+        },
+        "zoom": {
+            "title": "Zoomniveau",
+            "in": "Zoom Ind",
+            "out": "Zoom Ud",
+            "level": "{{level}}%"
+        },
+        "status": {
+            "completed": "Fuldført",
+            "sent": "Sendt",
+            "draft": "Kladde",
+            "archived": "Arkiveret",
+            "rejected": "Afvist"
+        },
+        "fullscreen": {
+            "enter": "Fuldskærmsvisning",
+            "exit": "Afslut Fuldskærmsvisning"
+        },
+        "options": "Flere muligheder",
+        "participants": {
+            "title": "Se Deltagere",
+            "description": "Se færdiggørelsesstatus"
+        },
+        "download": {
+            "title": "Download PDF",
+            "disabled": "Download er kun tilgængelig efter fuldførelse",
+            "label": "Download Fil",
+            "description": "Gem PDF-kopi",
+            "downloading": "Downloader...",
+            "preparing": "Forbereder dit dokument til download..."
+        },
+        "errors": {
+            "noPackageData": "Pakkedata er ikke tilgængelig. Opdater venligst siden og prøv igen."
+        },
+        "drawer": {
+            "title": "Deltagerstatus",
+            "description": "Spor færdiggørelsesfremskridt",
+            "noParticipants": "Ingen deltagerinformation tilgængelig.",
+            "back": "Tilbage til Dokument"
+        },
+        "participantStatus": {
+            "pending": "Afventer",
+            "completed": "Fuldført",
+            "not applicable": "Ikke relevant",
+            "pendingDesc": "Afventer handling",
+            "completedDesc": "Alle opgaver fuldført",
+            "notApplicableDesc": "Kun til arkivering"
+        }
+    },
+    "participantLayout": {
+        "brand": "I-Sign.eu",
+        "help": "Hjælp",
+        "sidebar": {
+            "toggle": "Slå sidestolpe til/fra",
+            "title": "Dokumentdetaljer",
+            "signAs": "Underskriv som",
+            "currentUser": "Nuværende Bruger",
+            "documents": "Dokumenter",
+            "pages": "{{count}} side{{#count !== 1 ? 'r' : ''}}",
+            "progress": "Fremskridt"
+        },
+        "progress": {
+            "status": "Fuldførelsesstatus",
+            "completed": "Dokument fuldført",
+            "rejected": "Dokument afvist",
+            "expired": "Dokument udløbet",
+            "draft": "Dokument i kladde",
+            "archived": "Dokument arkiveret",
+            "tasksCompleted": "Dine opgaver fuldført",
+            "reviewTerms": "Gennemgå og accepter vilkår",
+            "fieldsCompleted": "{{completed}}/{{total}} felter fuldført",
+            "readyForSubmission": "Klar til endelig indsendelse",
+            "termsAccepted": "Vilkår accepteret",
+            "requiredFields": "Påkrævede felter"
+        },
+        "success": {
+            "title": "Du er Klar!",
+            "message": "Tillykke! Du har fuldført alle dine tildelte opgaver for dette dokument. Dine svar er blevet indsendt, og dokumentet er klar til de næste trin i processen.",
+            "requiredFields": "Alle påkrævede felter fuldført",
+            "termsAccepted": "Brugsvilkår accepteret",
+            "signatureApplied": "Digital underskrift anvendt",
+            "nextSteps": "Hvad sker der nu?",
+            "nextMessage": "Dokumentet sendes videre til andre deltagere til deres gennemgang og fuldførelse. Du får besked, når hele dokumentprocessen er fuldført."
+        },
+        "terms": {
+            "part1": "Jeg erklærer, at jeg har læst dokumentet og vil overholde",
+            "link": "Brugsvilkår",
+            "part2": ".",
+            "accepted": "Vilkår accepteret"
+        },
+        "defaultParticipant": "Anden Deltager"
+    },
+    "documentViewer": {
+        "loading": {
+            "title": "Forbereder Dokument",
+            "message": "Vent venligst, mens vi indlæser dit dokument...",
+            "progress": "{{progress}}%"
+        },
+        "errors": {
+            "title": "Fejl ved Indlæsning af Dokument",
+            "missingUrl": "Dokument-URL mangler.",
+            "fetchFailed": "Mislykkedes at hente PDF: {{status}}",
+            "unknown": "Der opstod en ukendt fejl under indlæsning af PDF'en.",
+            "loadFailed": "Mislykkedes at indlæse dokument: {{message}}",
+            "tryAgain": "Prøv Igen"
+        },
+        "preparing": "Forbereder dokument...",
+        "rejection": {
+            "title": "Dokument Afvist",
+            "rejectedBy": "Afvist af:",
+            "ipAddress": "IP-adresse:",
+            "date": "Dato:",
+            "reason": "Årsag:"
+        },
+        "pageInfo": "Side {{current}} af {{total}}",
+        "fieldsOnPage": "{{count}} felt{{#count !== 1 ? 'er' : ''}} på denne side",
+        "reviewComplete": {
+            "title": "Dokumentgennemgang Fuldført",
+            "message": "Du er nået til slutningen af dokumentet. Gennemgå venligst alle felter og accepter vilkårene nedenfor for at fortsætte med underskrivelsen."
+        }
+    },
+    "actionSidebar": {
+        "save": {
+            "label": "Gem",
+            "saving": "Gemmer...",
+            "saveChanges": "Gem dine ændringer",
+            "noChanges": "Ingen ændringer at gemme",
+            "finalized": "Dokumentet er {{status}}",
+            "success": "Dine ændringer er blevet gemt!",
+            "error": "Mislykkedes at gemme dine ændringer. Prøv venligst igen."
+        },
+        "sign": {
+            "label": "Underskriv",
+            "ready": "Underskriv Dokument",
+            "finalized": "Dokumentet er {{status}}. Ingen yderligere handlinger er tilladt.",
+            "saveFirst": "Gem Først",
+            "noSignatureFields": "Du har ingen underskriftsfelter tildelt dig.",
+            "agreeTerms": "Accepter venligst Brugsvilkårene før underskrivelse.",
+            "allSigned": "Alle dine underskriftsfelter er blevet fuldført.",
+            "error": "Fejl: Kan ikke finde deltagerens tildeling."
+        },
+        "reject": {
+            "label": "Afvis",
+            "finalized": "Dokumentet er {{status}}. Ingen yderligere handlinger er tilladt.",
+            "receiversCannot": "Modtagere kan ikke afvise"
+        },
+        "reassign": {
+            "label": "Omfordel",
+            "finalized": "Dokumentet er {{status}}. Ingen yderligere handlinger er tilladt.",
+            "completed": "Du kan ikke omfordele efter at have fuldført dine handlinger."
+        },
+        "addReceiver": {
+            "label": "Tilføj Modtager",
+            "finalized": "Dokumentet er {{status}}"
+        },
+        "progress": {
+            "finalized": "Dokument {{status}}",
+            "unsaved": "Ugemte ændringer",
+            "readyToSign": "Klar til at underskrive",
+            "noSignature": "Ingen underskrift påkrævet",
+            "reviewTerms": "Gennemgå vilkår"
+        }
+    },
+    "rejectModal": {
+        "title": "Afvis dette Dokument",
+        "description": "Denne handling er irreversibel. Afsenderen og alle andre deltagere vil blive underrettet. Angiv venligst en klar årsag til afvisningen nedenfor.",
+        "reasonLabel": "Årsag til Afvisning",
+        "reasonPlaceholder": "f.eks. Kontraktdetaljerne er forkerte...",
+        "characterCount": "{{count}} / 500",
+        "submit": "Indsend Afvisning",
+        "submitting": "Indsender...",
+        "cancel": "Annuller",
+        "close": "Luk",
+        "validation": {
+            "emptyReason": "En årsag til afvisning er påkrævet.",
+            "reasonTooLong": "Årsagen skal være 500 tegn eller mindre."
+        },
+        "errors": {
+            "missingData": "Væsentlige data mangler. Opdater venligst siden."
+        }
+    },
+    "reassignDrawer": {
+        "close": "Luk",
+        "errors": {
+            "missingFields": "Angiv venligst fornavn, efternavn og e-mail.",
+            "missingReason": "En årsag til omfordeling er påkrævet."
+        },
+        "createContact": {
+            "success": "Kontakt oprettet!"
+        },
+        "reassign": {
+            "success": "Omfordeling fuldført!"
+        },
+        "steps": {
+            "select": {
+                "title": "Vælg Kontakt",
+                "description": "Vælg en kontakt at omfordele dit ansvar til",
+                "searchPlaceholder": "Søg efter navn eller e-mail...",
+                "loading": "Indlæser Kontakter...",
+                "noContacts": "Ingen kontakter fundet.",
+                "addButton": "Tilføj Ny Kontakt"
+            },
+            "add": {
+                "title": "Tilføj Ny Kontakt",
+                "description": "Indtast detaljer for den nye kontakt",
+                "emailLabel": "Ny Deltagers E-mail",
+                "emailPlaceholder": "navn@eksempel.com",
+                "firstNameLabel": "Fornavn",
+                "firstNamePlaceholder": "Fornavn",
+                "lastNameLabel": "Efternavn",
+                "lastNamePlaceholder": "Efternavn",
+                "phoneLabel": "Telefonnummer",
+                "phonePlaceholder": "Indtast telefonnummer",
+                "backButton": "Tilbage",
+                "createButton": "Opret og Vælg Kontakt"
+            },
+            "confirm": {
+                "title": "Bekræft Omfordeling",
+                "description": "Du er ved at omfordele dit ansvar til følgende kontakt. Denne handling kan ikke fortrydes.",
+                "reasonLabel": "Årsag til Omfordeling",
+                "reasonPlaceholder": "Angiv venligst en kort årsag...",
+                "backButton": "Tilbage",
+                "confirmButton": "Bekræft Omfordeling"
+            },
+            "success": {
+                "title": "Omfordeling Lykkedes",
+                "description": "Dit ansvar er blevet omfordelt",
+                "message": "Dit ansvar for dette dokument er blevet overført til:",
+                "notification": "Alle parter vil blive underrettet om denne ændring.",
+                "backButton": "Tilbage til Dokument"
+            },
+            "default": {
+                "title": "Omfordel Ansvar",
+                "description": "Overfør dine opgaver til en anden person"
+            }
+        }
+    },
+    "addReceiverDrawer": {
+        "close": "Luk",
+        "errors": {
+            "missingFields": "Angiv venligst fornavn, efternavn og e-mail."
+        },
+        "steps": {
+            "select": {
+                "title": "Vælg Kontakt at Tilføje",
+                "description": "Vælg en eksisterende kontakt at tilføje som modtager",
+                "searchPlaceholder": "Søg efter navn eller e-mail...",
+                "loading": "Indlæser Kontakter...",
+                "noContacts": "Ingen kontakter fundet.",
+                "addButton": "Tilføj Ny Kontakt"
+            },
+            "add": {
+                "title": "Tilføj Ny Kontakt",
+                "description": "Indtast detaljer for en ny kontakt",
+                "emailLabel": "Ny Modtagers E-mail",
+                "emailPlaceholder": "navn@eksempel.com",
+                "firstNameLabel": "Fornavn",
+                "firstNamePlaceholder": "Fornavn",
+                "lastNameLabel": "Efternavn",
+                "lastNamePlaceholder": "Efternavn",
+                "phoneLabel": "Telefonnummer",
+                "phonePlaceholder": "Indtast telefonnummer",
+                "backButton": "Tilbage",
+                "createButton": "Opret og Tilføj Kontakt"
+            },
+            "success": {
+                "title": "Modtager Tilføjet",
+                "description": "Kontakten er blevet underrettet og tilføjet til dokumentet",
+                "message": "er blevet tilføjet som modtager og underrettet.",
+                "notification": "Alle parter vil blive underrettet om denne tilføjelse.",
+                "backButton": "Tilbage til Dokument"
+            },
+            "failure": {
+                "title": "Handling Mislykkedes",
+                "description": "Der opstod en uventet fejl. Prøv venligst igen.",
+                "closeButton": "Luk"
+            },
+            "default": {
+                "title": "Tilføj Modtager",
+                "description": "Tilføj en ny skrivebeskyttet deltager til dette dokument"
+            }
+        }
+    },
+    "signingDrawer": {
+        "close": "Luk",
+        "email": "e-mail",
+        "phone": "telefonnummer",
+        "emailOtp": "E-mail OTP",
+        "smsOtp": "SMS OTP",
+        "errors": {
+            "missingData": "Der opstod en fejl. Kan ikke identificere dokumentet eller feltet.",
+            "missingIdentity": "Indtast venligst dit {{method}}.",
+            "resendOtp": "Kunne ikke gensende OTP. Gå tilbage og bekræft dit {{method}}.",
+            "invalidOtp": "Der opstod en fejl. Mangler påkrævet information."
+        },
+        "otpSent": {
+            "email": "OTP sendt til din e-mail!",
+            "sms": "OTP sendt til din telefon!"
+        },
+        "steps": {
+            "method": {
+                "title": "Vælg Underskriftsmetode",
+                "description": "Vælg en metode til sikkert at verificere din identitet",
+                "emailOption": "Engangskode via E-mail",
+                "emailDescription": "Sikker verifikation via din e-mail",
+                "smsOption": "Engangskode via SMS",
+                "smsDescription": "Sikker verifikation via din telefon"
+            },
+            "identity": {
+                "title": "Bekræft Dit {{method}}",
+                "description": "Af sikkerhedsmæssige årsager, indtast venligst dit {{method}} nedenfor",
+                "info": "Vi sender en bekræftelseskode til det {{method}}, du indtaster nedenfor.",
+                "matchInfo": "Det skal matche modtagerens {{method}}: {{contact}}",
+                "label": "Dit {{method}}",
+                "emailPlaceholder": "f.eks. ditnavn@eksempel.com",
+                "phonePlaceholder": "f.eks. +1234567890",
+                "backButton": "Tilbage",
+                "requestButton": "Anmod om Kode"
+            },
+            "otp": {
+                "title": "Indtast Bekræftelseskode",
+                "description": "Vi sendte en 6-cifret kode til {{contact}}. Den udløber om {{timer}} sekunder.",
+                "timerLabel": "sekunder tilbage",
+                "inputLabel": "Indtast 6-cifret bekræftelseskode",
+                "inputPlaceholder": "------",
+                "resendButton": "Gensend bekræftelseskode",
+                "resending": "Sender...",
+                "backButton": "Tilbage",
+                "completeButton": "Fuldfør Underskrivelse"
+            },
+            "success": {
+                "title": "Dokument Underskrevet!",
+                "description": "Din underskrift er blevet anvendt på dokumentet",
+                "message": "Tak for at fuldføre underskriftsprocessen via {{method}}.",
+                "notification": "Alle parter vil blive underrettet, når dokumentet er fuldt fuldført.",
+                "backButton": "Tilbage til Dokument"
+            },
+            "default": {
+                "title": "Underskriftsproces",
+                "description": ""
+            }
+        }
+    },
+    "readOnlyField": {
+        "unknownUser": "Ukendt Bruger",
+        "otherParticipant": "Anden Deltager",
+        "participantRole": "Deltager",
+        "signed": "Underskrevet",
+        "rejected": "Afvist",
+        "reason": "Årsag:",
+        "otpCode": "OTP: {{code}}",
+        "via": "via {{method}}",
+        "emailOtp": "E-mail OTP",
+        "signatureField": "Underskriftsfelt",
+        "checkbox": "Afkrydsningsfelt",
+        "textarea": "Tekstfelt",
+        "dateField": "Datofelt",
+        "textField": "Tekstfelt",
+        "rejectionTooltip": "Felt afvist af {{name}}: {{reason}}",
+        "fieldTooltip": "Felt for {{name}} ({{contact}}): {{label}}"
+    },
+    "interactiveField": {
+        "unknownUser": "Ukendt Bruger",
+        "currentUser": "Nuværende Bruger",
+        "participantRole": "Deltager",
+        "signed": "Underskrevet",
+        "rejected": "Afvist",
+        "reason": "Årsag:",
+        "rejectedIP": "IP: {{ip}}",
+        "otpCode": "OTP: {{code}}",
+        "via": "via {{method}}",
+        "emailOtp": "E-mail OTP",
+        "sign": "Underskriv",
+        "clickToSign": "Klik for at underskrive",
+        "chooseMethod": "Vælg metode",
+        "editField": "Rediger felt",
+        "saveField": "Gem felt",
+        "unsupported": "Ikke understøttet",
+        "errors": {
+            "termsNotAgreed": "Accepter venligst Brugsvilkårene nederst i dokumentet før underskrivelse.",
+            "noDocumentData": "Fejl: Dokumentdata er ikke tilgængelig.",
+            "noParticipantAssignment": "Fejl: Kan ikke finde deltagerens tildeling."
+        },
+        "rejectionTooltip": "Felt afvist af {{name}}: {{reason}}"
+    },
+    "subscriptionBanner": {
+        "noSubscription": {
+            "title": "Lås Op for Alle Funktioner",
+            "message": "Aktiver et abonnement for at begynde at oprette og administrere dokumenter.",
+            "ctaText": "Se Planer"
+        },
+        "limitReached": {
+            "title": "Dokumentgrænse Nået",
+            "message": "Opgrader venligst din plan for at fortsætte med at oprette nye dokumenter.",
+            "ctaText": "Opgrader Plan"
+        },
+        "lowDocuments": {
+            "title": "Få Dokumenter Tilbage",
+            "message": "Du har kun {{remaining}} dokumenter tilbage. Opgrader for at få flere.",
+            "ctaText": "Opgrader Plan"
+        }
+    },
+    "purchaseModal": {
+        "cardBrands": {
+            "visa": "Visa",
+            "mastercard": "Mastercard",
+            "amex": "American Express"
+        },
+        "expires": "Udløber {{month}}/{{year}}",
+        "default": "Standard",
+        "topUpTitle": "Tank Op på Din Plan",
+        "confirmSubscription": "Bekræft Dit Abonnement",
+        "topUpDetails": "Tank Op Detaljer",
+        "yourPlan": "Din Plan",
+        "yearly": "Årlig",
+        "monthly": "Månedlig",
+        "annually": "årligt",
+        "billed": "Faktureres {{interval}}t",
+        "trialEndNote": "Bemærk: Fortsættelse afslutter din gratis prøveperiode og opkræver dig øjeblikkeligt.",
+        "selectPaymentMethod": "Vælg Betalingsmetode",
+        "useDifferentCard": "Brug et Andet Kort",
+        "startingTrial": "Starter Prøveperiode...",
+        "startTrial": "Start 14-dages Gratis Prøveperiode",
+        "processing": "Behandler...",
+        "topUp": "Tank Op",
+        "subscribeNow": "Abonnér Nu",
+        "subscribe": "{{action}} Nu (€{{price}})",
+        "termsAgreement": "Ved at fortsætte accepterer du vores Servicevilkår.",
+        "success": {
+            "topUp": "Tank Op Lykkedes!",
+            "topUpMessage": "Du har nu flere dokumenter tilgængelige på din {{planName}} plan!",
+            "subscription": "Abonnement Lykkedes!",
+            "subscriptionMessage": "Velkommen til {{planName}} planen!",
+            "trial": "Gratis Prøveperiode Startet!",
+            "trialMessage": "Du har 14 dages adgang til {{planName}} planen!"
+        },
+        "errors": {
+            "cardNotFound": "Kortdetaljer-formular ikke fundet.",
+            "invalidCard": "Ugyldige kortdetaljer.",
+            "noPaymentMethod": "Vælg eller tilføj venligst en betalingsmetode for at fortsætte.",
+            "planNotAvailable": "Denne plan er ikke tilgængelig for køb i øjeblikket.",
+            "unknownError": "Der opstod en uventet fejl."
+        }
+    },
+    "fieldPropertiesPanel": {
+        "fieldType": "Felttype:",
+        "fieldTypes": {
+            "text": "Tekst",
+            "textarea": "Tekstfelt",
+            "radio": "Radio",
+            "dropdown": "Rullemenu"
+        },
+        "label": "Etiket:",
+        "placeholder": "Pladsholder:",
+        "radioGroupId": "Radiogruppe-ID:",
+        "radioGroupIdPlaceholder": "Unikt ID for denne radiogruppe",
+        "radioGroupIdHint": "Alle radio knapper med samme Gruppe-ID fungerer som et enkelt valg.",
+        "radioOptions": "Muligheder (kommasepareret):",
+        "radioOptionsPlaceholder": "Mulighed 1, Mulighed 2",
+        "radioOptionsHint": "Indtast mindst to muligheder for en meningsfuld radiogruppe.",
+        "dropdownOptions": "Muligheder (kommasepareret):",
+        "dropdownOptionsPlaceholder": "Mulighed 1, Mulighed 2",
+        "dropdownOptionsHint": "Indtast mindst én mulighed for rullemenuen.",
+        "required": "Påkrævet",
+        "errors": {
+            "labelRequired": "Etiket er påkrævet",
+            "labelEmpty": "Etiket må ikke være tom",
+            "placeholderTooLong": "Pladsholder er for lang",
+            "radioOptionsMin": "Mindst to kommaseparerede muligheder er påkrævet for Radiogruppe",
+            "dropdownOptionsMin": "Mindst én mulighed er påkrævet for Rullemenu",
+            "groupIdRequired": "Gruppe-ID er påkrævet for radio knapper"
+        }
+    },
+    "editorToolbar": {
+        "fieldTypes": {
+            "text": "Tekst",
+            "textarea": "Tekstfelt",
+            "signature": "Underskrift",
+            "checkbox": "Afkrydsningsfelt",
+            "date": "Dato"
+        }
+    },
+    "messages": {
+        "logoutSuccess": "Du er blevet logget ud."
+    },
+    "meta": {
+        "pageTitle": "I-sign.eu - Professionel Elektronisk Underskrift Platform"
+    },
+    "languageSwitcher": {
+        "title": "Sprog",
+        "selectLanguage": "Vælg Sprog"
+    }
 }

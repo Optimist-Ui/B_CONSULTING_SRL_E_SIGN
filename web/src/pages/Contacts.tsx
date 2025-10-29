@@ -4,6 +4,7 @@ import Swal from 'sweetalert2';
 import { useDispatch, useSelector } from 'react-redux';
 import { Formik, Field, Form, ErrorMessage, FieldArray } from 'formik';
 import * as Yup from 'yup';
+import { useTranslation } from 'react-i18next';
 
 // Redux Imports
 import { IRootState, AppDispatch } from '../store';
@@ -29,15 +30,8 @@ interface LanguageOption {
     label: string;
 }
 
-const languageOptions: LanguageOption[] = [
-    { value: 'en', label: 'English' },
-    { value: 'es', label: 'Español (Spanish)' },
-    { value: 'fr', label: 'Français (French)' },
-    { value: 'de', label: 'Deutsch (German)' },
-    { value: 'it', label: 'Italiano (Italian)' },
-];
-
 const Contacts = () => {
+    const { t } = useTranslation();
     const dispatch: AppDispatch = useDispatch();
     const { contacts, loading } = useSelector((state: IRootState) => state.contacts);
 
@@ -45,38 +39,45 @@ const Contacts = () => {
     const [editContact, setEditContact] = useState<Contact | null>(null);
     const [search, setSearch] = useState('');
 
+    const languageOptions: LanguageOption[] = [
+        { value: 'en', label: t('contacts.languages.en') },
+        { value: 'es', label: t('contacts.languages.es') },
+        { value: 'fr', label: t('contacts.languages.fr') },
+        { value: 'de', label: t('contacts.languages.de') },
+        { value: 'it', label: t('contacts.languages.it') },
+    ];
+
     useEffect(() => {
-        dispatch(setPageTitle('Contacts'));
+        dispatch(setPageTitle(t('contacts.pageTitle')));
         dispatch(fetchContacts({ search }));
-    }, [dispatch, search]);
+    }, [dispatch, search, t]);
 
-    const ContactSchema = Yup.object().shape({
-        firstName: Yup.string().required('First name is required').min(2, 'First name must be at least 2 characters').max(50, 'First name cannot exceed 50 characters'),
-
-        lastName: Yup.string().required('Last name is required').min(2, 'Last name must be at least 2 characters').max(50, 'Last name cannot exceed 50 characters'),
-
-        email: Yup.string().email('Invalid email format').required('Email is required').max(254, 'Email cannot exceed 254 characters'),
-
-        phone: Yup.string()
-            .max(25, 'Phone number seems too long')
-            .test('is-valid-phone', 'Invalid phone number', (value) => !value || isValidPhoneNumber(value || ''))
-            .nullable(),
-
-        language: Yup.object().nullable().required('Language is required'),
-
-        title: Yup.string().optional().min(2, 'Title must be at least 2 characters').max(100, 'Title cannot exceed 100 characters'),
-
-        customFields: Yup.array().of(
-            Yup.object().shape({
-                key: Yup.string().when('value', {
-                    is: (val: string) => val && val.length > 0,
-                    then: (schema) => schema.required('Field name is required').min(2, 'Field name must be at least 2 characters').max(50, 'Field name cannot exceed 50 characters'),
-                    otherwise: (schema) => schema.optional(),
-                }),
-                value: Yup.string().optional().max(255, 'Value cannot exceed 255 characters'),
-            })
-        ),
-    });
+    const getContactSchema = () =>
+        Yup.object().shape({
+            firstName: Yup.string().required(t('contacts.validation.firstName.required')).min(2, t('contacts.validation.firstName.min')).max(50, t('contacts.validation.firstName.max')),
+            lastName: Yup.string().required(t('contacts.validation.lastName.required')).min(2, t('contacts.validation.lastName.min')).max(50, t('contacts.validation.lastName.max')),
+            email: Yup.string().email(t('contacts.validation.email.invalid')).required(t('contacts.validation.email.required')).max(254, t('contacts.validation.email.max')),
+            phone: Yup.string()
+                .max(25, t('contacts.validation.phone.max'))
+                .test('is-valid-phone', t('contacts.validation.phone.invalid'), (value) => !value || isValidPhoneNumber(value || ''))
+                .nullable(),
+            language: Yup.object().nullable().required(t('contacts.validation.language.required')),
+            title: Yup.string().optional().min(2, t('contacts.validation.title.min')).max(100, t('contacts.validation.title.max')),
+            customFields: Yup.array().of(
+                Yup.object().shape({
+                    key: Yup.string().when('value', {
+                        is: (val: string) => val && val.length > 0,
+                        then: (schema) =>
+                            schema
+                                .required(t('contacts.validation.customFields.key.required'))
+                                .min(2, t('contacts.validation.customFields.key.min'))
+                                .max(50, t('contacts.validation.customFields.key.max')),
+                        otherwise: (schema) => schema.optional(),
+                    }),
+                    value: Yup.string().optional().max(255, t('contacts.validation.customFields.value.max')),
+                })
+            ),
+        });
 
     const openModal = (contact: Contact | null = null) => {
         setEditContact(contact);
@@ -85,9 +86,7 @@ const Contacts = () => {
 
     const handleSaveContact = async (values: any) => {
         const customFieldsObject = values.customFields.reduce((acc: { [key: string]: string }, field: { key: string; value: string }) => {
-            if (field.key && field.value) {
-                acc[field.key] = field.value;
-            }
+            if (field.key && field.value) acc[field.key] = field.value;
             return acc;
         }, {});
 
@@ -106,10 +105,10 @@ const Contacts = () => {
         try {
             if (editContact) {
                 await dispatch(updateContact({ contactId: editContact._id, contactData })).unwrap();
-                showMessage('Contact updated successfully.');
+                showMessage(t('contacts.messages.updateSuccess'));
             } else {
                 await dispatch(createContact(contactData)).unwrap();
-                showMessage('Contact added successfully.');
+                showMessage(t('contacts.messages.addSuccess'));
             }
             setAddContactModal(false);
         } catch (error: any) {
@@ -120,17 +119,18 @@ const Contacts = () => {
     const handleDeleteContact = (contactId: string) => {
         Swal.fire({
             icon: 'warning',
-            title: 'Are you sure?',
-            text: "You won't be able to revert this!",
+            title: t('contacts.deleteConfirm.title'),
+            text: t('contacts.deleteConfirm.text'),
             showCancelButton: true,
-            confirmButtonText: 'Yes, delete it!',
+            confirmButtonText: t('contacts.deleteConfirm.confirmButton'),
+            cancelButtonText: t('contacts.deleteConfirm.cancelButton'),
             padding: '2em',
             customClass: { popup: 'sweet-alerts' },
         }).then(async (result) => {
             if (result.isConfirmed) {
                 try {
                     await dispatch(deleteContact(contactId)).unwrap();
-                    showMessage('Contact has been deleted.');
+                    showMessage(t('contacts.messages.deleteSuccess'));
                 } catch (error: any) {
                     showMessage(error, 'error');
                 }
@@ -139,13 +139,7 @@ const Contacts = () => {
     };
 
     const showMessage = (msg: string, type: 'success' | 'error' = 'success') => {
-        const toast = Swal.mixin({
-            toast: true,
-            position: 'bottom-end',
-            showConfirmButton: false,
-            timer: 3000,
-            customClass: { container: 'toast' },
-        });
+        const toast = Swal.mixin({ toast: true, position: 'bottom-end', showConfirmButton: false, timer: 3000, customClass: { container: 'toast' } });
         toast.fire({ icon: type, title: msg, padding: '10px 20px' });
     };
 
@@ -154,31 +148,36 @@ const Contacts = () => {
     return (
         <div>
             <div className="flex items-center justify-between flex-wrap gap-4">
-                <h2 className="text-xl">Contacts</h2>
+                <h2 className="text-xl">{t('contacts.header.title')}</h2>
                 <div className="flex sm:flex-row flex-col sm:items-center sm:gap-3 gap-4 w-full sm:w-auto">
                     <button type="button" className="btn btn-primary" onClick={() => openModal()}>
                         <IconUserPlus className="ltr:mr-2 rtl:ml-2" />
-                        Add Contact
+                        {t('contacts.buttons.addContact')}
                     </button>
                     <div className="relative">
-                        <input type="text" placeholder="Search Contacts" className="form-input py-2 ltr:pr-11 rtl:pl-11" value={search} onChange={(e) => setSearch(e.target.value)} />
+                        <input
+                            type="text"
+                            placeholder={t('contacts.header.searchPlaceholder')}
+                            className="form-input py-2 ltr:pr-11 rtl:pl-11"
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                        />
                         <button type="button" className="absolute ltr:right-[11px] rtl:left-[11px] top-1/2 -translate-y-1/2">
                             <IconSearch className="mx-auto" />
                         </button>
                     </div>
                 </div>
             </div>
-
             <div className="mt-5 panel p-0 border-0 overflow-hidden">
                 <div className="table-responsive">
                     <table className="table-striped table-hover">
                         <thead>
                             <tr>
-                                <th>Name</th>
-                                <th>Email</th>
-                                <th>Phone</th>
-                                <th>Custom Info</th>
-                                <th className="!text-center">Actions</th>
+                                <th>{t('contacts.table.headers.name')}</th>
+                                <th>{t('contacts.table.headers.email')}</th>
+                                <th>{t('contacts.table.headers.phone')}</th>
+                                <th>{t('contacts.table.headers.customInfo')}</th>
+                                <th className="!text-center">{t('contacts.table.headers.actions')}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -186,7 +185,7 @@ const Contacts = () => {
                                 <tr>
                                     <td colSpan={5} className="text-center p-10">
                                         <div className="animate-spin border-4 border-transparent border-l-primary rounded-full w-10 h-10 inline-block align-middle m-auto mb-2"></div>
-                                        <div>Loading...</div>
+                                        <div>{t('contacts.loading')}</div>
                                     </td>
                                 </tr>
                             )}
@@ -197,11 +196,11 @@ const Contacts = () => {
                                             <div className="text-primary bg-primary/10 rounded-full p-4 mb-4">
                                                 <IconInbox className="w-10 h-10" />
                                             </div>
-                                            <h3 className="text-xl font-bold mb-2">No Contacts Yet</h3>
-                                            <p className="text-white-dark mb-6">Start by adding your first contact.</p>
+                                            <h3 className="text-xl font-bold mb-2">{t('contacts.emptyState.title')}</h3>
+                                            <p className="text-white-dark mb-6">{t('contacts.emptyState.description')}</p>
                                             <button type="button" className="btn btn-primary" onClick={() => openModal()}>
                                                 <IconUserPlus className="ltr:mr-2 rtl:ml-2" />
-                                                Add Contact
+                                                {t('contacts.buttons.addContact')}
                                             </button>
                                         </div>
                                     </td>
@@ -221,7 +220,7 @@ const Contacts = () => {
                                         </div>
                                     </td>
                                     <td>{contact.email}</td>
-                                    <td className="whitespace-nowrap">{contact.phone || 'N/A'}</td>
+                                    <td className="whitespace-nowrap">{contact.phone || t('contacts.table.notAvailable')}</td>
                                     <td>
                                         <div className="flex flex-wrap gap-1 max-w-xs">
                                             {contact.customFields &&
@@ -235,10 +234,10 @@ const Contacts = () => {
                                     <td>
                                         <div className="flex gap-4 items-center justify-center">
                                             <button type="button" className="btn btn-sm btn-outline-primary" onClick={() => openModal(contact)}>
-                                                Edit
+                                                {t('contacts.table.actions.edit')}
                                             </button>
                                             <button type="button" className="btn btn-sm btn-outline-danger" onClick={() => handleDeleteContact(contact._id)}>
-                                                Delete
+                                                {t('contacts.table.actions.delete')}
                                             </button>
                                         </div>
                                     </td>
@@ -270,7 +269,7 @@ const Contacts = () => {
                                         <IconX />
                                     </button>
                                     <div className="text-lg font-medium bg-[#fbfbfb] dark:bg-[#121c2c] ltr:pl-5 rtl:pr-5 py-3 ltr:pr-[50px] rtl:pl-[50px]">
-                                        {editContact ? 'Edit Contact' : 'Add Contact'}
+                                        {editContact ? t('contacts.modal.titleEdit') : t('contacts.modal.titleAdd')}
                                     </div>
                                     <div className="p-5">
                                         <Formik
@@ -284,7 +283,7 @@ const Contacts = () => {
                                                 language: findLanguageOption(editContact?.language) || languageOptions[0],
                                                 customFields: editContact?.customFields ? Object.entries(editContact.customFields).map(([key, value]) => ({ key, value })) : [{ key: '', value: '' }],
                                             }}
-                                            validationSchema={ContactSchema}
+                                            validationSchema={getContactSchema()}
                                             onSubmit={handleSaveContact}
                                             enableReinitialize
                                         >
@@ -293,39 +292,45 @@ const Contacts = () => {
                                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                                                         <div className="grid grid-cols-4 gap-2">
                                                             <div>
-                                                                <label htmlFor="titlePrefix">Title</label>
+                                                                <label htmlFor="titlePrefix">{t('contacts.modal.form.titlePrefix.label')}</label>
                                                                 <select
                                                                     name="titlePrefix"
                                                                     className="form-input"
                                                                     value={values.titlePrefix || ''}
                                                                     onChange={(e) => setFieldValue('titlePrefix', e.target.value)}
                                                                 >
-                                                                    <option value="">None</option>
-                                                                    <option value="Mr.">Mr.</option>
-                                                                    <option value="Mrs.">Mrs.</option>
-                                                                    <option value="Ms.">Ms.</option>
-                                                                    <option value="Dr.">Dr.</option>
-                                                                    <option value="Prof.">Prof.</option>
+                                                                    <option value="">{t('contacts.modal.form.titlePrefix.options.none')}</option>
+                                                                    <option value="Mr.">{t('contacts.modal.form.titlePrefix.options.mr')}</option>
+                                                                    <option value="Mrs.">{t('contacts.modal.form.titlePrefix.options.mrs')}</option>
+                                                                    <option value="Ms.">{t('contacts.modal.form.titlePrefix.options.ms')}</option>
+                                                                    <option value="Dr.">{t('contacts.modal.form.titlePrefix.options.dr')}</option>
+                                                                    <option value="Prof.">{t('contacts.modal.form.titlePrefix.options.prof')}</option>
                                                                 </select>
                                                             </div>
                                                             <div className="col-span-3">
-                                                                <label htmlFor="firstName">First Name</label>
-                                                                <Field name="firstName" type="text" id="firstName" placeholder="Enter First Name" className="form-input" />
+                                                                <label htmlFor="firstName">{t('contacts.modal.form.firstName.label')}</label>
+                                                                <Field
+                                                                    name="firstName"
+                                                                    type="text"
+                                                                    id="firstName"
+                                                                    placeholder={t('contacts.modal.form.firstName.placeholder')}
+                                                                    className="form-input"
+                                                                />
                                                                 <ErrorMessage name="firstName" component="div" className="text-danger mt-1" />
                                                             </div>
                                                         </div>
                                                         <div>
-                                                            <label htmlFor="lastName">Last Name</label>
-                                                            <Field name="lastName" type="text" id="lastName" placeholder="Enter Last Name" className="form-input" />
+                                                            <label htmlFor="lastName">{t('contacts.modal.form.lastName.label')}</label>
+                                                            <Field name="lastName" type="text" id="lastName" placeholder={t('contacts.modal.form.lastName.placeholder')} className="form-input" />
                                                             <ErrorMessage name="lastName" component="div" className="text-danger mt-1" />
                                                         </div>
                                                         <div className="sm:col-span-2">
-                                                            <label htmlFor="email">Email</label>
-                                                            <Field name="email" type="email" id="email" placeholder="Enter Email" className="form-input" />
+                                                            <label htmlFor="email">{t('contacts.modal.form.email.label')}</label>
+                                                            <Field name="email" type="email" id="email" placeholder={t('contacts.modal.form.email.placeholder')} className="form-input" />
                                                             <ErrorMessage name="email" component="div" className="text-danger mt-1" />
                                                         </div>
                                                         <div>
-                                                            <label htmlFor="phone">Phone Number</label>
+                                                            <label htmlFor="phone">{t('contacts.modal.form.phone.label')}</label>
                                                             <PhoneInput
                                                                 name="phone"
                                                                 international
@@ -337,7 +342,7 @@ const Contacts = () => {
                                                             <ErrorMessage name="phone" component="div" className="text-danger mt-1" />
                                                         </div>
                                                         <div>
-                                                            <label htmlFor="language">Language</label>
+                                                            <label htmlFor="language">{t('contacts.modal.form.language.label')}</label>
                                                             <Select
                                                                 name="language"
                                                                 options={languageOptions}
@@ -349,14 +354,13 @@ const Contacts = () => {
                                                             <ErrorMessage name="language" component="div" className="text-danger mt-1" />
                                                         </div>
                                                         <div className="sm:col-span-2">
-                                                            <label htmlFor="title">Title/Occupation</label>
-                                                            <Field name="title" type="text" id="title" placeholder="Enter Title" className="form-input" />
+                                                            <label htmlFor="title">{t('contacts.modal.form.title.label')}</label>
+                                                            <Field name="title" type="text" id="title" placeholder={t('contacts.modal.form.title.placeholder')} className="form-input" />
                                                             <ErrorMessage name="title" component="div" className="text-danger mt-1" />
                                                         </div>
                                                     </div>
-
                                                     <div className="mt-5 pt-5 border-t border-gray-200 dark:border-gray-800">
-                                                        <h6 className="font-semibold mb-3">Additional Information</h6>
+                                                        <h6 className="font-semibold mb-3">{t('contacts.modal.customFields.title')}</h6>
                                                         <FieldArray name="customFields">
                                                             {({ push, remove }) => (
                                                                 <div className="space-y-4">
@@ -367,12 +371,17 @@ const Contacts = () => {
                                                                                     name={`customFields[${index}].key`}
                                                                                     type="text"
                                                                                     className="form-input"
-                                                                                    placeholder="Field Name (e.g., Company)"
+                                                                                    placeholder={t('contacts.modal.customFields.keyPlaceholder')}
                                                                                 />
                                                                                 <ErrorMessage name={`customFields[${index}].key`} component="div" className="text-danger mt-1 text-xs" />
                                                                             </div>
                                                                             <div className="flex-1">
-                                                                                <Field name={`customFields[${index}].value`} type="text" className="form-input" placeholder="Value (e.g., Acme Inc.)" />
+                                                                                <Field
+                                                                                    name={`customFields[${index}].value`}
+                                                                                    type="text"
+                                                                                    className="form-input"
+                                                                                    placeholder={t('contacts.modal.customFields.valuePlaceholder')}
+                                                                                />
                                                                             </div>
                                                                             <button type="button" className="btn btn-outline-danger !p-2 mt-1" onClick={() => remove(index)}>
                                                                                 <IconTrash />
@@ -380,19 +389,18 @@ const Contacts = () => {
                                                                         </div>
                                                                     ))}
                                                                     <button type="button" className="btn btn-outline-primary" onClick={() => push({ key: '', value: '' })}>
-                                                                        + Add Custom Field
+                                                                        {t('contacts.modal.customFields.addButton')}
                                                                     </button>
                                                                 </div>
                                                             )}
                                                         </FieldArray>
                                                     </div>
-
                                                     <div className="flex justify-end items-center mt-8">
                                                         <button type="button" className="btn btn-outline-danger" onClick={() => setAddContactModal(false)}>
-                                                            Cancel
+                                                            {t('contacts.modal.buttons.cancel')}
                                                         </button>
                                                         <button type="submit" className="btn btn-primary ltr:ml-4 rtl:mr-4" disabled={loading}>
-                                                            {loading ? 'Saving...' : editContact ? 'Update' : 'Add'}
+                                                            {loading ? t('contacts.modal.buttons.saving') : editContact ? t('contacts.modal.buttons.update') : t('contacts.modal.buttons.add')}
                                                         </button>
                                                     </div>
                                                 </Form>

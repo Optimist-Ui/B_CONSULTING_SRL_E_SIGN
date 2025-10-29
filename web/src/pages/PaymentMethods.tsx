@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import Swal from 'sweetalert2';
+import { useTranslation } from 'react-i18next';
 
 // Redux imports
 import { IRootState, AppDispatch } from '../store';
@@ -14,7 +15,7 @@ import IconTrash from '../components/Icon/IconTrash';
 import IconX from '../components/Icon/IconX';
 import IconStar from '../components/Icon/IconStar';
 import IconPlus from '../components/Icon/IconPlus';
-import IconLock from '../components/Icon/IconLock'; // Assuming you have a lock icon
+import IconLock from '../components/Icon/IconLock';
 
 // Stripe imports
 import { loadStripe } from '@stripe/stripe-js';
@@ -47,6 +48,7 @@ const stripePromise = loadStripe(import.meta.env.VITE_APP_STRIPE_PUBLISHABLE_KEY
 
 // Card form component
 export const AddPaymentMethodForm: React.FC<AddPaymentMethodFormProps> = ({ onSuccess, onCancel, isLoading }) => {
+    const { t } = useTranslation();
     const stripe = useStripe();
     const elements = useElements();
     const dispatch = useDispatch<AppDispatch>();
@@ -55,70 +57,43 @@ export const AddPaymentMethodForm: React.FC<AddPaymentMethodFormProps> = ({ onSu
 
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
-
         if (!stripe || !elements) return;
 
         setIsProcessing(true);
         setCardError('');
 
         const cardElement = elements.getElement(CardElement);
-
         if (!cardElement) {
-            setCardError('Card element not found');
+            setCardError(t('paymentMethods.addForm.errors.cardElementNotFound'));
             setIsProcessing(false);
             return;
         }
 
         try {
-            // Create payment method
-            const { error, paymentMethod } = await stripe.createPaymentMethod({
-                type: 'card',
-                card: cardElement,
-            });
-
+            const { error, paymentMethod } = await stripe.createPaymentMethod({ type: 'card', card: cardElement });
             if (error) {
-                setCardError(error.message || 'An error occurred while processing your card.');
+                setCardError(error.message || t('paymentMethods.addForm.errors.cardProcessingError'));
                 setIsProcessing(false);
                 return;
             }
-
-            // Attach payment method to customer
-            await dispatch(
-                attachPaymentMethod({
-                    paymentMethodId: paymentMethod.id,
-                })
-            ).unwrap();
-
+            await dispatch(attachPaymentMethod({ paymentMethodId: paymentMethod.id })).unwrap();
             onSuccess();
         } catch (error: any) {
-            setCardError(error.toString() || 'Failed to add payment method.');
+            setCardError(error.toString() || t('paymentMethods.addForm.errors.addMethodFailed'));
         } finally {
             setIsProcessing(false);
         }
     };
 
     const cardElementOptions = {
-        style: {
-            base: {
-                fontSize: '16px',
-                color: '#1f2937',
-                '::placeholder': {
-                    color: '#9ca3af',
-                },
-                backgroundColor: 'transparent',
-            },
-            invalid: {
-                color: '#ef4444',
-                iconColor: '#ef4444',
-            },
-        },
+        style: { base: { fontSize: '16px', color: '#1f2937', '::placeholder': { color: '#9ca3af' }, backgroundColor: 'transparent' }, invalid: { color: '#ef4444', iconColor: '#ef4444' } },
         hidePostalCode: true,
     };
 
     return (
         <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Card Information</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t('paymentMethods.addForm.cardInfoLabel')}</label>
                 <div className="p-4 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 shadow-sm focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500 transition-all duration-200">
                     <CardElement options={cardElementOptions} />
                 </div>
@@ -129,12 +104,10 @@ export const AddPaymentMethodForm: React.FC<AddPaymentMethodFormProps> = ({ onSu
                     </p>
                 )}
             </div>
-
             <div className="text-sm text-gray-500 dark:text-gray-400 flex items-center">
                 <IconLock className="w-4 h-4 mr-2 text-green-500" />
-                Your payment information is encrypted and securely processed by Stripe.
+                {t('paymentMethods.addForm.secureNote')}
             </div>
-
             <div className="flex justify-end space-x-3">
                 <button
                     type="button"
@@ -142,14 +115,14 @@ export const AddPaymentMethodForm: React.FC<AddPaymentMethodFormProps> = ({ onSu
                     disabled={isProcessing || isLoading}
                     className="btn btn-outline-secondary px-6 py-2 rounded-md transition-colors duration-200 hover:bg-gray-100 dark:hover:bg-gray-700 focus:ring-2 focus:ring-gray-300"
                 >
-                    Cancel
+                    {t('paymentMethods.addForm.buttons.cancel')}
                 </button>
                 <button
                     type="submit"
                     disabled={!stripe || isProcessing || isLoading}
                     className="btn btn-primary px-6 py-2 rounded-md transition-colors duration-200 hover:opacity-90 focus:ring-2 focus:ring-blue-500"
                 >
-                    {isProcessing ? 'Adding...' : 'Add Payment Method'}
+                    {isProcessing ? t('paymentMethods.addForm.buttons.adding') : t('paymentMethods.addForm.buttons.add')}
                 </button>
             </div>
         </form>
@@ -158,25 +131,10 @@ export const AddPaymentMethodForm: React.FC<AddPaymentMethodFormProps> = ({ onSu
 
 // Card display component
 export const PaymentMethodCard: React.FC<PaymentMethodCardProps> = ({ paymentMethod, onSetDefault, onDelete, isSettingDefault, isDeletingId }) => {
-    const getCardIcon = (brand: string): string => {
-        const icons: Record<string, string> = {
-            visa: '💳', // Replace with actual SVG if available
-            mastercard: '💳',
-            amex: '💳',
-            discover: '💳',
-        };
-        return icons[brand] || '💳';
-    };
-
-    const formatCardBrand = (brand: string): string => {
-        const brands: Record<string, string> = {
-            visa: 'Visa',
-            mastercard: 'Mastercard',
-            amex: 'American Express',
-            discover: 'Discover',
-        };
-        return brands[brand] || brand.charAt(0).toUpperCase() + brand.slice(1);
-    };
+    const { t } = useTranslation();
+    const getCardIcon = (brand: string): string => ({ visa: '💳', mastercard: '💳', amex: '💳', discover: '💳' }[brand] || '💳');
+    const formatCardBrand = (brand: string): string =>
+        ({ visa: 'Visa', mastercard: 'Mastercard', amex: 'American Express', discover: 'Discover' }[brand] || brand.charAt(0).toUpperCase() + brand.slice(1));
 
     return (
         <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 shadow-md hover:shadow-lg transition-shadow duration-300 relative overflow-hidden">
@@ -184,11 +142,10 @@ export const PaymentMethodCard: React.FC<PaymentMethodCardProps> = ({ paymentMet
                 <div className="absolute top-4 right-4">
                     <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
                         <IconStar className="w-4 h-4 mr-1" />
-                        Default
+                        {t('paymentMethods.card.defaultBadge')}
                     </span>
                 </div>
             )}
-
             <div className="flex items-center mb-6">
                 <div className="text-3xl mr-4">{getCardIcon(paymentMethod.brand)}</div>
                 <div>
@@ -196,11 +153,9 @@ export const PaymentMethodCard: React.FC<PaymentMethodCardProps> = ({ paymentMet
                     <p className="text-gray-500 dark:text-gray-400 text-base">•••• •••• •••• {paymentMethod.last4}</p>
                 </div>
             </div>
-
             <div className="text-sm text-gray-500 dark:text-gray-400 mb-6">
-                Expires {paymentMethod.exp_month.toString().padStart(2, '0')}/{paymentMethod.exp_year}
+                {t('paymentMethods.card.expires')} {paymentMethod.exp_month.toString().padStart(2, '0')}/{paymentMethod.exp_year}
             </div>
-
             <div className="flex space-x-3">
                 {!paymentMethod.isDefault && (
                     <button
@@ -208,10 +163,9 @@ export const PaymentMethodCard: React.FC<PaymentMethodCardProps> = ({ paymentMet
                         disabled={isSettingDefault}
                         className="btn btn-outline-primary btn-sm px-4 py-2 rounded-md transition-colors duration-200 hover:bg-blue-50 dark:hover:bg-blue-900/50 focus:ring-2 focus:ring-blue-500"
                     >
-                        {isSettingDefault ? 'Setting...' : 'Set as Default'}
+                        {isSettingDefault ? t('paymentMethods.card.buttons.settingDefault') : t('paymentMethods.card.buttons.setDefault')}
                     </button>
                 )}
-
                 <button
                     onClick={() => onDelete(paymentMethod.id)}
                     disabled={isDeletingId === paymentMethod.id}
@@ -220,12 +174,12 @@ export const PaymentMethodCard: React.FC<PaymentMethodCardProps> = ({ paymentMet
                     {isDeletingId === paymentMethod.id ? (
                         <span className="flex items-center">
                             <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-600 mr-2"></div>
-                            Removing...
+                            {t('paymentMethods.card.buttons.removing')}
                         </span>
                     ) : (
                         <span className="flex items-center">
                             <IconTrash className="w-4 h-4 mr-2" />
-                            Remove
+                            {t('paymentMethods.card.buttons.remove')}
                         </span>
                     )}
                 </button>
@@ -237,12 +191,10 @@ export const PaymentMethodCard: React.FC<PaymentMethodCardProps> = ({ paymentMet
 // Modal component
 export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }) => {
     if (!isOpen) return null;
-
     return (
         <div className="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
             <div className="flex items-center justify-center min-h-screen px-4 text-center">
                 <div className="fixed inset-0 bg-gray-900 bg-opacity-60 transition-opacity duration-300 backdrop-blur-sm" onClick={onClose}></div>
-
                 <div className="inline-block bg-white dark:bg-gray-800 rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all my-8 max-w-xl w-full scale-100 opacity-100 p-1">
                     <div className="bg-white dark:bg-gray-800 px-6 py-5 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
                         <div className="flex items-center">
@@ -266,15 +218,15 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }
 
 // Main component
 const PaymentMethods: React.FC = () => {
+    const { t } = useTranslation();
     const dispatch = useDispatch<AppDispatch>();
     const { paymentMethods, loading, error, isAttaching, isSettingDefault, isDeleting } = useSelector((state: IRootState) => state.paymentMethods);
-
     const [showAddModal, setShowAddModal] = useState<boolean>(false);
 
     useEffect(() => {
-        dispatch(setPageTitle('Payment Methods'));
+        dispatch(setPageTitle(t('paymentMethods.pageTitle')));
         dispatch(fetchPaymentMethods());
-    }, [dispatch]);
+    }, [dispatch, t]);
 
     useEffect(() => {
         if (error) {
@@ -286,14 +238,14 @@ const PaymentMethods: React.FC = () => {
     const handleAddSuccess = async (): Promise<void> => {
         setShowAddModal(false);
         await dispatch(fetchPaymentMethods());
-        showMessage('Payment method added successfully!');
+        showMessage(t('paymentMethods.messages.addSuccess'));
     };
 
     const handleSetDefault = async (paymentMethodId: string): Promise<void> => {
         try {
             await dispatch(setDefaultPaymentMethod({ paymentMethodId })).unwrap();
             await dispatch(fetchPaymentMethods());
-            showMessage('Default payment method updated successfully!');
+            showMessage(t('paymentMethods.messages.setDefaultSuccess'));
         } catch (error: any) {
             showMessage(error.toString(), 'error');
         }
@@ -302,17 +254,17 @@ const PaymentMethods: React.FC = () => {
     const handleDelete = (paymentMethodId: string): void => {
         Swal.fire({
             icon: 'warning',
-            title: 'Remove Payment Method?',
-            text: 'Are you sure you want to remove this payment method?',
+            title: t('paymentMethods.deleteConfirm.title'),
+            text: t('paymentMethods.deleteConfirm.text'),
             showCancelButton: true,
-            confirmButtonText: 'Yes, remove it',
-            cancelButtonText: 'Cancel',
+            confirmButtonText: t('paymentMethods.deleteConfirm.confirmButton'),
+            cancelButtonText: t('paymentMethods.deleteConfirm.cancelButton'),
             customClass: { popup: 'sweet-alerts' },
         }).then(async (result) => {
             if (result.isConfirmed) {
                 try {
                     await dispatch(deletePaymentMethod({ paymentMethodId })).unwrap();
-                    showMessage('Payment method removed successfully!');
+                    showMessage(t('paymentMethods.messages.deleteSuccess'));
                 } catch (error: any) {
                     showMessage(error.toString(), 'error');
                 }
@@ -321,13 +273,7 @@ const PaymentMethods: React.FC = () => {
     };
 
     const showMessage = (msg: string, type: 'success' | 'error' = 'success'): void => {
-        const toast = Swal.mixin({
-            toast: true,
-            position: 'bottom-end',
-            showConfirmButton: false,
-            timer: 3000,
-            customClass: { container: 'toast' },
-        });
+        const toast = Swal.mixin({ toast: true, position: 'bottom-end', showConfirmButton: false, timer: 3000, customClass: { container: 'toast' } });
         toast.fire({ icon: type, title: msg, padding: '10px 20px' });
     };
 
@@ -335,7 +281,7 @@ const PaymentMethods: React.FC = () => {
         return (
             <div className="flex items-center justify-center py-32 bg-gray-50 dark:bg-gray-900 rounded-xl">
                 <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary"></div>
-                <span className="ml-4 text-lg text-gray-600 dark:text-gray-300">Loading payment methods...</span>
+                <span className="ml-4 text-lg text-gray-600 dark:text-gray-300">{t('paymentMethods.loading')}</span>
             </div>
         );
     }
@@ -344,15 +290,15 @@ const PaymentMethods: React.FC = () => {
         <div className="space-y-8 p-6 bg-white dark:bg-gray-800 rounded-xl shadow-sm">
             <div className="flex items-center justify-between">
                 <div>
-                    <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Payment Methods</h2>
-                    <p className="text-gray-600 dark:text-gray-400 mt-2 text-base">Securely manage your payment options for seamless e-signing experiences</p>
+                    <h2 className="text-3xl font-bold text-gray-900 dark:text-white">{t('paymentMethods.header.title')}</h2>
+                    <p className="text-gray-600 dark:text-gray-400 mt-2 text-base">{t('paymentMethods.header.description')}</p>
                 </div>
                 <button
                     onClick={() => setShowAddModal(true)}
                     className="btn btn-primary px-6 py-3 rounded-md flex items-center transition-colors duration-200 hover:opacity-90 focus:ring-2 focus:ring-blue-500"
                 >
                     <IconPlus className="w-5 h-5 mr-2" />
-                    Add Payment Method
+                    {t('paymentMethods.header.addButton')}
                 </button>
             </div>
 
@@ -361,32 +307,25 @@ const PaymentMethods: React.FC = () => {
                     <div className="mx-auto h-32 w-32 text-gray-400 mb-8">
                         <IconCreditCard className="h-full w-full" />
                     </div>
-                    <h3 className="text-2xl font-semibold text-gray-900 dark:text-white mb-3">No Payment Methods Added</h3>
-                    <p className="text-gray-600 dark:text-gray-400 mb-8 text-lg">Add a payment method to manage your e-sign subscriptions effortlessly</p>
+                    <h3 className="text-2xl font-semibold text-gray-900 dark:text-white mb-3">{t('paymentMethods.emptyState.title')}</h3>
+                    <p className="text-gray-600 dark:text-gray-400 mb-8 text-lg">{t('paymentMethods.emptyState.description')}</p>
                     <button
                         onClick={() => setShowAddModal(true)}
                         className="btn btn-primary px-6 py-3 rounded-md flex items-center mx-auto transition-colors duration-200 hover:opacity-90 focus:ring-2 focus:ring-blue-500"
                     >
                         <IconPlus className="w-5 h-5 mr-2" />
-                        Add Your First Payment Method
+                        {t('paymentMethods.emptyState.addButton')}
                     </button>
                 </div>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-                    {paymentMethods.map((paymentMethod) => (
-                        <PaymentMethodCard
-                            key={paymentMethod.id}
-                            paymentMethod={paymentMethod}
-                            onSetDefault={handleSetDefault}
-                            onDelete={handleDelete}
-                            isSettingDefault={isSettingDefault}
-                            isDeletingId={isDeleting}
-                        />
+                    {paymentMethods.map((pm) => (
+                        <PaymentMethodCard key={pm.id} paymentMethod={pm} onSetDefault={handleSetDefault} onDelete={handleDelete} isSettingDefault={isSettingDefault} isDeletingId={isDeleting} />
                     ))}
                 </div>
             )}
 
-            <Modal isOpen={showAddModal} onClose={() => setShowAddModal(false)} title="Add New Payment Method">
+            <Modal isOpen={showAddModal} onClose={() => setShowAddModal(false)} title={t('paymentMethods.addModalTitle')}>
                 <Elements stripe={stripePromise}>
                     <AddPaymentMethodForm onSuccess={handleAddSuccess} onCancel={() => setShowAddModal(false)} isLoading={isAttaching} />
                 </Elements>

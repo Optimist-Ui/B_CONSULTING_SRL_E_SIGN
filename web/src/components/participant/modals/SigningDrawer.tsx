@@ -1,4 +1,4 @@
-// SigningDrawer.tsx - Updated Version with Enter Key Support
+// SigningDrawer.tsx - Updated Version with Enter Key Support and i18n Translations
 import React, { useState, useEffect, ComponentType, Fragment } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Transition } from '@headlessui/react';
@@ -7,6 +7,7 @@ import { setSigningDrawerOpen, setSigningStep, setSigningMethod, setSigningEmail
 import { sendSignatureOtp, verifySignatureOtp, sendSignatureSmsOtp, verifySignatureSmsOtp } from '../../../store/thunk/signatureThunks';
 import { FiMail, FiSmartphone, FiLoader, FiChevronRight, FiCheckCircle } from 'react-icons/fi';
 import { toast } from 'react-toastify';
+import { useTranslation } from 'react-i18next';
 
 // Typed Icons
 const FiMailTyped = FiMail as ComponentType<{ className?: string }>;
@@ -16,6 +17,7 @@ const FiChevronRightTyped = FiChevronRight as ComponentType<{ className?: string
 const FiCheckCircleTyped = FiCheckCircle as ComponentType<{ className?: string }>;
 
 const SigningDrawer: React.FC = () => {
+    const { t } = useTranslation();
     const dispatch = useDispatch<AppDispatch>();
     const { uiState, packageData } = useSelector((state: IRootState) => state.participant);
     const { signatureLoading, signatureError, activeSigningFieldId, signingStep, signingMethod, signingEmail, signingPhone } = uiState;
@@ -64,13 +66,13 @@ const SigningDrawer: React.FC = () => {
 
     const handleIdentityConfirm = async () => {
         if (!packageData || !activeSigningFieldId || !signingMethod) {
-            toast.error('An error occurred. Cannot identify the document or field.');
+            toast.error(t('signingDrawer.errors.missingData') as string);
             return;
         }
 
         const identityValue = signingMethod === 'email' ? signingEmail : signingPhone;
         if (!identityValue) {
-            toast.error(`Please enter your ${signingMethod === 'email' ? 'email' : 'phone number'}.`);
+            toast.error(t('signingDrawer.errors.missingIdentity', { method: signingMethod === 'email' ? t('signingDrawer.email') : t('signingDrawer.phone') }) as string);
             return;
         }
 
@@ -83,7 +85,7 @@ const SigningDrawer: React.FC = () => {
                         email: signingEmail,
                     })
                 ).unwrap();
-                toast.success('OTP sent to your email!');
+                toast.success(t('signingDrawer.otpSent.email') as string);
             } else if (signingMethod === 'sms') {
                 await dispatch(
                     sendSignatureSmsOtp({
@@ -92,7 +94,7 @@ const SigningDrawer: React.FC = () => {
                         phone: signingPhone,
                     })
                 ).unwrap();
-                toast.success('OTP sent to your phone!');
+                toast.success(t('signingDrawer.otpSent.sms') as string);
             }
             setTimer(60);
         } catch (err) {
@@ -105,13 +107,13 @@ const SigningDrawer: React.FC = () => {
         if (identityValue) {
             handleIdentityConfirm();
         } else {
-            toast.warn(`Could not resend OTP. Please go back and confirm your ${signingMethod === 'email' ? 'email' : 'phone number'}.`);
+            toast.warn(t('signingDrawer.errors.resendOtp', { method: signingMethod === 'email' ? t('signingDrawer.email') : t('signingDrawer.phone') }) as string);
         }
     };
 
     const handleCompleteSigning = async () => {
         if (!packageData || !activeSigningFieldId || !signingMethod || otp.length < 6) {
-            toast.error('An error occurred. Missing required information.');
+            toast.error(t('signingDrawer.errors.invalidOtp') as string);
             return;
         }
 
@@ -206,37 +208,37 @@ const SigningDrawer: React.FC = () => {
     const getStepTitle = () => {
         switch (signingStep) {
             case 'method':
-                return 'Choose Signing Method';
+                return t('signingDrawer.steps.method.title');
             case 'identity':
-                return `Verify Your ${signingMethod === 'email' ? 'Email' : 'Phone Number'}`;
+                return t('signingDrawer.steps.identity.title', { method: signingMethod === 'email' ? t('signingDrawer.email') : t('signingDrawer.phone') });
             case 'otp':
-                return 'Enter Verification Code';
+                return t('signingDrawer.steps.otp.title');
             case 'success':
-                return 'Document Signed!';
+                return t('signingDrawer.steps.success.title');
             default:
-                return 'Signing Process';
+                return t('signingDrawer.steps.default.title');
         }
     };
 
     const getStepDescription = () => {
         switch (signingStep) {
             case 'method':
-                return 'Choose a method to securely verify your identity';
+                return t('signingDrawer.steps.method.description');
             case 'identity':
-                return `For security, please enter your ${signingMethod === 'email' ? 'email address' : 'phone number'} below`;
+                return t('signingDrawer.steps.identity.description', { method: signingMethod === 'email' ? t('signingDrawer.email') : t('signingDrawer.phone') });
             case 'otp': {
                 const contact = signingMethod === 'email' ? signingEmail : signingPhone;
-                return `We sent a 6-digit code to ${contact}. It expires in ${timer} seconds.`;
+                return t('signingDrawer.steps.otp.description', { contact, timer });
             }
             case 'success':
-                return 'Your signature has been successfully applied to the document';
+                return t('signingDrawer.steps.success.description');
             default:
-                return '';
+                return t('signingDrawer.steps.default.description');
         }
     };
 
     const getIdentityPlaceholder = () => {
-        return signingMethod === 'email' ? 'e.g., yourname@example.com' : 'e.g., +1234567890';
+        return signingMethod === 'email' ? t('signingDrawer.steps.identity.emailPlaceholder') : t('signingDrawer.steps.identity.phonePlaceholder');
     };
 
     const getIdentityValue = () => {
@@ -279,7 +281,11 @@ const SigningDrawer: React.FC = () => {
                                                 <h2 className="text-lg sm:text-xl font-semibold text-[#1e293b]">{getStepTitle()}</h2>
                                                 <p className="text-sm text-gray-500 mt-1">{getStepDescription()}</p>
                                             </div>
-                                            <button onClick={closeDrawer} className="p-2 rounded-lg text-gray-500 hover:text-[#1e293b] hover:bg-gray-100 transition-all duration-200">
+                                            <button
+                                                onClick={closeDrawer}
+                                                className="p-2 rounded-lg text-gray-500 hover:text-[#1e293b] hover:bg-gray-100 transition-all duration-200"
+                                                title={t('signingDrawer.close')}
+                                            >
                                                 <FiChevronRightTyped className="w-5 h-5" />
                                             </button>
                                         </div>
@@ -300,8 +306,8 @@ const SigningDrawer: React.FC = () => {
                                                             <FiMailTyped className="w-6 h-6" />
                                                         </div>
                                                         <div>
-                                                            <div className="font-semibold text-[#1e293b]">One-Time Code via Email</div>
-                                                            <div className="text-sm text-gray-500">Secure verification through your email</div>
+                                                            <div className="font-semibold text-[#1e293b]">{t('signingDrawer.steps.method.emailOption')}</div>
+                                                            <div className="text-sm text-gray-500">{t('signingDrawer.steps.method.emailDescription')}</div>
                                                         </div>
                                                     </button>
                                                     <button
@@ -312,8 +318,8 @@ const SigningDrawer: React.FC = () => {
                                                             <FiSmartphoneTyped className="w-6 h-6" />
                                                         </div>
                                                         <div>
-                                                            <div className="font-semibold text-[#1e293b]">One-Time Code via SMS</div>
-                                                            <div className="text-sm text-gray-500">Secure verification through your phone</div>
+                                                            <div className="font-semibold text-[#1e293b]">{t('signingDrawer.steps.method.smsOption')}</div>
+                                                            <div className="text-sm text-gray-500">{t('signingDrawer.steps.method.smsDescription')}</div>
                                                         </div>
                                                     </button>
                                                 </div>
@@ -324,14 +330,19 @@ const SigningDrawer: React.FC = () => {
                                                 <div className="space-y-6" onKeyPress={handleIdentityKeyPress}>
                                                     <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-4">
                                                         <p className="text-xs text-gray-500 mb-1">
-                                                            We will send a verification code to the {signingMethod === 'email' ? 'email address' : 'phone number'} you enter below.
+                                                            {t('signingDrawer.steps.identity.info', { method: signingMethod === 'email' ? t('signingDrawer.email') : t('signingDrawer.phone') })}
                                                         </p>
                                                         <p className="font-semibold text-[#1e293b]">
-                                                            It must match the recipient's {signingMethod === 'email' ? 'email' : 'phone'}: {maskedContact()}
+                                                            {t('signingDrawer.steps.identity.matchInfo', {
+                                                                method: signingMethod === 'email' ? t('signingDrawer.email') : t('signingDrawer.phone'),
+                                                                contact: maskedContact(),
+                                                            })}
                                                         </p>
                                                     </div>
                                                     <div>
-                                                        <label className="block text-sm font-medium text-[#1e293b] mb-2">Your {signingMethod === 'email' ? 'Email Address' : 'Phone Number'}*</label>
+                                                        <label className="block text-sm font-medium text-[#1e293b] mb-2">
+                                                            {t('signingDrawer.steps.identity.label', { method: signingMethod === 'email' ? t('signingDrawer.email') : t('signingDrawer.phone') })}*
+                                                        </label>
                                                         <input
                                                             type={signingMethod === 'email' ? 'email' : 'tel'}
                                                             value={getIdentityValue()}
@@ -348,7 +359,7 @@ const SigningDrawer: React.FC = () => {
                                                                 onClick={goBack}
                                                                 className="px-6 py-3 border border-gray-300 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition-all duration-200 shadow-sm"
                                                             >
-                                                                Back
+                                                                {t('signingDrawer.steps.identity.backButton')}
                                                             </button>
                                                         )}
                                                         <button
@@ -356,7 +367,7 @@ const SigningDrawer: React.FC = () => {
                                                             disabled={!getIdentityValue() || signatureLoading}
                                                             className="flex-1 px-6 py-3 bg-[#1e293b] text-white font-medium rounded-xl hover:bg-opacity-90 transition-all duration-200 shadow-sm hover:shadow-md disabled:bg-gray-300 disabled:cursor-not-allowed disabled:hover:shadow-sm flex items-center justify-center"
                                                         >
-                                                            {signatureLoading ? <FiLoaderTyped className="animate-spin w-5 h-5" /> : 'Request Code'}
+                                                            {signatureLoading ? <FiLoaderTyped className="animate-spin w-5 h-5" /> : t('signingDrawer.steps.identity.requestButton')}
                                                         </button>
                                                     </div>
                                                 </div>
@@ -367,17 +378,17 @@ const SigningDrawer: React.FC = () => {
                                                 <div className="space-y-6" onKeyPress={handleOtpKeyPress}>
                                                     <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl p-4 text-center">
                                                         <div className="text-2xl font-bold text-green-600 mb-1">{timer}</div>
-                                                        <div className="text-xs text-gray-600">seconds remaining</div>
+                                                        <div className="text-xs text-gray-600">{t('signingDrawer.steps.otp.timerLabel')}</div>
                                                     </div>
                                                     <div>
-                                                        <label className="block text-sm font-medium text-[#1e293b] mb-2 text-center">Enter 6-digit verification code</label>
+                                                        <label className="block text-sm font-medium text-[#1e293b] mb-2 text-center">{t('signingDrawer.steps.otp.inputLabel')}</label>
                                                         <input
                                                             type="text"
                                                             maxLength={6}
                                                             value={otp}
                                                             onChange={(e) => setOtp(e.target.value)}
                                                             className="w-full px-4 py-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-all duration-200 text-center text-2xl tracking-[0.5em] font-mono"
-                                                            placeholder="------"
+                                                            placeholder={t('signingDrawer.steps.otp.inputPlaceholder')}
                                                         />
                                                     </div>
                                                     {timer === 0 && (
@@ -386,7 +397,7 @@ const SigningDrawer: React.FC = () => {
                                                             disabled={signatureLoading}
                                                             className="w-full text-center text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors duration-200 disabled:opacity-50 disabled:cursor-wait"
                                                         >
-                                                            {signatureLoading ? 'Sending...' : 'Resend verification code'}
+                                                            {signatureLoading ? t('signingDrawer.steps.otp.resending') : t('signingDrawer.steps.otp.resendButton')}
                                                         </button>
                                                     )}
 
@@ -396,14 +407,14 @@ const SigningDrawer: React.FC = () => {
                                                             onClick={goBack}
                                                             className="px-6 py-3 border border-gray-300 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition-all duration-200 shadow-sm"
                                                         >
-                                                            Back
+                                                            {t('signingDrawer.steps.otp.backButton')}
                                                         </button>
                                                         <button
                                                             onClick={handleCompleteSigning}
                                                             disabled={otp.length < 6 || signatureLoading}
                                                             className="flex-1 px-6 py-3 bg-green-600 text-white font-medium rounded-xl hover:bg-opacity-90 transition-all duration-200 shadow-sm hover:shadow-md disabled:bg-gray-300 disabled:cursor-not-allowed disabled:hover:shadow-sm flex items-center justify-center"
                                                         >
-                                                            {signatureLoading ? <FiLoaderTyped className="animate-spin w-5 h-5" /> : 'Complete Signing'}
+                                                            {signatureLoading ? <FiLoaderTyped className="animate-spin w-5 h-5" /> : t('signingDrawer.steps.otp.completeButton')}
                                                         </button>
                                                     </div>
                                                 </div>
@@ -415,10 +426,12 @@ const SigningDrawer: React.FC = () => {
                                                     <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-6 animate-pulse">
                                                         <FiCheckCircleTyped className="w-10 h-10" />
                                                     </div>
-                                                    <h3 className="text-xl font-semibold text-[#1e293b] mb-3">Document Signed Successfully!</h3>
+                                                    <h3 className="text-xl font-semibold text-[#1e293b] mb-3">{t('signingDrawer.steps.success.title')}</h3>
                                                     <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl p-4 mb-6">
-                                                        <p className="text-sm text-gray-600">Thank you for completing the signing process via {signingMethod === 'email' ? 'Email OTP' : 'SMS OTP'}.</p>
-                                                        <p className="text-xs text-gray-500 mt-2">All parties will be notified when the document is fully completed.</p>
+                                                        <p className="text-sm text-gray-600">
+                                                            {t('signingDrawer.steps.success.message', { method: signingMethod === 'email' ? t('signingDrawer.emailOtp') : t('signingDrawer.smsOtp') })}
+                                                        </p>
+                                                        <p className="text-xs text-gray-500 mt-2">{t('signingDrawer.steps.success.notification')}</p>
                                                     </div>
 
                                                     {/* Action Button - Inline with content */}
@@ -426,7 +439,7 @@ const SigningDrawer: React.FC = () => {
                                                         onClick={closeDrawer}
                                                         className="w-full px-6 py-3 bg-[#1e293b] text-white font-medium rounded-xl hover:bg-opacity-90 transition-all duration-200 shadow-sm hover:shadow-md"
                                                     >
-                                                        Back to Document
+                                                        {t('signingDrawer.steps.success.backButton')}
                                                     </button>
                                                 </div>
                                             )}

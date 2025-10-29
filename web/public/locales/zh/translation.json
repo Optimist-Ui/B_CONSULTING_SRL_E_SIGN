@@ -1,128 +1,2853 @@
 {
-    "dashboard": "仪表盘",
-    "sales": "销售量",
-    "analytics": "分析",
-    "apps": "应用",
-    "components": "成分",
-    "elements": "元素",
-    "font_icons": "字体图标",
-    "widgets": "小工具",
-    "tables": "表",
-    "datatables": "数据表",
-    "forms": "形式",
-    "users": "用户",
-    "pages": "页面",
-    "authentication": "验证",
-    "drag_and_drop": "拖放",
-    "maps": "地图",
-    "charts": "图表",
-    "starter_kit": "入门套件",
-    "documentation": "文档",
-    "ui_kit": "用户界面套件",
-    "more": "更多的",
-    "finance": "金融",
-    "crypto": "加密货币",
-    "chat": "聊天",
-    "mailbox": "邮箱",
-    "todo_list": "待办事项列表",
-    "notes": "笔记",
-    "scrumboard": "剪贴板",
-    "contacts": "联系人",
-    "invoice": "发票",
-    "list": "列表",
-    "preview": "预习",
-    "add": "添加",
-    "edit": "编辑",
-    "calendar": "日历",
-    "tabs": "标签",
-    "accordions": "手风琴",
-    "modals": "模态",
-    "cards": "牌",
-    "carousel": "旋转木马",
-    "countdown": "倒数",
-    "counter": "柜台",
-    "sweet_alerts": "甜蜜的警报",
-    "timeline": "时间线",
-    "notifications": "通知",
-    "media_object": "媒体对象",
-    "list_group": "列表组",
-    "pricing_tables": "定价表",
-    "lightbox": "灯箱",
-    "alerts": "警报",
-    "avatar": "阿凡达",
-    "badges": "徽章",
-    "breadcrumbs": "面包屑",
-    "buttons": "纽扣",
-    "button_groups": "按钮组",
-    "color_library": "颜色库",
-    "dropdown": "落下",
-    "infobox": "信息框",
-    "jumbotron": "超大屏幕",
-    "loader": "装载机",
-    "pagination": "分页",
-    "popovers": "约夏克布丁",
-    "progress_bar": "进度条",
-    "search": "搜索",
-    "tooltips": "工具提示",
-    "treeview": "树视图",
-    "typography": "排版",
-    "basic": "基本的",
-    "order_sorting": "订单排序",
-    "multi_column": "多列",
-    "multiple_tables": "多个表",
-    "alt_pagination": "替代。分页",
-    "range_search": "范围搜索",
-    "export": "出口",
-    "input_group": "输入组",
-    "layouts": "布局",
-    "validation": "验证",
-    "input_mask": "输入掩码",
-    "select2": "选择2",
-    "touchspin": "触摸旋转",
-    "checkbox_and_radio": "复选框和收音机",
-    "switches": "开关",
-    "wizards": "奇才",
-    "file_upload": "上传文件",
-    "quill_editor": "羽毛笔编辑器",
-    "markdown_editor": "降价编辑器",
-    "date_and_range_picker": "日期和范围选择器",
-    "clipboard": "剪贴板",
-    "user_and_pages": "用户和页面",
-    "profile": "轮廓",
-    "account_settings": "帐号设定",
-    "knowledge_base": "知识库",
-    "contact_form": "联系表",
-    "faq": "常问问题",
-    "coming_soon": "快来了",
-    "error": "错误",
-    "maintenence": "维护",
-    "login_boxed": "登录盒装",
-    "register_boxed": "注册盒装",
-    "unlock_boxed": "解锁盒装",
-    "recover_id_boxed": "恢复盒装 ID",
-    "login_cover": "登录封面",
-    "register_cover": "注册封面",
-    "unlock_cover": "解锁封面",
-    "recover_id_cover": "恢复身份证封面",
-    "supports": "支持",
-    "login": "登录",
-    "lockscreen": "锁屏",
-    "password_recovery": "找回密码",
-    "register": "登记",
-    "404": "404",
-    "500": "500",
-    "503": "503",
-    "user_interface": "用户界面",
-    "tables_and_forms": "表格和表格",
-    "columns_filter": "列过滤器",
-    "column_chooser": "列选择器",
-    "advanced": "先进的",
-    "checkbox": "复选框",
-    "skin": "皮肤",
-    "sticky_header": "粘性标题",
-    "clone_header": "克隆标题",
-    "coming_soon_boxed": "即将推出盒装",
-    "coming_soon_cover": "即将推出封面",
-    "contact_us_boxed": "联系我们 盒装",
-    "contact_us_cover": "联系我们封面"
+    "navbar": {
+        "home": "首页",
+        "pricing": "价格",
+        "about": "关于我们",
+        "faq": "常见问题",
+        "eidas": "eIDAS",
+        "termsAndPrivacy": "条款与隐私",
+        "signIn": "登录",
+        "dashboard": "控制面板",
+        "logout": "退出",
+        "loginRegister": "登录 / 注册",
+        "goToDashboard": "前往控制面板"
+    },
+    "authModal": {
+        "title": "加入我们",
+        "description": "选择一个选项继续并管理您的文档。",
+        "loginButton": "登录您的账户",
+        "registerButton": "创建新账户"
+    },
+    "hero": {
+        "headline": {
+            "signDocuments": "签署文档",
+            "secureContracts": "安全合同",
+            "digitalAgreements": "数字协议",
+            "eSignatures": "电子签名",
+            "suffix": "数字化"
+        },
+        "subheadline": "适用于各种规模企业的最安全、用户最友好的电子签名平台。",
+        "features": {
+            "encryption": "加密",
+            "encryptionValue": "256位",
+            "uptime": "正常运行时间",
+            "uptimeValue": "99.9%",
+            "binding": "约束力",
+            "bindingValue": "法律"
+        },
+        "cta": {
+            "startTrial": "开始免费试用",
+            "watchDemo": "观看演示"
+        },
+        "documents": {
+            "contractAgreement": "合同协议",
+            "invoiceDocument": "发票文件",
+            "legalAgreement": "法律协议",
+            "businessProposal": "商业提案",
+            "termsConditions": "条款与条件",
+            "signatureRequired": "需要签名:",
+            "clickToSign": "点击签名",
+            "readyForSignature": "准备签名"
+        }
+    },
+    "features": {
+        "tag": "强大功能",
+        "title": {
+            "main": "您需要的一切",
+            "highlight": "数字签名"
+        },
+        "description": "我们全面的平台提供了您简化文档签署流程所需的所有工具和安全功能。",
+        "list": {
+            "legallyBinding": {
+                "title": "法律约束力",
+                "description": "所有签名均具有法律效力，并符合包括eIDAS和UETA在内的国际电子签名法律。"
+            },
+            "bankSecurity": {
+                "title": "银行级安全",
+                "description": "先进的256位SSL加密、多重身份验证和安全的云存储保护您的文档。"
+            },
+            "lightningFast": {
+                "title": "闪电般快速",
+                "description": "在60秒内完成文档签署。无需下载、无需打印、零延迟。"
+            },
+            "mobileOptimized": {
+                "title": "移动优化",
+                "description": "通过我们的响应式设计，在任何设备（台式机、平板电脑或智能手机）上都能无缝签署文档。"
+            },
+            "multiPartySigning": {
+                "title": "多方签署",
+                "description": "通过自动提醒和实时状态跟踪，收集多方的签名。"
+            },
+            "auditTrail": {
+                "title": "详细审计跟踪",
+                "description": "完整的审计跟踪，包括时间戳、IP地址和完成证书，实现完全透明。"
+            }
+        },
+        "benefits": {
+            "title": "深受数千人信赖",
+            "description": "加入全球数千家通过我们的平台简化文档流程的企业。",
+            "faster": {
+                "label": "比纸质更快",
+                "description": "在几分钟而不是几天内完成工作流程"
+            },
+            "uptime": {
+                "label": "正常运行时间保证",
+                "description": "在您需要时始终可用"
+            },
+            "encryption": {
+                "label": "SSL加密",
+                "description": "企业级安全"
+            },
+            "support": {
+                "label": "专家支持",
+                "description": "随时提供帮助"
+            }
+        },
+        "cta": {
+            "startTrial": "开始免费试用",
+            "learnMore": "了解更多"
+        }
+    },
+    "about": {
+        "tag": "✨ 关于 I-Sign.eu",
+        "title": {
+            "main": "重塑",
+            "highlight": "数字时代"
+        },
+        "subtitle": {
+            "prefix": "签署文档应该",
+            "connector": "且"
+        },
+        "keywords": {
+            "effortless": "轻松",
+            "secure": "安全",
+            "sustainable": "可持续"
+        },
+        "quote": "每一个数字签名都是迈向一个更清洁、更快速、更互联世界的一步。",
+        "mission": {
+            "title": "我们的使命",
+            "description": "让每个人都能获得数字信任，实现安全、高效和可持续的商业工作流程。"
+        },
+        "vision": {
+            "title": "我们的愿景",
+            "description": "一个没有纸张的世界，协议像想法一样轻松流动，由可持续创新驱动。"
+        },
+        "sustainability": {
+            "title": {
+                "main": "致力于",
+                "highlight": "碳中和未来"
+            },
+            "description": "每一个签署的文档都为可持续生态系统做出了贡献",
+            "features": {
+                "co2": {
+                    "title": "二氧化碳减排",
+                    "description": "减少纸张浪费"
+                },
+                "greenOps": {
+                    "title": "绿色运营",
+                    "description": "可再生能源数据中心"
+                },
+                "reforestation": {
+                    "title": "重新造林",
+                    "description": "全球植树"
+                },
+                "innovation": {
+                    "title": "可持续创新",
+                    "description": "环境技术"
+                }
+            }
+        },
+        "whyChooseUs": {
+            "title": "为什么选择 I-Sign.eu",
+            "description": "体验无限制的无缝签署",
+            "features": {
+                "secure": {
+                    "title": "设计安全",
+                    "description": "符合eIDAS、GDPR和ISO 27001"
+                },
+                "fast": {
+                    "title": "快速与简单",
+                    "description": "几秒内签署，无需下载"
+                },
+                "integrated": {
+                    "title": "集成工作流程",
+                    "description": "连接500多个商业工具"
+                },
+                "automation": {
+                    "title": "智能自动化",
+                    "description": "自动提醒和审计跟踪"
+                }
+            }
+        },
+        "cta": {
+            "title": {
+                "main": "加入",
+                "highlight": "数字信任革命"
+            },
+            "description": "成为可持续未来的一部分",
+            "button": "立即订阅"
+        }
+    },
+    "pricing": {
+        "tag": "简单透明的定价",
+        "title": {
+            "main": "选择您的完美",
+            "highlight": "签署体验"
+        },
+        "description": "免费开始，自信扩展。每个计划都包括企业级安全、专属支持和我们行业领先的正常运行时间保证。",
+        "billing": {
+            "monthly": "按月计费",
+            "yearly": "按年计费",
+            "save": "节省20%"
+        },
+        "plans": {
+            "popularBadge": "⭐ 最受欢迎选择",
+            "perMonth": "/月",
+            "billedYearly": "按每年€{{price}}计费",
+            "starter": {
+                "description": "非常适合个人和刚开始的小团队。"
+            },
+            "pro": {
+                "description": "为成长中的企业和专业团队提供最佳价值。"
+            },
+            "enterprise": {
+                "description": "为有定制需求的大型组织提供的完整解决方案。"
+            }
+        },
+        "buttons": {
+            "contactSales": "联系销售",
+            "startFree": "今天免费开始",
+            "startTrial": "开始14天免费试用"
+        },
+        "footerNotice": "🔒 无设置费 • 随时取消 • 30天保证",
+        "enterpriseCta": {
+            "title": "需要定制企业解决方案？",
+            "description": "为您的组织的独特需求获取个性化定价和专属支持。",
+            "button": "安排演示通话"
+        }
+    },
+    "faq": {
+        "title": {
+            "main": "常见",
+            "highlight": "问题"
+        },
+        "description": "查找有关我们电子签名平台和服务的常见问题的答案。",
+        "buttons": {
+            "showMore": "显示更多",
+            "showLess": "显示更少",
+            "learnMore": "了解签名"
+        },
+        "visual": {
+            "uptimeLabel": "正常运行时间",
+            "bindingValue": "法律",
+            "bindingLabel": "约束力",
+            "features": {
+                "security": "银行级安全",
+                "tracking": "实时跟踪",
+                "api": "API集成",
+                "storage": "无限存储"
+            },
+            "cta": "开始免费试用"
+        },
+        "questions": {
+            "q1": {
+                "question": "什么是电子签名工具？",
+                "answer": "我们的电子签名工具是一种安全的数字解决方案，允许您在线签署、发送和管理文档，无需打印、扫描或邮寄。"
+            },
+            "q2": {
+                "question": "谁可以使用电子签名工具？",
+                "answer": "它专为需要合法签署或请求文档签名，各种规模的企业、自由职业者和个人设计。"
+            },
+            "q3": {
+                "question": "签署者需要账户才能签署文档吗？",
+                "answer": "不需要。收件人无需创建账户即可签署文档。他们只需收到一个安全的链接来查看和签署。"
+            },
+            "q4": {
+                "question": "电子签名工具是否具有法律约束力？",
+                "answer": "是的。我们的解决方案符合主要的电子签名法规，包括eIDAS（欧盟）、eSIGN Act（美国）和UETA，使签署的文档具有法律效力和可执行性。"
+            },
+            "q5": {
+                "question": "我的文档有多安全？",
+                "answer": "所有文档在传输和存储过程中都经过加密。我们使用SSL/TLS加密和行业标准的安全措施来保护您的数据。"
+            },
+            "q6": {
+                "question": "我可以跟踪谁签署了我的文档以及何时签署吗？",
+                "answer": "是的。每个文档都有一个详细的审计跟踪，显示其何时被打开、查看和签署。"
+            },
+            "q7": {
+                "question": "该工具是否符合GDPR？",
+                "answer": "绝对符合。我们遵循GDPR关于数据保护、存储和同意处理的指南。"
+            },
+            "q8": {
+                "question": "电子签名是否被全球接受？",
+                "answer": "电子签名在大多数国家都得到法律认可。但是，某些特定文档（如遗嘱、房产契约或法庭文件）可能仍然需要湿墨水签名。"
+            },
+            "q9": {
+                "question": "我可以自定义我的签名样式吗？",
+                "answer": "是的。您可以绘制您的签名、上传图像或从预定义的样式中选择。"
+            },
+            "q10": {
+                "question": "支持哪些文件类型？",
+                "answer": "我们支持PDF、Word、Excel和大多数常见的文档格式。"
+            },
+            "q11": {
+                "question": "我可以在移动设备上签名吗？",
+                "answer": "是的。我们的工具是完全响应式的，可在智能手机、平板电脑和台式机上运行。"
+            },
+            "q12": {
+                "question": "我可以在一个文档上请求多个签名吗？",
+                "answer": "是的。您可以分配签署角色、设置签署顺序并收集多个签名。"
+            },
+            "q13": {
+                "question": "我可以为未签署的文档设置提醒吗？",
+                "answer": "是的。可以向收件人发送自动提醒，直到他们签署为止。"
+            },
+            "q14": {
+                "question": "我可以防止签署后文档被更改吗？",
+                "answer": "是的。一旦签署，文档就会被锁定以防止进一步修改。"
+            },
+            "q15": {
+                "question": "有免费试用期吗？",
+                "answer": "是的。我们提供有限功能的免费试用，以便您可以在升级前测试该工具。"
+            },
+            "q16": {
+                "question": "你们提供团队或企业计划吗？",
+                "answer": "是的。我们为个人、团队和大型组织提供灵活的计划，并提供批量发送、品牌化和集成等附加功能。"
+            },
+            "q17": {
+                "question": "你们接受哪些付款方式？",
+                "answer": "我们接受主要的信用卡/借记卡、PayPal以及针对企业客户的基于发票的付款。"
+            }
+        }
+    },
+    "testimonials": {
+        "loading": "正在加载推荐信...",
+        "error": {
+            "title": "无可用推荐信",
+            "description": "请稍后回来查看客户评论和反馈。"
+        },
+        "header": {
+            "tag": "客户评论",
+            "title": {
+                "main": "深受全球",
+                "highlight": "数千名",
+                "suffix": "专业人士喜爱"
+            },
+            "description": "加入信任我们平台满足其数字签名需求的不断增长的企业社区"
+        },
+        "stats": {
+            "customers": "满意客户",
+            "documents": "已签署文档",
+            "uptime": "正常运行时间保证",
+            "support": "专家支持"
+        },
+        "cta": {
+            "title": "准备好加入我们满意的客户了吗？",
+            "description": "立即开始您的免费试用，体验为什么成千上万的专业人士选择我们的平台",
+            "button": "开始免费试用"
+        }
+    },
+    "footer": {
+        "description": "适用于各种规模企业的最安全、用户最友好的电子签名平台。自信地进行文档数字化签署。",
+        "certification": "SOC 2 Type II 认证",
+        "quickLinks": {
+            "title": "快速链接",
+            "home": "首页",
+            "about": "关于我们",
+            "pricing": "价格",
+            "faq": "常见问题"
+        },
+        "legal": {
+            "title": "法律与支持",
+            "privacy": "隐私政策",
+            "terms": "服务条款",
+            "security": "安全",
+            "help": "帮助中心",
+            "contact": "联系支持"
+        },
+        "copyright": "© {{year}} I-Sign. 保留所有权利。"
+    },
+    "login": {
+        "meta": {
+            "title": "登录"
+        },
+        "branding": {
+            "welcome": "欢迎来到",
+            "description": "适用于各种规模企业的最安全、用户最友好的电子签名平台。",
+            "features": {
+                "encryption": {
+                    "title": "256位加密",
+                    "description": "银行级安全"
+                },
+                "uptime": {
+                    "title": "99.9% 正常运行时间",
+                    "description": "始终可用"
+                },
+                "binding": {
+                    "title": "法律约束力",
+                    "description": "合规签名"
+                }
+            }
+        },
+        "form": {
+            "header": {
+                "title": "登录",
+                "description": "欢迎回来！请输入您的详细信息。"
+            },
+            "email": {
+                "label": "电子邮件地址",
+                "placeholder": "输入您的电子邮件"
+            },
+            "password": {
+                "label": "密码",
+                "placeholder": "输入您的密码"
+            },
+            "rememberMe": "记住我",
+            "forgotPassword": "忘记密码？",
+            "button": {
+                "default": "登录",
+                "loading": "正在登录..."
+            },
+            "divider": "或",
+            "signup": {
+                "prompt": "还没有账户？",
+                "link": "注册"
+            }
+        },
+        "footer": {
+            "copyright": "© {{year}} i-sign.eu. 保留所有权利。"
+        },
+        "messages": {
+            "success": "登录成功！",
+            "error": "登录失败。请检查您的凭据。"
+        }
+    },
+    "register": {
+        "meta": {
+            "title": "注册"
+        },
+        "messages": {
+            "success": "注册成功！",
+            "error": "注册失败。请重试。"
+        },
+        "branding": {
+            "welcome": "欢迎来到",
+            "description": "加入信任我们平台进行安全电子签名的数千家企业。",
+            "features": {
+                "setup": {
+                    "title": "快速设置",
+                    "description": "在几分钟内开始使用"
+                },
+                "secure": {
+                    "title": "安全且合规",
+                    "description": "行业标准安全"
+                },
+                "business": {
+                    "title": "企业就绪",
+                    "description": "包含企业功能"
+                }
+            }
+        },
+        "form": {
+            "header": {
+                "title": "注册",
+                "description": "创建您的账户以开始使用。"
+            },
+            "firstName": {
+                "label": "名字",
+                "placeholder": "输入您的名字"
+            },
+            "lastName": {
+                "label": "姓氏",
+                "placeholder": "输入您的姓氏"
+            },
+            "email": {
+                "label": "电子邮件地址",
+                "placeholder": "输入您的电子邮件"
+            },
+            "password": {
+                "label": "密码",
+                "placeholder": "创建密码（最少6个字符）"
+            },
+            "button": {
+                "default": "创建账户",
+                "loading": "正在创建账户..."
+            },
+            "signin": {
+                "prompt": "已有账户？",
+                "link": "登录"
+            }
+        },
+        "validation": {
+            "firstName": {
+                "min": "名字必须至少包含2个字符",
+                "max": "名字不能超过50个字符",
+                "matches": "只允许字母、空格、连字符和撇号",
+                "required": "名字是必填项"
+            },
+            "lastName": {
+                "min": "姓氏必须至少包含2个字符",
+                "max": "姓氏不能超过50个字符",
+                "matches": "只允许字母、空格、连字符和撇号",
+                "required": "姓氏是必填项"
+            },
+            "email": {
+                "invalid": "电子邮件格式无效",
+                "max": "电子邮件不能超过100个字符",
+                "required": "电子邮件是必填项"
+            },
+            "password": {
+                "min": "密码必须至少包含6个字符",
+                "max": "密码不能超过128个字符",
+                "required": "密码是必填项"
+            }
+        },
+        "footer": {
+            "copyright": "© {{year}} i-sign.eu. 保留所有权利。"
+        }
+    },
+    "forgotPassword": {
+        "meta": {
+            "title": "忘记密码"
+        },
+        "messages": {
+            "success": "如果该电子邮件已注册，则已发送重置链接。",
+            "error": "发送重置链接失败。请重试。"
+        },
+        "branding": {
+            "welcome": "欢迎来到",
+            "description": "安全地重置您的密码，并在几分钟内返回签署文档。",
+            "features": {
+                "secure": {
+                    "title": "安全重置",
+                    "description": "受保护的恢复过程"
+                },
+                "verification": {
+                    "title": "电子邮件验证",
+                    "description": "即时链接发送"
+                }
+            }
+        },
+        "form": {
+            "header": {
+                "title": "重置密码",
+                "description": "输入您的电子邮件以接收重置链接。"
+            },
+            "email": {
+                "label": "电子邮件地址",
+                "placeholder": "输入您的电子邮件"
+            },
+            "button": {
+                "default": "发送重置链接",
+                "loading": "正在发送重置链接..."
+            },
+            "backToLogin": "返回登录"
+        },
+        "footer": {
+            "copyright": "© {{year}} i-sign.eu. 保留所有权利。"
+        }
+    },
+    "resetPassword": {
+        "meta": {
+            "title": "重置密码"
+        },
+        "messages": {
+            "noToken": "未提供重置令牌。",
+            "success": "密码重置成功！您现在可以登录了。",
+            "error": "重置密码失败。链接可能已过期。"
+        },
+        "validation": {
+            "passwordMin": "密码必须至少包含6个字符。",
+            "passwordsMismatch": "密码不匹配。"
+        },
+        "status": {
+            "verifying": {
+                "title": "正在验证链接",
+                "description": "请稍候，我们正在检查您的密码重置链接..."
+            },
+            "success": {
+                "title": "验证成功！",
+                "description": "请稍候，正在加载表单..."
+            },
+            "error": {
+                "title": "链接无效或已过期",
+                "description": "密码重置链接无效。它可能已被使用或已过期。",
+                "button": "返回登录"
+            }
+        },
+        "form": {
+            "header": {
+                "title": "创建新密码",
+                "description": "请在下面输入您的新密码。"
+            },
+            "newPassword": {
+                "label": "新密码",
+                "placeholder": "输入新密码（最少6个字符）"
+            },
+            "confirmPassword": {
+                "label": "确认密码",
+                "placeholder": "确认新密码"
+            },
+            "button": {
+                "default": "重置密码",
+                "loading": "正在重置密码..."
+            }
+        },
+        "footer": {
+            "copyright": "© {{year}} i-sign.eu. 保留所有权利。"
+        }
+    },
+    "reactivate": {
+        "meta": {
+            "title": "正在重新激活账户..."
+        },
+        "messages": {
+            "success": "账户重新激活成功！您现在可以登录了。",
+            "error": "链接无效或已过期。",
+            "noToken": "未找到重新激活令牌。链接不完整。"
+        },
+        "branding": {
+            "welcome": "欢迎来到",
+            "description": "重新激活您的账户，继续使用我们安全的电子签名平台。",
+            "features": {
+                "reactivation": {
+                    "title": "快速重新激活",
+                    "description": "即时账户恢复"
+                },
+                "secure": {
+                    "title": "安全流程",
+                    "description": "受保护的验证"
+                },
+                "preserved": {
+                    "title": "数据保留",
+                    "description": "您的所有文档安全无虞"
+                }
+            }
+        },
+        "status": {
+            "loading": {
+                "title": "正在重新激活账户",
+                "description": "请稍候，我们正在重新激活您的账户..."
+            },
+            "success": {
+                "title": "账户已重新激活！",
+                "button": "继续登录"
+            },
+            "error": {
+                "title": "重新激活失败",
+                "button": "返回登录"
+            }
+        },
+        "footer": {
+            "copyright": "© {{year}} i-sign.eu. 保留所有权利。"
+        }
+    },
+    "verifyEmail": {
+        "meta": {
+            "title": "正在验证电子邮件..."
+        },
+        "messages": {
+            "success": "电子邮件验证成功！您现在可以登录了。",
+            "error": "链接无效或已过期。",
+            "noToken": "未找到验证令牌。链接不完整。"
+        },
+        "branding": {
+            "welcome": "欢迎来到",
+            "description": "验证您的电子邮件，开始使用我们值得信赖的平台安全地签署文档。",
+            "features": {
+                "verification": {
+                    "title": "电子邮件验证",
+                    "description": "安全账户设置"
+                },
+                "access": {
+                    "title": "即时访问",
+                    "description": "立即开始签署"
+                },
+                "protected": {
+                    "title": "受保护的账户",
+                    "description": "您的数据是安全的"
+                }
+            }
+        },
+        "status": {
+            "loading": {
+                "title": "正在验证账户",
+                "description": "请稍候，我们正在激活您的账户..."
+            },
+            "success": {
+                "title": "账户已激活！",
+                "button": "继续登录"
+            },
+            "error": {
+                "title": "验证失败",
+                "button": "返回注册"
+            }
+        },
+        "footer": {
+            "copyright": "© {{year}} i-sign.eu. 保留所有权利。"
+        }
+    },
+    "pendingVerification": {
+        "meta": {
+            "title": "检查您的电子邮件"
+        },
+        "branding": {
+            "welcome": "欢迎来到",
+            "description": "适用于各种规模企业的最安全、用户最友好的电子签名平台。"
+        },
+        "content": {
+            "title": "检查您的收件箱",
+            "message": "我们已向您的电子邮件地址发送了一个验证链接。请点击该链接以激活您的账户，然后才能登录。",
+            "button": "返回登录"
+        },
+        "footer": {
+            "copyright": "© {{year}} i-sign.eu. 保留所有权利。"
+        }
+    },
+    "eidasGuide": {
+        "header": {
+            "backLink": "返回常见问题",
+            "title": "了解数字签名",
+            "subtitle": "关于电子签名及其在eIDAS下的法律框架的综合指南"
+        },
+        "tabs": {
+            "overview": "概述",
+            "ses": "简单（SES）",
+            "aes": "高级（AES）",
+            "qes": "合格（QES）",
+            "faqs": "常见问题"
+        },
+        "content": {
+            "overview": {
+                "title": "什么是数字签名？",
+                "p1": "数字签名是电子签名的一种特定形式，它使用先进的加密方法将签署者安全地链接到文档。它为签署者的真实性和已签署文档的完整性提供了最高级别的保证。",
+                "p2_prefix": "数字签名基于",
+                "p2_link": "公钥基础设施（PKI）",
+                "p2_suffix": "，这是一个国际公认的标准，可确保文档一旦签署就不会被更改，并且签署者的身份可以可靠地验证。这使得数字签名对于需要强大法律确定性的交易特别重要。",
+                "comparison": {
+                    "title": "电子签名与数字签名",
+                    "p1_strong": "电子签名 (i-sign.eus)",
+                    "p1_text": "是用于表明个人以数字形式签署文档意图的一大类方法。它们被广泛采用，因为它们易于使用、实施快速，并根据欧盟eIDAS法规（第910/2014号）获得法律认可。常见的用例包括雇佣合同、采购订单、发票和客户协议。",
+                    "p2_strong": "数字签名",
+                    "p2_text": "另一方面，是电子签名的一种特定类型，它使用先进的加密技术提供更强的安全性和身份验证。它们在高度管制的行业中尤其重要，并在eIDAS下有明确的定义。"
+                },
+                "types": {
+                    "title": "eIDAS下的三种类型",
+                    "description": "根据欧盟eIDAS法规，电子签名分为三个级别，从最不严格到最严格：",
+                    "ses": {
+                        "title": "简单（SES）",
+                        "description": "电子签名的基本形式，适用于低风险文档。"
+                    },
+                    "aes": {
+                        "title": "高级（AES）",
+                        "description": "更高的安全性，通过验证的身份与签署者唯一链接。"
+                    },
+                    "qes": {
+                        "title": "合格（QES）",
+                        "description": "最安全，在法律上等同于手写签名。"
+                    }
+                },
+                "tip": {
+                    "strong": "数字签名新手？",
+                    "text": "虽然数字签名乍一看可能很复杂，但一旦理解了关键要素，它们就会变得清晰得多。探索上面的每个标签，了解何时使用每种类型的签名。"
+                }
+            },
+            "ses": {
+                "title": "简单电子签名（SES）",
+                "subtitle": "适用于日常交易",
+                "p1": "简单电子签名（SES）是eIDAS法规下最基本的电子签名类型。它不需要签署者身份验证或身份验证的高级方法。",
+                "howItWorks": {
+                    "title": "工作原理",
+                    "p1": "在实践中，SES可能涉及一些简单直接的操作，例如：",
+                    "li1": "输入PIN码或访问代码",
+                    "li2": "点击“我接受”或勾选复选框",
+                    "li3": "通过电子邮件链接的签署流程提供签名"
+                },
+                "useCases": {
+                    "title": "常见用例",
+                    "p1": "此类签名通常足以满足低风险的日常交易，例如：",
+                    "item1": "销售和采购协议",
+                    "item2": "条款和条件的接受",
+                    "item3": "简单表格和声明"
+                },
+                "warning": {
+                    "strong": "重要提示：",
+                    "text": "虽然SES提供了速度和便利性，但它在签署者身份和文档完整性方面的保证级别最低。对于高风险或受监管的交易，可能需要更强的签名形式，例如高级（AES）或合格（QES）。"
+                },
+                "learnMoreLink": "了解有关标准电子签名实施的更多信息 →"
+            },
+            "aes": {
+                "title": "高级电子签名（AES）",
+                "subtitle": "适用于高价值交易",
+                "p1": "高级电子签名（AES）提供的安全级别高于简单电子签名。它需要额外的身份验证步骤，以确保签署者的身份得到验证，并且签名与他们唯一链接。",
+                "requirements": {
+                    "title": "eIDAS要求",
+                    "p1": "要根据eIDAS获得AES资格，签名必须满足以下标准：",
+                    "li1": "它与签署者唯一链接",
+                    "li2": "它能够识别签署者",
+                    "li3": "它是使用签署者可以独自控制的电子签名创建数据创建的",
+                    "li4": "它与已签署数据链接的方式使得对数据的任何后续更改都可以检测到"
+                },
+                "authMethods": {
+                    "title": "身份验证方法",
+                    "p1": "在实践中，AES可能涉及：",
+                    "item1": { "title": "身份验证", "description": "政府颁发的身份证明验证" },
+                    "item2": { "title": "生物识别检查", "description": "面部识别或指纹扫描" },
+                    "item3": { "title": "数字证书", "description": "为交易生成的唯一证书" },
+                    "item4": { "title": "一次性密码", "description": "发送到已验证设备的唯一OTP" }
+                },
+                "benefits": {
+                    "title": "主要优势",
+                    "li1": "签署者的可靠识别",
+                    "li2": "签名与已签署文档之间的唯一链接",
+                    "li3": "防篡改技术可检测任何更改"
+                },
+                "example": {
+                    "title": "用例示例",
+                    "p1_prefix": "高价值或敏感的商业交易，例如",
+                    "p1_strong1": "雇佣合同",
+                    "p1_connector": "或",
+                    "p1_strong2": "供应商协议",
+                    "p1_suffix": "，其中组织需要对签署者身份和文档完整性提供更强的保证。"
+                },
+                "learnMoreLink": "了解有关i-sign.eu验证方法的更多信息 →"
+            },
+            "qes": {
+                "title": "合格电子签名（QES）",
+                "subtitle": "适用于高度监管的交易",
+                "p1": "合格电子签名（QES）是欧盟eIDAS法规下定义的最安全、最值得信赖的电子签名形式。它要求由合格信任服务提供商（QTSP）在欧盟或英国进行面对面或等效的身份验证过程。",
+                "foundation": {
+                    "title": "技术基础",
+                    "p1_prefix": "QES依赖于",
+                    "p1_strong": "合格签名创建设备（QSCD）",
+                    "p1_suffix": "和由认可提供商颁发的合格证书。此过程确保：",
+                    "li1": "签署者的身份已通过最高法律标准验证",
+                    "li2": "签名与签署者和已签署文档唯一链接",
+                    "li3": "创建了完整且防篡改的审计跟踪"
+                },
+                "equivalence": {
+                    "title": "法律等同性",
+                    "p1_prefix": "由于这些保证，QES被认为是",
+                    "p1_strong": "手写签名的法律等同物",
+                    "p1_suffix": "，适用于所有欧盟成员国。",
+                    "p2": "事实上，法律专家经常认为QES可能比在无人监督的环境中见证的传统签名更可靠，因为数字流程确保了更强的身份验证和文档完整性。"
+                },
+                "useCases": {
+                    "title": "常见用例",
+                    "p1": "QES通常是高度监管或敏感交易所必需的，例如：",
+                    "item1": { "icon": "🏦", "text": "金融服务协议" },
+                    "item2": { "icon": "⚖️", "text": "公证行为" },
+                    "item3": { "icon": "🏛️", "text": "公共部门文件" },
+                    "item4": { "icon": "🌍", "text": "跨境法律合同" }
+                }
+            },
+            "faqs": {
+                "title": "常见问题",
+                "q1": {
+                    "title": "合格电子签名（QES）如何与i-sign.eu配合使用？",
+                    "p1": "QES在颁发数字证书之前需要强大的身份验证。它通过面对面或等效的身份验证提供最高级别的信任。在签署过程中，系统会要求客户以电子方式确认其身份。一旦验证，证明其身份的数字证书将自动附加到签名后。",
+                    "p2": "i-sign.eu提供多种QES选项，并集成了身份验证。数字证书由公认的证书颁发机构（信任服务提供商）颁发，i-sign.eu接受欧盟官方信任列表中列出的提供商颁发的合格证书。"
+                },
+                "q2": {
+                    "title": "高级电子签名（AES）如何与i-sign.eu配合使用？",
+                    "p1": "i-sign.eu的AES涉及额外的步骤来验证签署者的身份。这可能包括出示有效的政府颁发的证件以确认身份，并结合签署过程后的一次性访问代码。AES签名需要基于PKI的数字证书，该证书作为交易的一部分生成并附加到文档中。",
+                    "p2": "i-sign.eu提供灵活的身份验证选项，以满足eIDAS下高级和合格级别的电子签名要求。"
+                },
+                "q3": {
+                    "title": "简单电子签名（SES）如何与i-sign.eu配合使用？",
+                    "p1": "SES是全球最常用和最广泛接受的电子签名类型。使用i-sign.eu，SES可以在大多数低风险情况下取代手写签名。它特别适用于：",
+                    "li1": "内部文档",
+                    "li2": "企业对消费者协议",
+                    "li3": "与现有合作伙伴的交易",
+                    "p2": "SES快速、高效，只需要很少的步骤。但是，如果需要更强的签署者身份验证，则可能需要AES或QES。"
+                },
+                "contact": {
+                    "strong": "还有疑问？",
+                    "text_prefix": "访问我们的",
+                    "link": "主常见问题页面",
+                    "text_suffix": "或联系我们的支持团队以获得个性化帮助。"
+                }
+            }
+        },
+        "disclaimer": {
+            "title": "免责声明：",
+            "text": "以上内容仅供一般信息参考，并非旨在作为法律建议。有关您的具体情况的指导，请咨询合格的法律专业人士。"
+        },
+        "lastUpdated": "最后更新时间：{{date}}"
+    },
+    "termsAndPrivacy": {
+        "header": {
+            "subtitle": "专业电子签名平台"
+        },
+        "tabs": {
+            "terms": "服务条款",
+            "privacy": "隐私政策"
+        },
+        "lastUpdated": "最后更新时间：{{date}}",
+        "terms": {
+            "title": "服务条款",
+            "introduction": {
+                "title": "1. 简介",
+                "p1_prefix": "这些网站和服务条款和条件（“条款”或“一般条款”）管辖您对",
+                "p1_suffix": "网站、产品和服务（统称为“网站”或“服务”）的访问和使用。使用我们的网站或服务，即表示您同意受这些条款的约束，无论是代表您自己还是您所代表的企业。",
+                "p2": "如果您不同意这些条款，则无权使用本网站或服务，并且必须立即停止使用。"
+            },
+            "scope": {
+                "title": "2. 适用范围",
+                "p1": "这些条款适用于以下类别的用户（统称为“您”或“您的”）：",
+                "li1_strong": "网站访客",
+                "li1_text": "访问",
+                "li1_suffix": "及相关网站的个人。",
+                "li2_strong": "客户",
+                "li2_text": "订阅或许可",
+                "li2_suffix": "服务的组织或个人。",
+                "li3_strong": "用户",
+                "li3_text": "在客户账户下使用",
+                "li3_suffix": "服务的个人（包括授权员工或代理人）。",
+                "p2_prefix": "如果您是客户并已与",
+                "p2_suffix": "签订单独的服务协议或企业合同，则在与这些条款冲突的范围内，这些条款将优先适用。这些条款是为商业和专业用途设计的；适用的法律规定的消费者保护可能单独适用。"
+            },
+            "compliance": {
+                "title": "3. 遵守当地法律",
+                "p1": "如果您从具有特定监管要求或补充条款的司法管辖区（例如某些欧盟成员国）访问本网站或服务，则这些特定于司法管辖区的条款将作为这些条款的补充适用。如果发生冲突，特定于司法管辖区的条款将优先适用。"
+            },
+            "acceptance": {
+                "title": "4. 接受条款",
+                "p1": "通过访问、使用或下载本网站或服务的任何部分，您确认您：",
+                "li1": "已阅读并理解这些条款；",
+                "li2": "代表您自己或您的组织接受这些条款；",
+                "li3": "被授权在您的司法管辖区签订具有法律约束力的协议。",
+                "p2": "如果您不符合这些条件，则不得使用本网站或服务。"
+            },
+            "access": {
+                "title": "5. 网站访问和使用",
+                "eligibility": {
+                    "title": "5.1 使用资格",
+                    "p1_prefix": "通过访问或使用",
+                    "p1_suffix": "网站或服务，您声明并保证：",
+                    "li1": "您已达到法定年龄（18岁或以上，或您居住国的大多数年龄），并且具有代表您自己或您所代表的公司或组织签订这些条款的法律能力；",
+                    "li2": "您被授权根据适用的法律和法规（包括欧盟和当地司法管辖区关于电子签名和数据保护的规则）使用本网站和服务；和",
+                    "li3": "如果您代表企业行事，您已被正式授权使该企业受这些条款的约束。",
+                    "p2_prefix": "您承认，如果您不符合这些资格要求，或者您的访问权限曾因违反这些条款而被",
+                    "p2_suffix": "暂停或终止，则您不得使用本网站或服务。"
+                }
+            },
+            "contact": {
+                "title": "6. 联系信息",
+                "p1_prefix": "有关这些条款的问题，请通过",
+                "p1_suffix": "或通过我们的支持门户联系我们。"
+            }
+        },
+        "privacy": {
+            "title": "隐私政策",
+            "collection": {
+                "title": "1. 我们收集的信息",
+                "item1": { "title": "账户信息：", "text": "姓名、电子邮件地址、公司信息和身份验证凭据。" },
+                "item2": { "title": "文档数据：", "text": "上传用于签名的文档、签名数据、IP地址和签名活动的时间戳。" },
+                "item3": { "title": "使用信息：", "text": "日志数据、浏览器信息、设备标识符和服务使用模式。" }
+            },
+            "use": {
+                "title": "2. 我们如何使用您的信息",
+                "li1": "提供和维护电子签名服务",
+                "li2": "处理和促进文档签名",
+                "li3": "生成审计跟踪和合规报告",
+                "li4": "发送服务相关通知和更新",
+                "li5": "改进我们的服务和开发新功能",
+                "li6": "防止欺诈并确保服务安全",
+                "li7": "遵守法律义务"
+            },
+            "sharing": {
+                "title": "3. 信息共享",
+                "p1": "我们不会出售、交易或出租您的个人信息。我们只会在以下情况下共享信息：",
+                "li1": "征得您的明确同意",
+                "li2": "为促进指定方之间的签名过程",
+                "li3": "与协助平台运营的服务提供商共享",
+                "li4": "法律或法律程序要求时",
+                "li5": "为保护我们的权利、财产或安全"
+            },
+            "security": {
+                "title": "4. 数据安全",
+                "p1": "我们实施了全面的安全措施，包括加密、访问控制、定期安全审计和安全数据中心。所有数据在传输和静止时都使用行业标准的加密协议进行加密。我们维护ISO 27001和SOC 2合规标准。"
+            },
+            "retention": {
+                "title": "5. 数据保留",
+                "p1": "只要您的账户处于活动状态，我们就会保留您的数据，并保留适用法律要求的时间。签署的文档通常保留7年以符合法律合规目的。您可以要求删除您的数据，但须遵守法律保留要求。"
+            },
+            "rights": {
+                "title": "6. 您的权利（GDPR）",
+                "p1": "根据GDPR，您有权：",
+                "li1": "访问您的个人数据",
+                "li2": "纠正不准确的信息",
+                "li3": "请求删除数据（被遗忘权）",
+                "li4": "限制处理您的数据",
+                "li5": "数据可移植性",
+                "li6": "反对处理",
+                "li7": "随时撤回同意"
+            },
+            "transfers": {
+                "title": "7. 国际数据传输",
+                "p1": "您的数据主要在欧盟境内处理。任何国际传输都在适当的保障措施下进行，包括欧盟委员会批准的标准合同条款。"
+            },
+            "cookies": {
+                "title": "8. Cookie和跟踪",
+                "p1": "我们使用必要的cookie来实现服务功能，并使用分析cookie来改进我们的服务。您可以通过浏览器设置管理cookie偏好设置。我们的cookie政策提供了有关我们使用cookie的详细信息。"
+            },
+            "contact": {
+                "title": "9. 联系我们",
+                "p1": "有关隐私相关问题或行使您的权利，请通过privacy@i-sign.eu联系我们的数据保护官。对于欧盟居民，您也可以联系您当地的数据保护机构。"
+            },
+            "changes": {
+                "title": "10. 隐私政策的变更",
+                "p1": "我们将在变更生效前至少30天通过电子邮件或在我们平台上的显着通知告知您本隐私政策的任何重大变更。"
+            }
+        },
+        "footer": {
+            "copyright": "© {{year}} i-sign.eu - 专业电子签名平台",
+            "support_prefix": "如需支持，请联系我们："
+        }
+    },
+    "enterpriseContact": {
+        "messages": {
+            "success": "您的咨询已成功发送！",
+            "error": "发送咨询失败。请重试。"
+        },
+        "header": {
+            "title": {
+                "main": "企业",
+                "highlight": "定制解决方案"
+            },
+            "description": "联系我们的销售团队，获取针对您组织需求的个性化定价、定制功能和专属支持。"
+        },
+        "form": {
+            "name": {
+                "label": "全名",
+                "placeholder": "张三"
+            },
+            "email": {
+                "label": "商务电子邮件",
+                "placeholder": "zhang.san@company.com"
+            },
+            "company": {
+                "label": "公司名称",
+                "placeholder": "Acme Corporation"
+            },
+            "phone": {
+                "label": "电话号码（可选）"
+            },
+            "message": {
+                "label": "告诉我们您的需求",
+                "placeholder": "描述您的要求、团队规模或您感兴趣的任何特定功能..."
+            },
+            "button": {
+                "default": "提交咨询",
+                "submitting": "正在提交..."
+            }
+        },
+        "validation": {
+            "name": {
+                "min": "姓名必须至少包含2个字符",
+                "max": "姓名不能超过100个字符",
+                "required": "全名是必填项"
+            },
+            "email": {
+                "invalid": "电子邮件格式无效",
+                "required": "商务电子邮件是必填项"
+            },
+            "company": {
+                "min": "公司名称必须至少包含2个字符",
+                "max": "公司名称不能超过200个字符",
+                "required": "公司名称是必填项"
+            },
+            "phone": {
+                "invalid": "电话号码无效"
+            },
+            "message": {
+                "min": "消息必须至少包含10个字符",
+                "max": "消息不能超过2000个字符",
+                "required": "消息是必填项"
+            }
+        },
+        "footer": {
+            "callPrompt": "更喜欢致电？请联系我们：",
+            "emailPrompt": "或直接发送电子邮件："
+        }
+    },
+    "cookiePolicy": {
+        "title": "Cookie 政策",
+        "intro": "本Cookie政策解释了E-Sign（“我们”，“我们的”）在您访问我们的网站或使用我们的服务时如何使用cookie和类似技术。",
+        "whatAreCookies": {
+            "title": "什么是 Cookie？",
+            "text": "Cookie是您访问网站时存储在您设备上的小型文本文件。它们通过记住您的偏好和启用某些功能来帮助我们为您提供更好的体验。"
+        },
+        "types": {
+            "title": "我们使用的 Cookie 类型",
+            "essential": {
+                "title": "基本 Cookie",
+                "text": "这些cookie对于我们网站的正常运行是必需的。它们启用核心功能，例如身份验证、安全功能和基本导航。"
+            },
+            "functional": {
+                "title": "功能性 Cookie",
+                "text": "这些cookie可增强功能和个性化，例如记住您的语言偏好和设置。"
+            },
+            "analytics": {
+                "title": "分析 Cookie",
+                "text": "这些cookie通过匿名收集和报告信息来帮助我们了解访问者如何与我们的网站互动。"
+            },
+            "marketing": {
+                "title": "营销 Cookie",
+                "text": "这些cookie用于投放与您和您的兴趣更相关的广告。"
+            }
+        },
+        "managing": {
+            "title": "管理您的 Cookie 偏好设置",
+            "text": "您可以通过各种方式控制和管理cookie。您可以将浏览器设置为拒绝cookie，或在发送cookie时提醒您。您还可以使用我们的cookie偏好设置中心管理您的偏好设置。",
+            "button": "管理 Cookie 偏好设置"
+        },
+        "contact": {
+            "title": "联系我们",
+            "text": "如果您对本Cookie政策有任何疑问，请通过 privacy@esign.com 联系我们。"
+        },
+        "lastUpdated": "本政策最后更新于 {{date}}。"
+    },
+    "sidebar": {
+        "headings": {
+            "dashboard": "控制面板",
+            "settings": "设置"
+        },
+        "nav": {
+            "allDocuments": "所有文档",
+            "templates": "模板",
+            "contacts": "联系人列表",
+            "addDocument": "添加文档",
+            "subscriptions": "订阅",
+            "paymentMethods": "付款方式",
+            "profile": "个人资料"
+        }
+    },
+    "profile": {
+        "title": "账户设置",
+        "loading": "正在加载...",
+        "tabs": {
+            "profile": "个人资料",
+            "email": "电子邮件",
+            "password": "密码"
+        },
+        "messages": {
+            "deleteSuccess": "已请求删除账户",
+            "deleteFailed": "删除账户失败",
+            "updateSuccess": "个人资料已更新！",
+            "updateFailed": "更新失败"
+        },
+        "form": {
+            "image": {
+                "upload": "上传",
+                "remove": "移除"
+            },
+            "firstName": {
+                "label": "名字"
+            },
+            "lastName": {
+                "label": "姓氏"
+            },
+            "email": {
+                "label": "当前电子邮件",
+                "note": "要更改您的电子邮件，请转到“电子邮件”标签页"
+            },
+            "phone": {
+                "label": "电话号码"
+            },
+            "language": {
+                "label": "语言"
+            },
+            "button": {
+                "save": "保存更改",
+                "saving": "正在保存...",
+                "delete": "删除账户"
+            },
+            "validation": {
+                "firstName": {
+                    "required": "名字是必填项"
+                },
+                "lastName": {
+                    "required": "姓氏是必填项"
+                },
+                "phone": {
+                    "max": "电话号码太长",
+                    "invalid": "电话号码无效"
+                },
+                "language": {
+                    "required": "语言是必填项"
+                }
+            }
+        },
+        "emailForm": {
+            "title": "更改电子邮件地址",
+            "description": "我们将向您的当前电子邮件发送一个验证码以确认更改。",
+            "currentEmailLabel": "当前电子邮件：",
+            "newEmail": {
+                "label": "新电子邮件地址",
+                "placeholder": "输入您的新电子邮件地址"
+            },
+            "otp": {
+                "sentToLabel": "验证码已发送到：",
+                "label": "输入6位验证码",
+                "button": {
+                    "sending": "正在发送...",
+                    "resend": "重新发送",
+                    "verifying": "正在验证...",
+                    "verify": "验证并更新电子邮件",
+                    "cancel": "取消"
+                }
+            },
+            "button": {
+                "sending": "正在发送...",
+                "sendCode": "发送验证码",
+                "clear": "清除"
+            },
+            "messages": {
+                "invalidNewEmail": "请输入有效的新电子邮件",
+                "otpSentSuccess": "OTP已发送到您的当前电子邮件！",
+                "otpSentFailed": "发送OTP失败",
+                "otpLengthError": "输入6位OTP",
+                "updateSuccess": "电子邮件更新成功！",
+                "invalidOtp": "OTP无效"
+            },
+            "validation": {
+                "invalid": "电子邮件无效",
+                "required": "新电子邮件是必填项",
+                "notSame": "新电子邮件必须与当前电子邮件不同"
+            }
+        },
+        "passwordForm": {
+            "title": "更改密码",
+            "currentPassword": {
+                "label": "当前密码",
+                "placeholder": "当前"
+            },
+            "newPassword": {
+                "label": "新密码",
+                "placeholder": "新"
+            },
+            "confirmNewPassword": {
+                "label": "确认新密码",
+                "placeholder": "确认"
+            },
+            "button": {
+                "default": "更改密码",
+                "loading": "正在更改..."
+            },
+            "messages": {
+                "success": "密码已更改！",
+                "failed": "更改密码失败"
+            },
+            "validation": {
+                "min": "密码必须至少包含6个字符",
+                "max": "密码不能超过128个字符",
+                "currentPassword": {
+                    "required": "当前密码是必填项"
+                },
+                "newPassword": {
+                    "required": "新密码是必填项",
+                    "notOneOf": "新密码不能与当前密码相同"
+                },
+                "confirmNewPassword": {
+                    "required": "请确认您的新密码",
+                    "oneOf": "密码必须匹配"
+                }
+            }
+        }
+    },
+    "paymentMethods": {
+        "pageTitle": "付款方式",
+        "loading": "正在加载付款方式...",
+        "header": {
+            "title": "付款方式",
+            "description": "安全地管理您的付款选项，以获得无缝的电子签名体验",
+            "addButton": "添加付款方式"
+        },
+        "emptyState": {
+            "title": "未添加付款方式",
+            "description": "添加付款方式，轻松管理您的电子签名订阅",
+            "addButton": "添加您的第一个付款方式"
+        },
+        "addModalTitle": "添加新付款方式",
+        "addForm": {
+            "cardInfoLabel": "卡信息",
+            "secureNote": "您的付款信息已加密并由 Stripe 安全处理。",
+            "buttons": {
+                "cancel": "取消",
+                "add": "添加付款方式",
+                "adding": "正在添加..."
+            },
+            "errors": {
+                "cardElementNotFound": "未找到卡元素",
+                "cardProcessingError": "处理您的卡时发生错误。",
+                "addMethodFailed": "添加付款方式失败。"
+            }
+        },
+        "card": {
+            "defaultBadge": "默认",
+            "expires": "到期",
+            "buttons": {
+                "setDefault": "设为默认",
+                "settingDefault": "正在设置...",
+                "remove": "移除",
+                "removing": "正在移除..."
+            }
+        },
+        "deleteConfirm": {
+            "title": "移除付款方式？",
+            "text": "您确定要移除此付款方式吗？",
+            "confirmButton": "是的，移除",
+            "cancelButton": "取消"
+        },
+        "messages": {
+            "addSuccess": "付款方式添加成功！",
+            "setDefaultSuccess": "默认付款方式更新成功！",
+            "deleteSuccess": "付款方式移除成功！"
+        }
+    },
+    "subscriptions": {
+        "pageTitle": "账单与订阅"
+    },
+    "planSelection": {
+        "backButton": "返回订阅管理",
+        "header": {
+            "titleChange": "选择新计划",
+            "titleChoose": "选择您的计划",
+            "descriptionChange": "选择一个新计划来升级、降级或更改您的计费周期。",
+            "descriptionChoose": "升级您的账户以解锁更多功能、更高限制和专属支持。"
+        },
+        "billing": {
+            "monthly": "每月",
+            "yearly": "每年",
+            "save": "节省20%"
+        },
+        "popularBadge": "⭐ 最受欢迎",
+        "perMonth": "月",
+        "billedYearly": "按每年€{{price}}计费",
+        "plans": {
+            "starter": {
+                "description": "非常适合个人和刚开始的小团队。"
+            },
+            "pro": {
+                "description": "为成长中的企业和专业团队提供最佳价值。"
+            },
+            "enterprise": {
+                "description": "为需要更多功能的大型组织提供的完整解决方案。"
+            }
+        },
+        "trial": {
+            "title": "提供14天免费试用",
+            "note": "需要有效的信用卡！"
+        },
+        "buttons": {
+            "startTrial": "开始14天免费试用",
+            "choosePlan": "选择计划",
+            "topUp": "充值",
+            "switchToBilling": "切换到{{interval}}计费",
+            "switchToPlan": "切换到{{planName}}",
+            "contactSales": "联系销售"
+        }
+    },
+    "manageSubscription": {
+        "noSubscription": {
+            "title": "无有效订阅",
+            "description": "如果您认为这是错误，请联系支持。"
+        },
+        "header": {
+            "title": "订阅管理",
+            "description": "监控您的计划使用情况并管理计费偏好设置"
+        },
+        "buttons": {
+            "reactivating": "正在重新激活...",
+            "reactivateTrial": "重新激活试用",
+            "reactivatePlan": "重新激活计划",
+            "processing": "正在处理...",
+            "startSubscription": "开始订阅",
+            "cancelling": "正在取消...",
+            "cancelTrial": "取消试用",
+            "cancel": "取消"
+        },
+        "plan": {
+            "title": "{{planName}} 计划",
+            "monthly": "每月",
+            "yearly": "每年"
+        },
+        "status": {
+            "active": "有效",
+            "trialing": "试用中",
+            "past_due": "过期",
+            "canceled": "已取消",
+            "cancelsSoon": "即将取消"
+        },
+        "trial": {
+            "endsOn": "您的试用期将于 {{date}} 结束。"
+        },
+        "usage": {
+            "title": "文档使用量",
+            "unlimited": "无限",
+            "enterpriseNote": "您的企业计划没有文档限制",
+            "of": "的 {{limit}} 个文档",
+            "resetsOn": "使用量将于 {{date}} 重置"
+        },
+        "billing": {
+            "title": "账单状态",
+            "cancellationPending": "取消待定",
+            "cancelsOn": "您的计划将于以下日期取消",
+            "pastDue": "付款过期",
+            "pastDueNote": "请更新您的付款方式以继续服务",
+            "nextRenewal": "下一次续订",
+            "autoRenewalActive": "自动续订处于活动状态"
+        },
+        "quickStats": {
+            "started": "计划开始",
+            "cycle": "计费周期",
+            "documentsLeft": "剩余文档"
+        },
+        "management": {
+            "title": "计划管理",
+            "description1": "管理您的订阅、查看发票或更改您的计划。",
+            "description2": "更改将根据您的计费周期生效",
+            "buttons": {
+                "invoices": "发票",
+                "upgrade": "升级"
+            }
+        },
+        "cancelModal": {
+            "trial": {
+                "title": "取消免费试用？",
+                "text": "您的试用期将保持有效，直到 {{date}}，但它不会转换为付费计划。您确定吗？",
+                "confirmButton": "是的，取消试用"
+            },
+            "subscription": {
+                "title": "取消订阅？",
+                "text": "您的订阅将保持有效，直到当前期限结束于 {{date}}。您确定吗？",
+                "confirmButton": "是的，取消订阅"
+            },
+            "cancelButton": "保留我的计划"
+        },
+        "endTrialModal": {
+            "title": "立即激活付费计划？",
+            "text": "您将立即被收取 €{{price}}，并获得 {{planName}} 计划福利的完全访问权限，包括您的新文档限制。",
+            "confirmButton": "是的，立即激活",
+            "cancelButton": "留在试用期"
+        },
+        "messages": {
+            "cancelSuccess": "您的计划现已设置为取消。",
+            "reactivateSuccess": "您的订阅已成功重新激活！",
+            "endTrialSuccess": "您的订阅现已激活！"
+        }
+    },
+    "invoiceHistory": {
+        "title": "发票历史记录",
+        "closeLabel": "关闭模态窗口",
+        "loading": "正在加载发票...",
+        "locale": "zh-CN",
+        "table": {
+            "headers": {
+                "date": "日期",
+                "amount": "金额",
+                "status": "状态",
+                "action": "操作"
+            },
+            "viewAction": "查看发票"
+        },
+        "status": {
+            "paid": "已付款",
+            "open": "未结",
+            "void": "作废",
+            "uncollectible": "不可收回"
+        },
+        "empty": {
+            "title": "未找到发票",
+            "description": "您的账单历史记录将在您收到账单后显示在此处。"
+        }
+    },
+    "contacts": {
+        "pageTitle": "联系人",
+        "header": {
+            "title": "联系人",
+            "searchPlaceholder": "搜索联系人"
+        },
+        "buttons": {
+            "addContact": "添加联系人"
+        },
+        "table": {
+            "headers": {
+                "name": "姓名",
+                "email": "电子邮件",
+                "phone": "电话",
+                "customInfo": "自定义信息",
+                "actions": "操作"
+            },
+            "actions": {
+                "edit": "编辑",
+                "delete": "删除"
+            },
+            "notAvailable": "不适用"
+        },
+        "loading": "正在加载...",
+        "emptyState": {
+            "title": "暂无联系人",
+            "description": "从添加您的第一个联系人开始。"
+        },
+        "modal": {
+            "titleAdd": "添加联系人",
+            "titleEdit": "编辑联系人",
+            "form": {
+                "titlePrefix": {
+                    "label": "称谓",
+                    "options": {
+                        "none": "无",
+                        "mr": "先生",
+                        "mrs": "夫人",
+                        "ms": "女士",
+                        "dr": "博士",
+                        "prof": "教授"
+                    }
+                },
+                "firstName": { "label": "名字", "placeholder": "输入名字" },
+                "lastName": { "label": "姓氏", "placeholder": "输入姓氏" },
+                "email": { "label": "电子邮件", "placeholder": "输入电子邮件" },
+                "phone": { "label": "电话号码" },
+                "language": { "label": "语言" },
+                "title": { "label": "职称/职业", "placeholder": "输入职称" }
+            },
+            "customFields": {
+                "title": "附加信息",
+                "keyPlaceholder": "字段名称（例如：公司）",
+                "valuePlaceholder": "值（例如：Acme Inc.）",
+                "addButton": "+ 添加自定义字段"
+            },
+            "buttons": {
+                "cancel": "取消",
+                "add": "添加",
+                "update": "更新",
+                "saving": "正在保存..."
+            }
+        },
+        "deleteConfirm": {
+            "title": "您确定吗？",
+            "text": "您将无法撤消此操作！",
+            "confirmButton": "是的，删除它！",
+            "cancelButton": "取消"
+        },
+        "messages": {
+            "addSuccess": "联系人添加成功。",
+            "updateSuccess": "联系人更新成功。",
+            "deleteSuccess": "联系人已被删除。"
+        },
+        "validation": {
+            "firstName": { "required": "名字是必填项", "min": "名字必须至少包含2个字符", "max": "名字不能超过50个字符" },
+            "lastName": { "required": "姓氏是必填项", "min": "姓氏必须至少包含2个字符", "max": "姓氏不能超过50个字符" },
+            "email": { "invalid": "电子邮件格式无效", "required": "电子邮件是必填项", "max": "电子邮件不能超过254个字符" },
+            "phone": { "max": "电话号码似乎太长", "invalid": "电话号码无效" },
+            "language": { "required": "语言是必填项" },
+            "title": { "min": "职称必须至少包含2个字符", "max": "职称不能超过100个字符" },
+            "customFields": {
+                "key": { "required": "字段名称是必填项", "min": "字段名称必须至少包含2个字符", "max": "字段名称不能超过50个字符" },
+                "value": { "max": "值不能超过255个字符" }
+            }
+        },
+        "languages": {
+            "en": "英语",
+            "es": "西班牙语",
+            "fr": "法语",
+            "de": "德语",
+            "it": "意大利语"
+        }
+    },
+    "templates": {
+        "header": {
+            "title": "文档模板"
+        },
+        "buttons": {
+            "createNew": "创建新模板",
+            "backToList": "返回模板列表",
+            "saveTemplate": "保存模板",
+            "saving": "正在保存..."
+        },
+        "loading": "正在加载...",
+        "loadingTemplates": "正在加载模板...",
+        "emptyState": {
+            "title": "未找到模板",
+            "description": "从创建您的第一个文档模板开始。"
+        },
+        "table": {
+            "headers": {
+                "name": "名称",
+                "uuid": "附件 UUID",
+                "fields": "字段",
+                "actions": "操作"
+            }
+        },
+        "editor": {
+            "title": "正在编辑: {{templateName}}"
+        },
+        "deleteConfirm": {
+            "title": "您确定吗？",
+            "text": "您将无法撤消此操作！",
+            "confirmButton": "是的，删除它！",
+            "cancelButton": "不，取消！"
+        },
+        "deleteSuccessAlert": {
+            "title": "已删除！",
+            "text": "您的模板已被删除。"
+        },
+        "deleteErrorAlert": {
+            "title": "错误！"
+        },
+        "messages": {
+            "invalidId": "模板 ID 无效。",
+            "deleteSuccess": "模板删除成功！",
+            "deleteFailed": "删除模板失败。",
+            "noTemplateToSave": "没有要保存的模板。",
+            "titleRequired": "模板标题不能为空。",
+            "updateSuccess": "模板更新成功！",
+            "fileUrlMissing": "文件 URL 缺失。请上传文档。",
+            "s3KeyMissing": "S3 密钥缺失。请重新上传文档。",
+            "saveSuccess": "模板保存成功！",
+            "saveFailed": "保存模板失败。"
+        }
+    },
+    "uploadStep": {
+        "title": "上传文档并设置标题",
+        "uploadLabel": "上传 PDF 文档",
+        "dropzone": {
+            "prompt": "将 PDF 拖放到此处或单击以浏览",
+            "uploaded": "PDF 已上传",
+            "hint": "支持最大 50MB 的 PDF 文件"
+        },
+        "processing": "正在处理...",
+        "titleLabel": "文档标题",
+        "titlePlaceholder": "例如，保密协议",
+        "previewLabel": "文档预览",
+        "pageIndicator": "第 {{page}} 页",
+        "previewPlaceholder": "预览将在此处显示",
+        "button": {
+            "proceed": "继续到编辑器",
+            "processing": "正在处理..."
+        },
+        "messages": {
+            "uploadFailed": "上传文档失败。",
+            "uploadRequired": "请上传 PDF 文档。",
+            "invalidFileType": "请选择有效的 PDF 文件。"
+        },
+        "validation": {
+            "titleRequired": "文档标题是必填项",
+            "titleMin": "标题必须至少包含 3 个字符"
+        },
+        "errors": {
+            "fetchFailed": "获取 PDF 失败",
+            "fetchFromUrlFailed": "从 URL 获取 PDF 失败",
+            "noValidPdf": "未提供有效的 PDF 数据或非 blob URL。",
+            "renderFailed": "渲染 PDF 预览失败"
+        }
+    },
+    "editor": {
+        "loading": "正在加载模板编辑器...",
+        "properties": {
+            "title": "字段属性",
+            "prompt": "选择一个字段以编辑其属性。"
+        },
+        "fieldDefaults": {
+            "signature": "签名",
+            "textarea": "文本区域",
+            "textareaPlaceholder": "输入文本...",
+            "checkbox": "复选框",
+            "radio": "单选按钮",
+            "date": "日期字段",
+            "dropdown": "下拉列表",
+            "text": "文本字段",
+            "textPlaceholder": "在此处输入文本"
+        },
+        "deleteConfirm": {
+            "title": "删除字段？",
+            "text": "此操作无法撤消。",
+            "confirmButton": "是的，删除它！",
+            "cancelButton": "取消"
+        },
+        "messages": {
+            "deleteSuccess": "字段已删除。"
+        },
+        "errors": {
+            "fetchFailed": "获取 PDF 失败",
+            "noValidPdf": "未提供有效的 PDF 数据。",
+            "loadFailed": "加载 PDF 进行编辑失败",
+            "renderFailed": "渲染 PDF 页面失败。"
+        }
+    },
+    "documentsDashboard": {
+        "loading": "正在加载文档...",
+        "buttons": {
+            "upload": "上传文档"
+        },
+        "error": {
+            "title": "无法加载文档"
+        }
+    },
+    "packagesDashboard": {
+        "newPackageName": "新包裹",
+        "loadingDraft": "正在加载草稿包裹...",
+        "initializing": "正在初始化包裹创建...",
+        "errors": {
+            "notADraft": "此包裹不是草稿，无法编辑。",
+            "loadFailed": "加载草稿包裹失败。"
+        }
+    },
+    "documentTable": {
+        "loading": "正在加载文档...",
+        "headers": {
+            "documentName": "文档名称",
+            "status": "状态",
+            "initiator": "发起人",
+            "formFillers": "表单填写者",
+            "approvers": "批准者",
+            "signers": "签署者",
+            "receivers": "接收者",
+            "addedOn": "添加于",
+            "participants": "参与者",
+            "actions": "操作"
+        },
+        "actions": {
+            "download": "下载",
+            "notify": "通知/提醒",
+            "viewDetails": "查看详情",
+            "continueEditing": "继续编辑",
+            "viewHistory": "查看历史记录",
+            "reassign": "重新分配",
+            "skip": "跳过",
+            "revoke": "撤销"
+        },
+        "emptyState": {
+            "title": "未找到文档",
+            "description": "没有与您当前筛选条件匹配的文档。"
+        },
+        "revokeModal": {
+            "title": "撤销文档",
+            "message": "您确定要撤销文档“{{documentName}}”吗？此操作无法撤消，并将终止所有参与者的流程。",
+            "confirmButton": "是的，撤销"
+        }
+    },
+    "stepper": {
+        "header": {
+            "createTitle": "创建包裹",
+            "editTitle": "编辑草稿包裹"
+        },
+        "steps": {
+            "documentSelection": "文档选择",
+            "fieldAssignment": "字段分配",
+            "reviewAndConfirm": "审查与确认",
+            "select": "选择",
+            "assign": "分配",
+            "review": "审查"
+        },
+        "buttons": {
+            "backToDashboard": "返回控制面板",
+            "previousStep": "上一步",
+            "nextStep": "下一步",
+            "saveDraft": "保存为草稿",
+            "saveAsTemplate": "保存为模板",
+            "savingPackage": "正在保存包裹...",
+            "confirmPackage": "确认并发送包裹"
+        },
+        "messages": {
+            "noPackageToSave": "没有要保存的包裹。",
+            "savingDraft": "正在保存草稿...",
+            "draftSaved": "草稿保存成功！",
+            "draftFailed": "保存草稿失败。",
+            "noPackageForTemplate": "无法保存为模板：没有可用的包裹数据。",
+            "templateSaveFailed": "保存为模板失败。",
+            "noPackageToConfirm": "没有要确认的包裹。",
+            "titleRequired": "包裹标题不能为空。",
+            "documentRequired": "请上传或选择一个文档。",
+            "unassignedFields": "请为必填字段分配用户",
+            "packageSent": "包裹保存并发送成功！",
+            "packageSaveFailed": "保存包裹失败。"
+        }
+    },
+    "documentSelection": {
+        "mainTitle": "选择文档来源",
+        "mainSubtitle": "选择现有模板或上传新的 PDF 文档",
+        "template": {
+            "title": "使用现有模板",
+            "selectPlaceholder": "-- 选择现有模板 --",
+            "loading": "正在加载模板..."
+        },
+        "upload": {
+            "title": "上传新 PDF",
+            "dropPrompt": "将您的 PDF 拖放到此处",
+            "dragPrompt": "拖放 PDF 或单击以浏览",
+            "hint": "支持最大 10MB 的 PDF 文件",
+            "uploading": "正在上传..."
+        },
+        "packageTitle": {
+            "label": "包裹标题",
+            "placeholder": "例如，张三的入职文档"
+        },
+        "preview": {
+            "title": "文档预览",
+            "emptyTitle": "未选择文档",
+            "emptyDescription": "选择模板或上传 PDF 以查看预览"
+        },
+        "messages": {
+            "invalidFileType": "请选择有效的 PDF 文件。",
+            "uploadFailed": "上传文档失败。",
+            "templateLoadFailed": "加载选定的模板失败。",
+            "selectDocument": "请在继续之前上传或选择一个文档。"
+        },
+        "validation": {
+            "titleRequired": "包裹标题是必填项",
+            "titleMin": "标题必须至少包含 3 个字符"
+        },
+        "errors": {
+            "fetchFailed": "获取失败",
+            "fetchBlobFailed": "获取 blob 失败",
+            "renderFailed": "渲染 PDF 预览失败",
+            "fetchTemplateFailed": "获取模板 PDF 失败"
+        }
+    },
+    "fieldAssignment": {
+        "noDocument": {
+            "title": "未选择文档",
+            "description": "请在上一步中选择一个文档以开始分配字段。"
+        },
+        "loadError": {
+            "title": "加载 PDF 失败",
+            "button": "返回"
+        },
+        "noFieldsWarning": {
+            "title": "尚未添加字段",
+            "description": "将字段从上方的工具栏拖放到文档上，为参与者创建交互区域。"
+        },
+        "pageIndicator": "第 {{page}} 页，共 {{total}} 页",
+        "properties": {
+            "title": "字段属性",
+            "subtitle": "配置字段设置",
+            "closeAriaLabel": "关闭属性面板",
+            "openAriaLabel": "打开字段属性",
+            "noFieldSelected": {
+                "title": "未选择字段",
+                "description": "点击文档中的字段以编辑其属性并分配用户。"
+            }
+        },
+        "messages": {
+            "fieldAdded": "已添加 {{fieldLabel}} 字段。"
+        },
+        "errors": {
+            "fetchFailed": "获取 PDF 失败",
+            "fetchBlobFailed": "获取 blob 失败",
+            "loadFailed": "加载 PDF 失败",
+            "renderFailed": "渲染 PDF 页面失败。",
+            "noValidPdf": "未提供有效的 PDF 数据或 URL。"
+        }
+    },
+    "packageReview": {
+        "loading": "正在加载包裹详情...",
+        "locale": "zh-CN",
+        "tabs": {
+            "summary": "摘要",
+            "recipients": "收件人",
+            "settings": "设置"
+        },
+        "preview": {
+            "title": "文档预览",
+            "pageCount": "{{count}} 页",
+            "pageCount_plural": "{{count}} 页",
+            "pageIndicator": "第 {{current}} 页，共 {{total}} 页",
+            "actualSize": "实际尺寸",
+            "fitWidth": "适应宽度",
+            "rendering": {
+                "title": "正在渲染文档...",
+                "subtitle": "请稍候，我们正在准备您的文档"
+            }
+        },
+        "summary": {
+            "message": {
+                "title": "给参与者的可选消息",
+                "description": "此消息将包含在发送给所有参与者的初始“需要操作”电子邮件中。",
+                "placeholder": "例如，请尽快查看并签署此文档。谢谢！"
+            },
+            "details": {
+                "title": "详情一览",
+                "fields": "字段",
+                "recipients": "收件人",
+                "pages": "页数"
+            },
+            "credits": {
+                "title": "文档信用点使用情况",
+                "usageText": "此包裹将使用 1 个文档信用点",
+                "usageText_plural": "此包裹将使用 {{count}} 个文档信用点",
+                "signerCountText": "尚未分配签署者",
+                "signerCountText_plural": "检测到 {{count}} 个唯一签署者",
+                "signerCountText_plural_plural": "检测到 {{count}} 个唯一签署者",
+                "tip_strong": "提示：",
+                "tip_text": "每个文档信用点最多可涵盖 2 个唯一签署者。",
+                "tip_extra": "您有 {{signers}} 位签署者，需要 {{credits}} 个信用点。"
+            },
+            "progress": {
+                "title": "分配进度",
+                "completeText": "完成 {{rate}}%",
+                "actionRequired": "需要操作",
+                "unassignedFields": "有 1 个未分配的必填字段。",
+                "unassignedFields_plural": "有 {{count}} 个未分配的必填字段。"
+            }
+        },
+        "recipients": {
+            "assigned": {
+                "title": "已分配的参与者",
+                "empty": "没有用户被分配到字段。"
+            },
+            "notificationOnly": {
+                "title": "仅通知接收者",
+                "description": "添加将接收包裹通知但不需要签署的联系人。",
+                "addButton": "添加接收者"
+            }
+        },
+        "settings": {
+            "expiration": {
+                "title": "包裹到期",
+                "description": "设置此包裹不再可访问的日期和时间。",
+                "okButton": "确定"
+            },
+            "reminders": {
+                "title": "到期提醒",
+                "setExpirationNote": "请先设置包裹到期日期以启用到期提醒。",
+                "enableCheckbox": "发送到期提醒",
+                "timing": {
+                    "label": "提醒时间",
+                    "placeholder": "选择提醒时间",
+                    "options": {
+                        "1_hour": "提前 1 小时",
+                        "2_hours": "提前 2 小时",
+                        "1_day": "提前 24 小时",
+                        "2_days": "提前 48 小时"
+                    },
+                    "tooSoonNote": "到期日期太近，无法选择任何提醒选项。请设置较晚的日期以启用提醒。"
+                }
+            },
+            "autoReminders": {
+                "title": "自动提醒",
+                "setExpirationNote": "请先设置包裹到期日期以启用自动提醒。",
+                "enableCheckbox": "启用自动提醒",
+                "first": {
+                    "label": "第一次提醒",
+                    "suffix": "天到期前"
+                },
+                "repeat": {
+                    "label": "跟进提醒",
+                    "prefix": "每",
+                    "suffix": "天重复"
+                },
+                "tooSoonNote": "到期日期必须设置为未来超过一天才能启用自动提醒。"
+            },
+            "permissions": {
+                "title": "权限",
+                "allowDownload": "允许在签名完成前下载",
+                "allowReassign": "允许参与者重新分配其角色"
+            }
+        },
+        "messages": {
+            "receiverAdded": "{{name}} 已添加为接收者。",
+            "contactCreated": "{{name}} 已创建并选为接收者。",
+            "expirationSet": "包裹到期日设置为 {{date}}",
+            "expirationRemoved": "包裹到期日已移除 - 包裹将不会过期",
+            "reminderTimingReset": "提醒时间已重置，因为它对新的到期日期不再有效。",
+            "firstReminderReset": "第一个自动提醒已重置，因为它对新的到期日期不再有效。",
+            "repeatReminderReset": "跟进提醒间隔已重置，因为它不再有效。"
+        },
+        "errors": {
+            "missingSource": "文档来源缺失。请返回第1步。",
+            "fetchFailed": "获取失败",
+            "fetchBlobFailed": "获取 blob 失败",
+            "noSource": "在包裹数据中未找到 PDF 来源。",
+            "loadFailed": "加载文档预览失败。",
+            "renderFailed": "渲染 PDF 页面失败。",
+            "pastDate": "到期日期不能是过去。请选择未来的日期。"
+        }
+    },
+    "packageFieldRenderer": {
+        "fieldTypes": {
+            "text": "文本",
+            "textarea": "文本",
+            "signature": "签名",
+            "checkbox": "复选框",
+            "radio": "单选按钮",
+            "date": "日期",
+            "dropdown": "选择"
+        },
+        "labelInput": {
+            "placeholder": "字段标签"
+        },
+        "labelTitle": {
+            "signature": "签名字段标签无法编辑",
+            "editable": "点击编辑标签"
+        },
+        "titles": {
+            "markRequired": "标记为必填",
+            "markOptional": "标记为可选",
+            "quickAssign": "快速分配用户",
+            "signatureFieldAssigned": "签名字段已有一个签署者",
+            "deleteField": "删除字段"
+        },
+        "quickAssign": {
+            "title": "快速分配",
+            "signatureWarning": "签名字段只能分配一个签署者。",
+            "selectContact": "选择联系人",
+            "selectContactPlaceholder": "选择联系人...",
+            "addNewContact": "添加新联系人",
+            "role": "角色",
+            "signatureRoleNote": "签名字段需要签署者角色",
+            "nonSignatureRoleNote": "签署者只能分配给签名字段",
+            "authMethods": "身份验证方法",
+            "authMethodsEmail": "电子邮件 OTP 验证",
+            "authMethodsSMS": "短信 OTP 验证",
+            "assignButton": "分配给字段",
+            "roles": {
+                "Signer": "签署者",
+                "FormFiller": "表单填写者",
+                "Approver": "批准者"
+            }
+        },
+        "assignedUsers": {
+            "title": "{{name}} ({{role}}){{methods}}"
+        },
+        "messages": {
+            "labelUpdated": "标签已更新",
+            "markedRequired": "字段标记为必填",
+            "markedOptional": "字段标记为可选",
+            "signatureFieldAssigned": "签名字段已有一个签署者分配",
+            "userAssigned": "{{name}} 已分配为 {{role}}",
+            "contactAdded": "{{name}} 添加成功"
+        },
+        "errors": {
+            "signatureFieldHasSigner": "签名字段只能分配一个签署者。"
+        }
+    },
+    "addEditContactModal": {
+        "title": {
+            "add": "添加新联系人",
+            "edit": "编辑联系人"
+        },
+        "labels": {
+            "titlePrefix": "称谓",
+            "firstName": "名字",
+            "lastName": "姓氏",
+            "email": "电子邮件",
+            "phone": "电话号码",
+            "language": "语言",
+            "title": "职称/职业",
+            "additionalInfo": "附加信息"
+        },
+        "placeholders": {
+            "firstName": "输入名字",
+            "lastName": "输入姓氏",
+            "email": "输入电子邮件",
+            "title": "输入职称",
+            "customFieldKey": "字段名称（例如：公司）",
+            "customFieldValue": "值（例如：Acme Inc.）"
+        },
+        "titlePrefixOptions": {
+            "none": "无",
+            "mr": "先生",
+            "mrs": "夫人",
+            "ms": "女士",
+            "dr": "博士",
+            "prof": "教授"
+        },
+        "languageOptions": {
+            "en": "英语",
+            "es": "西班牙语",
+            "fr": "法语"
+        },
+        "buttons": {
+            "cancel": "取消",
+            "saving": "正在保存...",
+            "addContact": "添加联系人",
+            "updateContact": "更新联系人",
+            "addCustomField": "+ 添加自定义字段"
+        },
+        "errors": {
+            "firstNameRequired": "名字是必填项",
+            "lastNameRequired": "姓氏是必填项",
+            "emailInvalid": "电子邮件格式无效",
+            "emailRequired": "电子邮件是必填项",
+            "phoneInvalid": "电话号码无效",
+            "languageRequired": "语言是必填项",
+            "customFieldKeyRequired": "字段名称是必填项"
+        },
+        "messages": {
+            "contactAdded": "联系人添加成功。",
+            "contactUpdated": "联系人更新成功。"
+        }
+    },
+    "packageFieldPropertiesPanel": {
+        "fieldTypes": {
+            "text": "文本",
+            "textarea": "文本区域",
+            "signature": "签名",
+            "checkbox": "复选框",
+            "radio": "单选按钮",
+            "date": "日期",
+            "dropdown": "下拉列表"
+        },
+        "labels": {
+            "fieldType": "字段类型：",
+            "label": "标签：",
+            "placeholder": "占位符：",
+            "radioGroupId": "单选按钮组 ID：",
+            "radioOptions": "选项（逗号分隔）：",
+            "dropdownOptions": "选项（逗号分隔）：",
+            "required": "必填",
+            "assignUsers": "将用户分配到字段",
+            "signatureMethods": "签名方法：",
+            "allowedMethods": "允许的方法：",
+            "assignedUsers": "已分配的用户："
+        },
+        "placeholders": {
+            "placeholder": "输入占位符文本",
+            "radioGroupId": "此单选按钮组的唯一 ID",
+            "radioOptions": "选项 1, 选项 2",
+            "dropdownOptions": "选项 1, 选项 2",
+            "selectRole": "-- 选择角色 --"
+        },
+        "roles": {
+            "Signer": "签署者",
+            "FormFiller": "表单填写者",
+            "Approver": "批准者"
+        },
+        "signatureMethods": {
+            "emailOTP": "通过电子邮件 OTP",
+            "smsOTP": "通过短信 OTP"
+        },
+        "titles": {
+            "removeAssignment": "移除分配"
+        },
+        "messages": {
+            "signatureLabelFixed": "签名字段标签无法更改",
+            "radioGroupIdNote": "所有具有相同组 ID 的单选按钮作为一个选择集。",
+            "radioOptionsNote": "输入至少两个选项以获得有意义的单选按钮组。",
+            "dropdownOptionsNote": "为下拉列表输入至少一个选项。",
+            "signatureFieldNote": "签名字段只能分配一个签署者。将其用于数字签名收集。",
+            "signatureRoleNote": "签名字段只能分配给签署者",
+            "nonSignatureRoleNote": "签署者只能分配给签名字段",
+            "oneSignerMax": "最多 1 位签署者",
+            "noUsersAssigned": "未分配用户。",
+            "userAssigned": "{{name}} 已分配为 {{role}}",
+            "userAssignmentRemoved": "用户分配已移除"
+        },
+        "errors": {
+            "labelRequired": "标签是必填项",
+            "labelEmpty": "标签不能为空",
+            "placeholderTooLong": "占位符太长",
+            "radioOptionsMin": "单选按钮组至少需要两个逗号分隔的选项",
+            "dropdownOptionsMin": "下拉列表至少需要一个选项",
+            "groupIdRequired": "单选按钮需要组 ID",
+            "noAuthMethod": "签署者必须至少有一种身份验证方法。",
+            "signatureFieldHasSigner": "签名字段只能分配一个签署者。"
+        }
+    },
+    "packageStatusPage": {
+        "loading": {
+            "title": "正在加载文档状态...",
+            "message": "请稍候。"
+        },
+        "error": {
+            "title": "无法加载文档"
+        }
+    },
+    "packageStatusLayout": {
+        "participants": {
+            "title": "参与者"
+        }
+    },
+    "participantStatusPanel": {
+        "header": {
+            "title": "参与者",
+            "participantCount": "{{count}} 位参与者",
+            "pluralSuffix": ""
+        },
+        "roles": {
+            "receiver": "接收者"
+        },
+        "messages": {
+            "noParticipants": "未分配参与者"
+        }
+    },
+    "packageStatusHeader": {
+        "status": {
+            "completed": "已完成",
+            "rejected": "已拒绝",
+            "pending": "待处理",
+            "archived": "已存档",
+            "draft": "草稿"
+        },
+        "meta": {
+            "createdAt": "创建于",
+            "fieldCount": "{{count}} 个字段",
+            "pluralSuffix": ""
+        }
+    },
+    "ownerDocumentViewer": {
+        "errors": {
+            "loadFailed": "加载文档失败：{{message}}"
+        },
+        "controls": {
+            "previousPage": "上一页",
+            "nextPage": "下一页",
+            "zoomOut": "缩小",
+            "zoomIn": "放大",
+            "pageNavigation": "第 {{current}} 页，共 {{total}} 页",
+            "zoomLevel": "{{level}}%"
+        },
+        "pageNumber": "第 {{number}} 页"
+    },
+    "statusFieldRenderer": {
+        "status": {
+            "rejected": "已拒绝",
+            "revoked": "已撤销",
+            "draft": "草稿",
+            "signed": "已签署",
+            "signedBy": "由 {{signedBy}} 签署",
+            "filled": "已填写",
+            "pending": "待处理"
+        },
+        "unassigned": "未分配",
+        "tooltip": "{{label}} - {{type}} - 分配给：{{assignedTo}} - 状态：{{status}}"
+    },
+    "setting": {
+        "toggleCustomizer": "切换控制面板定制器",
+        "header": {
+            "title": "控制面板定制器",
+            "description": "设置将作为您的实时预览演示的 cookie 偏好设置。"
+        },
+        "colorScheme": {
+            "title": "配色方案",
+            "description": "整体亮色或暗色展示。",
+            "light": "亮色",
+            "dark": "暗色",
+            "system": "系统"
+        },
+        "navigationPosition": {
+            "title": "导航位置",
+            "description": "选择您的应用程序的主要导航范例。",
+            "horizontal": "水平",
+            "vertical": "垂直",
+            "collapsible": "可折叠",
+            "semiDark": "半暗（侧边栏和标题）"
+        },
+        "layoutStyle": {
+            "title": "布局样式",
+            "description": "选择您的应用程序的主要布局样式。",
+            "box": "盒装",
+            "full": "全屏"
+        },
+        "direction": {
+            "title": "方向",
+            "description": "选择您的应用程序的方向。",
+            "ltr": "从左到右（LTR）",
+            "rtl": "从右到左（RTL）"
+        },
+        "navbarType": {
+            "title": "导航栏类型",
+            "description": "固定或浮动。",
+            "sticky": "固定",
+            "floating": "浮动",
+            "static": "静态"
+        },
+        "routerTransition": {
+            "title": "路由转换",
+            "description": "主内容的动画。",
+            "none": "无",
+            "fade": "淡入淡出",
+            "fadeDown": "淡出向下",
+            "fadeUp": "淡出向上",
+            "fadeLeft": "淡出向左",
+            "fadeRight": "淡出向右",
+            "slideDown": "向下幻灯片",
+            "slideLeft": "向左幻灯片",
+            "slideRight": "向右幻灯片",
+            "zoomIn": "放大"
+        }
+    },
+    "reviewPage": {
+        "loading": {
+            "title": "正在检查资格",
+            "message": "请稍候，我们正在验证您的访问权限..."
+        },
+        "success": {
+            "title": "谢谢！🎉",
+            "message": "您的反馈已成功提交。",
+            "feedback": "您的评价有助于我们改善每个人的体验"
+        },
+        "ineligible": {
+            "title": "评价不可用",
+            "contactSupport": "如果您认为这是错误，请联系支持"
+        },
+        "form": {
+            "feedbackRequired": "需要反馈",
+            "title": "您的",
+            "titleHighlight": "体验如何",
+            "description": "您的反馈有助于我们改善每个人的电子签名体验。请花点时间评价您的体验。",
+            "progress": "进度：",
+            "progressStatus": "已完成 {{completed}} / 总共 {{total}}",
+            "ratingInstruction": "评分从 1（差）到 5（优秀）",
+            "commentsTitle": "附加评论",
+            "commentsDescription": "告诉我们更多关于您的体验（可选）",
+            "commentsPlaceholder": "分享您的想法、建议或任何具体反馈...",
+            "commentLength": "{{length}}/500",
+            "submitting": "正在提交反馈...",
+            "submitButton": "提交反馈",
+            "submitReady": "所有评分已完成！准备提交。",
+            "submitIncomplete": "请在提交前完成所有评分。"
+        },
+        "errors": {
+            "allRatingsRequired": "请为所有问题提供评分。",
+            "submissionError": "提交错误：{{error}}"
+        }
+    },
+    "subscriptionRequired": {
+        "active": {
+            "title": "需要有效订阅",
+            "description": "要访问此功能，您需要一个有效订阅。请从我们灵活的计划中选择一个。",
+            "action": "查看订阅计划"
+        },
+        "package": {
+            "title": "升级您的计划",
+            "description": "您当前的订阅不包括包裹创建功能。升级以解锁此强大功能。",
+            "action": "升级订阅"
+        },
+        "default": {
+            "title": "需要订阅",
+            "description": "此功能需要订阅才能继续。开始使用我们负担得起的计划。",
+            "action": "查看计划"
+        },
+        "status": {
+            "current": "当前状态",
+            "packageCreation": "包裹创建",
+            "allowed": "允许",
+            "notAllowed": "不允许"
+        },
+        "actions": {
+            "goBack": "返回"
+        },
+        "help": {
+            "text": "需要帮助选择计划吗？",
+            "link": "联系支持"
+        }
+    },
+    "participantPage": {
+        "loading": {
+            "title": "正在加载安全文档",
+            "message": "请稍候，我们正在准备您的文档..."
+        },
+        "error": {
+            "title": "访问被拒绝",
+            "message": "请检查您的链接或联系发送者，如果您认为这是一个错误。",
+            "action": "重试"
+        }
+    },
+    "headerControls": {
+        "navigation": {
+            "previous": "上一页",
+            "next": "下一页",
+            "page": "第 {{current}} 页，共 {{total}} 页"
+        },
+        "zoom": {
+            "title": "缩放级别",
+            "in": "放大",
+            "out": "缩小",
+            "level": "{{level}}%"
+        },
+        "status": {
+            "completed": "已完成",
+            "sent": "已发送",
+            "draft": "草稿",
+            "archived": "已存档",
+            "rejected": "已拒绝"
+        },
+        "fullscreen": {
+            "enter": "全屏查看",
+            "exit": "退出全屏查看"
+        },
+        "options": "更多选项",
+        "participants": {
+            "title": "查看参与者",
+            "description": "查看完成状态"
+        },
+        "download": {
+            "title": "下载 PDF",
+            "disabled": "下载仅在完成后可用",
+            "label": "下载文件",
+            "description": "保存 PDF 副本",
+            "downloading": "正在下载...",
+            "preparing": "正在准备您的文档以下载..."
+        },
+        "errors": {
+            "noPackageData": "包裹数据不可用。请刷新页面并重试。"
+        },
+        "drawer": {
+            "title": "参与者状态",
+            "description": "跟踪完成进度",
+            "noParticipants": "没有可用的参与者信息。",
+            "back": "返回文档"
+        },
+        "participantStatus": {
+            "pending": "待处理",
+            "completed": "已完成",
+            "not applicable": "不适用",
+            "pendingDesc": "等待操作",
+            "completedDesc": "所有任务完成",
+            "notApplicableDesc": "仅用于记录"
+        }
+    },
+    "participantLayout": {
+        "brand": "I-Sign.eu",
+        "help": "帮助",
+        "sidebar": {
+            "toggle": "切换侧边栏",
+            "title": "文档详情",
+            "signAs": "以...身份签署",
+            "currentUser": "当前用户",
+            "documents": "文档",
+            "pages": "{{count}} 页",
+            "progress": "进度"
+        },
+        "progress": {
+            "status": "完成状态",
+            "completed": "文档已完成",
+            "rejected": "文档已拒绝",
+            "expired": "文档已过期",
+            "draft": "文档处于草稿状态",
+            "archived": "文档已存档",
+            "tasksCompleted": "您的任务已完成",
+            "reviewTerms": "查看并接受条款",
+            "fieldsCompleted": "已完成 {{completed}} / {{total}} 个字段",
+            "readyForSubmission": "准备最终提交",
+            "termsAccepted": "条款已接受",
+            "requiredFields": "必填字段"
+        },
+        "success": {
+            "title": "您已准备就绪！🎉",
+            "message": "恭喜！您已成功完成此文档的所有分配任务。您的回复已提交，文档已准备好进行后续步骤。",
+            "requiredFields": "所有必填字段已完成",
+            "termsAccepted": "使用条款已接受",
+            "signatureApplied": "数字签名已应用",
+            "nextSteps": "接下来会发生什么？",
+            "nextMessage": "文档将发送给其他参与者进行查看和完成。当整个文档流程完成后，您将收到通知。"
+        },
+        "terms": {
+            "part1": "我声明我已阅读文档并将遵守",
+            "link": "使用条款",
+            "part2": "。",
+            "accepted": "条款已接受"
+        },
+        "defaultParticipant": "其他参与者"
+    },
+    "documentViewer": {
+        "loading": {
+            "title": "正在准备文档",
+            "message": "请稍候，我们正在加载您的文档...",
+            "progress": "{{progress}}%"
+        },
+        "errors": {
+            "title": "文档加载错误",
+            "missingUrl": "文档 URL 缺失。",
+            "fetchFailed": "获取 PDF 失败：{{status}}",
+            "unknown": "加载 PDF 时发生未知错误。",
+            "loadFailed": "加载文档失败：{{message}}",
+            "tryAgain": "重试"
+        },
+        "preparing": "正在准备文档...",
+        "rejection": {
+            "title": "文档已拒绝",
+            "rejectedBy": "拒绝者：",
+            "ipAddress": "IP 地址：",
+            "date": "日期：",
+            "reason": "原因："
+        },
+        "pageInfo": "第 {{current}} 页，共 {{total}} 页",
+        "fieldsOnPage": "本页有 {{count}} 个字段",
+        "reviewComplete": {
+            "title": "文档审查完成",
+            "message": "您已到达文档末尾。请审查所有字段并接受下方的条款以继续签署。"
+        }
+    },
+    "actionSidebar": {
+        "save": {
+            "label": "保存",
+            "saving": "正在保存...",
+            "saveChanges": "保存您的更改",
+            "noChanges": "没有要保存的更改",
+            "finalized": "文档状态为 {{status}}",
+            "success": "您的更改已成功保存！",
+            "error": "保存您的更改失败。请重试。"
+        },
+        "sign": {
+            "label": "签署",
+            "ready": "签署文档",
+            "finalized": "文档状态为 {{status}}。不允许进一步操作。",
+            "saveFirst": "先保存",
+            "noSignatureFields": "您没有分配任何签名字段。",
+            "agreeTerms": "请在签署前同意使用条款。",
+            "allSigned": "您的所有签名字段已完成。",
+            "error": "错误：无法找到参与者分配。"
+        },
+        "reject": {
+            "label": "拒绝",
+            "finalized": "文档状态为 {{status}}。不允许进一步操作。",
+            "receiversCannot": "接收者不能拒绝"
+        },
+        "reassign": {
+            "label": "重新分配",
+            "finalized": "文档状态为 {{status}}。不允许进一步操作。",
+            "completed": "完成操作后您无法重新分配。"
+        },
+        "addReceiver": {
+            "label": "添加收件人",
+            "finalized": "文档状态为 {{status}}"
+        },
+        "progress": {
+            "finalized": "文档 {{status}}",
+            "unsaved": "未保存的更改",
+            "readyToSign": "准备签署",
+            "noSignature": "无需签名",
+            "reviewTerms": "查看条款"
+        }
+    },
+    "rejectModal": {
+        "title": "拒绝此文档",
+        "description": "此操作不可逆。发送者和所有其他参与者将收到通知。请在下方提供拒绝的明确原因。",
+        "reasonLabel": "拒绝原因",
+        "reasonPlaceholder": "例如，合同细节不正确...",
+        "characterCount": "{{count}} / 500",
+        "submit": "提交拒绝",
+        "submitting": "正在提交...",
+        "cancel": "取消",
+        "close": "关闭",
+        "validation": {
+            "emptyReason": "拒绝原因不能为空。",
+            "reasonTooLong": "原因必须少于或等于 500 个字符。"
+        },
+        "errors": {
+            "missingData": "基本数据缺失。请刷新页面。"
+        }
+    },
+    "reassignDrawer": {
+        "close": "关闭",
+        "errors": {
+            "missingFields": "请提供名字、姓氏和电子邮件。",
+            "missingReason": "重新分配原因不能为空。"
+        },
+        "createContact": {
+            "success": "联系人创建成功！"
+        },
+        "reassign": {
+            "success": "重新分配成功完成！"
+        },
+        "steps": {
+            "select": {
+                "title": "选择联系人",
+                "description": "选择一个联系人以重新分配您的职责",
+                "searchPlaceholder": "按姓名或电子邮件搜索...",
+                "loading": "正在加载联系人...",
+                "noContacts": "未找到联系人。",
+                "addButton": "添加新联系人"
+            },
+            "add": {
+                "title": "添加新联系人",
+                "description": "输入新联系人的详细信息",
+                "emailLabel": "新参与者的电子邮件",
+                "emailPlaceholder": "name@example.com",
+                "firstNameLabel": "名字",
+                "firstNamePlaceholder": "名字",
+                "lastNameLabel": "姓氏",
+                "lastNamePlaceholder": "姓氏",
+                "phoneLabel": "电话号码",
+                "phonePlaceholder": "输入电话号码",
+                "backButton": "返回",
+                "createButton": "创建并选择联系人"
+            },
+            "confirm": {
+                "title": "确认重新分配",
+                "description": "您即将将您的职责重新分配给以下联系人。此操作无法撤消。",
+                "reasonLabel": "重新分配原因",
+                "reasonPlaceholder": "请提供简短原因...",
+                "backButton": "返回",
+                "confirmButton": "确认重新分配"
+            },
+            "success": {
+                "title": "重新分配成功",
+                "description": "您的职责已成功重新分配",
+                "message": "您对此文档的职责已转移给：",
+                "notification": "所有各方将收到此更改的通知。",
+                "backButton": "返回文档"
+            },
+            "default": {
+                "title": "重新分配职责",
+                "description": "将您的任务转移给其他人"
+            }
+        }
+    },
+    "addReceiverDrawer": {
+        "close": "关闭",
+        "errors": {
+            "missingFields": "请提供名字、姓氏和电子邮件。"
+        },
+        "steps": {
+            "select": {
+                "title": "选择要添加的联系人",
+                "description": "选择一个现有联系人以添加为接收者",
+                "searchPlaceholder": "按姓名或电子邮件搜索...",
+                "loading": "正在加载联系人...",
+                "noContacts": "未找到联系人。",
+                "addButton": "添加新联系人"
+            },
+            "add": {
+                "title": "添加新联系人",
+                "description": "输入新联系人的详细信息",
+                "emailLabel": "新接收者的电子邮件",
+                "emailPlaceholder": "name@example.com",
+                "firstNameLabel": "名字",
+                "firstNamePlaceholder": "名字",
+                "lastNameLabel": "姓氏",
+                "lastNamePlaceholder": "姓氏",
+                "phoneLabel": "电话号码",
+                "phonePlaceholder": "输入电话号码",
+                "backButton": "返回",
+                "createButton": "创建并添加联系人"
+            },
+            "success": {
+                "title": "接收者添加成功",
+                "description": "该联系人已收到通知并已添加到文档中",
+                "message": "已添加为接收者并收到通知。",
+                "notification": "所有各方将收到此添加的通知。",
+                "backButton": "返回文档"
+            },
+            "failure": {
+                "title": "操作失败",
+                "description": "发生意外错误。请重试。",
+                "closeButton": "关闭"
+            },
+            "default": {
+                "title": "添加接收者",
+                "description": "为该文档添加新的只读参与者"
+            }
+        }
+    },
+    "signingDrawer": {
+        "close": "关闭",
+        "email": "电子邮件",
+        "phone": "电话号码",
+        "emailOtp": "电子邮件 OTP",
+        "smsOtp": "短信 OTP",
+        "errors": {
+            "missingData": "发生错误。无法识别文档或字段。",
+            "missingIdentity": "请输入您的 {{method}}。",
+            "resendOtp": "无法重新发送 OTP。请返回并确认您的 {{method}}。",
+            "invalidOtp": "发生错误。缺少必需信息。"
+        },
+        "otpSent": {
+            "email": "OTP 已发送到您的电子邮件！",
+            "sms": "OTP 已发送到您的电话！"
+        },
+        "steps": {
+            "method": {
+                "title": "选择签署方法",
+                "description": "选择一种方法以安全地验证您的身份",
+                "emailOption": "通过电子邮件发送一次性代码",
+                "emailDescription": "通过您的电子邮件进行安全验证",
+                "smsOption": "通过短信发送一次性代码",
+                "smsDescription": "通过您的电话进行安全验证"
+            },
+            "identity": {
+                "title": "验证您的 {{method}}",
+                "description": "为安全起见，请在下方输入您的 {{method}}",
+                "info": "我们将向您在下方输入的 {{method}} 发送验证码。",
+                "matchInfo": "它必须与收件人的 {{method}} 匹配：{{contact}}",
+                "label": "您的 {{method}}",
+                "emailPlaceholder": "例如，您的名字@example.com",
+                "phonePlaceholder": "例如，+1234567890",
+                "backButton": "返回",
+                "requestButton": "请求代码"
+            },
+            "otp": {
+                "title": "输入验证码",
+                "description": "我们已向 {{contact}} 发送了一个 6 位代码。它将在 {{timer}} 秒后过期。",
+                "timerLabel": "剩余秒数",
+                "inputLabel": "输入 6 位验证码",
+                "inputPlaceholder": "------",
+                "resendButton": "重新发送验证码",
+                "resending": "正在发送...",
+                "backButton": "返回",
+                "completeButton": "完成签署"
+            },
+            "success": {
+                "title": "文档已签署！",
+                "description": "您的签名已成功应用到文档",
+                "message": "感谢您通过 {{method}} 完成签署流程。",
+                "notification": "当文档完全完成后，所有各方将收到通知。",
+                "backButton": "返回文档"
+            },
+            "default": {
+                "title": "签署流程",
+                "description": ""
+            }
+        }
+    },
+    "readOnlyField": {
+        "unknownUser": "未知用户",
+        "otherParticipant": "其他参与者",
+        "participantRole": "参与者",
+        "signed": "已签署",
+        "rejected": "已拒绝",
+        "reason": "原因：",
+        "otpCode": "OTP: {{code}}",
+        "via": "通过 {{method}}",
+        "emailOtp": "电子邮件 OTP",
+        "signatureField": "签名字段",
+        "checkbox": "复选框",
+        "textarea": "文本区域",
+        "dateField": "日期字段",
+        "textField": "文本字段",
+        "rejectionTooltip": "字段被 {{name}} 拒绝：{{reason}}",
+        "fieldTooltip": "字段用于 {{name}} ({{contact}})：{{label}}",
+        "languages": {
+            "en": "英语",
+            "es": "西班牙语",
+            "fr": "法语"
+        }
+    },
+    "interactiveField": {
+        "unknownUser": "未知用户",
+        "currentUser": "当前用户",
+        "participantRole": "参与者",
+        "signed": "已签署",
+        "rejected": "已拒绝",
+        "reason": "原因：",
+        "rejectedIP": "IP: {{ip}}",
+        "otpCode": "OTP: {{code}}",
+        "via": "通过 {{method}}",
+        "emailOtp": "电子邮件 OTP",
+        "sign": "签署",
+        "clickToSign": "点击签署",
+        "chooseMethod": "选择方法",
+        "editField": "编辑字段",
+        "saveField": "保存字段",
+        "unsupported": "不支持",
+        "errors": {
+            "termsNotAgreed": "请在签署前同意文档底部的使用条款。",
+            "noDocumentData": "错误：文档数据不可用。",
+            "noParticipantAssignment": "错误：无法找到参与者分配。"
+        },
+        "rejectionTooltip": "字段被 {{name}} 拒绝：{{reason}}"
+    },
+    "subscriptionBanner": {
+        "noSubscription": {
+            "title": "解锁所有功能",
+            "message": "激活订阅以开始创建和管理文档。",
+            "ctaText": "查看计划"
+        },
+        "limitReached": {
+            "title": "达到文档限制",
+            "message": "请升级您的计划以继续创建新文档。",
+            "ctaText": "升级计划"
+        },
+        "lowDocuments": {
+            "title": "文档即将用尽",
+            "message": "您只剩下 {{remaining}} 个文档。升级以获得更多。",
+            "ctaText": "升级计划"
+        }
+    },
+    "purchaseModal": {
+        "cardBrands": {
+            "visa": "Visa",
+            "mastercard": "Mastercard",
+            "amex": "American Express"
+        },
+        "expires": "{{month}}/{{year}} 到期",
+        "default": "默认",
+        "topUpTitle": "充值您的计划",
+        "confirmSubscription": "确认您的订阅",
+        "topUpDetails": "充值详情",
+        "yourPlan": "您的计划",
+        "yearly": "每年",
+        "monthly": "每月",
+        "annually": "每年",
+        "billed": "按 {{interval}} 计费",
+        "trialEndNote": "注意：继续操作将结束您的免费试用并立即向您收费。",
+        "selectPaymentMethod": "选择付款方式",
+        "useDifferentCard": "使用其他卡",
+        "startingTrial": "正在开始试用...",
+        "startTrial": "开始 14 天免费试用",
+        "processing": "正在处理...",
+        "topUp": "充值",
+        "subscribeNow": "订阅",
+        "subscribe": "立即{{action}} (€{{price}})",
+        "termsAgreement": "继续即表示您同意我们的服务条款。",
+        "success": {
+            "topUp": "充值成功！",
+            "topUpMessage": "您的 {{planName}} 计划现在有更多文档可用！",
+            "subscription": "订阅成功！",
+            "subscriptionMessage": "欢迎使用 {{planName}} 计划！",
+            "trial": "免费试用已开始！",
+            "trialMessage": "您有 14 天的 {{planName}} 计划访问权限！"
+        },
+        "errors": {
+            "cardNotFound": "未找到卡详细信息表单。",
+            "invalidCard": "卡详细信息无效。",
+            "noPaymentMethod": "请选择或添加付款方式以继续。",
+            "planNotAvailable": "此计划目前不可购买。",
+            "unknownError": "发生意外错误。"
+        }
+    },
+    "fieldPropertiesPanel": {
+        "fieldType": "字段类型：",
+        "fieldTypes": {
+            "text": "文本",
+            "textarea": "文本区域",
+            "radio": "单选按钮",
+            "dropdown": "下拉列表"
+        },
+        "label": "标签：",
+        "placeholder": "占位符：",
+        "radioGroupId": "单选按钮组 ID：",
+        "radioGroupIdPlaceholder": "此单选按钮组的唯一 ID",
+        "radioGroupIdHint": "所有具有相同组 ID 的单选按钮作为一个选择集。",
+        "radioOptions": "选项（逗号分隔）：",
+        "radioOptionsPlaceholder": "选项 1, 选项 2",
+        "radioOptionsHint": "输入至少两个选项以获得有意义的单选按钮组。",
+        "dropdownOptions": "选项（逗号分隔）：",
+        "dropdownOptionsPlaceholder": "选项 1, 选项 2",
+        "dropdownOptionsHint": "下拉列表至少需要一个选项。",
+        "required": "必填",
+        "errors": {
+            "labelRequired": "标签是必填项",
+            "labelEmpty": "标签不能为空",
+            "placeholderTooLong": "占位符太长",
+            "radioOptionsMin": "单选按钮组至少需要两个逗号分隔的选项",
+            "dropdownOptionsMin": "下拉列表至少需要一个选项",
+            "groupIdRequired": "单选按钮需要组 ID"
+        }
+    },
+    "editorToolbar": {
+        "fieldTypes": {
+            "text": "文本",
+            "textarea": "文本区域",
+            "signature": "签名",
+            "checkbox": "复选框",
+            "date": "日期"
+        }
+    },
+    "messages": {
+        "logoutSuccess": "您已成功退出登录。"
+    },
+    "meta": {
+        "pageTitle": "I-sign.eu - 专业电子签名平台"
+    },
+    "languageSwitcher": {
+        "title": "语言",
+        "selectLanguage": "选择语言"
+    }
 }

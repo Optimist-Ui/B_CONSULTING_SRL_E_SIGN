@@ -6,9 +6,11 @@ import { clearParticipantState } from '../store/slices/participantSlice';
 import { fetchPackageForParticipant as fetchPackageThunk } from '../store/thunk/participantThunks';
 import ParticipantLayout from '../components/participant/ParticipantLayout';
 import { toast } from 'react-toastify';
-import "../assets/css/participantpage.scss"
+import '../assets/css/participantpage.scss';
+import { useTranslation } from 'react-i18next';
 
 const ParticipantPage: React.FC = () => {
+    const { t } = useTranslation();
     const dispatch = useDispatch<AppDispatch>();
     const { packageId, participantId } = useParams<{ packageId: string; participantId: string }>();
 
@@ -19,7 +21,6 @@ const ParticipantPage: React.FC = () => {
             dispatch(fetchPackageThunk({ packageId, participantId }));
         }
 
-        // Cleanup when the component unmounts
         return () => {
             dispatch(clearParticipantState());
         };
@@ -27,7 +28,7 @@ const ParticipantPage: React.FC = () => {
 
     useEffect(() => {
         if (error) {
-            toast.error(error, { autoClose: false }); // Show error until dismissed
+            toast.error(error, { autoClose: false });
         }
     }, [error]);
 
@@ -35,7 +36,6 @@ const ParticipantPage: React.FC = () => {
         return (
             <div className="flex justify-center items-center h-screen bg-gradient-to-br from-slate-50 to-slate-100">
                 <div className="text-center p-8 bg-white rounded-2xl shadow-xl border border-slate-200/50 backdrop-blur-sm">
-                    {/* Enhanced loading spinner with multiple rings */}
                     <div className="relative w-20 h-20 mx-auto mb-6">
                         <div className="absolute inset-0 rounded-full border-4 border-slate-200"></div>
                         <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-[#1e293b] animate-spin"></div>
@@ -43,11 +43,10 @@ const ParticipantPage: React.FC = () => {
                     </div>
 
                     <div className="space-y-2">
-                        <h3 className="text-xl font-bold text-[#1e293b]">Loading Secure Document</h3>
-                        <p className="text-slate-600">Please wait while we prepare your document...</p>
+                        <h3 className="text-xl font-bold text-[#1e293b]">{t('participantPage.loading.title')}</h3>
+                        <p className="text-slate-600">{t('participantPage.loading.message')}</p>
                     </div>
 
-                    {/* Progress dots animation */}
                     <div className="flex justify-center items-center mt-4 space-x-1">
                         <div className="w-2 h-2 bg-[#1e293b] rounded-full animate-pulse"></div>
                         <div className="w-2 h-2 bg-[#1e293b] rounded-full animate-pulse animation-delay-200"></div>
@@ -62,7 +61,6 @@ const ParticipantPage: React.FC = () => {
         return (
             <div className="min-h-screen bg-gradient-to-br from-red-50 to-rose-100 flex justify-center items-center p-4">
                 <div className="text-center p-8 bg-white rounded-2xl shadow-2xl border border-red-200/50 backdrop-blur-sm max-w-md w-full">
-                    {/* Error icon with animation */}
                     <div className="w-16 h-16 mx-auto mb-6 bg-red-100 rounded-full flex items-center justify-center">
                         <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path
@@ -75,19 +73,18 @@ const ParticipantPage: React.FC = () => {
                     </div>
 
                     <div className="space-y-4">
-                        <h2 className="text-2xl font-bold text-red-700">Access Denied</h2>
+                        <h2 className="text-2xl font-bold text-red-700">{t('participantPage.error.title')}</h2>
                         <div className="space-y-2">
                             <p className="text-red-600 font-medium">{error}</p>
-                            <p className="text-sm text-slate-500 leading-relaxed">Please check your link or contact the sender if you believe this is an error.</p>
+                            <p className="text-sm text-slate-500 leading-relaxed">{t('participantPage.error.message')}</p>
                         </div>
                     </div>
 
-                    {/* Action button */}
                     <button
                         onClick={() => window.location.reload()}
                         className="mt-6 px-6 py-2.5 bg-[#1e293b] text-white rounded-lg hover:bg-slate-700 transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-[#1e293b] focus:ring-offset-2"
                     >
-                        Try Again
+                        {t('participantPage.error.action')}
                     </button>
                 </div>
             </div>
@@ -95,7 +92,6 @@ const ParticipantPage: React.FC = () => {
     }
 
     if (!packageData) {
-        // This state is briefly visible after loading and before data arrives
         return null;
     }
 

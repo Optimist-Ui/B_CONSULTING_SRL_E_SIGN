@@ -6,6 +6,7 @@ import { AppDispatch, IRootState } from '../../store';
 import { setRejectModalOpen, setSigningDrawerOpen, setReassignDrawerOpen, setActiveSigningFieldId, setActiveParticipantId, setAddReceiverDrawerOpen } from '../../store/slices/participantSlice';
 import { submitParticipantFields } from '../../store/thunk/participantThunks';
 import { toast } from 'react-toastify';
+import { useTranslation } from 'react-i18next';
 
 // Typed icons
 const FiXCircleTyped = FiXCircle as ComponentType<{ className?: string }>;
@@ -24,12 +25,15 @@ interface ActionSidebarProps {
 }
 
 const ActionSidebar: React.FC<ActionSidebarProps> = ({ allowReassign, allowReceiversToAdd, currentUserTasksCompleted }) => {
+    const { t } = useTranslation();
     const dispatch = useDispatch<AppDispatch>();
     const { packageData, fieldValues, uiState, loading } = useSelector((state: IRootState) => state.participant);
     const { hasAgreedToTerms } = uiState;
+
     // Check if package is in a final state
     const isFinalized = packageData?.status === 'Completed' || packageData?.status === 'Rejected' || packageData?.status === 'Revoked';
     const isCurrentUserReceiver = packageData?.currentUser?.role === 'Receiver';
+
     // Check if there are any unsaved field changes
     const hasUnsavedChanges = React.useMemo(() => {
         if (!packageData || isFinalized) return false;
@@ -73,31 +77,31 @@ const ActionSidebar: React.FC<ActionSidebarProps> = ({ allowReassign, allowRecei
                 })
             ).unwrap();
 
-            toast.success('Your changes have been saved successfully!');
+            toast.success(t('actionSidebar.save.success') as string);
         } catch (error) {
             console.error('Failed to save fields:', error);
-            toast.error('Failed to save your changes. Please try again.');
+            toast.error(t('actionSidebar.save.error') as string);
         }
     };
 
     const handleSignClick = () => {
         if (isFinalized) {
-            toast.info(`Document is ${packageData?.status.toLowerCase()}. No further actions are allowed.`);
+            toast.info(t('actionSidebar.sign.finalized', { status: packageData?.status.toLowerCase() }) as string);
             return;
         }
 
         if (hasUnsavedChanges) {
-            toast.warn('Please save your changes before signing.');
+            toast.warn(t('actionSidebar.sign.saveFirst') as string);
             return;
         }
 
         if (!hasSignatureFieldAssigned) {
-            toast.info('You do not have any signature fields assigned to you.');
+            toast.info(t('actionSidebar.sign.noSignatureFields') as string);
             return;
         }
 
         if (!hasAgreedToTerms) {
-            toast.warn('Please agree to the Terms of Use before signing.');
+            toast.warn(t('actionSidebar.sign.agreeTerms') as string);
             const termsSection = document.getElementById('terms-checkbox-section');
             if (termsSection) {
                 termsSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -117,7 +121,7 @@ const ActionSidebar: React.FC<ActionSidebarProps> = ({ allowReassign, allowRecei
         });
 
         if (!packageData || !firstUnsignedSignatureField) {
-            toast.info('All of your signature fields have been completed.');
+            toast.info(t('actionSidebar.sign.allSigned') as string);
             return;
         }
 
@@ -130,13 +134,13 @@ const ActionSidebar: React.FC<ActionSidebarProps> = ({ allowReassign, allowRecei
             dispatch(setActiveParticipantId(assignedUser.id));
             dispatch(setSigningDrawerOpen(true));
         } else {
-            toast.error('Error: Unable to find participant assignment.');
+            toast.error(t('actionSidebar.sign.error') as string);
         }
     };
 
     const handleRejectClick = () => {
         if (isFinalized) {
-            toast.info(`Document is ${packageData?.status.toLowerCase()}. No further actions are allowed.`);
+            toast.info(t('actionSidebar.reject.finalized', { status: packageData?.status.toLowerCase() }) as string);
             return;
         }
         dispatch(setRejectModalOpen(true));
@@ -144,7 +148,7 @@ const ActionSidebar: React.FC<ActionSidebarProps> = ({ allowReassign, allowRecei
 
     const handleReassignClick = () => {
         if (isFinalized) {
-            toast.info(`Document is ${packageData?.status.toLowerCase()}. No further actions are allowed.`);
+            toast.info(t('actionSidebar.reassign.finalized', { status: packageData?.status.toLowerCase() }) as string);
             return;
         }
         dispatch(setReassignDrawerOpen(true));
@@ -156,43 +160,43 @@ const ActionSidebar: React.FC<ActionSidebarProps> = ({ allowReassign, allowRecei
     };
 
     const getSignButtonTooltip = () => {
-        if (isFinalized) return `Document is ${packageData?.status.toLowerCase()}`;
-        if (hasUnsavedChanges) return 'Save your changes first';
-        if (!hasSignatureFieldAssigned) return 'No signature fields assigned to you';
-        if (!hasAgreedToTerms) return 'Please agree to Terms of Use';
-        return 'Ready to sign document';
+        if (isFinalized) return t('actionSidebar.sign.finalized', { status: packageData?.status.toLowerCase() });
+        if (hasUnsavedChanges) return t('actionSidebar.sign.saveFirst');
+        if (!hasSignatureFieldAssigned) return t('actionSidebar.sign.noSignatureFields');
+        if (!hasAgreedToTerms) return t('actionSidebar.sign.agreeTerms');
+        return t('actionSidebar.sign.ready');
     };
 
     const getSaveButtonTooltip = () => {
-        if (isFinalized) return `Document is ${packageData?.status.toLowerCase()}`;
-        if (!hasUnsavedChanges) return 'No changes to save';
-        if (loading) return 'Saving...';
-        return 'Save your changes';
+        if (isFinalized) return t('actionSidebar.save.finalized', { status: packageData?.status.toLowerCase() });
+        if (!hasUnsavedChanges) return t('actionSidebar.save.noChanges');
+        if (loading) return t('actionSidebar.save.saving');
+        return t('actionSidebar.save.saveChanges');
     };
 
     const getRejectButtonTooltip = () => {
-        if (isFinalized) return `Document is ${packageData?.status.toLowerCase()}`;
-        return 'Reject Document';
+        if (isFinalized) return t('actionSidebar.reject.finalized', { status: packageData?.status.toLowerCase() });
+        return t('actionSidebar.reject.label');
     };
 
     const getReassignButtonTooltip = () => {
-        if (isFinalized) return `Document is ${packageData?.status.toLowerCase()}`;
-        if (currentUserTasksCompleted) return 'You cannot reassign after completing your actions.';
-        return 'Reassign Document';
+        if (isFinalized) return t('actionSidebar.reassign.finalized', { status: packageData?.status.toLowerCase() });
+        if (currentUserTasksCompleted) return t('actionSidebar.reassign.completed');
+        return t('actionSidebar.reassign.label');
     };
 
     const getProgressStatus = () => {
         if (isFinalized)
             return {
-                text: `Document ${packageData?.status}`,
+                text: t('actionSidebar.progress.finalized', { status: packageData?.status }),
                 color: packageData?.status === 'Completed' ? 'green' : 'red',
                 icon: packageData?.status === 'Completed' ? FiCheckCircleTyped : FiXCircleTyped,
             };
-        if (hasUnsavedChanges) return { text: 'Unsaved changes', color: 'orange', icon: FiSaveTyped };
-        if (canSign) return { text: 'Ready to sign', color: 'green', icon: FiCheckCircleTyped };
-        if (hasAgreedToTerms && hasSignatureFieldAssigned) return { text: 'Ready to sign', color: 'green', icon: FiCheckCircleTyped };
-        if (hasAgreedToTerms) return { text: 'No signature required', color: 'blue', icon: FiUserTyped };
-        return { text: 'Review terms', color: 'gray', icon: FiAlertTriangleTyped };
+        if (hasUnsavedChanges) return { text: t('actionSidebar.progress.unsaved'), color: 'orange', icon: FiSaveTyped };
+        if (canSign) return { text: t('actionSidebar.progress.readyToSign'), color: 'green', icon: FiCheckCircleTyped };
+        if (hasAgreedToTerms && hasSignatureFieldAssigned) return { text: t('actionSidebar.progress.readyToSign'), color: 'green', icon: FiCheckCircleTyped };
+        if (hasAgreedToTerms) return { text: t('actionSidebar.progress.noSignature'), color: 'blue', icon: FiUserTyped };
+        return { text: t('actionSidebar.progress.reviewTerms'), color: 'gray', icon: FiAlertTriangleTyped };
     };
 
     const progressStatus = getProgressStatus();
@@ -217,7 +221,7 @@ const ActionSidebar: React.FC<ActionSidebarProps> = ({ allowReassign, allowRecei
                                 title={getSaveButtonTooltip()}
                             >
                                 <FiSaveTyped className="w-6 h-6 xl:w-7 xl:h-7 mb-1" />
-                                <span className="text-xs font-semibold">{loading ? 'Saving...' : 'Save'}</span>
+                                <span className="text-xs font-semibold">{loading ? t('actionSidebar.save.saving') : t('actionSidebar.save.label')}</span>
                             </button>
 
                             <div className="absolute right-full mr-3 top-1/2 -translate-y-1/2 bg-gray-900 text-white text-xs py-2 px-3 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10 shadow-lg">
@@ -240,7 +244,7 @@ const ActionSidebar: React.FC<ActionSidebarProps> = ({ allowReassign, allowRecei
                             title={getRejectButtonTooltip()}
                         >
                             <FiXCircleTyped className="w-6 h-6 xl:w-7 xl:h-7 mb-1" />
-                            <span className="text-xs font-semibold">Reject</span>
+                            <span className="text-xs font-semibold">{t('actionSidebar.reject.label')}</span>
                         </button>
 
                         <div className="absolute right-full mr-3 top-1/2 -translate-y-1/2 bg-gray-900 text-white text-xs py-2 px-3 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10 shadow-lg">
@@ -263,7 +267,7 @@ const ActionSidebar: React.FC<ActionSidebarProps> = ({ allowReassign, allowRecei
                         >
                             {canSign && <div className="absolute inset-0 bg-green-300 rounded-2xl animate-pulse opacity-30"></div>}
                             <FiCheckCircleTyped className="w-6 h-6 xl:w-7 xl:h-7 mb-1 relative z-10" />
-                            <span className="text-xs font-semibold relative z-10">Sign</span>
+                            <span className="text-xs font-semibold relative z-10">{t('actionSidebar.sign.label')}</span>
                             {canSign && <div className="absolute inset-0 -top-4 bg-gradient-to-r from-transparent via-white to-transparent opacity-20 transform -skew-x-12 animate-shimmer"></div>}
                         </button>
 
@@ -287,7 +291,7 @@ const ActionSidebar: React.FC<ActionSidebarProps> = ({ allowReassign, allowRecei
                                 title={getReassignButtonTooltip()}
                             >
                                 <FiShare2Typed className="w-6 h-6 xl:w-7 xl:h-7 mb-1" />
-                                <span className="text-xs font-semibold">Reassign</span>
+                                <span className="text-xs font-semibold">{t('actionSidebar.reassign.label')}</span>
                             </button>
                             <div className="absolute right-full mr-3 top-1/2 -translate-y-1/2 bg-gray-900 text-white text-xs py-2 px-3 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10 shadow-lg">
                                 {getReassignButtonTooltip()}
@@ -296,7 +300,7 @@ const ActionSidebar: React.FC<ActionSidebarProps> = ({ allowReassign, allowRecei
                         </div>
                     )}
 
-                    {/* --- NEW DESKTOP: Add Receiver Button --- */}
+                    {/* Add Receiver Button */}
                     {allowReceiversToAdd && isCurrentUserReceiver && (
                         <div className="group relative">
                             <button
@@ -307,13 +311,13 @@ const ActionSidebar: React.FC<ActionSidebarProps> = ({ allowReassign, allowRecei
                                         ? 'bg-gray-400 border-2 border-gray-300 cursor-not-allowed opacity-60 text-white'
                                         : 'text-teal-600 bg-teal-50 border-2 border-teal-100 hover:border-teal-300 hover:bg-teal-100 hover:shadow-lg'
                                 }`}
-                                title={isFinalized ? `Document is ${packageData?.status?.toLowerCase()}` : 'Add another receiver'}
+                                title={isFinalized ? t('actionSidebar.addReceiver.finalized', { status: packageData?.status?.toLowerCase() }) : t('actionSidebar.addReceiver.label')}
                             >
                                 <FiUserPlusTyped className="w-6 h-6 xl:w-7 xl:h-7 mb-1" />
-                                <span className="text-xs font-semibold">Add Recipient</span>
+                                <span className="text-xs font-semibold">{t('actionSidebar.addReceiver.label')}</span>
                             </button>
                             <div className="absolute right-full mr-3 top-1/2 -translate-y-1/2 bg-gray-900 text-white text-xs py-2 px-3 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10 shadow-lg">
-                                Add another receiver
+                                {t('actionSidebar.addReceiver.label')}
                                 <div className="absolute left-full top-1/2 -translate-y-1/2 border-4 border-transparent border-l-gray-900"></div>
                             </div>
                         </div>
@@ -400,7 +404,7 @@ const ActionSidebar: React.FC<ActionSidebarProps> = ({ allowReassign, allowRecei
                     </button>
 
                     <div className="absolute right-full mr-3 top-1/2 -translate-y-1/2 bg-gray-900 text-white text-xs py-2 px-3 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap shadow-lg">
-                        {getSignButtonTooltip()}
+                        {getSaveButtonTooltip()}
                     </div>
                 </div>
 
@@ -410,7 +414,7 @@ const ActionSidebar: React.FC<ActionSidebarProps> = ({ allowReassign, allowRecei
                         onClick={handleRejectClick}
                         disabled={isFinalized || currentUserTasksCompleted || isCurrentUserReceiver}
                         className={`w-14 h-14 rounded-full shadow-lg transition-all duration-300 flex items-center justify-center relative overflow-hidden ${
-                          currentUserTasksCompleted ||  isFinalized || isCurrentUserReceiver
+                            currentUserTasksCompleted || isFinalized || isCurrentUserReceiver
                                 ? 'bg-gray-400 text-white cursor-not-allowed opacity-60'
                                 : 'bg-red-500 text-white hover:bg-red-600 hover:shadow-xl hover:scale-110 active:scale-95'
                         }`}
@@ -446,7 +450,7 @@ const ActionSidebar: React.FC<ActionSidebarProps> = ({ allowReassign, allowRecei
                     </div>
                 )}
 
-                {/* --- NEW TABLET: Add Receiver Button --- */}
+                {/* Add Receiver Button */}
                 {allowReceiversToAdd && isCurrentUserReceiver && (
                     <div className="group relative">
                         <button
@@ -455,12 +459,12 @@ const ActionSidebar: React.FC<ActionSidebarProps> = ({ allowReassign, allowRecei
                             className={`w-14 h-14 rounded-full shadow-lg transition-all duration-300 flex items-center justify-center relative overflow-hidden ${
                                 isFinalized ? 'bg-gray-400 text-white cursor-not-allowed opacity-60' : 'bg-teal-500 text-white hover:bg-teal-600 hover:shadow-xl hover:scale-110 active:scale-95'
                             }`}
-                            title="Add another receiver"
+                            title={t('actionSidebar.addReceiver.label')}
                         >
                             <FiUserPlusTyped className="w-6 h-6" />
                         </button>
                         <div className="absolute right-full mr-3 top-1/2 -translate-y-1/2 bg-gray-900 text-white text-xs py-2 px-3 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap shadow-lg">
-                            Add another receiver
+                            {t('actionSidebar.addReceiver.label')}
                         </div>
                     </div>
                 )}
@@ -505,7 +509,7 @@ const ActionSidebar: React.FC<ActionSidebarProps> = ({ allowReassign, allowRecei
                                 }`}
                             >
                                 <FiSaveTyped className="w-5 h-5" />
-                                <span>{loading ? 'Saving...' : 'Save'}</span>
+                                <span>{loading ? t('actionSidebar.save.saving') : t('actionSidebar.save.label')}</span>
                             </button>
                         )}
 
@@ -514,14 +518,14 @@ const ActionSidebar: React.FC<ActionSidebarProps> = ({ allowReassign, allowRecei
                             onClick={handleRejectClick}
                             disabled={isCurrentUserReceiver || currentUserTasksCompleted || isFinalized}
                             className={`flex-1 flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl font-semibold transition-all duration-200 active:scale-95 ${
-                               currentUserTasksCompleted || isCurrentUserReceiver || isFinalized
+                                currentUserTasksCompleted || isCurrentUserReceiver || isFinalized
                                     ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                                     : 'text-red-600 bg-red-50 border-2 border-red-100 hover:border-red-300 hover:bg-red-100'
                             }`}
-                            title={isCurrentUserReceiver ? 'Receivers cannot reject' : 'Reject Document'}
+                            title={isCurrentUserReceiver ? t('actionSidebar.reject.receiversCannot') : t('actionSidebar.reject.label')}
                         >
                             <FiXCircleTyped className="w-5 h-5" />
-                            <span>Reject</span>
+                            <span>{t('actionSidebar.reject.label')}</span>
                         </button>
 
                         {/* Sign Button */}
@@ -534,7 +538,9 @@ const ActionSidebar: React.FC<ActionSidebarProps> = ({ allowReassign, allowRecei
                         >
                             {canSign && <div className="absolute inset-0 bg-green-400 animate-pulse opacity-20"></div>}
                             <FiCheckCircleTyped className="w-5 h-5 relative z-10 flex-shrink-0" />
-                            <span className="relative z-10 truncate">{hasUnsavedChanges ? 'Save First' : canSign ? 'Sign Document' : 'Agree to Terms'}</span>
+                            <span className="relative z-10 truncate">
+                                {hasUnsavedChanges ? t('actionSidebar.sign.saveFirst') : canSign ? t('actionSidebar.sign.ready') : t('actionSidebar.sign.agreeTerms')}
+                            </span>
                         </button>
 
                         {/* Reassign Button (if allowed) */}
@@ -557,7 +563,7 @@ const ActionSidebar: React.FC<ActionSidebarProps> = ({ allowReassign, allowRecei
                             <button
                                 onClick={handleAddReceiverClick}
                                 disabled={isFinalized}
-                                title={isFinalized ? `Document is ${packageData?.status?.toLowerCase()}` : 'Add another receiver'}
+                                title={isFinalized ? t('actionSidebar.addReceiver.finalized', { status: packageData?.status?.toLowerCase() }) : t('actionSidebar.addReceiver.label')}
                                 className={`p-3.5 rounded-xl transition-all duration-200 active:scale-95 ${
                                     isFinalized ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'text-teal-600 bg-teal-50 border-2 border-teal-100 hover:border-teal-300 hover:bg-teal-100'
                                 }`}

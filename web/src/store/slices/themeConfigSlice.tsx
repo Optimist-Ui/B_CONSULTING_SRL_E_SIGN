@@ -30,6 +30,7 @@ const defaultState = {
         { code: 'es', name: 'Spanish' },
         { code: 'sv', name: 'Swedish' },
         { code: 'tr', name: 'Turkish' },
+        { code: 'ae', name: 'Arabic' },
     ],
     semidark: false,
 };
@@ -70,7 +71,7 @@ const themeConfigSlice = createSlice({
     initialState: initialState,
     reducers: {
         toggleTheme(state, { payload }) {
-            payload = payload || state.theme; // light | dark | system
+            payload = payload || state.theme;
             localStorage.setItem('theme', payload);
             state.theme = payload;
             if (payload === 'light') {
@@ -92,30 +93,30 @@ const themeConfigSlice = createSlice({
             }
         },
         toggleMenu(state, { payload }) {
-            payload = payload || state.menu; // vertical, collapsible-vertical, horizontal
-            state.sidebar = false; // reset sidebar state
+            payload = payload || state.menu;
+            state.sidebar = false;
             localStorage.setItem('menu', payload);
             state.menu = payload;
         },
         toggleLayout(state, { payload }) {
-            payload = payload || state.layout; // full, boxed-layout
+            payload = payload || state.layout;
             localStorage.setItem('layout', payload);
             state.layout = payload;
         },
         toggleRTL(state, { payload }) {
-            payload = payload || state.rtlClass; // rtl, ltr
+            payload = payload || state.rtlClass;
             localStorage.setItem('rtlClass', payload);
             state.rtlClass = payload;
             document.querySelector('html')?.setAttribute('dir', state.rtlClass || 'ltr');
         },
         toggleAnimation(state, { payload }) {
-            payload = payload || state.animation; // animate__fadeIn, animate__fadeInDown, animate__fadeInUp, animate__fadeInLeft, animate__fadeInRight, animate__slideInDown, animate__slideInLeft, animate__slideInRight, animate__zoomIn
+            payload = payload || state.animation;
             payload = payload?.trim();
             localStorage.setItem('animation', payload);
             state.animation = payload;
         },
         toggleNavbar(state, { payload }) {
-            payload = payload || state.navbar; // navbar-sticky, navbar-floating, navbar-static
+            payload = payload || state.navbar;
             localStorage.setItem('navbar', payload);
             state.navbar = payload;
         },
@@ -134,7 +135,9 @@ const themeConfigSlice = createSlice({
         },
 
         setPageTitle(state, { payload }) {
-            document.title = `${payload} | I-sign.eu - Professional Electronic Signature Platform`;
+            // Get the translated platform name
+            const platformName = i18next.t('meta.pageTitle');
+            document.title = `${payload} | ${platformName}`;
         },
     },
 });

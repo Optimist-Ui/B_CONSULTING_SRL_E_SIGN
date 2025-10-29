@@ -2,6 +2,7 @@ import React, { ComponentType } from 'react';
 import { ParticipantPackageField, SignatureValue, RejectionDetails } from '../../../store/slices/participantSlice';
 import { FiFileText, FiCalendar, FiSquare, FiLock, FiUser, FiCheckCircle, FiXCircle, FiAlertTriangle } from 'react-icons/fi';
 import { FaSignature } from 'react-icons/fa';
+import { useTranslation } from 'react-i18next';
 
 // Typed Icons
 const FiFileTextTyped = FiFileText as ComponentType<{ className?: string }>;
@@ -21,6 +22,8 @@ interface ReadOnlyFieldProps {
 }
 
 const ReadOnlyField: React.FC<ReadOnlyFieldProps> = ({ field, rejectionDetails, packageStatus }) => {
+    const { t } = useTranslation();
+
     // Determine field size category for responsive styling
     const getFieldSizeCategory = () => {
         const area = field.width * field.height;
@@ -66,7 +69,7 @@ const ReadOnlyField: React.FC<ReadOnlyFieldProps> = ({ field, rejectionDetails, 
             const signatureMethods = user.signatureMethods || [];
 
             // Determine which contact info to show based on signature method
-            let contactInfo = user.contactName || 'Unknown User';
+            let contactInfo = user.contactName || t('readOnlyField.unknownUser');
 
             if (field.type === 'signature') {
                 if (signatureMethods.includes('SMS OTP') && user.contactPhone) {
@@ -86,19 +89,19 @@ const ReadOnlyField: React.FC<ReadOnlyFieldProps> = ({ field, rejectionDetails, 
             }
 
             return {
-                name: user.contactName || 'Unknown User',
+                name: user.contactName || t('readOnlyField.unknownUser'),
                 contactInfo,
                 email: user.contactEmail || '',
                 phone: user.contactPhone || '',
-                role: user.role || 'Participant',
+                role: user.role || t('readOnlyField.participantRole'),
             };
         }
         return {
-            name: 'Other Participant',
-            contactInfo: 'Other Participant',
+            name: t('readOnlyField.otherParticipant'),
+            contactInfo: t('readOnlyField.otherParticipant'),
             email: '',
             phone: '',
-            role: 'Participant',
+            role: t('readOnlyField.participantRole'),
         };
     };
 
@@ -129,7 +132,7 @@ const ReadOnlyField: React.FC<ReadOnlyFieldProps> = ({ field, rejectionDetails, 
             <div style={baseStyles} className="border-2 border-green-400 bg-green-50/80 rounded-lg shadow-sm backdrop-blur-sm p-2 flex flex-col justify-center overflow-hidden">
                 <div className={`flex items-center gap-1 ${isTinyField ? 'mb-0.5' : 'mb-1'} text-green-700`}>
                     <FiCheckCircleTyped className={`${iconSize} flex-shrink-0`} />
-                    <h4 className={`font-bold ${labelTextSize} uppercase tracking-wider`}>Signed</h4>
+                    <h4 className={`font-bold ${labelTextSize} uppercase tracking-wider`}>{t('readOnlyField.signed')}</h4>
                 </div>
                 <div className={`${userTextSize} text-slate-700 space-y-0.5 ${isTinyField ? 'pl-0' : 'pl-1'}`}>
                     <p className="font-semibold truncate">{signatureValue.signedBy}</p>
@@ -139,10 +142,14 @@ const ReadOnlyField: React.FC<ReadOnlyFieldProps> = ({ field, rejectionDetails, 
                         ) : (
                             <p className="truncate text-gray-600">{signatureValue.email}</p>
                         ))}
-                    {!isTinyField && signatureValue.otpCode && <p className="text-gray-600 font-mono">OTP: {signatureValue.otpCode}</p>}
+                    {!isTinyField && signatureValue.otpCode && <p className="text-gray-600 font-mono">{t('readOnlyField.otpCode', { code: signatureValue.otpCode })}</p>}
                     <p className="text-gray-600 truncate">{new Date(signatureValue.date).toLocaleString()}</p>
                 </div>
-                {!isTinyField && <p className={`text-right ${userTextSize} text-gray-500 mt-auto pt-0.5 font-semibold truncate`}>via {signatureValue.method || 'Email OTP'}</p>}
+                {!isTinyField && (
+                    <p className={`text-right ${userTextSize} text-gray-500 mt-auto pt-0.5 font-semibold truncate`}>
+                        {t('readOnlyField.via', { method: signatureValue.method || t('readOnlyField.emailOtp') })}
+                    </p>
+                )}
             </div>
         );
     }
@@ -153,7 +160,7 @@ const ReadOnlyField: React.FC<ReadOnlyFieldProps> = ({ field, rejectionDetails, 
             <div
                 style={baseStyles}
                 className="bg-red-50/80 border-2 border-red-400 rounded-lg shadow-sm backdrop-blur-sm flex flex-col overflow-hidden hover:shadow-md transition-all duration-200"
-                title={`Field rejected by ${rejectionDetails!.rejectedBy.contactName}: ${rejectionDetails!.reason}`}
+                title={t('readOnlyField.rejectionTooltip', { name: rejectionDetails!.rejectedBy.contactName, reason: rejectionDetails!.reason })}
             >
                 <div className={`flex items-center justify-between ${headerPadding} bg-red-100/60 rounded-t-md border-b border-red-300 flex-shrink-0`}>
                     <div className="flex items-center gap-0.5 min-w-0 flex-1">
@@ -176,7 +183,7 @@ const ReadOnlyField: React.FC<ReadOnlyFieldProps> = ({ field, rejectionDetails, 
                 <div className={`flex-grow flex flex-col ${contentPadding} min-h-0`}>
                     <div className="flex items-center gap-0.5 mb-0.5">
                         <FiXCircleTyped className={`${iconSize} text-red-600 flex-shrink-0`} />
-                        <span className={`${labelTextSize} font-bold text-red-700 uppercase tracking-wider`}>Rejected</span>
+                        <span className={`${labelTextSize} font-bold text-red-700 uppercase tracking-wider`}>{t('readOnlyField.rejected')}</span>
                     </div>
                     <div className={`${userTextSize} text-red-700 space-y-0.5`}>
                         <p className="font-semibold truncate">{rejectionDetails!.rejectedBy.contactName}</p>
@@ -184,7 +191,7 @@ const ReadOnlyField: React.FC<ReadOnlyFieldProps> = ({ field, rejectionDetails, 
                     </div>
                     {rejectionDetails!.reason && !isTinyField && (
                         <div className="mt-0.5 flex-grow">
-                            <p className={`${userTextSize} text-red-600 font-medium mb-0.5`}>Reason:</p>
+                            <p className={`${userTextSize} text-red-600 font-medium mb-0.5`}>{t('readOnlyField.reason')}</p>
                             <p className={`${labelTextSize} text-red-700 leading-tight break-words line-clamp-2`}>{rejectionDetails!.reason}</p>
                         </div>
                     )}
@@ -198,7 +205,7 @@ const ReadOnlyField: React.FC<ReadOnlyFieldProps> = ({ field, rejectionDetails, 
         <div
             style={baseStyles}
             className="bg-gray-100/80 border-2 border-dashed border-gray-300 rounded-lg shadow-sm backdrop-blur-sm opacity-70 hover:opacity-80 transition-all duration-200 flex flex-col overflow-hidden"
-            title={`Field for ${assignedUserInfo.name} (${assignedUserInfo.contactInfo}): ${field.label}`}
+            title={t('readOnlyField.fieldTooltip', { name: assignedUserInfo.name, contact: assignedUserInfo.contactInfo, label: field.label })}
         >
             <div className={`flex items-center justify-between ${headerPadding} bg-gray-200/60 rounded-t-md border-b border-gray-300 flex-shrink-0`}>
                 <div className="flex items-center gap-0.5 min-w-0 flex-1">
@@ -224,7 +231,7 @@ const ReadOnlyField: React.FC<ReadOnlyFieldProps> = ({ field, rejectionDetails, 
                         <FaSignatureTyped className={`${largeIconSize} text-gray-400 ${isTinyField ? 'mb-0' : 'mb-0.5'} flex-shrink-0`} />
                         {!isTinyField && (
                             <>
-                                <span className={`${labelTextSize} text-gray-500 font-medium text-center leading-tight`}>Signature Field</span>
+                                <span className={`${labelTextSize} text-gray-500 font-medium text-center leading-tight`}>{t('readOnlyField.signatureField')}</span>
                                 <span className={`${userTextSize} text-gray-400 text-center leading-tight mt-0.5 truncate max-w-full`}>{assignedUserInfo.name}</span>
                             </>
                         )}
@@ -234,7 +241,7 @@ const ReadOnlyField: React.FC<ReadOnlyFieldProps> = ({ field, rejectionDetails, 
                         <FiSquareTyped className={`${largeIconSize} text-gray-400 ${isTinyField ? 'mb-0' : 'mb-0.5'} flex-shrink-0`} />
                         {!isTinyField && (
                             <>
-                                <span className={`${labelTextSize} text-gray-500 font-medium text-center leading-tight`}>Checkbox</span>
+                                <span className={`${labelTextSize} text-gray-500 font-medium text-center leading-tight`}>{t('readOnlyField.checkbox')}</span>
                                 <span className={`${userTextSize} text-gray-400 text-center leading-tight mt-0.5 truncate max-w-full`}>{assignedUserInfo.name}</span>
                             </>
                         )}
@@ -245,7 +252,7 @@ const ReadOnlyField: React.FC<ReadOnlyFieldProps> = ({ field, rejectionDetails, 
                             <FiFileTextTyped className={`${largeIconSize} text-gray-400 ${isTinyField ? 'mb-0' : 'mb-0.5'} flex-shrink-0`} />
                             {!isTinyField && (
                                 <>
-                                    <span className={`${labelTextSize} text-gray-500 font-medium text-center leading-tight`}>Text Area</span>
+                                    <span className={`${labelTextSize} text-gray-500 font-medium text-center leading-tight`}>{t('readOnlyField.textarea')}</span>
                                     <span className={`${userTextSize} text-gray-400 text-center leading-tight mt-0.5 truncate max-w-full`}>{assignedUserInfo.name}</span>
                                 </>
                             )}
@@ -256,7 +263,7 @@ const ReadOnlyField: React.FC<ReadOnlyFieldProps> = ({ field, rejectionDetails, 
                         <FiCalendarTyped className={`${largeIconSize} text-gray-400 ${isTinyField ? 'mb-0' : 'mb-0.5'} flex-shrink-0`} />
                         {!isTinyField && (
                             <>
-                                <span className={`${labelTextSize} text-gray-500 font-medium text-center leading-tight`}>Date Field</span>
+                                <span className={`${labelTextSize} text-gray-500 font-medium text-center leading-tight`}>{t('readOnlyField.dateField')}</span>
                                 <span className={`${userTextSize} text-gray-400 text-center leading-tight mt-0.5 truncate max-w-full`}>{assignedUserInfo.name}</span>
                             </>
                         )}
@@ -266,7 +273,7 @@ const ReadOnlyField: React.FC<ReadOnlyFieldProps> = ({ field, rejectionDetails, 
                         <FiFileTextTyped className={`${largeIconSize} text-gray-400 ${isTinyField ? 'mb-0' : 'mb-0.5'} flex-shrink-0`} />
                         {!isTinyField && (
                             <>
-                                <span className={`${labelTextSize} text-gray-500 font-medium text-center leading-tight`}>Text Field</span>
+                                <span className={`${labelTextSize} text-gray-500 font-medium text-center leading-tight`}>{t('readOnlyField.textField')}</span>
                                 <span className={`${userTextSize} text-gray-400 text-center leading-tight mt-0.5 truncate max-w-full`}>{assignedUserInfo.name}</span>
                             </>
                         )}

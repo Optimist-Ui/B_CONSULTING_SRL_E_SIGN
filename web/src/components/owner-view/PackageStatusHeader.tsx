@@ -1,6 +1,7 @@
 import React, { ComponentType } from 'react';
 import { DocumentPackage } from '../../store/slices/packageSlice';
 import { FiXCircle, FiCheckCircle, FiClock, FiArchive, FiEdit, FiMoreVertical } from 'react-icons/fi';
+import { useTranslation } from 'react-i18next'; // Import useTranslation
 
 const FiEditTyped = FiEdit as ComponentType<{ className?: string }>;
 const FiArchiveTyped = FiArchive as ComponentType<{ className?: string }>;
@@ -14,35 +15,37 @@ interface Props {
 }
 
 const PackageStatusHeader: React.FC<Props> = ({ packageData }) => {
+    const { t } = useTranslation(); // Initialize translation hook
+
     const getStatusInfo = () => {
         switch (packageData.status) {
             case 'Completed':
                 return {
-                    text: 'Completed',
+                    text: t('packageStatusHeader.status.completed'),
                     icon: FiCheckCircleTyped,
                     className: 'bg-green-50 text-green-700 border-green-200',
                 };
             case 'Rejected':
                 return {
-                    text: 'Rejected',
+                    text: t('packageStatusHeader.status.rejected'),
                     icon: FiXCircleTyped,
                     className: 'bg-red-50 text-red-700 border-red-200',
                 };
             case 'Sent':
                 return {
-                    text: 'Pending',
+                    text: t('packageStatusHeader.status.pending'),
                     icon: FiClockTyped,
                     className: 'bg-blue-50 text-blue-700 border-blue-200',
                 };
             case 'Archived':
                 return {
-                    text: 'Archived',
+                    text: t('packageStatusHeader.status.archived'),
                     icon: FiArchiveTyped,
                     className: 'bg-gray-50 text-gray-700 border-gray-200',
                 };
             case 'Draft':
                 return {
-                    text: 'Draft',
+                    text: t('packageStatusHeader.status.draft'),
                     icon: FiEditTyped,
                     className: 'bg-yellow-50 text-yellow-700 border-yellow-200',
                 };
@@ -81,10 +84,15 @@ const PackageStatusHeader: React.FC<Props> = ({ packageData }) => {
 
                         {/* Meta Info */}
                         <div className="flex items-center gap-4 text-sm text-gray-500">
-                            {packageData.createdAt && <span>Created {new Date(packageData.createdAt).toLocaleDateString()}</span>}
+                            {packageData.createdAt && (
+                                <span>
+                                    {t('packageStatusHeader.meta.createdAt')} {new Date(packageData.createdAt).toLocaleDateString()}
+                                </span>
+                            )}
                             {packageData.fields && (
                                 <span>
-                                    {packageData.fields.length} field{packageData.fields.length !== 1 ? 's' : ''}
+                                    {t('packageStatusHeader.meta.fieldCount', { count: packageData.fields.length })}
+                                    {packageData.fields.length !== 1 ? t('packageStatusHeader.meta.pluralSuffix') : ''}
                                 </span>
                             )}
                         </div>

@@ -1,128 +1,2848 @@
 {
-    "dashboard": "instrumentbräda",
-    "sales": "Försäljning",
-    "analytics": "Analytics",
-    "apps": "Appar",
-    "components": "Komponenter",
-    "elements": "Element",
-    "font_icons": "Teckensnitt ikoner",
-    "widgets": "Widgets",
-    "tables": "Tabeller",
-    "datatables": "Datatabeller",
-    "forms": "Blanketter",
-    "users": "Användare",
-    "pages": "Sidor",
-    "authentication": "Autentisering",
-    "drag_and_drop": "Dra och släpp",
-    "maps": "Kartor",
-    "charts": "Diagram",
-    "starter_kit": "Startpaket",
-    "documentation": "Dokumentation",
-    "ui_kit": "UI Kit",
-    "more": "Mer",
-    "finance": "Finansiera",
-    "crypto": "Krypto",
-    "chat": "chatt",
-    "mailbox": "brevlåda",
-    "todo_list": "att göra lista",
-    "notes": "Notera",
-    "scrumboard": "scrumboard",
-    "contacts": "Kontakter",
-    "invoice": "faktura",
-    "list": "lista",
-    "preview": "Förhandsvisning",
-    "add": "Lägg till",
-    "edit": "Redigera",
-    "calendar": "Kalender",
-    "tabs": "flikar",
-    "accordions": "dragspel",
-    "modals": "modal",
-    "cards": "Kort",
-    "carousel": "karusell",
-    "countdown": "nedräkning",
-    "counter": "räknare",
-    "sweet_alerts": "Söta varningar",
-    "timeline": "tidslinjen",
-    "notifications": "meddelanden",
-    "media_object": "MediaObject",
-    "list_group": "Listgrupp",
-    "pricing_tables": "Pristabeller",
-    "lightbox": "ljuslåda",
-    "alerts": "Varningar",
-    "avatar": "avatar",
-    "badges": "märken",
-    "breadcrumbs": "ströbröd",
-    "buttons": "knappar",
-    "button_groups": "Knappgrupper",
-    "color_library": "ColorLibrary",
-    "dropdown": "falla ner",
-    "infobox": "inforuta",
-    "jumbotron": "jumbotron",
-    "loader": "lastare",
-    "pagination": "paginering",
-    "popovers": "popovers",
-    "progress_bar": "förloppsindikator",
-    "search": "Sök",
-    "tooltips": "verktygstips",
-    "treeview": "trädvy",
-    "typography": "Typografi",
-    "basic": "grundläggande",
-    "order_sorting": "Beställningssortering",
-    "multi_column": "Flera kolumn",
-    "multiple_tables": "Flera bord",
-    "alt_pagination": "Alt. paginering",
-    "range_search": "Områdessökning",
-    "export": "exportera",
-    "input_group": "Inmatningsgrupp",
-    "layouts": "layouter",
-    "validation": "godkännande",
-    "input_mask": "Ingångsmask",
-    "select2": "Välj2",
-    "touchspin": "beröringssnurr",
-    "checkbox_and_radio": "Kryssruta och radio",
-    "switches": "växlar",
-    "wizards": "Trollkarlar",
-    "file_upload": "filuppladdning",
-    "quill_editor": "Quill redaktör",
-    "markdown_editor": "Markdown editor",
-    "date_and_range_picker": "Datum- och intervallväljare",
-    "clipboard": "klippbräda",
-    "user_and_pages": "Användare och sidor",
-    "profile": "profiler",
-    "account_settings": "Kontoinställningar",
-    "knowledge_base": "kunskapsbas",
-    "contact_form": "Kontaktformulär",
-    "faq": "FAQ",
-    "coming_soon": "Kommer snart",
-    "error": "fel",
-    "maintenence": "underhåll",
-    "login_boxed": "Inloggning Boxed",
-    "register_boxed": "Registrera Boxed",
-    "unlock_boxed": "Lås upp Boxed",
-    "recover_id_boxed": "Återställ ID Boxed",
-    "login_cover": "Inloggningsskydd",
-    "register_cover": "Register Cover",
-    "unlock_cover": "Lås upp locket",
-    "recover_id_cover": "Återställ ID-omslag",
-    "supports": "Stöder",
-    "login": "Logga in",
-    "lockscreen": "Låsskärm",
-    "password_recovery": "Återställning av lösenord",
-    "register": "Registrera",
-    "404": "404",
-    "500": "500",
-    "503": "503",
-    "user_interface": "Användargränssnitt",
-    "tables_and_forms": "Tabeller Och Blanketter",
-    "columns_filter": "Kolumner Filter",
-    "column_chooser": "Kolumnväljare",
-    "advanced": "Avancerad",
-    "checkbox": "Kryssruta",
-    "skin": "Hud",
-    "sticky_header": "Sticky Header",
-    "clone_header": "Clone Header",
-    "coming_soon_boxed": "Kommer snart i box",
-    "coming_soon_cover": "Kommer snart omslag",
-    "contact_us_boxed": "Kontakta oss Boxed",
-    "contact_us_cover": "Kontakta oss Cover"
+    "navbar": {
+        "home": "Hem",
+        "pricing": "Priser",
+        "about": "Om oss",
+        "faq": "FAQ",
+        "eidas": "eIDAS",
+        "termsAndPrivacy": "Villkor & Sekretess",
+        "signIn": "Logga in",
+        "dashboard": "Översikt",
+        "logout": "Logga ut",
+        "loginRegister": "Logga in / Registrera dig",
+        "goToDashboard": "Gå till Översikten"
+    },
+    "authModal": {
+        "title": "Gå med oss",
+        "description": "Välj ett alternativ för att fortsätta och hantera dina dokument.",
+        "loginButton": "Logga in på ditt konto",
+        "registerButton": "Skapa ett nytt konto"
+    },
+    "hero": {
+        "headline": {
+            "signDocuments": "Signera Dokument",
+            "secureContracts": "Säkra Avtal",
+            "digitalAgreements": "Digitala Överenskommelser",
+            "eSignatures": "E-signaturer",
+            "suffix": "Digitalt"
+        },
+        "subheadline": "Den säkraste och mest användarvänliga plattformen för elektroniska signaturer för företag av alla storlekar.",
+        "features": {
+            "encryption": "Kryptering",
+            "encryptionValue": "256-bitars",
+            "uptime": "Drifttid",
+            "uptimeValue": "99.9%",
+            "binding": "Bindande",
+            "bindingValue": "Juridiskt"
+        },
+        "cta": {
+            "startTrial": "Starta Gratis Prova på",
+            "watchDemo": "Se Demo"
+        },
+        "documents": {
+            "contractAgreement": "Kontraktsavtal",
+            "invoiceDocument": "Fakturadokument",
+            "legalAgreement": "Juridiskt Avtal",
+            "businessProposal": "Affärsförslag",
+            "termsConditions": "Regler & Villkor",
+            "signatureRequired": "Signatur krävs:",
+            "clickToSign": "Klicka för att signera",
+            "readyForSignature": "Redo för signatur"
+        }
+    },
+    "features": {
+        "tag": "Kraftfulla Funktioner",
+        "title": {
+            "main": "Allt du Behöver för",
+            "highlight": "Digitala Signaturer"
+        },
+        "description": "Vår omfattande plattform tillhandahåller alla verktyg och säkerhetsfunktioner du behöver för att effektivisera din dokumentsigneringsprocess.",
+        "list": {
+            "legallyBinding": {
+                "title": "Juridiskt Bindande",
+                "description": "Alla signaturer är juridiskt giltiga och följer internationella lagar om e-signaturer, inklusive eIDAS och UETA."
+            },
+            "bankSecurity": {
+                "title": "Säkerhet på Banknivå",
+                "description": "Avancerad 256-bitars SSL-kryptering, multifaktorautentisering och säker molnlagring skyddar dina dokument."
+            },
+            "lightningFast": {
+                "title": "Blixtsnabbt",
+                "description": "Slutför dokumentsignering på under 60 sekunder. Inga nedladdningar, ingen utskrift, inga förseningar."
+            },
+            "mobileOptimized": {
+                "title": "Mobiloptimerad",
+                "description": "Signera dokument sömlöst på vilken enhet som helst - stationär dator, surfplatta eller smartphone med vår responsiva design."
+            },
+            "multiPartySigning": {
+                "title": "Signering av Flera Parter",
+                "description": "Samla in signaturer från flera parter med automatiserade påminnelser och statusspårning i realtid."
+            },
+            "auditTrail": {
+                "title": "Detaljerad Revisionslogg",
+                "description": "Komplett revisionslogg med tidsstämplar, IP-adresser och intyg om slutförande för full transparens."
+            }
+        },
+        "benefits": {
+            "title": "Betrodd av Tusentals",
+            "description": "Gå med i företag världen över som har effektiviserat sina dokumentprocesser med vår plattform.",
+            "faster": {
+                "label": "Snabbare än papper",
+                "description": "Slutför arbetsflöden på minuter, inte dagar"
+            },
+            "uptime": {
+                "label": "Drifttidsgaranti",
+                "description": "Alltid tillgänglig när du behöver det"
+            },
+            "encryption": {
+                "label": "SSL-kryptering",
+                "description": "Säkerhet i företagsklass"
+            },
+            "support": {
+                "label": "Expertsupport",
+                "description": "Hjälp när du än behöver den"
+            }
+        },
+        "cta": {
+            "startTrial": "Starta Gratis Prova på",
+            "learnMore": "Läs Mer"
+        }
+    },
+    "about": {
+        "tag": "✨ Om I-Sign.eu",
+        "title": {
+            "main": "Återuppfinn förtroendet i den",
+            "highlight": "Digitala Eran"
+        },
+        "subtitle": {
+            "prefix": "Att signera ett dokument ska vara",
+            "connector": "och"
+        },
+        "keywords": {
+            "effortless": "enkelt",
+            "secure": "säkert",
+            "sustainable": "hållbart"
+        },
+        "quote": "Varje digital signatur är ett steg mot en renare, snabbare och mer uppkopplad värld.",
+        "mission": {
+            "title": "Vårt Uppdrag",
+            "description": "Göra digitalt förtroende tillgängligt för alla, vilket möjliggör säkra, effektiva och hållbara affärsflöden."
+        },
+        "vision": {
+            "title": "Vår Vision",
+            "description": "En värld utan papper där överenskommelser flyter lika lätt som idéer, drivet av hållbar innovation."
+        },
+        "sustainability": {
+            "title": {
+                "main": "Engagerade i en",
+                "highlight": "Koldioxidneutral Framtid"
+            },
+            "description": "Varje signerat dokument bidrar till ett hållbart ekosystem",
+            "features": {
+                "co2": {
+                    "title": "CO₂-minskning",
+                    "description": "Minskning av pappersavfall"
+                },
+                "greenOps": {
+                    "title": "Gröna Verksamheter",
+                    "description": "Datacenter med förnybar energi"
+                },
+                "reforestation": {
+                    "title": "Återskogning",
+                    "description": "Global trädplantering"
+                },
+                "innovation": {
+                    "title": "Hållbar Innovation",
+                    "description": "Teknik för miljön"
+                }
+            }
+        },
+        "whyChooseUs": {
+            "title": "Varför Välja I-Sign.eu",
+            "description": "Upplev sömlös signering utan begränsningar",
+            "features": {
+                "secure": {
+                    "title": "Säker från Grunden",
+                    "description": "eIDAS, GDPR och ISO 27001-kompatibel"
+                },
+                "fast": {
+                    "title": "Snabbt & Enkelt",
+                    "description": "Signera på några sekunder utan nedladdningar"
+                },
+                "integrated": {
+                    "title": "Integrerade Arbetsflöden",
+                    "description": "Anslut till över 500 affärsverktyg"
+                },
+                "automation": {
+                    "title": "Smart Automatisering",
+                    "description": "Automatiserade påminnelser och revisionsloggar"
+                }
+            }
+        },
+        "cta": {
+            "title": {
+                "main": "Gå med i",
+                "highlight": "Digital Förtroenderevolutionen"
+            },
+            "description": "Bli en del av den hållbara framtiden",
+            "button": "Prenumerera Nu"
+        }
+    },
+    "pricing": {
+        "tag": "Enkla och Transparenta Priser",
+        "title": {
+            "main": "Välj din Perfekta",
+            "highlight": "Signeringsupplevelse"
+        },
+        "description": "Börja gratis och skala med tillförsikt. Varje plan inkluderar säkerhet i företagsklass, dedikerad support och vår branschledande drifttidsgaranti.",
+        "billing": {
+            "monthly": "Månadsvis Fakturering",
+            "yearly": "Årlig Fakturering",
+            "save": "Spara 20%"
+        },
+        "plans": {
+            "popularBadge": "⭐ Mest Populära Valet",
+            "perMonth": "/mån",
+            "billedYearly": "Faktureras som €{{price}} per år",
+            "starter": {
+                "description": "Perfekt för individer och små team som kommer igång."
+            },
+            "pro": {
+                "description": "Bästa värdet för växande företag och professionella team."
+            },
+            "enterprise": {
+                "description": "Komplett lösning för stora organisationer med anpassade behov."
+            }
+        },
+        "buttons": {
+            "contactSales": "Kontakta Försäljning",
+            "startFree": "Starta Gratis Idag",
+            "startTrial": "Starta 14-dagars Gratis Prova på"
+        },
+        "footerNotice": "🔒 Inga installationsavgifter • Avbryt när som helst • 30 dagars garanti",
+        "enterpriseCta": {
+            "title": "Behöver du en Anpassad Företagslösning?",
+            "description": "Få personlig prissättning och dedikerad support skräddarsydd för din organisations unika krav.",
+            "button": "Boka ett Demossamtal"
+        }
+    },
+    "faq": {
+        "title": {
+            "main": "Vanliga",
+            "highlight": "Frågor"
+        },
+        "description": "Hitta svar på vanliga frågor om vår i-signature-plattform och tjänster.",
+        "buttons": {
+            "showMore": "Visa Mer",
+            "showLess": "Visa Mindre",
+            "learnMore": "Läs om Signaturer"
+        },
+        "visual": {
+            "uptimeLabel": "Drifttid",
+            "bindingValue": "Juridiskt",
+            "bindingLabel": "Bindande",
+            "features": {
+                "security": "Säkerhet på Banknivå",
+                "tracking": "Realtidsspårning",
+                "api": "API-integration",
+                "storage": "Obegränsad Lagring"
+            },
+            "cta": "Starta Gratis Prova på"
+        },
+        "questions": {
+            "q1": {
+                "question": "Vad är verktyget i-signing?",
+                "answer": "Vårt i-signing-verktyg är en säker digital lösning som låter dig signera, skicka och hantera dokument online, vilket eliminerar behovet av utskrift, skanning eller postning."
+            },
+            "q2": {
+                "question": "Vem kan använda verktyget i-signing?",
+                "answer": "Det är utformat för företag av alla storlekar, frilansare och privatpersoner som behöver signera lagligt eller begära signaturer på dokument."
+            },
+            "q3": {
+                "question": "Behöver signerare ett konto för att signera dokument?",
+                "answer": "Nej. Mottagare kan signera dokument utan att skapa ett konto. De får bara en säker länk för att granska och signera."
+            },
+            "q4": {
+                "question": "Är verktyget i-signing juridiskt bindande?",
+                "answer": "Ja. Vår lösning uppfyller stora i-signaturregler, inklusive eIDAS (EU), eSIGN Act (USA) och UETA, vilket gör signerade dokument juridiskt giltiga och verkställbara."
+            },
+            "q5": {
+                "question": "Hur säkra är mina dokument?",
+                "answer": "Alla dokument krypteras under överföring och lagring. Vi använder SSL/TLS-kryptering och branschstandardiserade säkerhetsåtgärder för att skydda dina data."
+            },
+            "q6": {
+                "question": "Kan jag spåra vem som signerade mitt dokument och när?",
+                "answer": "Ja. Varje dokument levereras med en detaljerad revisionslogg som visar när det öppnades, visades och signerades."
+            },
+            "q7": {
+                "question": "Är verktyget GDPR-kompatibelt?",
+                "answer": "Absolut. Vi följer GDPR-riktlinjerna för dataskydd, lagring och hantering av samtycke."
+            },
+            "q8": {
+                "question": "Accepteras i-signaturer över hela världen?",
+                "answer": "E-signaturer är lagligt erkända i de flesta länder. Vissa specifika dokument (som testamenten, fastighetsköp eller domstolsansökningar) kan dock fortfarande kräva signaturer med våt bläckpenna."
+            },
+            "q9": {
+                "question": "Kan jag anpassa min signaturstil?",
+                "answer": "Ja. Du kan rita din signatur, ladda upp en bild eller välja från fördefinierade stilar."
+            },
+            "q10": {
+                "question": "Vilka filtyper stöds?",
+                "answer": "Vi stöder PDF, Word, Excel och de flesta vanliga dokumentformat."
+            },
+            "q11": {
+                "question": "Kan jag signera på mobila enheter?",
+                "answer": "Ja. Vårt verktyg är helt responsivt och fungerar på smartphones, surfplattor och stationära datorer."
+            },
+            "q12": {
+                "question": "Kan jag begära flera signaturer på ett dokument?",
+                "answer": "Ja. Du kan tilldela signeringsroller, ställa in signeringsordning och samla in flera signaturer."
+            },
+            "q13": {
+                "question": "Kan jag ställa in påminnelser för osignerade dokument?",
+                "answer": "Ja. Automatiska påminnelser kan skickas till mottagarna tills de signerar."
+            },
+            "q14": {
+                "question": "Kan jag förhindra dokumentändringar efter signering?",
+                "answer": "Ja. När dokumentet väl är signerat är det låst för att förhindra ytterligare ändringar."
+            },
+            "q15": {
+                "question": "Finns det en gratis prova på?",
+                "answer": "Ja. Vi erbjuder en gratis prova på med begränsade funktioner så att du kan testa verktyget innan du uppgraderar."
+            },
+            "q16": {
+                "question": "Erbjuder ni team- eller företagslösningar?",
+                "answer": "Ja. Vi har flexibla planer för individer, team och stora organisationer med ytterligare funktioner som massutskick, varumärkesanpassning och integrationer."
+            },
+            "q17": {
+                "question": "Vilka betalningsmetoder accepterar ni?",
+                "answer": "Vi accepterar stora kredit-/betalkort, PayPal och fakturabaserade betalningar för företagskunder."
+            }
+        }
+    },
+    "testimonials": {
+        "loading": "Laddar vittnesmål...",
+        "error": {
+            "title": "Inga vittnesmål tillgängliga",
+            "description": "Kom tillbaka snart för kundrecensioner och feedback."
+        },
+        "header": {
+            "tag": "Kundrecensioner",
+            "title": {
+                "main": "Älskad av",
+                "highlight": "Tusentals",
+                "suffix": "av proffs världen över"
+            },
+            "description": "Gå med i den växande gruppen av företag som litar på vår plattform för sina digitala signeringsbehov"
+        },
+        "stats": {
+            "customers": "Nöjda Kunder",
+            "documents": "Signerade Dokument",
+            "uptime": "Drifttidsgaranti",
+            "support": "Expertsupport"
+        },
+        "cta": {
+            "title": "Redo att gå med våra nöjda kunder?",
+            "description": "Starta din gratis prova på idag och upplev varför tusentals proffs väljer vår plattform",
+            "button": "Starta Gratis Prova på"
+        }
+    },
+    "footer": {
+        "description": "Den säkraste och mest användarvänliga plattformen för elektroniska signaturer för företag av alla storlekar. Signera dokument digitalt med förtroende.",
+        "certification": "SOC 2 Typ II Certifierad",
+        "quickLinks": {
+            "title": "Snabblänkar",
+            "home": "Hem",
+            "about": "Om Oss",
+            "pricing": "Priser",
+            "faq": "FAQ"
+        },
+        "legal": {
+            "title": "Juridiskt & Support",
+            "privacy": "Sekretesspolicy",
+            "terms": "Användarvillkor",
+            "security": "Säkerhet",
+            "help": "Hjälpcenter",
+            "contact": "Kontakta Support"
+        },
+        "copyright": "© {{year}} I-Sign. Alla rättigheter reserverade."
+    },
+    "login": {
+        "meta": {
+            "title": "Logga in"
+        },
+        "branding": {
+            "welcome": "Välkommen till",
+            "description": "Den säkraste och mest användarvänliga plattformen för elektroniska signaturer för företag av alla storlekar.",
+            "features": {
+                "encryption": {
+                    "title": "256-bitars Kryptering",
+                    "description": "Säkerhet på banknivå"
+                },
+                "uptime": {
+                    "title": "99.9% Drifttid",
+                    "description": "Alltid tillgänglig"
+                },
+                "binding": {
+                    "title": "Juridiskt Bindande",
+                    "description": "Kompatibla signaturer"
+                }
+            }
+        },
+        "form": {
+            "header": {
+                "title": "Logga in",
+                "description": "Välkommen tillbaka! Vänligen ange dina uppgifter."
+            },
+            "email": {
+                "label": "E-postadress",
+                "placeholder": "Ange din e-postadress"
+            },
+            "password": {
+                "label": "Lösenord",
+                "placeholder": "Ange ditt lösenord"
+            },
+            "rememberMe": "Kom ihåg mig",
+            "forgotPassword": "Glömt ditt lösenord?",
+            "button": {
+                "default": "Logga in",
+                "loading": "Loggar in..."
+            },
+            "divider": "eller",
+            "signup": {
+                "prompt": "Har du inget konto?",
+                "link": "Registrera dig"
+            }
+        },
+        "footer": {
+            "copyright": "© {{year}} i-sign.eu. Alla rättigheter reserverade."
+        },
+        "messages": {
+            "success": "Inloggningen lyckades!",
+            "error": "Inloggningen misslyckades. Kontrollera dina uppgifter."
+        }
+    },
+    "register": {
+        "meta": {
+            "title": "Registrera"
+        },
+        "messages": {
+            "success": "Registreringen lyckades!",
+            "error": "Registreringen misslyckades. Vänligen försök igen."
+        },
+        "branding": {
+            "welcome": "Välkommen till",
+            "description": "Gå med i tusentals företag som litar på vår plattform för säkra elektroniska signaturer.",
+            "features": {
+                "setup": {
+                    "title": "Snabb Inställning",
+                    "description": "Kom igång på några minuter"
+                },
+                "secure": {
+                    "title": "Säker & Kompatibel",
+                    "description": "Branschstandard säkerhet"
+                },
+                "business": {
+                    "title": "Redo för Affärer",
+                    "description": "Företagsfunktioner ingår"
+                }
+            }
+        },
+        "form": {
+            "header": {
+                "title": "Registrera dig",
+                "description": "Skapa ditt konto för att komma igång."
+            },
+            "firstName": {
+                "label": "Förnamn",
+                "placeholder": "Ange ditt förnamn"
+            },
+            "lastName": {
+                "label": "Efternamn",
+                "placeholder": "Ange ditt efternamn"
+            },
+            "email": {
+                "label": "E-postadress",
+                "placeholder": "Ange din e-postadress"
+            },
+            "password": {
+                "label": "Lösenord",
+                "placeholder": "Skapa ett lösenord (minst 6 tecken)"
+            },
+            "button": {
+                "default": "Skapa Konto",
+                "loading": "Skapar Konto..."
+            },
+            "signin": {
+                "prompt": "Har du redan ett konto?",
+                "link": "Logga in"
+            }
+        },
+        "validation": {
+            "firstName": {
+                "min": "Förnamnet måste vara minst 2 tecken",
+                "max": "Förnamnet får inte överstiga 50 tecken",
+                "matches": "Endast bokstäver, mellanslag, bindestreck och apostrofer är tillåtna",
+                "required": "Förnamn krävs"
+            },
+            "lastName": {
+                "min": "Efternamnet måste vara minst 2 tecken",
+                "max": "Efternamnet får inte överstiga 50 tecken",
+                "matches": "Endast bokstäver, mellanslag, bindestreck och apostrofer är tillåtna",
+                "required": "Efternamn krävs"
+            },
+            "email": {
+                "invalid": "Ogiltigt e-postformat",
+                "max": "E-postadressen får inte överstiga 100 tecken",
+                "required": "E-postadress krävs"
+            },
+            "password": {
+                "min": "Lösenordet måste vara minst 6 tecken",
+                "max": "Lösenordet får inte överstiga 128 tecken",
+                "required": "Lösenord krävs"
+            }
+        },
+        "footer": {
+            "copyright": "© {{year}} i-sign.eu. Alla rättigheter reserverade."
+        }
+    },
+    "forgotPassword": {
+        "meta": {
+            "title": "Glömt Lösenord"
+        },
+        "messages": {
+            "success": "Om e-postadressen är registrerad har en återställningslänk skickats.",
+            "error": "Det gick inte att skicka återställningslänken. Vänligen försök igen."
+        },
+        "branding": {
+            "welcome": "Välkommen till",
+            "description": "Återställ ditt lösenord säkert och återgå till att signera dokument på några minuter.",
+            "features": {
+                "secure": {
+                    "title": "Säker Återställning",
+                    "description": "Skyddad återställningsprocess"
+                },
+                "verification": {
+                    "title": "E-postverifiering",
+                    "description": "Omedelbar länk leverans"
+                }
+            }
+        },
+        "form": {
+            "header": {
+                "title": "Återställ Lösenord",
+                "description": "Ange din e-postadress för att få en återställningslänk."
+            },
+            "email": {
+                "label": "E-postadress",
+                "placeholder": "Ange din e-postadress"
+            },
+            "button": {
+                "default": "Skicka Återställningslänk",
+                "loading": "Skickar Återställningslänk..."
+            },
+            "backToLogin": "Tillbaka till Logga in"
+        },
+        "footer": {
+            "copyright": "© {{year}} i-sign.eu. Alla rättigheter reserverade."
+        }
+    },
+    "resetPassword": {
+        "meta": {
+            "title": "Återställ Lösenord"
+        },
+        "messages": {
+            "noToken": "Ingen återställningstoken tillhandahålls.",
+            "success": "Lösenordet återställdes framgångsrikt! Du kan nu logga in.",
+            "error": "Det gick inte att återställa lösenordet. Länken kan ha gått ut."
+        },
+        "validation": {
+            "passwordMin": "Lösenordet måste vara minst 6 tecken.",
+            "passwordsMismatch": "Lösenorden matchar inte."
+        },
+        "status": {
+            "verifying": {
+                "title": "Verifierar Länk",
+                "description": "Vänligen vänta medan vi kontrollerar din lösenordsåterställningslänk..."
+            },
+            "success": {
+                "title": "Verifieringen Lyckades!",
+                "description": "Vänligen vänta, laddar formuläret..."
+            },
+            "error": {
+                "title": "Ogiltig eller Utgången Länk",
+                "description": "Länken för återställning av lösenord är inte giltig. Den kan redan ha använts eller har gått ut.",
+                "button": "Tillbaka till Logga in"
+            }
+        },
+        "form": {
+            "header": {
+                "title": "Skapa Nytt Lösenord",
+                "description": "Vänligen ange ditt nya lösenord nedan."
+            },
+            "newPassword": {
+                "label": "Nytt Lösenord",
+                "placeholder": "Ange nytt lösenord (minst 6 tecken)"
+            },
+            "confirmPassword": {
+                "label": "Bekräfta Lösenord",
+                "placeholder": "Bekräfta nytt lösenord"
+            },
+            "button": {
+                "default": "Återställ Lösenord",
+                "loading": "Återställer Lösenord..."
+            }
+        },
+        "footer": {
+            "copyright": "© {{year}} i-sign.eu. Alla rättigheter reserverade."
+        }
+    },
+    "reactivate": {
+        "meta": {
+            "title": "Återaktiverar Konto..."
+        },
+        "messages": {
+            "success": "Kontot återaktiverades framgångsrikt! Du kan nu logga in.",
+            "error": "Länken är ogiltig eller har gått ut.",
+            "noToken": "Ingen återaktiveringstoken hittades. Länken är ofullständig."
+        },
+        "branding": {
+            "welcome": "Välkommen till",
+            "description": "Återaktivera ditt konto och fortsätt använda vår säkra plattform för elektroniska signaturer.",
+            "features": {
+                "reactivation": {
+                    "title": "Snabb Återaktivering",
+                    "description": "Omedelbar kontoåterställning"
+                },
+                "secure": {
+                    "title": "Säker Process",
+                    "description": "Skyddad verifiering"
+                },
+                "preserved": {
+                    "title": "Data Bevaras",
+                    "description": "Alla dina dokument är säkra"
+                }
+            }
+        },
+        "status": {
+            "loading": {
+                "title": "Återaktiverar Konto",
+                "description": "Vänligen vänta medan vi återaktiverar ditt konto..."
+            },
+            "success": {
+                "title": "Kontot Återaktiverades!",
+                "button": "Fortsätt till Logga in"
+            },
+            "error": {
+                "title": "Återaktiveringen Misslyckades",
+                "button": "Tillbaka till Logga in"
+            }
+        },
+        "footer": {
+            "copyright": "© {{year}} i-sign.eu. Alla rättigheter reserverade."
+        }
+    },
+    "verifyEmail": {
+        "meta": {
+            "title": "Verifierar E-post..."
+        },
+        "messages": {
+            "success": "E-post verifierades framgångsrikt! Du kan nu logga in.",
+            "error": "Länken är ogiltig eller har gått ut.",
+            "noToken": "Ingen verifieringstoken hittades. Länken är ofullständig."
+        },
+        "branding": {
+            "welcome": "Välkommen till",
+            "description": "Verifiera din e-postadress och börja signera dokument säkert med vår betrodda plattform.",
+            "features": {
+                "verification": {
+                    "title": "E-postverifiering",
+                    "description": "Säker kontoinställning"
+                },
+                "access": {
+                    "title": "Omedelbar Åtkomst",
+                    "description": "Börja signera omedelbart"
+                },
+                "protected": {
+                    "title": "Skyddat Konto",
+                    "description": "Dina data är säkra"
+                }
+            }
+        },
+        "status": {
+            "loading": {
+                "title": "Verifierar Konto",
+                "description": "Vänligen vänta medan vi aktiverar ditt konto..."
+            },
+            "success": {
+                "title": "Kontot Aktiverades!",
+                "button": "Fortsätt till Logga in"
+            },
+            "error": {
+                "title": "Verifieringen Misslyckades",
+                "button": "Tillbaka till Registrering"
+            }
+        },
+        "footer": {
+            "copyright": "© {{year}} i-sign.eu. Alla rättigheter reserverade."
+        }
+    },
+    "pendingVerification": {
+        "meta": {
+            "title": "Kontrollera Din E-post"
+        },
+        "branding": {
+            "welcome": "Välkommen till",
+            "description": "Den säkraste och mest användarvänliga plattformen för elektroniska signaturer för företag av alla storlekar."
+        },
+        "content": {
+            "title": "Kontrollera Din Inkorg",
+            "message": "Vi har skickat en verifieringslänk till din e-postadress. Vänligen klicka på länken för att aktivera ditt konto innan du loggar in.",
+            "button": "Återgå till Logga in"
+        },
+        "footer": {
+            "copyright": "© {{year}} i-sign.eu. Alla rättigheter reserverade."
+        }
+    },
+    "eidasGuide": {
+        "header": {
+            "backLink": "Tillbaka till FAQ",
+            "title": "Förstå Digitala Signaturer",
+            "subtitle": "En omfattande guide till elektroniska signaturer och deras rättsliga ramverk enligt eIDAS"
+        },
+        "tabs": {
+            "overview": "Översikt",
+            "ses": "Enkel (SES)",
+            "aes": "Avancerad (AES)",
+            "qes": "Kvalificerad (QES)",
+            "faqs": "FAQ"
+        },
+        "content": {
+            "overview": {
+                "title": "Vad är en Digital Signatur?",
+                "p1": "En digital signatur är en specifik form av elektronisk signatur som använder avancerade kryptografiska metoder för att säkert länka en signerare till ett dokument. Den ger den högsta nivån av säkerhet angående signerarens äkthet och det signerade dokumentets integritet.",
+                "p2_prefix": "Digitala signaturer baseras på",
+                "p2_link": "Public Key Infrastructure (PKI)",
+                "p2_suffix": ", en internationellt erkänd standard som säkerställer att dokument inte kan ändras när de väl är signerade och att signerarens identitet kan verifieras på ett tillförlitligt sätt. Detta gör digitala signaturer särskilt viktiga för transaktioner som kräver stark rättslig säkerhet.",
+                "comparison": {
+                    "title": "Elektroniska vs Digitala Signaturer",
+                    "p1_strong": "Elektroniska signaturer (i-sign.eus)",
+                    "p1_text": "är en bred kategori av metoder som används för att indikera en persons avsikt att signera ett dokument i digital form. De är allmänt antagna eftersom de är enkla att använda, snabba att implementera och lagligt erkända enligt EU:s eIDAS-förordning (nr 910/2014). Vanliga användningsfall inkluderar anställningsavtal, inköpsorder, fakturor och kundavtal.",
+                    "p2_strong": "Digitala signaturer",
+                    "p2_text": "å andra sidan, är en specifik typ av elektronisk signatur som använder avancerad kryptografisk teknik för att ge starkare säkerhet och autentisering. De är särskilt viktiga i starkt reglerade branscher och definieras explicit under eIDAS."
+                },
+                "types": {
+                    "title": "Tre Typer Enligt eIDAS",
+                    "description": "Enligt EU:s eIDAS-förordning kategoriseras elektroniska signaturer i tre nivåer, från minst till mest strikt:",
+                    "ses": {
+                        "title": "Enkel (SES)",
+                        "description": "Grundläggande former av i-sign.eus, lämpliga för lågriskdokument."
+                    },
+                    "aes": {
+                        "title": "Avancerad (AES)",
+                        "description": "Högre säkerhet, unikt kopplad till signeraren med verifierad identitet."
+                    },
+                    "qes": {
+                        "title": "Kvalificerad (QES)",
+                        "description": "Säkraste, juridiskt likvärdig med handskrivna signaturer."
+                    }
+                },
+                "tip": {
+                    "strong": "Ny på digitala signaturer?",
+                    "text": "Även om digitala signaturer kan verka komplexa till en början, blir de mycket tydligare när nyckelelementen förstås. Utforska varje flik ovan för att lära dig när du ska använda varje typ av signatur."
+                }
+            },
+            "ses": {
+                "title": "Enkel Elektronisk Signatur (SES)",
+                "subtitle": "För vardagliga transaktioner",
+                "p1": "En Enkel Elektronisk Signatur (SES) är den mest grundläggande typen av elektronisk signatur enligt eIDAS-förordningen. Den kräver inte avancerade metoder för signerarens autentisering eller identitetsverifiering.",
+                "howItWorks": {
+                    "title": "Så Fungerar Det",
+                    "p1": "I praktiken kan en SES involvera något så enkelt som:",
+                    "li1": "Att ange en PIN-kod eller åtkomstkod",
+                    "li2": "Att klicka på \"Jag accepterar\" eller markera en kryssruta",
+                    "li3": "Att tillhandahålla en signatur via en e-postlänkad signeringsprocess"
+                },
+                "useCases": {
+                    "title": "Vanliga Användningsfall",
+                    "p1": "Denna typ av signatur är ofta tillräcklig för lågrisk-, dagliga transaktioner, såsom:",
+                    "item1": "Försäljnings- och upphandlingsavtal",
+                    "item2": "Godkännande av villkor och bestämmelser",
+                    "item3": "Enkla formulär och deklarationer"
+                },
+                "warning": {
+                    "strong": "Viktigt:",
+                    "text": "Även om SES erbjuder snabbhet och bekvämlighet, ger den den lägsta nivån av säkerhet angående signerarens identitet och dokumentets integritet. För transaktioner med högre risk eller reglerade transaktioner kan starkare former av signatur, såsom Avancerad (AES) eller Kvalificerad (QES), krävas."
+                },
+                "learnMoreLink": "Läs mer om standard i-sign.eu-implementering →"
+            },
+            "aes": {
+                "title": "Avancerad Elektronisk Signatur (AES)",
+                "subtitle": "För transaktioner med högt värde",
+                "p1": "En Avancerad Elektronisk Signatur (AES) erbjuder en högre säkerhetsnivå än en Enkel Elektronisk Signatur. Den kräver ytterligare autentiseringssteg för att säkerställa att signerarens identitet verifieras och att signaturen är unikt kopplad till dem.",
+                "requirements": {
+                    "title": "eIDAS-krav",
+                    "p1": "För att kvalificera som AES enligt eIDAS måste signaturen uppfylla följande kriterier:",
+                    "li1": "Den är unikt kopplad till signeraren",
+                    "li2": "Den kan identifiera signeraren",
+                    "li3": "Den skapas med hjälp av data för skapande av elektronisk signatur som signeraren kan behålla under sin ensamma kontroll",
+                    "li4": "Den är kopplad till de signerade uppgifterna på ett sådant sätt att varje efterföljande ändring av uppgifterna kan upptäckas"
+                },
+                "authMethods": {
+                    "title": "Autentiseringsmetoder",
+                    "p1": "I praktiken kan AES involvera:",
+                    "item1": { "title": "Identitetsverifiering", "description": "Verifiering av statligt utfärdat ID" },
+                    "item2": { "title": "Biometriska Kontroller", "description": "Ansiktsigenkänning eller fingeravtrycksskanning" },
+                    "item3": { "title": "Digitala Certifikat", "description": "Unikt certifikat genererat för transaktionen" },
+                    "item4": { "title": "Engångslösenord", "description": "Unikt OTP skickat till verifierad enhet" }
+                },
+                "benefits": {
+                    "title": "Viktiga Fördelar",
+                    "li1": "Pålitlig identifiering av signeraren",
+                    "li2": "En unik koppling mellan signaturen och det signerade dokumentet",
+                    "li3": "Manipulationssäker teknik upptäcker eventuella ändringar"
+                },
+                "example": {
+                    "title": "Exempel på Användningsfall",
+                    "p1_prefix": "Affärstransaktioner med högt värde eller känsliga, såsom",
+                    "p1_strong1": "anställningsavtal",
+                    "p1_connector": "eller",
+                    "p1_strong2": "leverantörsavtal",
+                    "p1_suffix": ", där organisationen behöver starkare säkerhet angående signerarens identitet och dokumentets integritet."
+                },
+                "learnMoreLink": "Läs mer om i-sign.eu:s verifieringsmetoder →"
+            },
+            "qes": {
+                "title": "Kvalificerad Elektronisk Signatur (QES)",
+                "subtitle": "För starkt reglerade transaktioner",
+                "p1": "En Kvalificerad Elektronisk Signatur (QES) är den säkraste och mest betrodda formen av elektronisk signatur definierad under EU:s eIDAS-förordning. Den kräver en personlig eller likvärdig identitetsverifieringsprocess utförd av en Kvalificerad Tillitstjänsteleverantör (QTSP), antingen inom EU eller Storbritannien.",
+                "foundation": {
+                    "title": "Teknisk Grund",
+                    "p1_prefix": "QES förlitar sig på en",
+                    "p1_strong": "Kvalificerad Signaturskapande Enhet (QSCD)",
+                    "p1_suffix": "och ett kvalificerat certifikat utfärdat av en erkänd leverantör. Denna process säkerställer att:",
+                    "li1": "Signerarens identitet har verifierats enligt den högsta rättsliga standarden",
+                    "li2": "Signaturen är unikt kopplad till signeraren och det signerade dokumentet",
+                    "li3": "En komplett och manipulationssäker revisionslogg skapas"
+                },
+                "equivalence": {
+                    "title": "Rättslig Likvärdighet",
+                    "p1_prefix": "På grund av dessa garantier betraktas en QES som den",
+                    "p1_strong": "rättsliga motsvarigheten till en handskriven signatur",
+                    "p1_suffix": "över alla EU:s medlemsstater.",
+                    "p2": "Faktum är att juridiska experter ofta hävdar att en QES kan vara mer tillförlitlig än en traditionell signatur bevittnad i en oövervakad miljö, eftersom den digitala processen säkerställer starkare identitetsverifiering och dokumentintegritet."
+                },
+                "useCases": {
+                    "title": "Vanliga Användningsfall",
+                    "p1": "QES krävs i allmänhet för starkt reglerade eller känsliga transaktioner, såsom:",
+                    "item1": { "icon": "🏦", "text": "Avtal om finansiella tjänster" },
+                    "item2": { "icon": "⚖️", "text": "Notariehandlingar" },
+                    "item3": { "icon": "🏛️", "text": "Offentliga sektorns ansökningar" },
+                    "item4": { "icon": "🌍", "text": "Gränsöverskridande juridiska avtal" }
+                }
+            },
+            "faqs": {
+                "title": "Vanliga Frågor",
+                "q1": {
+                    "title": "Hur fungerar en Kvalificerad Elektronisk Signatur (QES) med i-sign.eu?",
+                    "p1": "En QES kräver stark identitetsautentisering innan ett digitalt certifikat kan utfärdas. Den ger den högsta nivån av förtroende genom personlig, eller likvärdig, ID-verifiering. Under signeringsprocessen ombeds kunderna att elektroniskt bekräfta sin identitet. När den har verifierats, bifogas ett digitalt certifikat som bevisar deras identitet automatiskt till signaturen bakom kulisserna.",
+                    "p2": "i-sign.eu erbjuder flera alternativ för QES med integrerad ID-verifiering. Digitala certifikat utfärdas av erkända certifikatmyndigheter (Tillitstjänsteleverantörer), och i-sign.eu accepterar kvalificerade certifikat utfärdade av leverantörer listade på den officiella EU Trust List."
+                },
+                "q2": {
+                    "title": "Hur fungerar en Avancerad Elektronisk Signatur (AES) med i-sign.eu?",
+                    "p1": "En AES med i-sign.eu involverar ytterligare steg för att autentisera signeraren. Detta kan inkludera att presentera ett giltigt statligt utfärdat dokument för att bekräfta identitet, kombinerat med en engångsåtkomstkod efter signeringsprocessen. AES-signaturer kräver ett PKI-baserat digitalt certifikat, som genereras och bifogas dokumentet som en del av transaktionen.",
+                    "p2": "i-sign.eu tillhandahåller flexibla ID-verifieringsalternativ för att uppfylla både Avancerade och Kvalificerade nivåer av elektroniska signaturer under eIDAS."
+                },
+                "q3": {
+                    "title": "Hur fungerar en Enkel Elektronisk Signatur (SES) med i-sign.eu?",
+                    "p1": "SES är den mest använda och allmänt accepterade typen av i-sign.eu över hela världen. Med i-sign.eu kan SES ersätta handskrivna signaturer i de flesta lågrisksituationer. Den är särskilt lämplig för:",
+                    "li1": "Interna dokument",
+                    "li2": "Avtal mellan företag och konsumenter",
+                    "li3": "Transaktioner med befintliga partners",
+                    "p2": "SES är snabb, effektiv och kräver få steg. Men om starkare signeringsautentisering behövs, kan en AES eller QES krävas istället."
+                },
+                "contact": {
+                    "strong": "Har du fortfarande frågor?",
+                    "text_prefix": "Besök vår",
+                    "link": "huvud-FAQ-sida",
+                    "text_suffix": "eller kontakta vårt supportteam för personlig assistans."
+                }
+            }
+        },
+        "disclaimer": {
+            "title": "Friskrivningsklausul:",
+            "text": "Innehållet ovan är endast för allmänna informationssyften och är inte avsett som juridisk rådgivning. För vägledning om din specifika situation, vänligen kontakta en kvalificerad jurist."
+        },
+        "lastUpdated": "Senast uppdaterad: {{date}}"
+    },
+    "termsAndPrivacy": {
+        "header": {
+            "subtitle": "Professionell Plattform för Elektronisk Signatur"
+        },
+        "tabs": {
+            "terms": "Användarvillkor",
+            "privacy": "Sekretesspolicy"
+        },
+        "lastUpdated": "Senast uppdaterad: {{date}}",
+        "terms": {
+            "title": "Användarvillkor",
+            "introduction": {
+                "title": "1. Introduktion",
+                "p1_prefix": "Dessa Användarvillkor för Webbplatser och Tjänster (”Villkoren” eller ”Allmänna Villkoren”) reglerar din åtkomst till och användning av",
+                "p1_suffix": "webbplatser, produkter och tjänster (kollektivt, ”Webbplatsen” eller ”Tjänsterna”). Genom att använda vår Webbplats eller Tjänster samtycker du till att vara bunden av dessa Villkor, antingen för din egen räkning eller för ett företag du representerar.",
+                "p2": "Om du inte godkänner dessa Villkor är du inte behörig att använda Webbplatsen eller Tjänsterna och måste omedelbart avbryta användningen."
+            },
+            "scope": {
+                "title": "2. Tillämpningsområde",
+                "p1": "Dessa Villkor gäller för följande kategorier av användare (kollektivt kallade ”du” eller ”din”):",
+                "li1_strong": "Webbplatsbesökare",
+                "li1_text": "Individer som får åtkomst till",
+                "li1_suffix": "och relaterade webbplatser.",
+                "li2_strong": "Kunder",
+                "li2_text": "Organisationer eller individer som prenumererar på eller licensierar Tjänsterna",
+                "li2_suffix": ".",
+                "li3_strong": "Användare",
+                "li3_text": "Individer som använder Tjänsterna",
+                "li3_suffix": "under ett kundkonto (inklusive behöriga anställda eller ombud).",
+                "p2_prefix": "Om du är en kund och har ingått ett separat Serviceavtal eller Företagsavtal med",
+                "p2_suffix": ", ska dessa villkor gälla i den utsträckning de strider mot dessa Villkor. Dessa Villkor är utformade för affärs- och yrkesmässigt bruk; konsumentskydd enligt tillämplig lag kan gälla separat."
+            },
+            "compliance": {
+                "title": "3. Efterlevnad av Lokala Lagar",
+                "p1": "Om du får åtkomst till Webbplatsen eller Tjänsterna från en jurisdiktion med specifika lagkrav eller tilläggsvillkor (såsom vissa EU-medlemsstater), ska dessa jurisdiktionsspecifika villkor tillämpas utöver dessa Villkor. I händelse av konflikt ska de jurisdiktionsspecifika villkoren gälla."
+            },
+            "acceptance": {
+                "title": "4. Godkännande av Villkoren",
+                "p1": "Genom att få åtkomst till, använda eller ladda ner någon del av Webbplatsen eller Tjänsterna bekräftar du att du:",
+                "li1": "Har läst och förstått dessa Villkor;",
+                "li2": "Godkänner dessa Villkor för din egen räkning eller på uppdrag av din organisation;",
+                "li3": "Är behörig att ingå juridiskt bindande avtal i din jurisdiktion.",
+                "p2": "Om du inte uppfyller dessa villkor får du inte använda Webbplatsen eller Tjänsterna."
+            },
+            "access": {
+                "title": "5. Åtkomst och Användning av Webbplatsen",
+                "eligibility": {
+                    "title": "5.1 Behörighet att Använda",
+                    "p1_prefix": "Genom att få åtkomst till eller använda Webbplatsen eller Tjänsterna",
+                    "p1_suffix": ", garanterar du att:",
+                    "li1": "Du har laglig ålder (18 år eller äldre, eller på annat sätt myndighetsåldern i ditt hemland) och har rättskapacitet att ingå dessa Villkor för din egen räkning eller på uppdrag av det företag eller den organisation du representerar;",
+                    "li2": "Du är behörig att använda Webbplatsen och Tjänsterna i enlighet med tillämpliga lagar och förordningar, inklusive EU:s och lokala jurisdiktionsregler om elektroniska signaturer och dataskydd; och",
+                    "li3": "Om du agerar på uppdrag av ett företag, är du behörig att binda företaget till dessa Villkor.",
+                    "p2_prefix": "Du bekräftar att du inte får använda Webbplatsen eller Tjänsterna om du inte uppfyller dessa behörighetskrav, eller om din åtkomst tidigare har stängts av eller sagts upp av",
+                    "p2_suffix": "på grund av brott mot dessa Villkor."
+                }
+            },
+            "contact": {
+                "title": "6. Kontaktinformation",
+                "p1_prefix": "För frågor om dessa villkor, vänligen kontakta oss på",
+                "p1_suffix": "eller via vår supportportal."
+            }
+        },
+        "privacy": {
+            "title": "Sekretesspolicy",
+            "collection": {
+                "title": "1. Information vi Samlar in",
+                "item1": { "title": "Kontoinformation:", "text": "Namn, e-postadress, företagsinformation och autentiseringsuppgifter." },
+                "item2": { "title": "Dokumentdata:", "text": "Dokument som laddats upp för signering, signaturdata, IP-adresser och tidsstämplar för signaturaktiviteter." },
+                "item3": { "title": "Användningsinformation:", "text": "Loggdata, webbläsarinformation, enhetsidentifierare och användningsmönster för tjänsten." }
+            },
+            "use": {
+                "title": "2. Hur vi Använder Din Information",
+                "li1": "Tillhandahålla och underhålla tjänsten för elektronisk signatur",
+                "li2": "Behandla och underlätta dokumentsignaturer",
+                "li3": "Generera revisionsloggar och efterlevnadsrapporter",
+                "li4": "Skicka tjänstrelaterade aviseringar och uppdateringar",
+                "li5": "Förbättra vår tjänst och utveckla nya funktioner",
+                "li6": "Förhindra bedrägeri och säkerställa tjänstens säkerhet",
+                "li7": "Följa lagliga skyldigheter"
+            },
+            "sharing": {
+                "title": "3. Informationsdelning",
+                "p1": "Vi säljer, byter eller hyr inte ut din personliga information. Vi kan dela information endast under följande omständigheter:",
+                "li1": "Med ditt uttryckliga samtycke",
+                "li2": "För att underlätta signeringsprocessen mellan utsedda parter",
+                "li3": "Med tjänsteleverantörer som hjälper till med plattformsverksamheten",
+                "li4": "När det krävs enligt lag eller rättslig process",
+                "li5": "För att skydda våra rättigheter, egendom eller säkerhet"
+            },
+            "security": {
+                "title": "4. Datasäkerhet",
+                "p1": "Vi implementerar omfattande säkerhetsåtgärder inklusive kryptering, åtkomstkontroller, regelbundna säkerhetsrevisioner och säkra datacenter. All data krypteras både under överföring och i vila med branschstandardiserade krypteringsprotokoll. Vi upprätthåller ISO 27001 och SOC 2 efterlevnadsstandarder."
+            },
+            "retention": {
+                "title": "5. Datalagring",
+                "p1": "Vi behåller dina uppgifter så länge ditt konto är aktivt och under den period som krävs enligt tillämpliga lagar. Signerade dokument lagras vanligtvis i 7 år för juridiska efterlevnadssyften. Du kan begära radering av dina uppgifter, med förbehåll för lagliga lagringskrav."
+            },
+            "rights": {
+                "title": "6. Dina Rättigheter (GDPR)",
+                "p1": "Enligt GDPR har du rätt att:",
+                "li1": "Få åtkomst till dina personuppgifter",
+                "li2": "Rätta felaktig information",
+                "li3": "Begära radering av data (rätten att bli glömd)",
+                "li4": "Begränsa behandlingen av dina uppgifter",
+                "li5": "Dataportabilitet",
+                "li6": "Invända mot behandlingen",
+                "li7": "Återkalla samtycke när som helst"
+            },
+            "transfers": {
+                "title": "7. Internationella Dataöverföringar",
+                "p1": "Dina uppgifter behandlas primärt inom Europeiska Unionen. Alla internationella överföringar utförs under lämpliga skyddsåtgärder, inklusive standardavtalsklausuler godkända av Europeiska kommissionen."
+            },
+            "cookies": {
+                "title": "8. Cookies och Spårning",
+                "p1": "Vi använder nödvändiga cookies för tjänstens funktionalitet och analyscookies för att förbättra vår tjänst. Du kan hantera cookieinställningar via din webbläsares inställningar. Vår cookiepolicy ger detaljerad information om vår cookieanvändning."
+            },
+            "contact": {
+                "title": "9. Kontakta Oss",
+                "p1": "För sekretessrelaterade frågor eller för att utöva dina rättigheter, kontakta vårt dataskyddsombud på privacy@i-sign.eu. För EU-invånare kan du också kontakta din lokala dataskyddsmyndighet."
+            },
+            "changes": {
+                "title": "10. Ändringar i Sekretesspolicyn",
+                "p1": "Vi kommer att meddela dig om eventuella väsentliga ändringar i denna sekretesspolicy via e-post eller ett framträdande meddelande på vår plattform minst 30 dagar innan ändringarna träder i kraft."
+            }
+        },
+        "footer": {
+            "copyright": "© {{year}} i-sign.eu - Professionell Plattform för Elektronisk Signatur",
+            "support_prefix": "För support, kontakta oss på"
+        }
+    },
+    "enterpriseContact": {
+        "messages": {
+            "success": "Din förfrågan har skickats framgångsrikt!",
+            "error": "Det gick inte att skicka förfrågan. Vänligen försök igen."
+        },
+        "header": {
+            "title": {
+                "main": "Företags",
+                "highlight": "Anpassade Lösningar"
+            },
+            "description": "Kontakta vårt säljteam för personlig prissättning, anpassade funktioner och dedikerad support skräddarsydd för din organisations unika behov."
+        },
+        "form": {
+            "name": {
+                "label": "Fullständigt Namn",
+                "placeholder": "Johan Svensson"
+            },
+            "email": {
+                "label": "Företags-e-post",
+                "placeholder": "johan.svensson@foretag.com"
+            },
+            "company": {
+                "label": "Företagsnamn",
+                "placeholder": "Acme Corporation"
+            },
+            "phone": {
+                "label": "Telefonnummer (Valfritt)"
+            },
+            "message": {
+                "label": "Berätta om dina behov",
+                "placeholder": "Beskriv dina krav, teamstorlek eller eventuella specifika funktioner du är intresserad av..."
+            },
+            "button": {
+                "default": "Skicka Förfrågan",
+                "submitting": "Skickar..."
+            }
+        },
+        "validation": {
+            "name": {
+                "min": "Namnet måste vara minst 2 tecken",
+                "max": "Namnet får inte överstiga 100 tecken",
+                "required": "Fullständigt namn krävs"
+            },
+            "email": {
+                "invalid": "Ogiltigt e-postformat",
+                "required": "Företags-e-post krävs"
+            },
+            "company": {
+                "min": "Företagsnamnet måste vara minst 2 tecken",
+                "max": "Företagsnamnet får inte överstiga 200 tecken",
+                "required": "Företagsnamn krävs"
+            },
+            "phone": {
+                "invalid": "Ogiltigt telefonnummer"
+            },
+            "message": {
+                "min": "Meddelandet måste vara minst 10 tecken",
+                "max": "Meddelandet får inte överstiga 2000 tecken",
+                "required": "Meddelande krävs"
+            }
+        },
+        "footer": {
+            "callPrompt": "Föredrar du att ringa? Nå oss på",
+            "emailPrompt": "Eller e-posta direkt:"
+        }
+    },
+    "cookiePolicy": {
+        "title": "Cookiepolicy",
+        "intro": "Denna Cookiepolicy förklarar hur E-Sign (”vi”, ”oss” eller ”vår”) använder cookies och liknande tekniker när du besöker vår webbplats eller använder våra tjänster.",
+        "whatAreCookies": {
+            "title": "Vad är Cookies?",
+            "text": "Cookies är små textfiler som lagras på din enhet när du besöker en webbplats. De hjälper oss att ge dig en bättre upplevelse genom att komma ihåg dina preferenser och möjliggöra viss funktionalitet."
+        },
+        "types": {
+            "title": "Typer av Cookies vi Använder",
+            "essential": {
+                "title": "Nödvändiga Cookies",
+                "text": "Dessa cookies är nödvändiga för att vår webbplats ska fungera korrekt. De möjliggör kärnfunktionalitet som autentisering, säkerhetsfunktioner och grundläggande navigering."
+            },
+            "functional": {
+                "title": "Funktionella Cookies",
+                "text": "Dessa cookies möjliggör förbättrad funktionalitet och personalisering, såsom att komma ihåg dina språkinställningar och inställningar."
+            },
+            "analytics": {
+                "title": "Analyscookies",
+                "text": "Dessa cookies hjälper oss att förstå hur besökare interagerar med vår webbplats genom att samla in och rapportera information anonymt."
+            },
+            "marketing": {
+                "title": "Marknadsföringscookies",
+                "text": "Dessa cookies används för att leverera annonser som är mer relevanta för dig och dina intressen."
+            }
+        },
+        "managing": {
+            "title": "Hantera Dina Cookieinställningar",
+            "text": "Du kan kontrollera och hantera cookies på olika sätt. Du kan ställa in din webbläsare för att neka cookies eller varna dig när cookies skickas. Du kan också hantera dina preferenser med hjälp av vårt center för cookieinställningar.",
+            "button": "Hantera Cookieinställningar"
+        },
+        "contact": {
+            "title": "Kontakta Oss",
+            "text": "Om du har några frågor om denna Cookiepolicy, vänligen kontakta oss på privacy@esign.com."
+        },
+        "lastUpdated": "Denna policy uppdaterades senast: {{date}}."
+    },
+    "sidebar": {
+        "headings": {
+            "dashboard": "Översikt",
+            "settings": "Inställningar"
+        },
+        "nav": {
+            "allDocuments": "Alla Dokument",
+            "templates": "Mallar",
+            "contacts": "Kontaktlista",
+            "addDocument": "Lägg till Dokument",
+            "subscriptions": "Prenumerationer",
+            "paymentMethods": "Betalningsmetoder",
+            "profile": "Profil"
+        }
+    },
+    "profile": {
+        "title": "Kontoinställningar",
+        "loading": "Laddar...",
+        "tabs": {
+            "profile": "Profil",
+            "email": "E-post",
+            "password": "Lösenord"
+        },
+        "messages": {
+            "deleteSuccess": "Borttagning av konto begärd",
+            "deleteFailed": "Det gick inte att ta bort kontot",
+            "updateSuccess": "Profilen uppdaterad!",
+            "updateFailed": "Uppdateringen misslyckades"
+        },
+        "form": {
+            "image": {
+                "upload": "Ladda upp",
+                "remove": "Ta bort"
+            },
+            "firstName": {
+                "label": "Förnamn"
+            },
+            "lastName": {
+                "label": "Efternamn"
+            },
+            "email": {
+                "label": "Nuvarande E-post",
+                "note": "För att ändra din e-postadress, gå till fliken E-post"
+            },
+            "phone": {
+                "label": "Telefonnummer"
+            },
+            "language": {
+                "label": "Språk"
+            },
+            "button": {
+                "save": "Spara Ändringar",
+                "saving": "Sparar...",
+                "delete": "Ta bort Konto"
+            },
+            "validation": {
+                "firstName": {
+                    "required": "Förnamn krävs"
+                },
+                "lastName": {
+                    "required": "Efternamn krävs"
+                },
+                "phone": {
+                    "max": "Telefonnumret är för långt",
+                    "invalid": "Ogiltigt telefonnummer"
+                },
+                "language": {
+                    "required": "Språk krävs"
+                }
+            }
+        },
+        "emailForm": {
+            "title": "Ändra E-postadress",
+            "description": "Vi skickar en verifieringskod till din nuvarande e-postadress för att bekräfta ändringen.",
+            "currentEmailLabel": "Nuvarande E-post:",
+            "newEmail": {
+                "label": "Ny E-postadress",
+                "placeholder": "Ange din nya e-postadress"
+            },
+            "otp": {
+                "sentToLabel": "Verifieringskod skickad till:",
+                "label": "Ange 6-siffrig Verifieringskod",
+                "button": {
+                    "sending": "Skickar...",
+                    "resend": "Skicka igen",
+                    "verifying": "Verifierar...",
+                    "verify": "Verifiera & Uppdatera E-post",
+                    "cancel": "Avbryt"
+                }
+            },
+            "button": {
+                "sending": "Skickar...",
+                "sendCode": "Skicka Verifieringskod",
+                "clear": "Rensa"
+            },
+            "messages": {
+                "invalidNewEmail": "Vänligen ange en giltig ny e-postadress",
+                "otpSentSuccess": "OTP skickades till din nuvarande e-postadress!",
+                "otpSentFailed": "Det gick inte att skicka OTP",
+                "otpLengthError": "Ange 6-siffrigt OTP",
+                "updateSuccess": "E-postadressen uppdaterades framgångsrikt!",
+                "invalidOtp": "Ogiltigt OTP"
+            },
+            "validation": {
+                "invalid": "Ogiltig e-postadress",
+                "required": "Ny e-postadress krävs",
+                "notSame": "Ny e-postadress måste skilja sig från nuvarande e-postadress"
+            }
+        },
+        "passwordForm": {
+            "title": "Ändra Lösenord",
+            "currentPassword": {
+                "label": "Nuvarande Lösenord",
+                "placeholder": "Nuvarande"
+            },
+            "newPassword": {
+                "label": "Nytt Lösenord",
+                "placeholder": "Nytt"
+            },
+            "confirmNewPassword": {
+                "label": "Bekräfta Nytt Lösenord",
+                "placeholder": "Bekräfta"
+            },
+            "button": {
+                "default": "Ändra Lösenord",
+                "loading": "Ändrar..."
+            },
+            "messages": {
+                "success": "Lösenordet ändrat!",
+                "failed": "Det gick inte att ändra lösenordet"
+            },
+            "validation": {
+                "min": "Lösenordet måste vara minst 6 tecken",
+                "max": "Lösenordet får inte överstiga 128 tecken",
+                "currentPassword": {
+                    "required": "Nuvarande lösenord krävs"
+                },
+                "newPassword": {
+                    "required": "Nytt lösenord krävs",
+                    "notOneOf": "Nytt lösenord kan inte vara detsamma som det nuvarande"
+                },
+                "confirmNewPassword": {
+                    "required": "Vänligen bekräfta ditt nya lösenord",
+                    "oneOf": "Lösenorden måste matcha"
+                }
+            }
+        }
+    },
+    "paymentMethods": {
+        "pageTitle": "Betalningsmetoder",
+        "loading": "Laddar betalningsmetoder...",
+        "header": {
+            "title": "Betalningsmetoder",
+            "description": "Hantera säkert dina betalningsalternativ för sömlösa e-signeringsupplevelser",
+            "addButton": "Lägg till Betalningsmetod"
+        },
+        "emptyState": {
+            "title": "Inga Betalningsmetoder Tillagda",
+            "description": "Lägg till en betalningsmetod för att hantera dina e-signeringsprenumerationer utan ansträngning",
+            "addButton": "Lägg till Din Första Betalningsmetod"
+        },
+        "addModalTitle": "Lägg till Ny Betalningsmetod",
+        "addForm": {
+            "cardInfoLabel": "Kortinformation",
+            "secureNote": "Din betalningsinformation är krypterad och säkert behandlas av Stripe.",
+            "buttons": {
+                "cancel": "Avbryt",
+                "add": "Lägg till Betalningsmetod",
+                "adding": "Lägger till..."
+            },
+            "errors": {
+                "cardElementNotFound": "Kortelement hittades inte",
+                "cardProcessingError": "Ett fel uppstod vid behandling av ditt kort.",
+                "addMethodFailed": "Det gick inte att lägga till betalningsmetod."
+            }
+        },
+        "card": {
+            "defaultBadge": "Standard",
+            "expires": "Går ut",
+            "buttons": {
+                "setDefault": "Ange som Standard",
+                "settingDefault": "Anger...",
+                "remove": "Ta bort",
+                "removing": "Tar bort..."
+            }
+        },
+        "deleteConfirm": {
+            "title": "Ta bort Betalningsmetod?",
+            "text": "Är du säker på att du vill ta bort den här betalningsmetoden?",
+            "confirmButton": "Ja, ta bort den",
+            "cancelButton": "Avbryt"
+        },
+        "messages": {
+            "addSuccess": "Betalningsmetoden lades till framgångsrikt!",
+            "setDefaultSuccess": "Standardbetalningsmetod uppdaterades framgångsrikt!",
+            "deleteSuccess": "Betalningsmetoden togs bort framgångsrikt!"
+        }
+    },
+    "subscriptions": {
+        "pageTitle": "Fakturering & Prenumerationer"
+    },
+    "planSelection": {
+        "backButton": "Tillbaka till Prenumerationshantering",
+        "header": {
+            "titleChange": "Välj ett Nytt Abonnemang",
+            "titleChoose": "Välj Ditt Abonnemang",
+            "descriptionChange": "Välj ett nytt abonnemang för att uppgradera, nedgradera eller ändra din faktureringscykel.",
+            "descriptionChoose": "Uppgradera ditt konto för att låsa upp fler funktioner, högre gränser och dedikerad support."
+        },
+        "billing": {
+            "monthly": "Månadsvis",
+            "yearly": "Årligen",
+            "save": "Spara 20%"
+        },
+        "popularBadge": "⭐ Mest Populär",
+        "perMonth": "mån",
+        "billedYearly": "Faktureras som €{{price}} per år",
+        "plans": {
+            "starter": {
+                "description": "Perfekt för individer och små team som kommer igång."
+            },
+            "pro": {
+                "description": "Bästa värdet för växande företag och professionella team."
+            },
+            "enterprise": {
+                "description": "Komplett lösning för stora organisationer som behöver mer."
+            }
+        },
+        "trial": {
+            "title": "14 Dagars Gratis Prova på Tillgänglig",
+            "note": "Giltigt kreditkort krävs!"
+        },
+        "buttons": {
+            "startTrial": "Starta 14-dagars Gratis Prova på",
+            "choosePlan": "Välj Abonnemang",
+            "topUp": "Fyll på",
+            "switchToBilling": "Byt till {{interval}} Fakturering",
+            "switchToPlan": "Byt till {{planName}}-abonnemanget",
+            "contactSales": "Kontakta Försäljning"
+        }
+    },
+    "manageSubscription": {
+        "noSubscription": {
+            "title": "Ingen Aktiv Prenumeration",
+            "description": "Vänligen kontakta support om du tror att detta är ett fel."
+        },
+        "header": {
+            "title": "Prenumerationshantering",
+            "description": "Övervaka din abonnemangsanvändning och hantera faktureringsinställningar"
+        },
+        "buttons": {
+            "reactivating": "Återaktiverar...",
+            "reactivateTrial": "Återaktivera Prova på",
+            "reactivatePlan": "Återaktivera Abonnemang",
+            "processing": "Behandlar...",
+            "startSubscription": "Starta Prenumeration",
+            "cancelling": "Avbryter...",
+            "cancelTrial": "Avbryt Prova på",
+            "cancel": "Avbryt"
+        },
+        "plan": {
+            "title": "{{planName}}-abonnemanget",
+            "monthly": "Månadsvis",
+            "yearly": "Årligen"
+        },
+        "status": {
+            "active": "Aktiv",
+            "trialing": "Prova på Aktiv",
+            "past_due": "Förfallen",
+            "canceled": "Avbruten",
+            "cancelsSoon": "Avbryts snart"
+        },
+        "trial": {
+            "endsOn": "Din prova på avslutas {{date}}."
+        },
+        "usage": {
+            "title": "Dokumentanvändning",
+            "unlimited": "Obegränsad",
+            "enterpriseNote": "Inga dokumentbegränsningar i ditt företagsabonnemang",
+            "of": "av {{limit}} dokument",
+            "resetsOn": "Användningen återställs {{date}}"
+        },
+        "billing": {
+            "title": "Faktureringsstatus",
+            "cancellationPending": "Avbokning Inväntar",
+            "cancelsOn": "Ditt abonnemang kommer att avbrytas",
+            "pastDue": "Betalning Förfallen",
+            "pastDueNote": "Vänligen uppdatera din betalningsmetod för att fortsätta tjänsten",
+            "nextRenewal": "Nästa förnyelse",
+            "autoRenewalActive": "Automatisk förnyelse är aktiv"
+        },
+        "quickStats": {
+            "started": "Abonnemang Startat",
+            "cycle": "Faktureringscykel",
+            "documentsLeft": "Dokument Kvar"
+        },
+        "management": {
+            "title": "Abonnemangshantering",
+            "description1": "Hantera din prenumeration, visa fakturor eller ändra ditt abonnemang.",
+            "description2": "Ändringar träder i kraft enligt din faktureringscykel",
+            "buttons": {
+                "invoices": "Fakturor",
+                "upgrade": "Uppgradera"
+            }
+        },
+        "cancelModal": {
+            "trial": {
+                "title": "Avbryt Gratis Prova på?",
+                "text": "Din prova på förblir aktiv fram till {{date}}, men den kommer inte att konverteras till ett betalt abonnemang. Är du säker?",
+                "confirmButton": "Ja, avbryt prova på"
+            },
+            "subscription": {
+                "title": "Avbryt Prenumeration?",
+                "text": "Din prenumeration förblir aktiv fram till slutet av den aktuella perioden {{date}}. Är du säker?",
+                "confirmButton": "Ja, avbryt prenumerationen"
+            },
+            "cancelButton": "Behåll Mitt Abonnemang"
+        },
+        "endTrialModal": {
+            "title": "Aktivera Betalt Abonnemang Nu?",
+            "text": "Du kommer att debiteras €{{price}} omedelbart och få full tillgång till fördelarna med {{planName}}-abonnemanget, inklusive din nya dokumentgräns.",
+            "confirmButton": "Ja, Aktivera Nu",
+            "cancelButton": "Stanna på Prova på"
+        },
+        "messages": {
+            "cancelSuccess": "Ditt abonnemang är nu inställt på att avbrytas.",
+            "reactivateSuccess": "Din prenumeration har återaktiverats framgångsrikt!",
+            "endTrialSuccess": "Din prenumeration är nu aktiv!"
+        }
+    },
+    "invoiceHistory": {
+        "title": "Fakturhistorik",
+        "closeLabel": "Stäng modal",
+        "loading": "Laddar fakturor...",
+        "locale": "sv-SE",
+        "table": {
+            "headers": {
+                "date": "Datum",
+                "amount": "Belopp",
+                "status": "Status",
+                "action": "Åtgärd"
+            },
+            "viewAction": "Visa Faktura"
+        },
+        "status": {
+            "paid": "Betald",
+            "open": "Öppen",
+            "void": "Ogiltig",
+            "uncollectible": "Ointagbar"
+        },
+        "empty": {
+            "title": "Inga Fakturor Hittades",
+            "description": "Din faktureringshistorik kommer att visas här när du faktureras."
+        }
+    },
+    "contacts": {
+        "pageTitle": "Kontakter",
+        "header": {
+            "title": "Kontakter",
+            "searchPlaceholder": "Sök Kontakter"
+        },
+        "buttons": {
+            "addContact": "Lägg till Kontakt"
+        },
+        "table": {
+            "headers": {
+                "name": "Namn",
+                "email": "E-post",
+                "phone": "Telefon",
+                "customInfo": "Anpassad Info",
+                "actions": "Åtgärder"
+            },
+            "actions": {
+                "edit": "Redigera",
+                "delete": "Ta bort"
+            },
+            "notAvailable": "Ej Tillgängligt"
+        },
+        "loading": "Laddar...",
+        "emptyState": {
+            "title": "Inga Kontakter Ännu",
+            "description": "Börja med att lägga till din första kontakt."
+        },
+        "modal": {
+            "titleAdd": "Lägg till Kontakt",
+            "titleEdit": "Redigera Kontakt",
+            "form": {
+                "titlePrefix": {
+                    "label": "Titel",
+                    "options": {
+                        "none": "Ingen",
+                        "mr": "Herr",
+                        "mrs": "Fru",
+                        "ms": "Fröken/Fru",
+                        "dr": "Dr.",
+                        "prof": "Prof."
+                    }
+                },
+                "firstName": { "label": "Förnamn", "placeholder": "Ange Förnamn" },
+                "lastName": { "label": "Efternamn", "placeholder": "Ange Efternamn" },
+                "email": { "label": "E-post", "placeholder": "Ange E-post" },
+                "phone": { "label": "Telefonnummer" },
+                "language": { "label": "Språk" },
+                "title": { "label": "Titel/Befattning", "placeholder": "Ange Titel" }
+            },
+            "customFields": {
+                "title": "Ytterligare Information",
+                "keyPlaceholder": "Fältnamn (t.ex. Företag)",
+                "valuePlaceholder": "Värde (t.ex. Acme Inc.)",
+                "addButton": "+ Lägg till Anpassat Fält"
+            },
+            "buttons": {
+                "cancel": "Avbryt",
+                "add": "Lägg till",
+                "update": "Uppdatera",
+                "saving": "Sparar..."
+            }
+        },
+        "deleteConfirm": {
+            "title": "Är du säker?",
+            "text": "Du kommer inte att kunna ångra detta!",
+            "confirmButton": "Ja, ta bort det!",
+            "cancelButton": "Avbryt"
+        },
+        "messages": {
+            "addSuccess": "Kontakt lades till framgångsrikt.",
+            "updateSuccess": "Kontakt uppdaterades framgångsrikt.",
+            "deleteSuccess": "Kontakten har tagits bort."
+        },
+        "validation": {
+            "firstName": { "required": "Förnamn krävs", "min": "Förnamnet måste vara minst 2 tecken", "max": "Förnamnet får inte överstiga 50 tecken" },
+            "lastName": { "required": "Efternamn krävs", "min": "Efternamnet måste vara minst 2 tecken", "max": "Efternamnet får inte överstiga 50 tecken" },
+            "email": { "invalid": "Ogiltigt e-postformat", "required": "E-post krävs", "max": "E-postadressen får inte överstiga 254 tecken" },
+            "phone": { "max": "Telefonnumret verkar för långt", "invalid": "Ogiltigt telefonnummer" },
+            "language": { "required": "Språk krävs" },
+            "title": { "min": "Titeln måste vara minst 2 tecken", "max": "Titeln får inte överstiga 100 tecken" },
+            "customFields": {
+                "key": { "required": "Fältnamn krävs", "min": "Fältnamnet måste vara minst 2 tecken", "max": "Fältnamnet får inte överstiga 50 tecken" },
+                "value": { "max": "Värdet får inte överstiga 255 tecken" }
+            }
+        },
+        "languages": {
+            "en": "Engelska",
+            "es": "Spanska (Español)",
+            "fr": "Franska (French)",
+            "de": "Tyska (German)",
+            "it": "Italienska (Italian)"
+        }
+    },
+    "templates": {
+        "header": {
+            "title": "Dokumentmallar"
+        },
+        "buttons": {
+            "createNew": "Skapa Ny Mall",
+            "backToList": "Tillbaka till Mallar",
+            "saveTemplate": "Spara Mall",
+            "saving": "Sparar..."
+        },
+        "loading": "Laddar...",
+        "loadingTemplates": "Laddar mallar...",
+        "emptyState": {
+            "title": "Inga Mallar Hittades",
+            "description": "Kom igång genom att skapa din första dokumentmall."
+        },
+        "table": {
+            "headers": {
+                "name": "Namn",
+                "uuid": "Bilaga UUID",
+                "fields": "Fält",
+                "actions": "Åtgärder"
+            }
+        },
+        "editor": {
+            "title": "Redigerar: {{templateName}}"
+        },
+        "deleteConfirm": {
+            "title": "Är du säker?",
+            "text": "Du kommer inte att kunna ångra detta!",
+            "confirmButton": "Ja, ta bort det!",
+            "cancelButton": "Nej, avbryt!"
+        },
+        "deleteSuccessAlert": {
+            "title": "Borttagen!",
+            "text": "Din mall har tagits bort."
+        },
+        "deleteErrorAlert": {
+            "title": "Fel!"
+        },
+        "messages": {
+            "invalidId": "Ogiltigt mall-ID.",
+            "deleteSuccess": "Mall borttagen framgångsrikt!",
+            "deleteFailed": "Det gick inte att ta bort mallen.",
+            "noTemplateToSave": "Ingen mall att spara.",
+            "titleRequired": "Mallens titel får inte vara tom.",
+            "updateSuccess": "Mall uppdaterades framgångsrikt!",
+            "fileUrlMissing": "Fil-URL saknas. Vänligen ladda upp ett dokument.",
+            "s3KeyMissing": "S3-nyckel saknas. Vänligen ladda upp dokumentet igen.",
+            "saveSuccess": "Mall sparades framgångsrikt!",
+            "saveFailed": "Det gick inte att spara mallen."
+        }
+    },
+    "uploadStep": {
+        "title": "Ladda upp Dokument & Ange Titel",
+        "uploadLabel": "Ladda upp PDF-dokument",
+        "dropzone": {
+            "prompt": "Släpp PDF här eller klicka för att bläddra",
+            "uploaded": "PDF Uppladdad",
+            "hint": "Stöder PDF-filer upp till 50MB"
+        },
+        "processing": "Behandlar...",
+        "titleLabel": "Dokumenttitel",
+        "titlePlaceholder": "t.ex. Sekretessavtal",
+        "previewLabel": "Dokumentförhandsvisning",
+        "pageIndicator": "Sida {{page}}",
+        "previewPlaceholder": "Förhandsgranskningen kommer att visas här",
+        "button": {
+            "proceed": "Fortsätt till Redigeraren",
+            "processing": "Behandlar..."
+        },
+        "messages": {
+            "uploadFailed": "Det gick inte att ladda upp dokumentet.",
+            "uploadRequired": "Vänligen ladda upp ett PDF-dokument.",
+            "invalidFileType": "Vänligen välj en giltig PDF-fil."
+        },
+        "validation": {
+            "titleRequired": "Dokumenttitel krävs",
+            "titleMin": "Titeln måste vara minst 3 tecken"
+        },
+        "errors": {
+            "fetchFailed": "Det gick inte att hämta PDF",
+            "fetchFromUrlFailed": "Det gick inte att hämta PDF från URL",
+            "noValidPdf": "Ingen giltig PDF-data eller icke-blob URL tillhandahålls.",
+            "renderFailed": "Det gick inte att rendera PDF-förhandsvisning"
+        }
+    },
+    "editor": {
+        "loading": "Laddar mallredigeraren...",
+        "properties": {
+            "title": "Fältegenskaper",
+            "prompt": "Välj ett fält för att redigera dess egenskaper."
+        },
+        "fieldDefaults": {
+            "signature": "Signatur",
+            "textarea": "Textområde",
+            "textareaPlaceholder": "Ange text...",
+            "checkbox": "Kryssruta",
+            "radio": "Radio-knapp",
+            "date": "Datumfält",
+            "dropdown": "Rullgardinsmeny",
+            "text": "Textfält",
+            "textPlaceholder": "Ange text här"
+        },
+        "deleteConfirm": {
+            "title": "Ta bort fält?",
+            "text": "Denna åtgärd kan inte ångras.",
+            "confirmButton": "Ja, ta bort det!",
+            "cancelButton": "Avbryt"
+        },
+        "messages": {
+            "deleteSuccess": "Fält borttaget."
+        },
+        "errors": {
+            "fetchFailed": "Det gick inte att hämta PDF",
+            "noValidPdf": "Ingen giltig PDF-data tillhandahålls.",
+            "loadFailed": "Det gick inte att ladda PDF för redigering",
+            "renderFailed": "Det gick inte att rendera PDF-sidor."
+        }
+    },
+    "documentsDashboard": {
+        "loading": "Laddar Dokument...",
+        "buttons": {
+            "upload": "Ladda upp Dokument"
+        },
+        "error": {
+            "title": "Kunde inte Ladda Dokument"
+        }
+    },
+    "packagesDashboard": {
+        "newPackageName": "Nytt Paket",
+        "loadingDraft": "Laddar utkastpaket...",
+        "initializing": "Initierar paketsskapande...",
+        "errors": {
+            "notADraft": "Detta paket är inte ett utkast och kan inte redigeras.",
+            "loadFailed": "Det gick inte att ladda utkastspaket."
+        }
+    },
+    "documentTable": {
+        "loading": "Laddar dokument...",
+        "headers": {
+            "documentName": "Dokumentnamn",
+            "status": "Status",
+            "initiator": "Initiativtagare",
+            "formFillers": "Formulärifyllare",
+            "approvers": "Godkännare",
+            "signers": "Signerare",
+            "receivers": "Mottagare",
+            "addedOn": "Tillagd den",
+            "participants": "Deltagare",
+            "actions": "Åtgärder"
+        },
+        "actions": {
+            "download": "Ladda ner",
+            "notify": "Meddela/Påminnelse",
+            "viewDetails": "Visa Detaljer",
+            "continueEditing": "Fortsätt Redigera",
+            "viewHistory": "Visa Historik",
+            "reassign": "Omplacera",
+            "skip": "Hoppa över",
+            "revoke": "Återkalla"
+        },
+        "emptyState": {
+            "title": "Inga Dokument Hittades",
+            "description": "Det finns inga dokument som matchar dina nuvarande filter."
+        },
+        "revokeModal": {
+            "title": "Återkalla Dokument",
+            "message": "Är du säker på att du vill återkalla dokumentet \"{{documentName}}\"? Denna åtgärd kan inte ångras och kommer att avsluta processen för alla deltagare.",
+            "confirmButton": "Ja, Återkalla"
+        }
+    },
+    "stepper": {
+        "header": {
+            "createTitle": "Skapa Paket",
+            "editTitle": "Redigera Utkastspaket"
+        },
+        "steps": {
+            "documentSelection": "Dokumentval",
+            "fieldAssignment": "Fälttilldelning",
+            "reviewAndConfirm": "Granska & Bekräfta",
+            "select": "Välj",
+            "assign": "Tilldela",
+            "review": "Granska"
+        },
+        "buttons": {
+            "backToDashboard": "Tillbaka till Översikten",
+            "previousStep": "Föregående Steg",
+            "nextStep": "Nästa Steg",
+            "saveDraft": "Spara som Utkast",
+            "saveAsTemplate": "Spara som Mall",
+            "savingPackage": "Sparar Paket...",
+            "confirmPackage": "Bekräfta & Skicka Paket"
+        },
+        "messages": {
+            "noPackageToSave": "Inget paket att spara.",
+            "savingDraft": "Sparar utkast...",
+            "draftSaved": "Utkast sparat framgångsrikt!",
+            "draftFailed": "Det gick inte att spara utkast.",
+            "noPackageForTemplate": "Kan inte spara som mall: Ingen paketdata tillgänglig.",
+            "templateSaveFailed": "Det gick inte att spara som mall.",
+            "noPackageToConfirm": "Inget paket att bekräfta.",
+            "titleRequired": "Pakettitel får inte vara tom.",
+            "documentRequired": "Vänligen ladda upp eller välj ett dokument.",
+            "unassignedFields": "Vänligen tilldela användare till obligatoriska fält",
+            "packageSent": "Paketet sparades och skickades framgångsrikt!",
+            "packageSaveFailed": "Det gick inte att spara paketet."
+        }
+    },
+    "documentSelection": {
+        "mainTitle": "Välj Dokumentkälla",
+        "mainSubtitle": "Välj en befintlig mall eller ladda upp ett nytt PDF-dokument",
+        "template": {
+            "title": "Använd Befintlig Mall",
+            "selectPlaceholder": "-- Välj en Befintlig Mall --",
+            "loading": "Laddar mallar..."
+        },
+        "upload": {
+            "title": "Ladda upp Ny PDF",
+            "dropPrompt": "Släpp din PDF här",
+            "dragPrompt": "Dra & Släpp PDF eller Klicka för att Bläddra",
+            "hint": "Stöder PDF-filer upp till 10MB",
+            "uploading": "Laddar upp..."
+        },
+        "packageTitle": {
+            "label": "Pakettitel",
+            "placeholder": "t.ex. Introduktionsdokument för Johan Svensson"
+        },
+        "preview": {
+            "title": "Dokumentförhandsvisning",
+            "emptyTitle": "Inget Dokument Valdes",
+            "emptyDescription": "Välj en mall eller ladda upp en PDF för att se förhandsgranskningen"
+        },
+        "messages": {
+            "invalidFileType": "Vänligen välj en giltig PDF-fil.",
+            "uploadFailed": "Det gick inte att ladda upp dokumentet.",
+            "templateLoadFailed": "Det gick inte att ladda den valda mallen.",
+            "selectDocument": "Vänligen ladda upp eller välj ett dokument innan du fortsätter."
+        },
+        "validation": {
+            "titleRequired": "Pakettitel krävs",
+            "titleMin": "Titeln måste vara minst 3 tecken"
+        },
+        "errors": {
+            "fetchFailed": "Hämtningen misslyckades",
+            "fetchBlobFailed": "Hämtningen av blob misslyckades",
+            "renderFailed": "Det gick inte att rendera PDF-förhandsvisning",
+            "fetchTemplateFailed": "Det gick inte att hämta mall-PDF"
+        }
+    },
+    "fieldAssignment": {
+        "noDocument": {
+            "title": "Inget Dokument Valdes",
+            "description": "Vänligen välj ett dokument i föregående steg för att börja tilldela fält."
+        },
+        "loadError": {
+            "title": "Det gick inte att Ladda PDF",
+            "button": "Gå Tillbaka"
+        },
+        "noFieldsWarning": {
+            "title": "Inga Fält Tillagda Ännu",
+            "description": "Dra och släpp fält från verktygsfältet ovan till dokumentet för att skapa interaktiva områden för deltagarna."
+        },
+        "pageIndicator": "Sida {{page}} av {{total}}",
+        "properties": {
+            "title": "Fältegenskaper",
+            "subtitle": "Konfigurera fältinställningar",
+            "closeAriaLabel": "Stäng egenskapspanel",
+            "openAriaLabel": "Öppna fältegenskaper",
+            "noFieldSelected": {
+                "title": "Inget Fält Valdes",
+                "description": "Tryck på ett fält i dokumentet för att redigera dess egenskaper och tilldela användare."
+            }
+        },
+        "messages": {
+            "fieldAdded": "Tillagt fält {{fieldLabel}}."
+        },
+        "errors": {
+            "fetchFailed": "Det gick inte att hämta PDF",
+            "fetchBlobFailed": "Hämtningen av blob misslyckades",
+            "loadFailed": "Det gick inte att ladda PDF",
+            "renderFailed": "Det gick inte att rendera PDF-sidor.",
+            "noValidPdf": "Ingen giltig PDF-data eller URL tillhandahålls."
+        }
+    },
+    "packageReview": {
+        "loading": "Laddar paketdetaljer...",
+        "locale": "sv-SE",
+        "tabs": {
+            "summary": "Sammanfattning",
+            "recipients": "Mottagare",
+            "settings": "Inställningar"
+        },
+        "preview": {
+            "title": "Dokumentförhandsvisning",
+            "pageCount": "{{count}} sida",
+            "pageCount_plural": "{{count}} sidor",
+            "pageIndicator": "Sida {{current}} av {{total}}",
+            "actualSize": "Faktisk Storlek",
+            "fitWidth": "Anpassa Bredd",
+            "rendering": {
+                "title": "Renderar Dokument...",
+                "subtitle": "Vänligen vänta medan vi förbereder ditt dokument"
+            }
+        },
+        "summary": {
+            "message": {
+                "title": "Valfritt Meddelande till Deltagare",
+                "description": "Detta meddelande kommer att inkluderas i det ursprungliga e-postmeddelandet ”Åtgärd Krävs” som skickas till alla deltagare.",
+                "placeholder": "t.ex. Vänligen granska och signera detta dokument snarast. Tack!"
+            },
+            "details": {
+                "title": "Detaljer i Korthet",
+                "fields": "Fält",
+                "recipients": "Mottagare",
+                "pages": "Sidor"
+            },
+            "credits": {
+                "title": "Användning av Dokumentkredit",
+                "usageText": "Detta paket kommer att använda 1 dokumentkredit",
+                "usageText_plural": "Detta paket kommer att använda {{count}} dokumentkrediter",
+                "signerCountText": "Inga signerare tilldelade ännu",
+                "signerCountText_plural": "{{count}} unik signerare upptäckt",
+                "signerCountText_plural_plural": "{{count}} unika signerare upptäckta",
+                "tip_strong": "Tips:",
+                "tip_text": "Varje dokumentkredit täcker upp till 2 unika signerare.",
+                "tip_extra": "Du har {{signers}} signerare, vilket kräver {{credits}} krediter."
+            },
+            "progress": {
+                "title": "Tilldelningsstatus",
+                "completeText": "{{rate}}% Slutfört",
+                "actionRequired": "Åtgärd Krävs",
+                "unassignedFields": "Det finns 1 otilldelat obligatoriskt fält.",
+                "unassignedFields_plural": "Det finns {{count}} otilldelade obligatoriska fält."
+            }
+        },
+        "recipients": {
+            "assigned": {
+                "title": "Tilldelade Deltagare",
+                "empty": "Inga användare har tilldelats fält."
+            },
+            "notificationOnly": {
+                "title": "Endast Meddelande-Mottagare",
+                "description": "Lägg till kontakter som kommer att få paketmeddelanden men inte behöver signera.",
+                "addButton": "Lägg till Mottagare"
+            }
+        },
+        "settings": {
+            "expiration": {
+                "title": "Paketets Utgång",
+                "description": "Ställ in ett datum och tid då detta paket inte längre kommer att vara tillgängligt.",
+                "okButton": "OK"
+            },
+            "reminders": {
+                "title": "Påminnelser om Utgång",
+                "setExpirationNote": "Vänligen ställ in ett utgångsdatum för paketet först för att aktivera påminnelser om utgång.",
+                "enableCheckbox": "Skicka Påminnelser om Utgång",
+                "timing": {
+                    "label": "Tidpunkt för Påminnelse",
+                    "placeholder": "Välj tidpunkt för påminnelse",
+                    "options": {
+                        "1_hour": "1 Timme Innan",
+                        "2_hours": "2 Timmar Innan",
+                        "1_day": "24 Timmar Innan",
+                        "2_days": "48 Timmar Innan"
+                    },
+                    "tooSoonNote": "Utgångsdatumet är för snart för några påminnelsealternativ. Vänligen ställ in ett senare datum för att aktivera påminnelser."
+                }
+            },
+            "autoReminders": {
+                "title": "Automatiska Påminnelser",
+                "setExpirationNote": "Vänligen ställ in ett utgångsdatum för paketet först för att aktivera automatiska påminnelser.",
+                "enableCheckbox": "Aktivera Automatiska Påminnelser",
+                "first": {
+                    "label": "Första påminnelsen",
+                    "suffix": "dagar före utgång"
+                },
+                "repeat": {
+                    "label": "Uppföljningspåminnelser",
+                    "prefix": "Upprepa var",
+                    "suffix": "dagar"
+                },
+                "tooSoonNote": "Utgångsdatumet måste ställas in till mer än en dag i framtiden för att aktivera automatiska påminnelser."
+            },
+            "permissions": {
+                "title": "Behörigheter",
+                "allowDownload": "Tillåt nedladdning innan signering är klar",
+                "allowReassign": "Tillåt deltagare att omplacera sin roll"
+            }
+        },
+        "messages": {
+            "receiverAdded": "{{name}} tillagd som mottagare.",
+            "contactCreated": "{{name}} skapades och valdes som mottagare.",
+            "expirationSet": "Paketets utgång inställd på {{date}}",
+            "expirationRemoved": "Paketets utgång borttagen - paketet kommer inte att gå ut",
+            "reminderTimingReset": "Tidpunkten för påminnelsen återställdes eftersom den inte längre är giltig för det nya utgångsdatumet.",
+            "firstReminderReset": "Den första automatiska påminnelsen återställdes eftersom den inte längre är giltig för det nya utgångsdatumet.",
+            "repeatReminderReset": "Uppföljningspåminnelseintervallet återställdes eftersom det inte längre är giltigt."
+        },
+        "errors": {
+            "missingSource": "Dokumentkällan saknas. Vänligen återgå till Steg 1.",
+            "fetchFailed": "Hämtningen misslyckades",
+            "fetchBlobFailed": "Hämtningen av blob misslyckades",
+            "noSource": "Ingen PDF-källa hittades i paketdata.",
+            "loadFailed": "Det gick inte att ladda dokumentförhandsvisningen.",
+            "renderFailed": "Det gick inte att rendera PDF-sidor.",
+            "pastDate": "Utgångsdatumet kan inte vara i det förflutna. Vänligen välj ett framtida datum."
+        }
+    },
+    "packageFieldRenderer": {
+        "fieldTypes": {
+            "text": "Text",
+            "textarea": "Text",
+            "signature": "Signatur",
+            "checkbox": "Kryssruta",
+            "radio": "Radio-knapp",
+            "date": "Datum",
+            "dropdown": "Välj"
+        },
+        "labelInput": {
+            "placeholder": "Fältetikett"
+        },
+        "labelTitle": {
+            "signature": "Fältetiketten för signatur kan inte redigeras",
+            "editable": "Klicka för att redigera etikett"
+        },
+        "titles": {
+            "markRequired": "Markera som obligatoriskt",
+            "markOptional": "Markera som valfritt",
+            "quickAssign": "Snabb tilldela användare",
+            "signatureFieldAssigned": "Signaturfältet har redan en signerare",
+            "deleteField": "Ta bort fält"
+        },
+        "quickAssign": {
+            "title": "Snabb Tilldelning",
+            "signatureWarning": "Signaturfält kan bara ha en Signerare tilldelad.",
+            "selectContact": "Välj Kontakt",
+            "selectContactPlaceholder": "Välj en kontakt...",
+            "addNewContact": "Lägg till Ny Kontakt",
+            "role": "Roll",
+            "signatureRoleNote": "Signaturfält kräver rollen Signerare",
+            "nonSignatureRoleNote": "Signerare kan endast tilldelas signaturfält",
+            "authMethods": "Autentiseringsmetoder",
+            "authMethodsEmail": "E-post OTP-verifiering",
+            "authMethodsSMS": "SMS OTP-verifiering",
+            "assignButton": "Tilldela till Fält",
+            "roles": {
+                "Signer": "Signerare",
+                "FormFiller": "Formulärifyllare",
+                "Approver": "Godkännare"
+            }
+        },
+        "assignedUsers": {
+            "title": "{{name}} ({{role}}){{methods}}"
+        },
+        "messages": {
+            "labelUpdated": "Etikett uppdaterad",
+            "markedRequired": "Fält markerat som obligatoriskt",
+            "markedOptional": "Fält markerat som valfritt",
+            "signatureFieldAssigned": "Signaturfältet har redan en signerare tilldelad",
+            "userAssigned": "{{name}} tilldelad som {{role}}",
+            "contactAdded": "{{name}} tillagd framgångsrikt"
+        },
+        "errors": {
+            "signatureFieldHasSigner": "Signaturfält kan bara ha en signerare tilldelad."
+        }
+    },
+    "addEditContactModal": {
+        "title": {
+            "add": "Lägg till Ny Kontakt",
+            "edit": "Redigera Kontakt"
+        },
+        "labels": {
+            "titlePrefix": "Titel",
+            "firstName": "Förnamn",
+            "lastName": "Efternamn",
+            "email": "E-post",
+            "phone": "Telefonnummer",
+            "language": "Språk",
+            "title": "Titel/Befattning",
+            "additionalInfo": "Ytterligare Information"
+        },
+        "placeholders": {
+            "firstName": "Ange Förnamn",
+            "lastName": "Ange Efternamn",
+            "email": "Ange E-post",
+            "title": "Ange Titel",
+            "customFieldKey": "Fältnamn (t.ex. Företag)",
+            "customFieldValue": "Värde (t.ex. Acme Inc.)"
+        },
+        "titlePrefixOptions": {
+            "none": "Ingen",
+            "mr": "Herr",
+            "mrs": "Fru",
+            "ms": "Fröken/Fru",
+            "dr": "Dr.",
+            "prof": "Prof."
+        },
+        "languageOptions": {
+            "en": "Engelska",
+            "es": "Spanska (Spanish)",
+            "fr": "Franska (French)"
+        },
+        "buttons": {
+            "cancel": "Avbryt",
+            "saving": "Sparar...",
+            "addContact": "Lägg till Kontakt",
+            "updateContact": "Uppdatera Kontakt",
+            "addCustomField": "+ Lägg till Anpassat Fält"
+        },
+        "errors": {
+            "firstNameRequired": "Förnamn krävs",
+            "lastNameRequired": "Efternamn krävs",
+            "emailInvalid": "Ogiltigt e-postformat",
+            "emailRequired": "E-post krävs",
+            "phoneInvalid": "Ogiltigt telefonnummer",
+            "languageRequired": "Språk krävs",
+            "customFieldKeyRequired": "Fältnamn krävs"
+        },
+        "messages": {
+            "contactAdded": "Kontakt lades till framgångsrikt.",
+            "contactUpdated": "Kontakt uppdaterades framgångsrikt."
+        }
+    },
+    "packageFieldPropertiesPanel": {
+        "fieldTypes": {
+            "text": "Text",
+            "textarea": "Textområde",
+            "signature": "Signatur",
+            "checkbox": "Kryssruta",
+            "radio": "Radio-knapp",
+            "date": "Datum",
+            "dropdown": "Rullgardinsmeny"
+        },
+        "labels": {
+            "fieldType": "Fälttyp:",
+            "label": "Etikett:",
+            "placeholder": "Platshållare:",
+            "radioGroupId": "Radio Grupp-ID:",
+            "radioOptions": "Alternativ (komma-separerade):",
+            "dropdownOptions": "Alternativ (komma-separerade):",
+            "required": "Obligatoriskt",
+            "assignUsers": "Tilldela Användare till Fält",
+            "signatureMethods": "Signaturmetod(er):",
+            "allowedMethods": "Tillåtna Metoder:",
+            "assignedUsers": "Tilldelade Användare:"
+        },
+        "placeholders": {
+            "placeholder": "Ange platshållartext",
+            "radioGroupId": "Unikt ID för denna radiogrupp",
+            "radioOptions": "Alternativ 1, Alternativ 2",
+            "dropdownOptions": "Alternativ 1, Alternativ 2",
+            "selectRole": "-- Välj Roll --"
+        },
+        "roles": {
+            "Signer": "Signerare",
+            "FormFiller": "Formulärifyllare",
+            "Approver": "Godkännare"
+        },
+        "signatureMethods": {
+            "emailOTP": "Via E-post OTP",
+            "smsOTP": "Via SMS OTP"
+        },
+        "titles": {
+            "removeAssignment": "Ta bort tilldelning"
+        },
+        "messages": {
+            "signatureLabelFixed": "Fältetiketter för signatur kan inte ändras",
+            "radioGroupIdNote": "Alla radio-knappar med samma Grupp-ID fungerar som ett enda urval.",
+            "radioOptionsNote": "Ange minst två alternativ för en meningsfull radiogrupp.",
+            "dropdownOptionsNote": "Ange minst ett alternativ för rullgardinsmenyn.",
+            "signatureFieldNote": "Signaturfält kan bara ha en Signerare tilldelad. Använd detta för insamling av digital signatur.",
+            "signatureRoleNote": "Signaturfält kan endast tilldelas Signerare",
+            "nonSignatureRoleNote": "Signerare kan endast tilldelas signaturfält",
+            "oneSignerMax": "Max 1 Signerare",
+            "noUsersAssigned": "Inga användare tilldelade.",
+            "userAssigned": "{{name}} tilldelad som {{role}}",
+            "userAssignmentRemoved": "Användartilldelning borttagen"
+        },
+        "errors": {
+            "labelRequired": "Etikett krävs",
+            "labelEmpty": "Etiketten kan inte vara tom",
+            "placeholderTooLong": "Platshållare för lång",
+            "radioOptionsMin": "Minst två komma-separerade alternativ krävs för Radiogrupp",
+            "dropdownOptionsMin": "Minst ett alternativ krävs för Rullgardinsmeny",
+            "groupIdRequired": "Grupp-ID krävs för radio-knappar",
+            "noAuthMethod": "En signerare måste ha minst en autentiseringsmetod.",
+            "signatureFieldHasSigner": "Signaturfält kan bara ha en signerare tilldelad."
+        }
+    },
+    "packageStatusPage": {
+        "loading": {
+            "title": "Laddar Dokumentstatus...",
+            "message": "Vänligen vänta ett ögonblick."
+        },
+        "error": {
+            "title": "Det gick inte att Ladda Dokument"
+        }
+    },
+    "packageStatusLayout": {
+        "participants": {
+            "title": "Deltagare"
+        }
+    },
+    "participantStatusPanel": {
+        "header": {
+            "title": "Deltagare",
+            "participantCount": "{{count}} deltagare",
+            "pluralSuffix": ""
+        },
+        "roles": {
+            "receiver": "Mottagare"
+        },
+        "messages": {
+            "noParticipants": "Inga deltagare tilldelade"
+        }
+    },
+    "packageStatusHeader": {
+        "status": {
+            "completed": "Slutförd",
+            "rejected": "Avvisad",
+            "pending": "Väntar",
+            "archived": "Arkiverad",
+            "draft": "Utkast"
+        },
+        "meta": {
+            "createdAt": "Skapad",
+            "fieldCount": "{{count}} fält",
+            "pluralSuffix": ""
+        }
+    },
+    "ownerDocumentViewer": {
+        "errors": {
+            "loadFailed": "Det gick inte att ladda dokument: {{message}}"
+        },
+        "controls": {
+            "previousPage": "Föregående sida",
+            "nextPage": "Nästa sida",
+            "zoomOut": "Zooma ut",
+            "zoomIn": "Zooma in",
+            "pageNavigation": "Sida {{current}} av {{total}}",
+            "zoomLevel": "{{level}}%"
+        },
+        "pageNumber": "Sida {{number}}"
+    },
+    "statusFieldRenderer": {
+        "status": {
+            "rejected": "Avvisad",
+            "revoked": "Återkallad",
+            "draft": "Utkast",
+            "signed": "Signerad",
+            "signedBy": "Signerad av {{signedBy}}",
+            "filled": "Ifylld",
+            "pending": "Väntar"
+        },
+        "unassigned": "Otilldelad",
+        "tooltip": "{{label}} - {{type}} - Tilldelad till: {{assignedTo}} - Status: {{status}}"
+    },
+    "setting": {
+        "toggleCustomizer": "Växla anpassare för översikten",
+        "header": {
+            "title": "ANPASSA ÖVERSIKTEN",
+            "description": "Ställ in preferenser som kommer att sparas i cookies för din live-demoförhandsvisning."
+        },
+        "colorScheme": {
+            "title": "Färgschema",
+            "description": "Övergripande ljus eller mörk presentation.",
+            "light": "Ljus",
+            "dark": "Mörk",
+            "system": "System"
+        },
+        "navigationPosition": {
+            "title": "Navigeringsposition",
+            "description": "Välj det primära navigeringsparadigmet för din app.",
+            "horizontal": "Horisontell",
+            "vertical": "Vertikal",
+            "collapsible": "Fällbar",
+            "semiDark": "Semi Mörk (Sidofält & Rubrik)"
+        },
+        "layoutStyle": {
+            "title": "Layoutstil",
+            "description": "Välj den primära layoutstilen för din app.",
+            "box": "Låda",
+            "full": "Full"
+        },
+        "direction": {
+            "title": "Riktning",
+            "description": "Välj riktningen för din app.",
+            "ltr": "Vänster till Höger (LTR)",
+            "rtl": "Höger till Vänster (RTL)"
+        },
+        "navbarType": {
+            "title": "Navigationsfältstyp",
+            "description": "Klibbig eller Flytande.",
+            "sticky": "Klibbig",
+            "floating": "Flytande",
+            "static": "Statisk"
+        },
+        "routerTransition": {
+            "title": "Routerövergång",
+            "description": "Animering av huvud innehållet.",
+            "none": "Ingen",
+            "fade": "Tona",
+            "fadeDown": "Tona Ned",
+            "fadeUp": "Tona Upp",
+            "fadeLeft": "Tona Vänster",
+            "fadeRight": "Tona Höger",
+            "slideDown": "Glida Ned",
+            "slideLeft": "Glida Vänster",
+            "slideRight": "Glida Höger",
+            "zoomIn": "Zooma In"
+        }
+    },
+    "reviewPage": {
+        "loading": {
+            "title": "Kontrollerar Behörighet",
+            "message": "Vänligen vänta medan vi verifierar din åtkomst..."
+        },
+        "success": {
+            "title": "Tack! 🎉",
+            "message": "Din feedback har skickats framgångsrikt.",
+            "feedback": "Din recension hjälper oss att förbättra upplevelsen för alla"
+        },
+        "ineligible": {
+            "title": "Recension Inte Tillgänglig",
+            "contactSupport": "Om du tror att detta är ett fel, vänligen kontakta support"
+        },
+        "form": {
+            "feedbackRequired": "Feedback Krävs",
+            "title": "Hur var din",
+            "titleHighlight": "upplevelse",
+            "description": "Din feedback hjälper oss att förbättra e-signeringsupplevelsen för alla. Vänligen ta en stund att betygsätta din upplevelse.",
+            "progress": "Framsteg:",
+            "progressStatus": "{{completed}} av {{total}} slutfört",
+            "ratingInstruction": "Betygsätt från 1 (dåligt) till 5 (utmärkt)",
+            "commentsTitle": "Ytterligare Kommentarer",
+            "commentsDescription": "Berätta mer om din upplevelse (valfritt)",
+            "commentsPlaceholder": "Dela dina tankar, förslag eller specifik feedback...",
+            "commentLength": "{{length}}/500",
+            "submitting": "Skickar Feedback...",
+            "submitButton": "Skicka Feedback",
+            "submitReady": "Alla betyg slutförda! Redo att skicka.",
+            "submitIncomplete": "Vänligen slutför alla betyg innan du skickar in."
+        },
+        "errors": {
+            "allRatingsRequired": "Vänligen ge ett betyg för alla frågor.",
+            "submissionError": "Inskickningsfel: {{error}}"
+        }
+    },
+    "subscriptionRequired": {
+        "active": {
+            "title": "Aktiv Prenumeration Krävs",
+            "description": "För att komma åt denna funktion behöver du en aktiv prenumeration. Välj bland våra flexibla planer nedan.",
+            "action": "Visa Prenumerationsplaner"
+        },
+        "package": {
+            "title": "Uppgradera Ditt Abonnemang",
+            "description": "Din nuvarande prenumeration inkluderar inte paketskapande. Uppgradera för att låsa upp denna kraftfulla funktion.",
+            "action": "Uppgradera Prenumeration"
+        },
+        "default": {
+            "title": "Prenumeration Krävs",
+            "description": "Denna funktion kräver en prenumeration för att fortsätta. Kom igång med våra prisvärda planer.",
+            "action": "Visa Abonnemang"
+        },
+        "status": {
+            "current": "Nuvarande Status",
+            "packageCreation": "Paketskapande",
+            "allowed": "Tillåtet",
+            "notAllowed": "Inte Tillåtet"
+        },
+        "actions": {
+            "goBack": "Gå Tillbaka"
+        },
+        "help": {
+            "text": "Behöver du hjälp med att välja abonnemang?",
+            "link": "Kontakta Support"
+        }
+    },
+    "participantPage": {
+        "loading": {
+            "title": "Laddar Säkert Dokument",
+            "message": "Vänligen vänta medan vi förbereder ditt dokument..."
+        },
+        "error": {
+            "title": "Åtkomst Nekas",
+            "message": "Vänligen kontrollera din länk eller kontakta avsändaren om du tror att detta är ett fel.",
+            "action": "Försök Igen"
+        }
+    },
+    "headerControls": {
+        "navigation": {
+            "previous": "Föregående Sida",
+            "next": "Nästa Sida",
+            "page": "Sida {{current}} av {{total}}"
+        },
+        "zoom": {
+            "title": "Zoomnivå",
+            "in": "Zooma In",
+            "out": "Zooma Ut",
+            "level": "{{level}}%"
+        },
+        "status": {
+            "completed": "Slutförd",
+            "sent": "Skickad",
+            "draft": "Utkast",
+            "archived": "Arkiverad",
+            "rejected": "Avvisad"
+        },
+        "fullscreen": {
+            "enter": "Fullskärmsvy",
+            "exit": "Avsluta Fullskärmsvy"
+        },
+        "options": "Fler alternativ",
+        "participants": {
+            "title": "Visa Deltagare",
+            "description": "Se slutförandestatus"
+        },
+        "download": {
+            "title": "Ladda ner PDF",
+            "disabled": "Nedladdning är endast tillgänglig efter slutförande",
+            "label": "Ladda ner Fil",
+            "description": "Spara PDF-kopia",
+            "downloading": "Laddar ner...",
+            "preparing": "Förbereder ditt dokument för nedladdning..."
+        },
+        "errors": {
+            "noPackageData": "Paketdata är inte tillgänglig. Vänligen uppdatera sidan och försök igen."
+        },
+        "drawer": {
+            "title": "Deltagarstatus",
+            "description": "Spåra slutförandeprogres",
+            "noParticipants": "Ingen deltagarinformation tillgänglig.",
+            "back": "Tillbaka till Dokument"
+        },
+        "participantStatus": {
+            "pending": "Väntar",
+            "completed": "Slutförd",
+            "not applicable": "Ej tillämpligt",
+            "pendingDesc": "Väntar på åtgärd",
+            "completedDesc": "Alla uppgifter slutförda",
+            "notApplicableDesc": "Endast för register"
+        }
+    },
+    "participantLayout": {
+        "brand": "I-Sign.eu",
+        "help": "Hjälp",
+        "sidebar": {
+            "toggle": "Växla sidofält",
+            "title": "Dokumentdetaljer",
+            "signAs": "Signera som",
+            "currentUser": "Nuvarande Användare",
+            "documents": "Dokument",
+            "pages": "{{count}} sida{{#count !== 1 ? 'r' : ''}}",
+            "progress": "Framsteg"
+        },
+        "progress": {
+            "status": "Slutförandestatus",
+            "completed": "Dokument slutfört",
+            "rejected": "Dokument avvisat",
+            "expired": "Dokumentet har gått ut",
+            "draft": "Dokument i utkast",
+            "archived": "Dokument arkiverat",
+            "tasksCompleted": "Dina uppgifter slutförda",
+            "reviewTerms": "Granska och acceptera villkor",
+            "fieldsCompleted": "{{completed}}/{{total}} fält slutförda",
+            "readyForSubmission": "Redo för slutlig inlämning",
+            "termsAccepted": "Villkor accepterade",
+            "requiredFields": "Obligatoriska fält"
+        },
+        "success": {
+            "title": "Allt är Klart! 🎉",
+            "message": "Grattis! Du har framgångsrikt slutfört alla dina tilldelade uppgifter för detta dokument. Dina svar har skickats in och dokumentet är redo för nästa steg i processen.",
+            "requiredFields": "Alla obligatoriska fält slutförda",
+            "termsAccepted": "Användarvillkor accepterade",
+            "signatureApplied": "Digital signatur tillämpad",
+            "nextSteps": "Vad händer härnäst?",
+            "nextMessage": "Dokumentet kommer att fortsätta till andra deltagare för deras granskning och slutförande. Du kommer att meddelas när hela dokumentprocessen är slutförd."
+        },
+        "terms": {
+            "part1": "Jag förklarar att jag har läst dokumentet och ska följa",
+            "link": "Användarvillkoren",
+            "part2": ".",
+            "accepted": "Villkor accepterade"
+        },
+        "defaultParticipant": "Annan Deltagare"
+    },
+    "documentViewer": {
+        "loading": {
+            "title": "Förbereder Dokument",
+            "message": "Vänligen vänta medan vi laddar ditt dokument...",
+            "progress": "{{progress}}%"
+        },
+        "errors": {
+            "title": "Fel vid Laddning av Dokument",
+            "missingUrl": "Dokument-URL saknas.",
+            "fetchFailed": "Det gick inte att hämta PDF: {{status}}",
+            "unknown": "Ett okänt fel inträffade vid laddning av PDF.",
+            "loadFailed": "Det gick inte att ladda dokument: {{message}}",
+            "tryAgain": "Försök Igen"
+        },
+        "preparing": "Förbereder dokument...",
+        "rejection": {
+            "title": "Dokument Avvisat",
+            "rejectedBy": "Avvisat av:",
+            "ipAddress": "IP-adress:",
+            "date": "Datum:",
+            "reason": "Anledning:"
+        },
+        "pageInfo": "Sida {{current}} av {{total}}",
+        "fieldsOnPage": "{{count}} fält{{#count !== 1 ? '' : ''}} på denna sida",
+        "reviewComplete": {
+            "title": "Dokumentgranskning Slutförd",
+            "message": "Du har nått slutet av dokumentet. Vänligen granska alla fält och acceptera villkoren nedan för att fortsätta med signeringen."
+        }
+    },
+    "actionSidebar": {
+        "save": {
+            "label": "Spara",
+            "saving": "Sparar...",
+            "saveChanges": "Spara dina ändringar",
+            "noChanges": "Inga ändringar att spara",
+            "finalized": "Dokumentet är {{status}}",
+            "success": "Dina ändringar har sparats framgångsrikt!",
+            "error": "Det gick inte att spara dina ändringar. Vänligen försök igen."
+        },
+        "sign": {
+            "label": "Signera",
+            "ready": "Signera Dokument",
+            "finalized": "Dokumentet är {{status}}. Inga ytterligare åtgärder är tillåtna.",
+            "saveFirst": "Spara Först",
+            "noSignatureFields": "Du har inga signaturfält tilldelade till dig.",
+            "agreeTerms": "Vänligen godkänn Användarvillkoren innan du signerar.",
+            "allSigned": "Alla dina signaturfält har slutförts.",
+            "error": "Fel: Det gick inte att hitta deltagartilldelning."
+        },
+        "reject": {
+            "label": "Avvisa",
+            "finalized": "Dokumentet är {{status}}. Inga ytterligare åtgärder är tillåtna.",
+            "receiversCannot": "Mottagare kan inte avvisa"
+        },
+        "reassign": {
+            "label": "Omplacera",
+            "finalized": "Dokumentet är {{status}}. Inga ytterligare åtgärder är tillåtna.",
+            "completed": "Du kan inte omplacera efter att ha slutfört dina åtgärder."
+        },
+        "addReceiver": {
+            "label": "Lägg till Mottagare",
+            "finalized": "Dokumentet är {{status}}"
+        },
+        "progress": {
+            "finalized": "Dokument {{status}}",
+            "unsaved": "Osparade ändringar",
+            "readyToSign": "Redo att signera",
+            "noSignature": "Ingen signatur krävs",
+            "reviewTerms": "Granska villkor"
+        }
+    },
+    "rejectModal": {
+        "title": "Avvisa detta Dokument",
+        "description": "Denna åtgärd är oåterkallelig. Avsändaren och alla andra deltagare kommer att meddelas. Vänligen ange en tydlig anledning till avvisandet nedan.",
+        "reasonLabel": "Anledning till Avvisandet",
+        "reasonPlaceholder": "t.ex. Avtalsdetaljerna är felaktiga...",
+        "characterCount": "{{count}} / 500",
+        "submit": "Skicka Avvisande",
+        "submitting": "Skickar...",
+        "cancel": "Avbryt",
+        "close": "Stäng",
+        "validation": {
+            "emptyReason": "En anledning till avvisandet krävs.",
+            "reasonTooLong": "Anledningen måste vara 500 tecken eller mindre."
+        },
+        "errors": {
+            "missingData": "Viktig data saknas. Vänligen uppdatera sidan."
+        }
+    },
+    "reassignDrawer": {
+        "close": "Stäng",
+        "errors": {
+            "missingFields": "Vänligen ange förnamn, efternamn och e-post.",
+            "missingReason": "En anledning till omplaceringen krävs."
+        },
+        "createContact": {
+            "success": "Kontakt skapades framgångsrikt!"
+        },
+        "reassign": {
+            "success": "Omplaceringen slutfördes framgångsrikt!"
+        },
+        "steps": {
+            "select": {
+                "title": "Välj Kontakt",
+                "description": "Välj en kontakt att omplacera ditt ansvar till",
+                "searchPlaceholder": "Sök efter namn eller e-post...",
+                "loading": "Laddar Kontakter...",
+                "noContacts": "Inga kontakter hittades.",
+                "addButton": "Lägg till Ny Kontakt"
+            },
+            "add": {
+                "title": "Lägg till Ny Kontakt",
+                "description": "Ange uppgifter för den nya kontakten",
+                "emailLabel": "Ny Deltagares E-post",
+                "emailPlaceholder": "namn@exempel.com",
+                "firstNameLabel": "Förnamn",
+                "firstNamePlaceholder": "Förnamn",
+                "lastNameLabel": "Efternamn",
+                "lastNamePlaceholder": "Efternamn",
+                "phoneLabel": "Telefonnummer",
+                "phonePlaceholder": "Ange telefonnummer",
+                "backButton": "Tillbaka",
+                "createButton": "Skapa och Välj Kontakt"
+            },
+            "confirm": {
+                "title": "Bekräfta Omplacering",
+                "description": "Du håller på att omplacera ditt ansvar till följande kontakt. Denna åtgärd kan inte ångras.",
+                "reasonLabel": "Anledning till Omplaceringen",
+                "reasonPlaceholder": "Vänligen ange en kort anledning...",
+                "backButton": "Tillbaka",
+                "confirmButton": "Bekräfta Omplacering"
+            },
+            "success": {
+                "title": "Omplaceringen Lyckades",
+                "description": "Ditt ansvar har omplacerats framgångsrikt",
+                "message": "Ditt ansvar för detta dokument har överförts till:",
+                "notification": "Alla parter kommer att meddelas om denna ändring.",
+                "backButton": "Tillbaka till Dokument"
+            },
+            "default": {
+                "title": "Omplacera Ansvar",
+                "description": "Överför dina uppgifter till en annan person"
+            }
+        }
+    },
+    "addReceiverDrawer": {
+        "close": "Stäng",
+        "errors": {
+            "missingFields": "Vänligen ange förnamn, efternamn och e-post."
+        },
+        "steps": {
+            "select": {
+                "title": "Välj Kontakt att Lägga till",
+                "description": "Välj en befintlig kontakt att lägga till som mottagare",
+                "searchPlaceholder": "Sök efter namn eller e-post...",
+                "loading": "Laddar Kontakter...",
+                "noContacts": "Inga kontakter hittades.",
+                "addButton": "Lägg till Ny Kontakt"
+            },
+            "add": {
+                "title": "Lägg till Ny Kontakt",
+                "description": "Ange uppgifterna för en ny kontakt",
+                "emailLabel": "Ny Mottagares E-post",
+                "emailPlaceholder": "namn@exempel.com",
+                "firstNameLabel": "Förnamn",
+                "firstNamePlaceholder": "Förnamn",
+                "lastNameLabel": "Efternamn",
+                "lastNamePlaceholder": "Efternamn",
+                "phoneLabel": "Telefonnummer",
+                "phonePlaceholder": "Ange telefonnummer",
+                "backButton": "Tillbaka",
+                "createButton": "Skapa och Lägg till Kontakt"
+            },
+            "success": {
+                "title": "Mottagare Tillagd Framgångsrikt",
+                "description": "Kontakten har meddelats och lagts till i dokumentet",
+                "message": "har lagts till som mottagare och meddelats.",
+                "notification": "Alla parter kommer att meddelas om detta tillägg.",
+                "backButton": "Tillbaka till Dokument"
+            },
+            "failure": {
+                "title": "Åtgärden Misslyckades",
+                "description": "Ett oväntat fel inträffade. Vänligen försök igen.",
+                "closeButton": "Stäng"
+            },
+            "default": {
+                "title": "Lägg till Mottagare",
+                "description": "Lägg till en ny deltagare med skrivskydd till detta dokument"
+            }
+        }
+    },
+    "signingDrawer": {
+        "close": "Stäng",
+        "email": "e-post",
+        "phone": "telefonnummer",
+        "emailOtp": "E-post OTP",
+        "smsOtp": "SMS OTP",
+        "errors": {
+            "missingData": "Ett fel inträffade. Kan inte identifiera dokumentet eller fältet.",
+            "missingIdentity": "Vänligen ange din/ditt {{method}}.",
+            "resendOtp": "Kunde inte skicka OTP igen. Vänligen gå tillbaka och bekräfta din/ditt {{method}}.",
+            "invalidOtp": "Ett fel inträffade. Obligatorisk information saknas."
+        },
+        "otpSent": {
+            "email": "OTP skickat till din e-post!",
+            "sms": "OTP skickat till din telefon!"
+        },
+        "steps": {
+            "method": {
+                "title": "Välj Signeringsmetod",
+                "description": "Välj en metod för att säkert verifiera din identitet",
+                "emailOption": "Engångskod via E-post",
+                "emailDescription": "Säker verifiering via din e-post",
+                "smsOption": "Engångskod via SMS",
+                "smsDescription": "Säker verifiering via din telefon"
+            },
+            "identity": {
+                "title": "Verifiera Din/Ditt {{method}}",
+                "description": "För säkerhet, vänligen ange din/ditt {{method}} nedan",
+                "info": "Vi skickar en verifieringskod till {{method}} du anger nedan.",
+                "matchInfo": "Det måste matcha mottagarens {{method}}: {{contact}}",
+                "label": "Din/Ditt {{method}}",
+                "emailPlaceholder": "t.ex. dittnamn@exempel.com",
+                "phonePlaceholder": "t.ex. +1234567890",
+                "backButton": "Tillbaka",
+                "requestButton": "Begär Kod"
+            },
+            "otp": {
+                "title": "Ange Verifieringskod",
+                "description": "Vi skickade en 6-siffrig kod till {{contact}}. Den går ut om {{timer}} sekunder.",
+                "timerLabel": "sekunder kvar",
+                "inputLabel": "Ange 6-siffrig verifieringskod",
+                "inputPlaceholder": "------",
+                "resendButton": "Skicka verifieringskod igen",
+                "resending": "Skickar...",
+                "backButton": "Tillbaka",
+                "completeButton": "Slutför Signering"
+            },
+            "success": {
+                "title": "Dokument Signerat!",
+                "description": "Din signatur har tillämpats framgångsrikt på dokumentet",
+                "message": "Tack för att du slutförde signeringsprocessen via {{method}}.",
+                "notification": "Alla parter kommer att meddelas när dokumentet är helt slutfört.",
+                "backButton": "Tillbaka till Dokument"
+            },
+            "default": {
+                "title": "Signeringsprocess",
+                "description": ""
+            }
+        }
+    },
+    "readOnlyField": {
+        "unknownUser": "Okänd Användare",
+        "otherParticipant": "Annan Deltagare",
+        "participantRole": "Deltagare",
+        "signed": "Signerad",
+        "rejected": "Avvisad",
+        "reason": "Anledning:",
+        "otpCode": "OTP: {{code}}",
+        "via": "via {{method}}",
+        "emailOtp": "E-post OTP",
+        "signatureField": "Signaturfält",
+        "checkbox": "Kryssruta",
+        "textarea": "Textområde",
+        "dateField": "Datumfält",
+        "textField": "Textfält",
+        "rejectionTooltip": "Fält avvisat av {{name}}: {{reason}}",
+        "fieldTooltip": "Fält för {{name}} ({{contact}}): {{label}}"
+    },
+    "interactiveField": {
+        "unknownUser": "Okänd Användare",
+        "currentUser": "Nuvarande Användare",
+        "participantRole": "Deltagare",
+        "signed": "Signerad",
+        "rejected": "Avvisad",
+        "reason": "Anledning:",
+        "rejectedIP": "IP: {{ip}}",
+        "otpCode": "OTP: {{code}}",
+        "via": "via {{method}}",
+        "emailOtp": "E-post OTP",
+        "sign": "Signera",
+        "clickToSign": "Klicka för att signera",
+        "chooseMethod": "Välj metod",
+        "editField": "Redigera fält",
+        "saveField": "Spara fält",
+        "unsupported": "Stöds Inte",
+        "errors": {
+            "termsNotAgreed": "Vänligen godkänn Användarvillkoren längst ner i dokumentet innan du signerar.",
+            "noDocumentData": "Fel: Dokumentdata är inte tillgänglig.",
+            "noParticipantAssignment": "Fel: Det gick inte att hitta deltagartilldelning."
+        },
+        "rejectionTooltip": "Fält avvisat av {{name}}: {{reason}}"
+    },
+    "subscriptionBanner": {
+        "noSubscription": {
+            "title": "Lås upp Alla Funktioner",
+            "message": "Aktivera en prenumeration för att börja skapa och hantera dokument.",
+            "ctaText": "Visa Abonnemang"
+        },
+        "limitReached": {
+            "title": "Dokumentgränsen Uppnådd",
+            "message": "Vänligen uppgradera ditt abonnemang för att fortsätta skapa nya dokument.",
+            "ctaText": "Uppgradera Abonnemang"
+        },
+        "lowDocuments": {
+            "title": "Få Dokument Kvar",
+            "message": "Du har bara {{remaining}} dokument kvar. Uppgradera för att få fler.",
+            "ctaText": "Uppgradera Abonnemang"
+        }
+    },
+    "purchaseModal": {
+        "cardBrands": {
+            "visa": "Visa",
+            "mastercard": "Mastercard",
+            "amex": "American Express"
+        },
+        "expires": "Går ut {{month}}/{{year}}",
+        "default": "Standard",
+        "topUpTitle": "Fyll på Ditt Abonnemang",
+        "confirmSubscription": "Bekräfta Din Prenumeration",
+        "topUpDetails": "Påfyllningsdetaljer",
+        "yourPlan": "Ditt Abonnemang",
+        "yearly": "Årligen",
+        "monthly": "Månadsvis",
+        "annually": "årligen",
+        "billed": "Faktureras {{interval}}",
+        "trialEndNote": "Obs: Att fortsätta kommer att avsluta din gratis prova på och debitera dig omedelbart.",
+        "selectPaymentMethod": "Välj Betalningsmetod",
+        "useDifferentCard": "Använd ett Annat Kort",
+        "startingTrial": "Startar Prova på...",
+        "startTrial": "Starta 14-dagars Gratis Prova på",
+        "processing": "Behandlar...",
+        "topUp": "Fyll på",
+        "subscribeNow": "Prenumerera",
+        "subscribe": "{{action}} Nu (€{{price}})",
+        "termsAgreement": "Genom att fortsätta godkänner du våra Användarvillkor.",
+        "success": {
+            "topUp": "Påfyllning Lyckades!",
+            "topUpMessage": "Du har nu fler dokument tillgängliga i ditt {{planName}}-abonnemang!",
+            "subscription": "Prenumerationen Lyckades!",
+            "subscriptionMessage": "Välkommen till {{planName}}-abonnemanget!",
+            "trial": "Gratis Prova på Startade!",
+            "trialMessage": "Du har 14 dagars åtkomst till {{planName}}-abonnemanget!"
+        },
+        "errors": {
+            "cardNotFound": "Kortinformationsformulär hittades inte.",
+            "invalidCard": "Ogiltiga kortuppgifter.",
+            "noPaymentMethod": "Vänligen välj eller lägg till en betalningsmetod för att fortsätta.",
+            "planNotAvailable": "Detta abonnemang är inte tillgängligt för köp just nu.",
+            "unknownError": "Ett oväntat fel inträffade."
+        }
+    },
+    "fieldPropertiesPanel": {
+        "fieldType": "Fälttyp:",
+        "fieldTypes": {
+            "text": "Text",
+            "textarea": "Textområde",
+            "radio": "Radio-knapp",
+            "dropdown": "Rullgardinsmeny"
+        },
+        "label": "Etikett:",
+        "placeholder": "Platshållare:",
+        "radioGroupId": "Radio Grupp-ID:",
+        "radioGroupIdPlaceholder": "Unikt ID för denna radiogrupp",
+        "radioGroupIdHint": "Alla radio-knappar med samma Grupp-ID fungerar som ett enda urval.",
+        "radioOptions": "Alternativ (komma-separerade):",
+        "radioOptionsPlaceholder": "Alternativ 1, Alternativ 2",
+        "radioOptionsHint": "Ange minst två alternativ för en meningsfull radiogrupp.",
+        "dropdownOptions": "Alternativ (komma-separerade):",
+        "dropdownOptionsPlaceholder": "Alternativ 1, Alternativ 2",
+        "dropdownOptionsHint": "Ange minst ett alternativ för rullgardinsmenyn.",
+        "required": "Obligatoriskt",
+        "errors": {
+            "labelRequired": "Etikett krävs",
+            "labelEmpty": "Etiketten kan inte vara tom",
+            "placeholderTooLong": "Platshållare för lång",
+            "radioOptionsMin": "Minst två komma-separerade alternativ krävs för Radiogrupp",
+            "dropdownOptionsMin": "Minst ett alternativ krävs för Rullgardinsmeny",
+            "groupIdRequired": "Grupp-ID krävs för radio-knappar"
+        }
+    },
+    "editorToolbar": {
+        "fieldTypes": {
+            "text": "Text",
+            "textarea": "Textområde",
+            "signature": "Signatur",
+            "checkbox": "Kryssruta",
+            "date": "Datum"
+        }
+    },
+    "messages": {
+        "logoutSuccess": "Du har loggats ut framgångsrikt."
+    },
+    "meta": {
+        "pageTitle": "I-sign.eu - Professionell Plattform för Elektronisk Signatur"
+    },
+    "languageSwitcher": {
+        "title": "Språk",
+        "selectLanguage": "Välj Språk"
+    }
 }

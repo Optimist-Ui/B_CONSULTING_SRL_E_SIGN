@@ -1,6 +1,8 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 const HomeFooter = () => {
+    const { t } = useTranslation();
     const currentYear = new Date().getFullYear();
 
     const scrollToSection = (sectionId: string): void => {
@@ -41,41 +43,39 @@ const HomeFooter = () => {
                                 <span className="text-2xl font-bold text-white">
                                     E<span className="text-blue-400">Sign</span>
                                 </span> */}
-                            <img src="/logo-white.png" alt="logo" className="w-44" />
+                                <img src="/logo-white.png" alt="logo" className="w-44" />
                             </div>
-                            <p className="text-gray-400 mb-6 max-w-md leading-relaxed">
-                                The most secure and user-friendly electronic signature platform for businesses of all sizes. Sign documents digitally with confidence.
-                            </p>
+                            <p className="text-gray-400 mb-6 max-w-md leading-relaxed">{t('footer.description')}</p>
                             <div className="flex items-center space-x-2 text-sm text-gray-500">
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
-                                <span>SOC 2 Type II Certified</span>
+                                <span>{t('footer.certification')}</span>
                             </div>
                         </div>
 
                         {/* Quick Links */}
                         <div>
-                            <h3 className="text-white font-semibold mb-6">Quick Links</h3>
+                            <h3 className="text-white font-semibold mb-6">{t('footer.quickLinks.title')}</h3>
                             <ul className="space-y-4">
                                 <li>
                                     <button onClick={() => scrollToTop()} className="text-gray-400 hover:text-blue-400 transition-colors duration-200">
-                                        Home
+                                        {t('footer.quickLinks.home')}
                                     </button>
                                 </li>
                                 <li>
                                     <button onClick={() => scrollToSection('about')} className="text-gray-400 hover:text-blue-400 transition-colors duration-200">
-                                        About Us
+                                        {t('footer.quickLinks.about')}
                                     </button>
                                 </li>
                                 <li>
                                     <button onClick={() => scrollToSection('pricing')} className="text-gray-400 hover:text-blue-400 transition-colors duration-200">
-                                        Pricing
+                                        {t('footer.quickLinks.pricing')}
                                     </button>
                                 </li>
                                 <li>
                                     <button onClick={() => scrollToSection('faq')} className="text-gray-400 hover:text-blue-400 transition-colors duration-200">
-                                        FAQ
+                                        {t('footer.quickLinks.faq')}
                                     </button>
                                 </li>
                             </ul>
@@ -83,31 +83,31 @@ const HomeFooter = () => {
 
                         {/* Legal & Support */}
                         <div>
-                            <h3 className="text-white font-semibold mb-6">Legal & Support</h3>
+                            <h3 className="text-white font-semibold mb-6">{t('footer.legal.title')}</h3>
                             <ul className="space-y-4">
                                 <li>
-                                    <a href="terms-of-use" target="_blank" className="text-gray-400 hover:text-blue-400 transition-colors duration-200">
-                                        Privacy Policy
+                                    <a href="terms-of-use" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-blue-400 transition-colors duration-200">
+                                        {t('footer.legal.privacy')}
                                     </a>
                                 </li>
                                 <li>
-                                    <a href="terms-of-use" target="_blank" className="text-gray-400 hover:text-blue-400 transition-colors duration-200">
-                                        Terms of Service
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="#" className="text-gray-400 hover:text-blue-400 transition-colors duration-200">
-                                        Security
+                                    <a href="terms-of-use" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-blue-400 transition-colors duration-200">
+                                        {t('footer.legal.terms')}
                                     </a>
                                 </li>
                                 <li>
                                     <a href="#" className="text-gray-400 hover:text-blue-400 transition-colors duration-200">
-                                        Help Center
+                                        {t('footer.legal.security')}
                                     </a>
                                 </li>
                                 <li>
                                     <a href="#" className="text-gray-400 hover:text-blue-400 transition-colors duration-200">
-                                        Contact Support
+                                        {t('footer.legal.help')}
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#" className="text-gray-400 hover:text-blue-400 transition-colors duration-200">
+                                        {t('footer.legal.contact')}
                                     </a>
                                 </li>
                             </ul>
@@ -119,7 +119,7 @@ const HomeFooter = () => {
                 <div className="py-6 border-t border-slate-800">
                     <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
                         {/* Copyright */}
-                        <div className="text-gray-500 text-sm">© {currentYear} I-Sign. All rights reserved.</div>
+                        <div className="text-gray-500 text-sm">{t('footer.copyright', { year: currentYear })}</div>
 
                         {/* Social Links & Contact */}
                         <div className="flex items-center space-x-6">

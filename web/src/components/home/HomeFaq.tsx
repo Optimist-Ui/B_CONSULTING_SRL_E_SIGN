@@ -1,98 +1,19 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 
 const HomeFaq = () => {
+    const { t } = useTranslation();
     const [activeIndex, setActiveIndex] = useState(0);
     const [isVisible, setIsVisible] = useState(false);
     const [showAll, setShowAll] = useState(false);
 
-    const faqData = [
-        // General
-        {
-            id: 1,
-            question: 'What is the e-signing tool?',
-            answer: 'Our e-signing tool is a secure digital solution that allows you to sign, send, and manage documents online, eliminating the need for printing, scanning, or mailing.',
-        },
-        {
-            id: 2,
-            question: 'Who can use the e-signing tool?',
-            answer: 'It’s designed for businesses of all sizes, freelancers, and individuals who need to legally sign or request signatures on documents.',
-        },
-        {
-            id: 3,
-            question: 'Do signers need an account to sign documents?',
-            answer: 'No. Recipients can sign documents without creating an account. They just receive a secure link to review and sign.',
-        },
-        {
-            id: 4,
-            question: 'Is the e-signing tool legally binding?',
-            answer: 'Yes. Our solution complies with major e-signature regulations, including eIDAS (EU), eSIGN Act (US), and UETA, making signed documents legally valid and enforceable.',
-        },
-        {
-            id: 5,
-            question: 'How secure are my documents?',
-            answer: 'All documents are encrypted during transfer and storage. We use SSL/TLS encryption and industry-standard security measures to protect your data.',
-        },
-        {
-            id: 6,
-            question: 'Can I track who signed my document and when?',
-            answer: 'Yes. Each document comes with a detailed audit trail, showing when it was opened, viewed, and signed.',
-        },
-        {
-            id: 7,
-            question: 'Is the tool GDPR-compliant?',
-            answer: 'Absolutely. We follow GDPR guidelines for data protection, storage, and consent handling.',
-        },
-        {
-            id: 8,
-            question: 'Are e-signatures accepted worldwide?',
-            answer: 'E-signatures are legally recognized in most countries. However, some specific documents (like wills, property deeds, or court filings) may still require wet-ink signatures.',
-        },
-        {
-            id: 9,
-            question: 'Can I customize my signature style?',
-            answer: 'Yes. You can draw your signature, upload an image, or choose from predefined styles.',
-        },
-        {
-            id: 10,
-            question: 'What file types are supported?',
-            answer: 'We support PDF, Word, Excel, and most common document formats.',
-        },
-        {
-            id: 11,
-            question: 'Can I sign on mobile devices?',
-            answer: 'Yes. Our tool is fully responsive and works on smartphones, tablets, and desktops.',
-        },
-        {
-            id: 12,
-            question: 'Can I request multiple signatures on one document?',
-            answer: 'Yes. You can assign signing roles, set signing order, and collect multiple signatures.',
-        },
-        {
-            id: 13,
-            question: 'Can I set reminders for unsigned documents?',
-            answer: 'Yes. Automatic reminders can be sent to recipients until they sign.',
-        },
-        {
-            id: 14,
-            question: 'Can I prevent document changes after signing?',
-            answer: 'Yes. Once signed, the document is locked to prevent further modifications.',
-        },
-        {
-            id: 15,
-            question: 'Is there a free trial?',
-            answer: 'Yes. We offer a free trial with limited features so you can test the tool before upgrading.',
-        },
-        {
-            id: 16,
-            question: 'Do you offer team or enterprise plans?',
-            answer: 'Yes. We have flexible plans for individuals, teams, and large organizations with additional features like bulk sending, branding, and integrations.',
-        },
-        {
-            id: 17,
-            question: 'Which payment methods do you accept?',
-            answer: 'We accept major credit/debit cards, PayPal, and invoice-based payments for enterprise customers.',
-        },
-    ];
+    const faqData = Array.from({ length: 17 }, (_, i) => ({
+        id: i + 1,
+        questionKey: `faq.questions.q${i + 1}.question`,
+        answerKey: `faq.questions.q${i + 1}.answer`,
+    }));
+
+    const visualFeatures = ['faq.visual.features.security', 'faq.visual.features.tracking', 'faq.visual.features.api', 'faq.visual.features.storage'];
 
     useEffect(() => {
         setIsVisible(true);
@@ -121,10 +42,10 @@ const HomeFaq = () => {
                         {/* Section Header */}
                         <div className={`transition-all duration-1000 transform ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}>
                             <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-4">
-                                Frequently Asked
-                                <span className="block text-blue-400">Questions</span>
+                                {t('faq.title.main')}
+                                <span className="block text-blue-400">{t('faq.title.highlight')}</span>
                             </h2>
-                            <p className="text-lg sm:text-xl text-gray-300 max-w-2xl">Find answers to common questions about our e-signature platform and services.</p>
+                            <p className="text-lg sm:text-xl text-gray-300 max-w-2xl">{t('faq.description')}</p>
                         </div>
 
                         {/* FAQ Accordion */}
@@ -138,7 +59,7 @@ const HomeFaq = () => {
                                             aria-expanded={activeIndex === index}
                                             aria-controls={`faq-answer-${faq.id}`}
                                         >
-                                            <h3 className="text-lg sm:text-xl font-semibold text-white group-hover:text-blue-300 transition-colors duration-300">{faq.question}</h3>
+                                            <h3 className="text-lg sm:text-xl font-semibold text-white group-hover:text-blue-300 transition-colors duration-300">{t(faq.questionKey)}</h3>
                                             <div className={`transform transition-transform duration-300 ${activeIndex === index ? 'rotate-180' : ''}`}>
                                                 <svg className="w-5 h-5 text-blue-400 group-hover:text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -152,7 +73,7 @@ const HomeFaq = () => {
                                         >
                                             <div className="px-6 pb-5">
                                                 <div className="h-px bg-gradient-to-r from-transparent via-blue-400/30 to-transparent mb-4"></div>
-                                                <p className="text-gray-300 leading-relaxed">{faq.answer}</p>
+                                                <p className="text-gray-300 leading-relaxed">{t(faq.answerKey)}</p>
                                             </div>
                                         </div>
                                     </div>
@@ -163,13 +84,13 @@ const HomeFaq = () => {
                                     onClick={handleToggleShow}
                                     className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-all duration-300 hover:shadow-lg hover:shadow-blue-600/25 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 >
-                                    {showAll ? 'Show Less' : 'Show More'}
+                                    {showAll ? t('faq.buttons.showLess') : t('faq.buttons.showMore')}
                                 </button>
                                 <a
                                     href="/digital-signatures-guide"
                                     className="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-all duration-300 hover:shadow-lg hover:shadow-purple-600/25 focus:outline-none focus:ring-2 focus:ring-purple-500 flex items-center gap-2"
                                 >
-                                    <span>Learn About Signatures</span>
+                                    <span>{t('faq.buttons.learnMore')}</span>
                                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                                     </svg>
@@ -188,20 +109,20 @@ const HomeFaq = () => {
                                     <div className="grid grid-cols-2 gap-4">
                                         <div className="bg-blue-500/20 rounded-lg p-4 text-center border border-blue-400/20">
                                             <div className="text-2xl font-bold text-blue-400">99.9%</div>
-                                            <div className="text-sm text-gray-300">Uptime</div>
+                                            <div className="text-sm text-gray-300">{t('faq.visual.uptimeLabel')}</div>
                                         </div>
                                         <div className="bg-green-500/20 rounded-lg p-4 text-center border border-green-400/20">
-                                            <div className="text-2xl font-bold text-green-400">Legal</div>
-                                            <div className="text-sm text-gray-300">Binding</div>
+                                            <div className="text-2xl font-bold text-green-400">{t('faq.visual.bindingValue')}</div>
+                                            <div className="text-sm text-gray-300">{t('faq.visual.bindingLabel')}</div>
                                         </div>
                                     </div>
 
                                     {/* Feature list */}
                                     <div className="space-y-3">
-                                        {['Bank-level Security', 'Real-time Tracking', 'API Integration', 'Unlimited Storage'].map((feature, index) => (
+                                        {visualFeatures.map((featureKey, index) => (
                                             <div key={index} className="flex items-center gap-3">
                                                 <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
-                                                <span className="text-gray-300">{feature}</span>
+                                                <span className="text-gray-300">{t(featureKey)}</span>
                                             </div>
                                         ))}
                                     </div>
@@ -209,7 +130,7 @@ const HomeFaq = () => {
                                     {/* CTA */}
                                     <div className="pt-4 border-t border-white/20">
                                         <button className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-medium transition-all duration-300 hover:shadow-lg hover:shadow-blue-600/25 hover:scale-105 transform">
-                                            Start Free Trial
+                                            {t('faq.visual.cta')}
                                         </button>
                                     </div>
                                 </div>

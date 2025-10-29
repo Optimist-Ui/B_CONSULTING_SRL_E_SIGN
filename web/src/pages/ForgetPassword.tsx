@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { IRootState, AppDispatch } from '../store';
 import { useEffect, useState, FormEvent } from 'react';
 import { toast } from 'react-toastify';
+import { useTranslation } from 'react-i18next';
 
 // Redux Imports
 import { setPageTitle, toggleRTL } from '../store/slices/themeConfigSlice';
@@ -15,6 +16,7 @@ import IconCaretDown from '../components/Icon/IconCaretDown';
 import IconMail from '../components/Icon/IconMail';
 
 const ForgetPassword = () => {
+    const { t } = useTranslation();
     const dispatch: AppDispatch = useDispatch();
 
     // Select state from the Redux store
@@ -28,9 +30,9 @@ const ForgetPassword = () => {
     const [isVisible, setIsVisible] = useState(false);
 
     useEffect(() => {
-        dispatch(setPageTitle('Forgot Password'));
+        dispatch(setPageTitle(t('forgotPassword.meta.title')));
         setIsVisible(true);
-    }, [dispatch]);
+    }, [dispatch, t]);
 
     const setLocale = (newFlag: string) => {
         setFlag(newFlag);
@@ -41,61 +43,51 @@ const ForgetPassword = () => {
     const submitForm = async (e: FormEvent) => {
         e.preventDefault();
         try {
-            // Dispatch the thunk and await its result
             await dispatch(requestPasswordReset(email)).unwrap();
-
-            // On success
-            toast.success('If the email is registered, a reset link has been sent.');
-            setEmail(''); // Clear the input field on success
+            toast.success(t('forgotPassword.messages.success') as string);
+            setEmail('');
         } catch (error: any) {
-            // On failure
-            toast.error(error || 'Failed to send reset link. Please try again.');
+            toast.error(error || t('forgotPassword.messages.error'));
         }
     };
 
+    const brandingFeatures = [
+        { icon: '🔐', titleKey: 'forgotPassword.branding.features.secure.title', descKey: 'forgotPassword.branding.features.secure.description' },
+        { icon: '📧', titleKey: 'forgotPassword.branding.features.verification.title', descKey: 'forgotPassword.branding.features.verification.description' },
+    ];
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-blue-900 flex items-center justify-center px-4 py-8 relative overflow-hidden">
-            {/* Animated background elements */}
             <div className="absolute inset-0 overflow-hidden">
                 <div className="absolute top-20 left-10 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
                 <div className="absolute bottom-20 right-10 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '700ms' }}></div>
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-cyan-500/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1000ms' }}></div>
             </div>
-
-            {/* Floating particles */}
             <div className="absolute top-1/4 left-1/4 w-2 h-2 bg-blue-400/40 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
             <div className="absolute top-3/4 right-1/4 w-3 h-3 bg-purple-400/40 rounded-full animate-bounce" style={{ animationDelay: '500ms' }}></div>
             <div className="absolute bottom-1/4 left-1/3 w-2 h-2 bg-cyan-400/40 rounded-full animate-bounce" style={{ animationDelay: '700ms' }}></div>
-
             <div className="relative w-full max-w-6xl mx-auto">
                 <div className="grid lg:grid-cols-2 gap-8 items-center">
-                    {/* Left side - Branding */}
                     <div className={`hidden lg:block transition-all duration-1000 transform ${isVisible ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0'}`}>
                         <div className="bg-white/5 backdrop-blur-xl rounded-3xl p-12 border border-white/10 shadow-2xl">
                             <div className="space-y-8">
                                 <div>
                                     <Link to="/" className="block">
-                                        <h2 className="text-5xl font-bold text-white mb-4">Welcome to</h2>
+                                        <h2 className="text-5xl font-bold text-white mb-4">{t('forgotPassword.branding.welcome')}</h2>
                                         <h1 className="text-6xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">i-sign.eu</h1>
                                     </Link>
                                 </div>
-
-                                <p className="text-xl text-gray-300 leading-relaxed">Reset your password securely and get back to signing documents in minutes.</p>
-
-                                {/* Feature highlights */}
+                                <p className="text-xl text-gray-300 leading-relaxed">{t('forgotPassword.branding.description')}</p>
                                 <div className="space-y-2">
-                                    {[
-                                        { icon: '🔐', title: 'Secure Reset', desc: 'Protected recovery process' },
-                                        { icon: '📧', title: 'Email Verification', desc: 'Instant link delivery' },
-                                    ].map((feature, index) => (
+                                    {brandingFeatures.map((feature, index) => (
                                         <div
                                             key={index}
                                             className="flex items-center gap-4 bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-white/10 hover:bg-white/10 transition-all duration-300 hover:scale-105 transform"
                                         >
                                             <div className="text-3xl">{feature.icon}</div>
                                             <div>
-                                                <h3 className="text-white font-semibold">{feature.title}</h3>
-                                                <p className="text-gray-400 text-sm">{feature.desc}</p>
+                                                <h3 className="text-white font-semibold">{t(feature.titleKey)}</h3>
+                                                <p className="text-gray-400 text-sm">{t(feature.descKey)}</p>
                                             </div>
                                         </div>
                                     ))}
@@ -103,18 +95,13 @@ const ForgetPassword = () => {
                             </div>
                         </div>
                     </div>
-
-                    {/* Right side - Reset Form */}
                     <div className={`transition-all duration-1000 delay-300 transform ${isVisible ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'}`}>
                         <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-8 md:p-12 border border-white/20 shadow-2xl">
-                            {/* Header */}
                             <div className="flex justify-between items-start mb-8">
                                 <div>
-                                    <h2 className="text-3xl md:text-4xl font-bold text-white mb-2">Reset Password</h2>
-                                    <p className="text-gray-300">Enter your email to receive a reset link.</p>
+                                    <h2 className="text-3xl md:text-4xl font-bold text-white mb-2">{t('forgotPassword.form.header.title')}</h2>
+                                    <p className="text-gray-300">{t('forgotPassword.form.header.description')}</p>
                                 </div>
-
-                                {/* Language Dropdown */}
                                 <div className="dropdown ms-auto w-max">
                                     <Dropdown
                                         offset={[0, 8]}
@@ -149,26 +136,21 @@ const ForgetPassword = () => {
                                     </Dropdown>
                                 </div>
                             </div>
-
-                            {/* Mobile Logo */}
                             <div className="lg:hidden text-center mb-8">
                                 <Link to="/">
                                     <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">i-sign.eu</h1>
                                 </Link>
                             </div>
-
-                            {/* Form */}
                             <form onSubmit={submitForm} className="space-y-6">
-                                {/* Email Input */}
                                 <div className="space-y-2">
                                     <label htmlFor="email" className="text-white font-medium block">
-                                        Email Address
+                                        {t('forgotPassword.form.email.label')}
                                     </label>
                                     <div className="relative group">
                                         <input
                                             id="email"
                                             type="email"
-                                            placeholder="Enter your email"
+                                            placeholder={t('forgotPassword.form.email.placeholder')}
                                             className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 pl-12 text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all duration-300"
                                             value={email}
                                             onChange={(e) => setEmail(e.target.value)}
@@ -179,8 +161,6 @@ const ForgetPassword = () => {
                                         </span>
                                     </div>
                                 </div>
-
-                                {/* Submit Button */}
                                 <button
                                     type="submit"
                                     disabled={loading}
@@ -189,11 +169,11 @@ const ForgetPassword = () => {
                                     {loading ? (
                                         <>
                                             <span className="animate-spin border-2 border-white border-l-transparent rounded-full w-5 h-5 inline-block"></span>
-                                            <span>Sending Reset Link...</span>
+                                            <span>{t('forgotPassword.form.button.loading')}</span>
                                         </>
                                     ) : (
                                         <>
-                                            <span>Send Reset Link</span>
+                                            <span>{t('forgotPassword.form.button.default')}</span>
                                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path
                                                     strokeLinecap="round"
@@ -205,20 +185,16 @@ const ForgetPassword = () => {
                                         </>
                                     )}
                                 </button>
-
-                                {/* Back to Sign In */}
                                 <div className="mt-6 text-center">
                                     <Link to="/login" className="text-blue-400 hover:text-blue-300 text-sm font-medium transition-colors duration-300 inline-flex items-center gap-2">
                                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                                         </svg>
-                                        Back to Sign In
+                                        {t('forgotPassword.form.backToLogin')}
                                     </Link>
                                 </div>
                             </form>
-
-                            {/* Footer */}
-                            <div className="mt-8 pt-6 border-t border-white/10 text-center text-sm text-gray-400">© {new Date().getFullYear()} i-sign.eu. All Rights Reserved.</div>
+                            <div className="mt-8 pt-6 border-t border-white/10 text-center text-sm text-gray-400">{t('forgotPassword.footer.copyright', { year: new Date().getFullYear() })}</div>
                         </div>
                     </div>
                 </div>

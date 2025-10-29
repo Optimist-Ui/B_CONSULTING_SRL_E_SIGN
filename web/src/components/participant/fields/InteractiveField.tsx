@@ -6,6 +6,7 @@ import { ParticipantPackageField, RejectionDetails } from '../../../store/slices
 import { FiEdit3, FiSave, FiFileText, FiCalendar, FiSquare, FiCheckSquare, FiCheckCircle, FiXCircle, FiAlertTriangle, FiUser } from 'react-icons/fi';
 import { FaSignature, FaPen } from 'react-icons/fa';
 import { toast } from 'react-toastify';
+import { useTranslation } from 'react-i18next';
 
 // Typed Icons
 const FiEdit3Typed = FiEdit3 as ComponentType<{ className?: string }>;
@@ -29,6 +30,7 @@ interface InteractiveFieldProps {
 }
 
 const InteractiveField: React.FC<InteractiveFieldProps> = ({ field, value, rejectionDetails, packageStatus }) => {
+    const { t } = useTranslation();
     const dispatch = useDispatch<AppDispatch>();
     const { packageData, uiState } = useSelector((state: IRootState) => state.participant);
     const { hasAgreedToTerms } = uiState;
@@ -63,17 +65,17 @@ const InteractiveField: React.FC<InteractiveFieldProps> = ({ field, value, rejec
         if (field.assignedUsers && field.assignedUsers.length > 0) {
             const user = field.assignedUsers[0];
             return {
-                name: user.contactName || 'Unknown User',
+                name: user.contactName || t('interactiveField.unknownUser'),
                 email: user.contactEmail || '',
                 phone: user.contactPhone || '',
-                role: user.role || 'Participant',
+                role: user.role || t('interactiveField.participantRole'),
             };
         }
         return {
-            name: 'Current User',
+            name: t('interactiveField.currentUser'),
             email: '',
             phone: '',
-            role: 'Participant',
+            role: t('interactiveField.participantRole'),
         };
     };
 
@@ -100,7 +102,7 @@ const InteractiveField: React.FC<InteractiveFieldProps> = ({ field, value, rejec
 
     const handleSignatureClick = useCallback(() => {
         if (!hasAgreedToTerms) {
-            toast.warn('Please agree to the Terms of Use at the bottom of the document before signing.');
+            toast.warn(t('interactiveField.errors.termsNotAgreed') as string);
             const termsSection = document.getElementById('terms-checkbox-section');
             if (termsSection) {
                 termsSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -113,7 +115,7 @@ const InteractiveField: React.FC<InteractiveFieldProps> = ({ field, value, rejec
         }
 
         if (!packageData) {
-            toast.error('Error: Document data not available.');
+            toast.error(t('interactiveField.errors.noDocumentData') as string);
             return;
         }
 
@@ -122,7 +124,7 @@ const InteractiveField: React.FC<InteractiveFieldProps> = ({ field, value, rejec
         );
 
         if (!assignedUser) {
-            toast.error('Error: Unable to find participant assignment.');
+            toast.error(t('interactiveField.errors.noParticipantAssignment') as string);
             return;
         }
 
@@ -201,7 +203,7 @@ const InteractiveField: React.FC<InteractiveFieldProps> = ({ field, value, rejec
             default:
                 return {
                     editing: 'border-gray-300 bg-gray-50/80',
-                    finalized: 'border-green-300 bg-green-50/80',
+                    finalized: 'border-green-3450 bg-green-50/80',
                     button: 'bg-gray-500 hover:bg-gray-600',
                 };
         }
@@ -224,7 +226,7 @@ const InteractiveField: React.FC<InteractiveFieldProps> = ({ field, value, rejec
             <div
                 style={baseStyles}
                 className="bg-red-50/80 border-2 border-red-400 rounded-lg shadow-sm backdrop-blur-sm flex flex-col overflow-hidden hover:shadow-md transition-all duration-200"
-                title={`Field rejected by ${rejectionDetails!.rejectedBy.contactName}: ${rejectionDetails!.reason}`}
+                title={t('interactiveField.rejectionTooltip', { name: rejectionDetails!.rejectedBy.contactName, reason: rejectionDetails!.reason })}
             >
                 <div className={`flex items-center justify-between ${headerPadding} bg-red-100/60 rounded-t-md border-b border-red-300 flex-shrink-0`}>
                     <div className="flex items-center gap-0.5 min-w-0 flex-1">
@@ -239,16 +241,16 @@ const InteractiveField: React.FC<InteractiveFieldProps> = ({ field, value, rejec
                 <div className={`flex-grow flex flex-col ${contentPadding} min-h-0`}>
                     <div className="flex items-center gap-0.5 mb-0.5">
                         <FiXCircleTyped className="w-3 h-3 text-red-600 flex-shrink-0" />
-                        <span className={`${labelTextSize} font-bold text-red-700 uppercase tracking-wider`}>Rejected</span>
+                        <span className={`${labelTextSize} font-bold text-red-700 uppercase tracking-wider`}>{t('interactiveField.rejected')}</span>
                     </div>
                     <div className={`${userTextSize} text-red-700 space-y-0.5`}>
                         <p className="font-semibold truncate">{rejectionDetails!.rejectedBy.contactName}</p>
-                        {!isTinyField && rejectionDetails!.rejectedIP && <p className="text-red-600">IP: {rejectionDetails!.rejectedIP}</p>}
+                        {!isTinyField && rejectionDetails!.rejectedIP && <p className="text-red-600">{t('interactiveField.rejectedIP', { ip: rejectionDetails!.rejectedIP })}</p>}
                         <p className="text-red-600">{new Date(rejectionDetails!.rejectedAt).toLocaleString()}</p>
                     </div>
                     {rejectionDetails!.reason && !isTinyField && (
                         <div className="mt-0.5 flex-grow">
-                            <p className={`${userTextSize} text-red-600 font-medium mb-0.5`}>Reason:</p>
+                            <p className={`${userTextSize} text-red-600 font-medium mb-0.5`}>{t('interactiveField.reason')}</p>
                             <p className={`${labelTextSize} text-red-700 leading-tight break-words line-clamp-2`}>{rejectionDetails!.reason}</p>
                         </div>
                     )}
@@ -275,7 +277,11 @@ const InteractiveField: React.FC<InteractiveFieldProps> = ({ field, value, rejec
                             )}
                         </div>
                     </div>
-                    <button onClick={() => setIsEditing(true)} className={`${isTinyField ? 'p-0.5' : 'p-1'} rounded-md hover:bg-green-200/60 transition-colors group`} title="Edit field">
+                    <button
+                        onClick={() => setIsEditing(true)}
+                        className={`${isTinyField ? 'p-0.5' : 'p-1'} rounded-md hover:bg-green-200/60 transition-colors group`}
+                        title={t('interactiveField.editField')}
+                    >
                         <FiEdit3Typed className={`${isTinyField ? 'w-2.5 h-2.5' : 'w-3 h-3'} text-green-700 group-hover:text-green-800`} />
                     </button>
                 </div>
@@ -311,7 +317,11 @@ const InteractiveField: React.FC<InteractiveFieldProps> = ({ field, value, rejec
                                 )}
                             </div>
                         </div>
-                        <button onClick={handleFinalize} className={`${colors.button} text-white ${isTinyField ? 'p-0.5' : 'p-1'} rounded-md transition-colors shadow-sm`} title="Save field">
+                        <button
+                            onClick={handleFinalize}
+                            className={`${colors.button} text-white ${isTinyField ? 'p-0.5' : 'p-1'} rounded-md transition-colors shadow-sm`}
+                            title={t('interactiveField.saveField')}
+                        >
                             <FiSaveTyped className={`${isTinyField ? 'w-2.5 h-2.5' : 'w-3 h-3'}`} />
                         </button>
                     </div>
@@ -348,7 +358,11 @@ const InteractiveField: React.FC<InteractiveFieldProps> = ({ field, value, rejec
                                 )}
                             </div>
                         </div>
-                        <button onClick={handleFinalize} className={`${colors.button} text-white ${isTinyField ? 'p-0.5' : 'p-1'} rounded-md transition-colors shadow-sm`} title="Save field">
+                        <button
+                            onClick={handleFinalize}
+                            className={`${colors.button} text-white ${isTinyField ? 'p-0.5' : 'p-1'} rounded-md transition-colors shadow-sm`}
+                            title={t('interactiveField.saveField')}
+                        >
                             <FiSaveTyped className={`${isTinyField ? 'w-2.5 h-2.5' : 'w-3 h-3'}`} />
                         </button>
                     </div>
@@ -407,7 +421,7 @@ const InteractiveField: React.FC<InteractiveFieldProps> = ({ field, value, rejec
                     <div style={baseStyles} className="border-2 border-green-400 bg-green-50/80 rounded-lg shadow-sm backdrop-blur-sm p-2 flex flex-col justify-center overflow-hidden">
                         <div className="flex items-center gap-1 mb-1 text-green-700">
                             <FiCheckCircleTyped className={`${isTinyField ? 'w-3 h-3' : 'w-4 h-4'} flex-shrink-0`} />
-                            <h4 className={`font-bold ${labelTextSize} uppercase tracking-wider`}>Signed</h4>
+                            <h4 className={`font-bold ${labelTextSize} uppercase tracking-wider`}>{t('interactiveField.signed')}</h4>
                         </div>
                         <div className={`${userTextSize} text-slate-700 space-y-0.5 ${isTinyField ? 'pl-0' : 'pl-1'}`}>
                             <p className="font-semibold truncate">{signatureValue.signedBy}</p>
@@ -417,42 +431,46 @@ const InteractiveField: React.FC<InteractiveFieldProps> = ({ field, value, rejec
                                 ) : (
                                     <p className="truncate text-gray-600">{signatureValue.email}</p>
                                 ))}
-                            {!isTinyField && signatureValue.otpCode && <p className="text-gray-600 font-mono">OTP: {signatureValue.otpCode}</p>}
+                            {!isTinyField && signatureValue.otpCode && <p className="text-gray-600 font-mono">{t('interactiveField.otpCode', { code: signatureValue.otpCode })}</p>}
                             <p className="text-gray-600 truncate">{new Date(signatureValue.date).toLocaleString()}</p>
                         </div>
-                        {!isTinyField && <p className={`text-right ${userTextSize} text-gray-500 mt-auto pt-0.5 font-semibold truncate`}>via {signatureValue.method || 'Email OTP'}</p>}
+                        {!isTinyField && (
+                            <p className={`text-right ${userTextSize} text-gray-500 mt-auto pt-0.5 font-semibold truncate`}>
+                                {t('interactiveField.via', { method: signatureValue.method || t('interactiveField.emailOtp') })}
+                            </p>
+                        )}
                     </div>
                 );
             } else {
                 const currentUserAssignment = field.assignedUsers.find((user) => user.contactId === packageData?.currentUser?.contactId);
-                const signatureMethod = currentUserAssignment?.signatureMethod || 'Email OTP';
+                const signatureMethod = currentUserAssignment?.signatureMethod || t('interactiveField.emailOtp');
 
                 const getSignatureMethodInfo = () => {
                     switch (signatureMethod) {
                         case 'SMS OTP':
                             return {
-                                subtitle: 'Click to sign',
+                                subtitle: t('interactiveField.clickToSign'),
                                 iconColor: 'text-green-600',
                                 bgGradient: 'bg-gradient-to-br from-green-50 to-emerald-50',
                                 borderColor: 'border-green-300',
                             };
                         case 'Email OTP':
                             return {
-                                subtitle: 'Click to sign',
+                                subtitle: t('interactiveField.clickToSign'),
                                 iconColor: 'text-indigo-600',
                                 bgGradient: 'bg-gradient-to-br from-indigo-50 to-blue-50',
                                 borderColor: 'border-indigo-300',
                             };
                         case 'Both':
                             return {
-                                subtitle: 'Choose method',
+                                subtitle: t('interactiveField.chooseMethod'),
                                 iconColor: 'text-purple-600',
                                 bgGradient: 'bg-gradient-to-br from-purple-50 to-indigo-50',
                                 borderColor: 'border-purple-300',
                             };
                         default:
                             return {
-                                subtitle: 'Click to sign',
+                                subtitle: t('interactiveField.clickToSign'),
                                 iconColor: 'text-indigo-600',
                                 bgGradient: 'bg-gradient-to-br from-indigo-50 to-blue-50',
                                 borderColor: 'border-indigo-300',
@@ -492,7 +510,9 @@ const InteractiveField: React.FC<InteractiveFieldProps> = ({ field, value, rejec
                             <FaPenTyped
                                 className={`${isTinyField ? 'text-sm' : 'text-lg'} ${methodInfo.iconColor} ${isTinyField ? 'mb-0' : 'mb-1'} group-hover:scale-105 transition-transform flex-shrink-0`}
                             />
-                            <span className={`font-bold text-slate-800 ${labelTextSize} uppercase tracking-wide text-center leading-tight`}>{isTinyField ? 'Sign' : methodInfo.subtitle}</span>
+                            <span className={`font-bold text-slate-800 ${labelTextSize} uppercase tracking-wide text-center leading-tight`}>
+                                {isTinyField ? t('interactiveField.sign') : methodInfo.subtitle}
+                            </span>
                         </div>
                     </div>
                 );
@@ -516,7 +536,7 @@ const InteractiveField: React.FC<InteractiveFieldProps> = ({ field, value, rejec
                         </div>
                     </div>
                     <div className={`flex-grow flex items-center justify-center ${contentPadding}`}>
-                        <span className={`${labelTextSize} text-gray-500 font-medium`}>Unsupported</span>
+                        <span className={`${labelTextSize} text-gray-500 font-medium`}>{t('interactiveField.unsupported')}</span>
                     </div>
                 </div>
             );
