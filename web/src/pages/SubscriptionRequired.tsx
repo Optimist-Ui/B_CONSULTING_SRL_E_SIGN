@@ -98,7 +98,7 @@ const SubscriptionRequired: React.FC = () => {
                     <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-600">
                         <p className="text-sm text-gray-500 dark:text-gray-400">
                             {t('subscriptionRequired.help.text')}{' '}
-                            <Link to="/contact" className="text-blue-600 dark:text-blue-400 hover:underline font-medium">
+                            <Link to="/help" className="text-blue-600 dark:text-blue-400 hover:underline font-medium">
                                 {t('subscriptionRequired.help.link')}
                             </Link>
                         </p>
