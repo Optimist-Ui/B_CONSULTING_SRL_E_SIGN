@@ -23,7 +23,7 @@ interface ReadOnlyFieldProps {
 
 const ReadOnlyField: React.FC<ReadOnlyFieldProps> = ({ field, rejectionDetails, packageStatus }) => {
     const { t } = useTranslation();
-
+    console.log(field);
     // Determine field size category for responsive styling
     const getFieldSizeCategory = () => {
         const area = field.width * field.height;
@@ -215,12 +215,11 @@ const ReadOnlyField: React.FC<ReadOnlyFieldProps> = ({ field, rejectionDetails, 
                             {field.label}
                             {field.required && <span className="text-gray-400 ml-0.5">*</span>}
                         </span>
-                        {!isTinyField && (
-                            <div className="flex items-center gap-0.5">
-                                <FiUserTyped className="w-1.5 h-1.5 text-gray-500" />
-                                <span className={`${userTextSize} text-gray-500 font-medium truncate`}>{assignedUserInfo.contactInfo}</span>
-                            </div>
-                        )}
+                        {/* Always show contact info for read-only fields */}
+                        <div className="flex items-center gap-0.5">
+                            <FiUserTyped className={`${isTinyField ? 'w-1 h-1' : 'w-1.5 h-1.5'} text-gray-500 flex-shrink-0`} />
+                            <span className={`${userTextSize} text-gray-500 font-medium truncate`}>{assignedUserInfo.contactInfo}</span>
+                        </div>
                     </div>
                 </div>
                 <FiLockTyped className={`${iconSize} text-gray-500 flex-shrink-0`} />

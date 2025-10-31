@@ -526,7 +526,7 @@ class PackageService {
         ...fieldObj,
         isAssignedToCurrentUser: isAssigned,
         // Security: Only return detailed assignment info if the current user is assigned to this field
-        assignedUsers: isAssigned ? processedAssignedUsers : [],
+        assignedUsers: processedAssignedUsers,
       };
     });
 
