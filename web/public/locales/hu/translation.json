@@ -481,6 +481,10 @@
             "signin": {
                 "prompt": "Már van fiókja?",
                 "link": "Bejelentkezés"
+            },
+            "language": {
+                "label": "Preferált nyelv",
+                "placeholder": "Válassza ki a nyelvét"
             }
         },
         "validation": {

@@ -7,6 +7,7 @@ class ExpiryJob extends BaseJob {
     this.User = container.resolve("User");
     this.emailService = container.resolve("emailService");
     this.packageService = container.resolve("packageService");
+    this.Contact = container.resolve("Contact");
   }
 
   /**
@@ -134,53 +135,97 @@ class ExpiryJob extends BaseJob {
     const emailsFailed = [];
 
     try {
-      const owner = pkg.ownerId;
+      const owner = pkg.ownerId; // Assumes ownerId is populated
       if (!owner) {
         console.warn(
-          `⚠️  Package ${pkg._id} has no owner, skipping notifications`
+          `⚠️ Package ${pkg._id} has no owner, skipping notifications`
         );
         return { emailsSent, emailsFailed };
       }
 
       const ownerName = `${owner.firstName} ${owner.lastName}`;
+      const allRecipients = new Map();
 
-      // Get all unique participant emails
-      const participantEmails = new Set([
-        owner.email, // Include owner
-        ...pkg.fields.flatMap(
-          (f) =>
-            f.assignedUsers
-              .map((au) => au.contactEmail)
-              .filter((email) => email) // Filter out null/undefined
-        ),
-        ...pkg.receivers.map((r) => r.contactEmail).filter((email) => email),
-      ]);
+      // 1. Gather all participants and their contactIds
+      pkg.fields.forEach((field) => {
+        (field.assignedUsers || []).forEach((user) => {
+          if (!allRecipients.has(user.contactEmail)) {
+            allRecipients.set(user.contactEmail, {
+              contactId: user.contactId,
+              name: user.contactName,
+              email: user.contactEmail,
+              isOwner: false,
+            });
+          }
+        });
+      });
 
-      console.log(
-        `Sending expiry notifications to ${participantEmails.size} recipients`
+      pkg.receivers.forEach((receiver) => {
+        if (!allRecipients.has(receiver.contactEmail)) {
+          allRecipients.set(receiver.contactEmail, {
+            contactId: receiver.contactId,
+            name: receiver.contactName,
+            email: receiver.contactEmail,
+            isOwner: false,
+          });
+        }
+      });
+
+      // Add the owner to the list
+      if (!allRecipients.has(owner.email)) {
+        allRecipients.set(owner.email, {
+          name: ownerName,
+          email: owner.email,
+          isOwner: true,
+        });
+      }
+
+      // 2. Efficiently fetch language preferences for all contacts
+      const contactIds = Array.from(allRecipients.values())
+        .filter((r) => !r.isOwner && r.contactId)
+        .map((r) => r.contactId);
+
+      const contacts = await this.Contact.find({
+        _id: { $in: contactIds },
+      }).select("language");
+      const languageMap = new Map(
+        contacts.map((c) => [c._id.toString(), c.language])
       );
 
-      // Send expiry notification to all participants
-      for (const email of participantEmails) {
+      console.log(
+        `Sending expiry notifications to ${allRecipients.size} recipients`
+      );
+
+      // 3. Loop through recipients and send notifications with the correct language
+      for (const recipient of allRecipients.values()) {
         try {
+          // Determine language
+          if (recipient.isOwner) {
+            recipient.language = owner.language || "en";
+          } else {
+            recipient.language =
+              languageMap.get(recipient.contactId.toString()) || "en";
+          }
+
           await this.emailService.sendDocumentExpiredNotification(
-            email,
+            recipient, // Pass the entire enriched object
             ownerName,
             pkg.name,
             pkg.options.expiresAt
           );
-          emailsSent.push(email);
+          emailsSent.push(recipient.email);
         } catch (error) {
-          console.error(`Failed to send expiry email to ${email}:`, error);
-          emailsFailed.push({ email, error: error.message });
+          console.error(
+            `Failed to send expiry email to ${recipient.email}:`,
+            error
+          );
+          emailsFailed.push({ email: recipient.email, error: error.message });
         }
       }
 
       console.log(
-        `✅ Sent ${emailsSent.length} expiry notifications, ` +
-          `${emailsFailed.length} failed`
+        `✅ Sent ${emailsSent.length} expiry notifications, ${emailsFailed.length} failed`
       );
-
       return { emailsSent, emailsFailed };
     } catch (error) {
       console.error(

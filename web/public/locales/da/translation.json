@@ -481,6 +481,10 @@
             "signin": {
                 "prompt": "Har du allerede en konto?",
                 "link": "Log Ind"
+            },
+            "language": {
+                "label": "Foretrukket sprog",
+                "placeholder": "Vælg dit sprog"
             }
         },
         "validation": {

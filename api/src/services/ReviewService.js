@@ -1,10 +1,11 @@
 // services/ReviewService.js
 class ReviewService {
-  constructor({ Review, Package, emailService, User }) {
+  constructor({ Review, Package, emailService, User, Contact }) {
     this.Review = Review;
     this.Package = Package;
     this.EmailService = emailService;
     this.User = User;
+    this.Contact = Contact;
   }
 
   async _findParticipant(pkg, participantId) {
@@ -87,6 +88,14 @@ class ReviewService {
     const pkg = await this.Package.findById(packageId);
     const participant = await this._findParticipant(pkg, participantId);
 
+    // --- NEW: Fetch the participant's language preference ---
+    const contact = await this.Contact.findById(participant.contactId).select(
+      "language"
+    );
+    // Add language to the participant object, defaulting to 'en'
+    participant.language = contact ? contact.language : "en";
+    // --- END NEW ---
+
     const answerValues = Object.values(reviewData.answers);
     const averageRating =
       answerValues.reduce((sum, rating) => sum + rating, 0) /
@@ -108,15 +117,9 @@ class ReviewService {
     // to call the methods directly on the EmailService object.
 
     if (averageRating > 3) {
-      await this.EmailService.sendReviewAppreciationEmail(
-        participant.contactEmail,
-        participant.contactName
-      );
+      await this.EmailService.sendReviewAppreciationEmail(participant);
     } else {
-      await this.EmailService.sendReviewImprovementEmail(
-        participant.contactEmail,
-        participant.contactName
-      );
+      await this.EmailService.sendReviewImprovementEmail(participant);
     }
     // --- END OF FIX ---
 

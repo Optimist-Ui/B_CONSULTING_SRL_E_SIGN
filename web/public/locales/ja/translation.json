@@ -476,6 +476,10 @@
             "signin": {
                 "prompt": "すでにアカウントをお持ちの場合",
                 "link": "サインイン"
+            },
+            "language": {
+                "label": "優先言語",
+                "placeholder": "言語を選択してください"
             }
         },
         "validation": {

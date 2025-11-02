@@ -1,18 +1,19 @@
-const BaseJob = require('./BaseJob');
+const BaseJob = require("./BaseJob");
 
 class ReminderJob extends BaseJob {
   constructor(container) {
     super(container);
-    this.Package = container.resolve('Package');
-    this.User = container.resolve('User');
-    this.emailService = container.resolve('emailService');
+    this.Package = container.resolve("Package");
+    this.User = container.resolve("User");
+    this.emailService = container.resolve("emailService");
+    this.Contact = container.resolve("Contact");
   }
 
   /**
    * Run every 30 minutes
    */
   get schedule() {
-    return '*/30 * * * *';
+    return "*/30 * * * *";
   }
 
   /**
@@ -24,17 +25,19 @@ class ReminderJob extends BaseJob {
 
     try {
       const remindersData = await this.sendExpiryReminders();
-      
+
       this.updateLastRun();
-      
+
       const endTime = new Date();
       const duration = endTime - startTime;
-      
-      console.log(`Reminder job completed in ${duration}ms. Sent ${remindersData.remindersSent} reminders.`);
-      
+
+      console.log(
+        `Reminder job completed in ${duration}ms. Sent ${remindersData.remindersSent} reminders.`
+      );
+
       return remindersData;
     } catch (error) {
-      console.error('Error in ReminderJob execution:', error);
+      console.error("Error in ReminderJob execution:", error);
       throw error;
     }
   }
@@ -50,17 +53,19 @@ class ReminderJob extends BaseJob {
     try {
       // Find packages that need reminders
       const packagesNeedingReminders = await this.Package.find({
-        'options.expiresAt': { $gt: now }, // Not yet expired
-        'options.sendExpirationReminders': true,
-        status: 'Sent'
-      }).populate('ownerId', 'firstName lastName email');
+        "options.expiresAt": { $gt: now }, // Not yet expired
+        "options.sendExpirationReminders": true,
+        status: "Sent",
+      }).populate("ownerId", "firstName lastName email");
 
-      console.log(`Found ${packagesNeedingReminders.length} packages to check for reminders`);
+      console.log(
+        `Found ${packagesNeedingReminders.length} packages to check for reminders`
+      );
 
       for (const pkg of packagesNeedingReminders) {
         try {
           packagesProcessed++;
-          
+
           const timeUntilExpiry = pkg.options.expiresAt - now;
           const shouldSendReminder = this.shouldSendExpiryReminder(
             pkg.options.reminderPeriod,
@@ -70,20 +75,24 @@ class ReminderJob extends BaseJob {
           if (shouldSendReminder) {
             await this.sendReminderNotifications(pkg, timeUntilExpiry);
             remindersSent++;
-            console.log(`Sent reminder for package: ${pkg.name} (ID: ${pkg._id})`);
+            console.log(
+              `Sent reminder for package: ${pkg.name} (ID: ${pkg._id})`
+            );
           }
         } catch (error) {
-          console.error(`Error processing reminder for package ${pkg._id}:`, error);
+          console.error(
+            `Error processing reminder for package ${pkg._id}:`,
+            error
+          );
         }
       }
 
       return {
         packagesProcessed,
-        remindersSent
+        remindersSent,
       };
-
     } catch (error) {
-      console.error('Error in sendExpiryReminders method:', error);
+      console.error("Error in sendExpiryReminders method:", error);
       throw error;
     }
   }
@@ -99,14 +108,26 @@ class ReminderJob extends BaseJob {
     const tolerance = 30 * 60 * 1000;
 
     switch (reminderPeriod) {
-      case '1_hour_before':
-        return timeUntilExpiry <= (millisecondsInHour + tolerance) && timeUntilExpiry > 0;
-      case '2_hours_before':
-        return timeUntilExpiry <= (2 * millisecondsInHour + tolerance) && timeUntilExpiry > 0;
-      case '1_day_before':
-        return timeUntilExpiry <= (millisecondsInDay + tolerance) && timeUntilExpiry > 0;
-      case '2_days_before':
-        return timeUntilExpiry <= (2 * millisecondsInDay + tolerance) && timeUntilExpiry > 0;
+      case "1_hour_before":
+        return (
+          timeUntilExpiry <= millisecondsInHour + tolerance &&
+          timeUntilExpiry > 0
+        );
+      case "2_hours_before":
+        return (
+          timeUntilExpiry <= 2 * millisecondsInHour + tolerance &&
+          timeUntilExpiry > 0
+        );
+      case "1_day_before":
+        return (
+          timeUntilExpiry <= millisecondsInDay + tolerance &&
+          timeUntilExpiry > 0
+        );
+      case "2_days_before":
+        return (
+          timeUntilExpiry <= 2 * millisecondsInDay + tolerance &&
+          timeUntilExpiry > 0
+        );
       default:
         return false;
     }
@@ -115,43 +136,84 @@ class ReminderJob extends BaseJob {
   /**
    * Send reminder notifications
    */
-  async sendReminderNotifications(pkg, timeUntilExpiry) {
+  async sendReminderNotifications(pkg) {
     try {
-      const owner = pkg.ownerId;
+      const owner = pkg.ownerId; // Assumes owner is populated
       const ownerName = `${owner.firstName} ${owner.lastName}`;
 
-      // Calculate human-readable time until expiry
-      const hoursUntilExpiry = Math.ceil(timeUntilExpiry / (60 * 60 * 1000));
-      const daysUntilExpiry = Math.ceil(timeUntilExpiry / (24 * 60 * 60 * 1000));
-      
-      let timeString;
-      if (hoursUntilExpiry <= 24) {
-        timeString = `${hoursUntilExpiry} hour${hoursUntilExpiry !== 1 ? 's' : ''}`;
-      } else {
-        timeString = `${daysUntilExpiry} day${daysUntilExpiry !== 1 ? 's' : ''}`;
-      }
+      const allRecipients = new Map();
 
-      // Get all unique participant emails (exclude owner for reminders)
-      const participantEmails = new Set([
-        ...pkg.fields.flatMap(f => 
-          f.assignedUsers.map(au => au.contactEmail)
-        ),
-        ...pkg.receivers.map(r => r.contactEmail)
-      ]);
+      // 1. Gather all participants who have not completed their tasks
+      pkg.fields.forEach((field) => {
+        (field.assignedUsers || []).forEach((user) => {
+          // Only send reminders to users who have not yet signed/completed
+          if (!user.signed && !allRecipients.has(user.contactEmail)) {
+            allRecipients.set(user.contactEmail, {
+              contactId: user.contactId,
+              participantId: user.id, // For the action link
+              name: user.contactName,
+              email: user.contactEmail,
+            });
+          }
+        });
+      });
 
-      // Send reminder to participants
-      for (const email of participantEmails) {
+      // 2. Efficiently fetch language preferences
+      const contactIds = Array.from(allRecipients.values())
+        .map((r) => r.contactId)
+        .filter((id) => id);
+      const contacts = await this.Contact.find({
+        _id: { $in: contactIds },
+      }).select("language");
+      const languageMap = new Map(
+        contacts.map((c) => [c._id.toString(), c.language])
+      );
+
+      // 3. Loop through recipients and send notifications
+      for (const recipient of allRecipients.values()) {
+        recipient.language =
+          languageMap.get(recipient.contactId.toString()) || "en";
+
+        // Fetch language-specific time units
+        const content = getEmailContent("expiryReminder", recipient.language);
+        const timeUnits = content.timeUnits;
+
+        // Calculate human-readable time until expiry
+        const timeUntilExpiry =
+          pkg.options.expiresAt.getTime() - new Date().getTime();
+        const hoursUntilExpiry = Math.ceil(timeUntilExpiry / (1000 * 60 * 60));
+        const daysUntilExpiry = Math.ceil(
+          timeUntilExpiry / (1000 * 60 * 60 * 24)
+        );
+
+        let timeString;
+        if (hoursUntilExpiry <= 48) {
+          timeString = `${hoursUntilExpiry} ${
+            hoursUntilExpiry > 1 ? timeUnits.hours : timeUnits.hour
+          }`;
+        } else {
+          timeString = `${daysUntilExpiry} ${
+            daysUntilExpiry > 1 ? timeUnits.days : timeUnits.day
+          }`;
+        }
+
+        // The action URL is specific to each participant
+        const actionUrl = `${process.env.CLIENT_URL}/package/${pkg._id}/participant/${recipient.participantId}`;
+
         await this.emailService.sendExpiryReminderNotification(
-          email,
+          recipient, // Pass the entire enriched object
           ownerName,
           pkg.name,
           timeString,
-          pkg.options.expiresAt
+          pkg.options.expiresAt,
+          actionUrl
         );
       }
-
     } catch (error) {
-      console.error(`Error sending reminder notifications for package ${pkg._id}:`, error);
+      console.error(
+        `Error sending reminder notifications for package ${pkg._id}:`,
+        error
+      );
     }
   }
 }

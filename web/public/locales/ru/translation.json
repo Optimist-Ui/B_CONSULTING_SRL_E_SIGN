@@ -476,6 +476,10 @@
             "signin": {
                 "prompt": "Уже есть аккаунт?",
                 "link": "Войти"
+            },
+            "language": {
+                "label": "Предпочитаемый язык",
+                "placeholder": "Выберите ваш язык"
             }
         },
         "validation": {

@@ -476,6 +476,10 @@
             "signin": {
                 "prompt": "Vous avez déjà un compte ?",
                 "link": "Se connecter"
+            },
+            "language": {
+                "label": "Langue préférée",
+                "placeholder": "Sélectionnez votre langue"
             }
         },
         "validation": {

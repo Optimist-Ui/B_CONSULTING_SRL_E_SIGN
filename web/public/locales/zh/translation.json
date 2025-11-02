@@ -476,6 +476,10 @@
             "signin": {
                 "prompt": "已有账户？",
                 "link": "登录"
+            },
+            "language": {
+                "label": "首选语言",
+                "placeholder": "选择您的语言"
             }
         },
         "validation": {

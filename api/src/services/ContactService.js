@@ -116,15 +116,23 @@ class ContactService {
     return { message: "Contact deleted successfully." };
   }
 
-  async submitEnterpriseInquiry({ name, email, company, phone, message }) {
+  async submitEnterpriseInquiry({
+    name,
+    email,
+    company,
+    phone,
+    message,
+    language,
+  }) {
     try {
-      // Send email to admin
+      // Send email to admin with language context
       await this.emailService.sendEnterpriseInquiry({
         contactName: name,
         contactEmail: email,
         companyName: company,
         phoneNumber: phone || null,
         message: message,
+        language: language, // Pass the language
       });
 
       return {

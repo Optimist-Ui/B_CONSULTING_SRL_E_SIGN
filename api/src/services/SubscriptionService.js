@@ -175,6 +175,10 @@ class SubscriptionService {
         throw new Error("Failed to parse trial dates from Stripe");
       }
 
+      if (isNaN(trialEndDate.getTime())) {
+        throw new Error("Failed to parse trial dates from Stripe");
+      }
+
       // Initialize subscription history for the trial
       const trialHistory = {
         type: "trial",
@@ -227,18 +231,11 @@ class SubscriptionService {
 
       // Send trial activation email
       try {
-        const formattedTrialEndDate = trialEndDate.toLocaleDateString("en-US", {
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-        });
-
         await this.emailService.sendTrialActivationEmail(
-          user.email,
-          user.firstName,
+          user, // Pass the entire user object
           plan.name,
-          formattedTrialEndDate,
-          3
+          trialEndDate, // Pass the raw Date object
+          3 // Document limit
         );
       } catch (emailError) {
         console.error(
@@ -310,6 +307,7 @@ class SubscriptionService {
       );
     }
   }
+
   /**
    * Marks expired subscription history entries as "expired".
    */
@@ -609,7 +607,7 @@ class SubscriptionService {
    */
   async cancelSubscription(userId) {
     const user = await this.User.findById(userId).select(
-      "subscription email firstName"
+      "subscription email firstName language"
     );
     if (!user || !user.subscription || !user.subscription.subscriptionId) {
       throw new Error("No active subscription to cancel.");
@@ -623,19 +621,17 @@ class SubscriptionService {
     );
 
     try {
-      const expiryDate = new Date(
+      // --- THIS IS THE KEY CHANGE ---
+      // Create a raw Date object from the Stripe timestamp
+      const expiryDateObject = new Date(
         updatedSubscription.current_period_end * 1000
-      ).toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      });
+      );
+      // --- END CHANGE ---
 
       await this.emailService.sendCancellationConfirmation(
-        user.email,
-        user.firstName,
+        user, // Pass the entire user object
         user.subscription.planName,
-        expiryDate
+        expiryDateObject // Pass the raw Date object
       );
     } catch (emailError) {
       console.error(
@@ -657,7 +653,7 @@ class SubscriptionService {
    */
   async reactivateSubscription(userId) {
     const user = await this.User.findById(userId).select(
-      "subscription email firstName"
+      "subscription email firstName language"
     );
     if (!user || !user.subscription || !user.subscription.subscriptionId) {
       throw new Error("No subscription found to reactivate.");
@@ -676,19 +672,14 @@ class SubscriptionService {
     });
 
     try {
-      const renewalDate = new Date(
+      const renewalDateObject = new Date(
         updatedSubscription.current_period_end * 1000
-      ).toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      });
+      );
 
-      await this.emailService.sendReactivationConfirmation(
-        user.email,
-        user.firstName,
+      await this.emailService.sendSubscriptionReactivation(
+        user, // Pass the entire user object
         user.subscription.planName,
-        renewalDate
+        renewalDateObject // Pass the raw Date object
       );
     } catch (emailError) {
       console.error(
@@ -981,8 +972,10 @@ class SubscriptionService {
 
     console.log(`Subscription ${subscriptionId} deleted for user ${user._id}`);
   }
+
   /**
    * Sends subscription confirmation email after a successful payment.
+   * UPDATED: Detects trial-to-paid transitions and sends appropriate email
    */
   async processSubscriptionConfirmationEmail(invoice) {
     try {
@@ -997,25 +990,38 @@ class SubscriptionService {
       }
 
       const planName = user.subscription.planName;
-      const amount = (invoice.amount_paid / 100).toFixed(2);
+      const amount = invoice.amount_paid / 100;
       const renewalDateTimestamp = invoice.lines.data[0]?.period?.end;
-      const renewalDate = renewalDateTimestamp
-        ? new Date(renewalDateTimestamp * 1000).toLocaleDateString("en-US", {
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-          })
-        : "N/A";
+      const renewalDateObject = renewalDateTimestamp
+        ? new Date(renewalDateTimestamp * 1000)
+        : null;
       const invoiceUrl = invoice.hosted_invoice_url;
 
-      await this.emailService.sendSubscriptionConfirmation(
-        user.email,
-        user.firstName,
-        planName,
-        amount,
-        renewalDate,
-        invoiceUrl
-      );
+      // 🔥 NEW: Detect if this is a trial-to-paid transition
+      const isTrialToPaid = invoice.billing_reason === "subscription_update";
+
+      if (isTrialToPaid) {
+        // Send trial-to-active email instead of generic confirmation
+        const firstBillingDateObject = new Date(invoice.created * 1000);
+
+        await this.emailService.sendTrialToActiveTransitionEmail(
+          user, // Pass entire user object for language
+          planName,
+          firstBillingDateObject, // First billing date
+          renewalDateObject, // Next billing date
+          amount,
+          invoiceUrl
+        );
+      } else {
+        // Regular subscription confirmation (new purchase or renewal)
+        await this.emailService.sendSubscriptionConfirmation(
+          user,
+          planName,
+          amount,
+          renewalDateObject,
+          invoiceUrl
+        );
+      }
     } catch (error) {
       console.error("Error processing subscription confirmation email:", error);
     }

@@ -617,9 +617,7 @@ class PackageService {
     const field = pkg.fields.find(
       (f) => f.id === fieldId && f.type === "signature"
     );
-    if (!field) {
-      throw new Error("Signature field not found.");
-    }
+    if (!field) throw new Error("Signature field not found.");
 
     const assignedUser = field.assignedUsers.find(
       (au) => au.id === participantId
@@ -627,7 +625,7 @@ class PackageService {
     if (
       !assignedUser ||
       assignedUser.role !== "Signer" ||
-      !assignedUser.signatureMethods.includes("Email OTP") || // <-- Change this line
+      !assignedUser.signatureMethods.includes("Email OTP") ||
       assignedUser.signed
     ) {
       throw new Error(
@@ -639,11 +637,18 @@ class PackageService {
       throw new Error("Email does not match assigned participant.");
     }
 
+    // --- NEW: Fetch Contact to get language preference ---
+    const contact = await this.Contact.findById(assignedUser.contactId).select(
+      "language"
+    );
+    // Add language to the assignedUser object, defaulting to 'en'
+    assignedUser.language = contact ? contact.language : "en";
+    // --- END NEW ---
+
     // Generate 6-digit OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const expiresAt = new Date(Date.now() + 60 * 1000); // 60 seconds
+    const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes (to match email text)
 
-    // Overwrite if exists
     await this.OTP.deleteMany({ packageId, fieldId, participantId });
     await this.OTP.create({
       packageId,
@@ -654,10 +659,9 @@ class PackageService {
       expiresAt,
     });
 
-    // Send email using provided method
+    // Send email using the updated method signature
     await this.EmailService.sendSignatureOtp(
-      assignedUser.contactEmail,
-      assignedUser.contactName,
+      assignedUser, // Pass the entire enriched object
       pkg.name,
       otp
     );
@@ -1537,13 +1541,13 @@ class PackageService {
   }
 
   /**
-   * Allows the package owner (initiator) to send a manual reminder email
+   * Allows the package owner to send a manual reminder email
    * to all participants who have not yet completed their required actions.
    */
   async sendManualReminder(packageId, userId) {
     const pkg = await this.Package.findOne({
       _id: packageId,
-      ownerId: userId, // CRITICAL: Only the owner can send reminders.
+      ownerId: userId,
     }).populate("ownerId", "firstName lastName");
 
     if (!pkg) {
@@ -1551,8 +1555,6 @@ class PackageService {
         "Package not found or you do not have permission to send reminders."
       );
     }
-
-    // Can only send reminders for active packages
     if (pkg.status !== "Sent") {
       throw new Error(
         `Reminders can only be sent for packages with 'Sent' status. Current status: '${pkg.status}'.`
@@ -1560,47 +1562,38 @@ class PackageService {
     }
 
     const initiatorName = `${pkg.ownerId.firstName} ${pkg.ownerId.lastName}`;
-    const participantsToRemind = [];
 
-    // Find all participants with fields assigned to them
+    // Determine which participants have incomplete required tasks
     const allParticipants = new Map();
     (pkg.fields || []).forEach((field) => {
       (field.assignedUsers || []).forEach((user) => {
         if (!allParticipants.has(user.contactId.toString())) {
           allParticipants.set(user.contactId.toString(), {
             ...user.toObject(),
-            isComplete: true, // Assume complete until a pending task is found
+            isComplete: true, // Assume complete initially
           });
         }
       });
     });
 
-    // Determine which participants are NOT yet complete
     allParticipants.forEach((participant) => {
       const theirRequiredFields = pkg.fields.filter(
-        (field) =>
-          field.required &&
-          field.assignedUsers.some(
+        (f) =>
+          f.required &&
+          f.assignedUsers.some(
             (u) => u.contactId.toString() === participant.contactId.toString()
           )
       );
-
-      // If a participant has no required fields, they are considered complete.
       if (theirRequiredFields.length === 0) return;
-
       const areAllTasksDone = theirRequiredFields.every((field) => {
         const assignment = field.assignedUsers.find(
           (u) => u.contactId.toString() === participant.contactId.toString()
         );
-        return assignment && assignment.signed; // `signed` is our 'task complete' flag
+        return assignment && assignment.signed;
       });
-
-      if (!areAllTasksDone) {
-        participant.isComplete = false;
-      }
+      if (!areAllTasksDone) participant.isComplete = false;
     });
 
-    // Filter down to only those who are incomplete
     const pendingParticipants = Array.from(allParticipants.values()).filter(
       (p) => !p.isComplete
     );
@@ -1611,13 +1604,28 @@ class PackageService {
       );
     }
 
+    // --- NEW: Efficiently fetch language preferences ---
+    const contactIdsToRemind = pendingParticipants.map((p) => p.contactId);
+    const contacts = await this.Contact.find({
+      _id: { $in: contactIdsToRemind },
+    }).select("language");
+    const languageMap = new Map(
+      contacts.map((c) => [c._id.toString(), c.language])
+    );
+
+    // Add language to each participant object
+    pendingParticipants.forEach((p) => {
+      p.language = languageMap.get(p.contactId.toString()) || "en";
+    });
+    // --- END NEW ---
+
     // Send the email to each pending participant
     for (const participant of pendingParticipants) {
       const actionLink = `${process.env.CLIENT_URL}/package/${pkg._id}/participant/${participant.id}`;
 
+      // Pass the entire enriched participant object
       await this.EmailService.sendManualReminderNotification(
-        participant.contactEmail,
-        participant.contactName,
+        participant,
         initiatorName,
         pkg.name,
         actionLink
@@ -1874,21 +1882,20 @@ class PackageService {
 
   /**
    * Sends notifications when a package is completed.
-   * This includes:
-   * 1. A completion notification for ALL PARTICIPANTS (excluding initiator).
-   * 2. A special completion notification for the INITIATOR with dashboard link.
    * @private
    */
   async _sendCompletionNotifications(pkg, initiatorName) {
-    const packageOwner = await this.User.findById(pkg.ownerId);
-
+    const packageOwner = await this.User.findById(pkg.ownerId).select(
+      "firstName lastName email language"
+    );
     const allRecipients = new Map();
 
-    // Add all action-takers (Signer, Approver, FormFiller)
+    // 1. Gather all participants and, crucially, their contactId
     pkg.fields.forEach((field) => {
       field.assignedUsers.forEach((user) => {
         if (!allRecipients.has(user.contactEmail)) {
           allRecipients.set(user.contactEmail, {
+            contactId: user.contactId, // <-- Important for language lookup
             participantId: user.id,
             email: user.contactEmail,
             name: user.contactName,
@@ -1898,10 +1905,10 @@ class PackageService {
       });
     });
 
-    // Add notification-only receivers
     pkg.receivers.forEach((receiver) => {
       if (!allRecipients.has(receiver.contactEmail)) {
         allRecipients.set(receiver.contactEmail, {
+          contactId: receiver.contactId, // <-- Important for language lookup
           participantId: receiver.id,
           email: receiver.contactEmail,
           name: receiver.contactName,
@@ -1910,24 +1917,43 @@ class PackageService {
       }
     });
 
-    // Send completion notifications to all PARTICIPANTS (not initiator)
+    // 2. Efficiently fetch language preferences for all participants
+    const allContactIds = Array.from(allRecipients.values())
+      .map((r) => r.contactId)
+      .filter((id) => id);
+    if (allContactIds.length > 0) {
+      const contacts = await this.Contact.find({
+        _id: { $in: allContactIds },
+      }).select("language");
+      const languageMap = new Map(
+        contacts.map((c) => [c._id.toString(), c.language])
+      );
+
+      // Add language preference to each recipient object
+      for (const recipient of allRecipients.values()) {
+        recipient.language =
+          languageMap.get(recipient.contactId.toString()) || "en";
+      }
+    }
+
+    // 3. Send completion notifications to all PARTICIPANTS (excluding initiator)
     for (const recipient of allRecipients.values()) {
       const universalAccessLink = `${process.env.CLIENT_URL}/package/${pkg._id}/participant/${recipient.participantId}`;
 
+      // The recipient object now contains the 'language' property
       await this.EmailService.sendDocumentCompletedNotification(
-        recipient.email,
+        recipient,
         initiatorName,
         pkg.name,
         universalAccessLink
       );
     }
 
-    // NEW: Send special completion notification to INITIATOR with dashboard link
+    // 4. Send special completion notification to INITIATOR
     if (packageOwner) {
       const dashboardLink = `${process.env.CLIENT_URL}/dashboard`;
       await this.EmailService.sendInitiatorCompletionNotification(
-        packageOwner.email,
-        initiatorName,
+        packageOwner, // Pass the entire owner object
         pkg.name,
         dashboardLink
       );
@@ -1945,11 +1971,10 @@ class PackageService {
     const actionTakers = new Map();
     const notificationReceivers = new Map();
 
-    // 1. Separate all participants into two groups: those who take action and those who only receive.
+    // 1. Separate all participants into two groups.
     for (const field of pkg.fields) {
       if (field.assignedUsers) {
         for (const user of field.assignedUsers) {
-          // Use the user's email as the key to ensure each person is only in the map once.
           if (!actionTakers.has(user.contactEmail)) {
             actionTakers.set(user.contactEmail, user);
           }
@@ -1959,18 +1984,34 @@ class PackageService {
 
     if (pkg.receivers) {
       for (const receiver of pkg.receivers) {
-        // If a receiver is ALSO an action-taker, they should not get a separate "read-only" email.
         if (!actionTakers.has(receiver.contactEmail)) {
           notificationReceivers.set(receiver.contactEmail, receiver);
         }
       }
     }
 
-    // 2. Send the consolidated "Action Required" email to all unique action-takers.
+    // 2. EFFICIENTLY FETCH LANGUAGES FOR ALL RECIPIENTS (ACTION-TAKERS & RECEIVERS)
+    const allContactIds = [
+      ...Array.from(actionTakers.values()).map((u) => u.contactId),
+      ...Array.from(notificationReceivers.values()).map((r) => r.contactId),
+    ].filter((id) => id); // Filter out any null/undefined IDs
+
+    if (allContactIds.length === 0) return; // No one to notify
+
+    const contacts = await this.Contact.find({
+      _id: { $in: allContactIds },
+    }).select("language");
+    const languageMap = new Map(
+      contacts.map((c) => [c._id.toString(), c.language])
+    );
+
+    // 3. Send the "Action Required" email to all unique action-takers.
     for (const user of actionTakers.values()) {
-      // The URL needs a unique ID for the participant to identify them later.
-      // We can use the 'id' field which is unique per user assignment in the package.
       const actionUrl = `${process.env.CLIENT_URL}/package/${pkg._id}/participant/${user.id}`;
+      // Add the fetched language to the user object before sending
+      user.language = languageMap.get(user.contactId.toString()) || "en";
+
+      // NOTE: This assumes `sendActionRequiredNotification` will be updated to use the `user.language` property.
       await this.EmailService.sendActionRequiredNotification(
         user,
         pkg,
@@ -1980,15 +2021,18 @@ class PackageService {
       );
     }
 
-    // 3. Send the separate "For Your Records" email to all unique notification-only receivers.
+    // 4. Send the "For Your Records" email to all unique notification-only receivers.
     for (const receiver of notificationReceivers.values()) {
       const actionUrl = `${process.env.CLIENT_URL}/package/${pkg._id}/participant/${receiver.id}`;
+      // Add the fetched language to the receiver object before sending
+      receiver.language =
+        languageMap.get(receiver.contactId.toString()) || "en";
+
       await this.EmailService.sendReceiverNotification(
         receiver,
         pkg,
         senderName,
-        actionUrl,
-        pkg.customMessage
+        actionUrl
       );
     }
   }
@@ -1996,7 +2040,6 @@ class PackageService {
   /**
    * @private
    * Sends rejection notifications to the owner and all participants.
-   * Generates the correct access link based on whether the recipient is the initiator or a participant.
    */
   async _sendRejectionNotifications(
     pkg,
@@ -2004,66 +2047,85 @@ class PackageService {
     rejectorName,
     rejectionReason
   ) {
-    const packageOwner = pkg.ownerId; // Already populated from the calling method
-
-    // Create a map of all unique participants and receivers to gather their details.
+    // The package owner is already populated on pkg from the rejectPackage method
+    const packageOwner = pkg.ownerId;
     const allRecipients = new Map();
 
-    // Add all action-takers (Signers, Approvers, etc.)
+    // 1. Gather all participants and their contactIds
     pkg.fields.forEach((field) => {
       (field.assignedUsers || []).forEach((user) => {
         if (!allRecipients.has(user.contactEmail)) {
           allRecipients.set(user.contactEmail, {
+            contactId: user.contactId, // <-- Important for language lookup
             participantId: user.id,
             name: user.contactName,
             email: user.contactEmail,
-            isOwner: false, // Mark as not owner
+            isOwner: false,
           });
         }
       });
     });
 
-    // Add notification-only receivers
     pkg.receivers.forEach((receiver) => {
       if (!allRecipients.has(receiver.contactEmail)) {
         allRecipients.set(receiver.contactEmail, {
+          contactId: receiver.contactId, // <-- Important for language lookup
           participantId: receiver.id,
           name: receiver.contactName,
           email: receiver.contactEmail,
-          isOwner: false, // Mark as not owner
+          isOwner: false,
         });
       }
     });
 
-    // Ensure the package owner is on the list to receive the notification
+    // 2. Add the package owner to the list
     if (packageOwner && !allRecipients.has(packageOwner.email)) {
       allRecipients.set(packageOwner.email, {
+        // No contactId needed for owner, language is on the User object
         participantId: packageOwner._id.toString(),
         name: initiatorName,
         email: packageOwner.email,
-        isOwner: true, // Mark as owner
+        isOwner: true,
       });
     }
 
-    // Loop through the unique recipients and send each a personalized notification
-    for (const recipient of allRecipients.values()) {
-      // ✅ FIX: Generate different links for owner vs participants
-      const universalAccessLink = recipient.isOwner
-        ? `${process.env.CLIENT_URL}/package/${pkg._id}` // Owner link (no participant ID)
-        : `${process.env.CLIENT_URL}/package/${pkg._id}/participant/${recipient.participantId}`; // Participant link
+    // 3. Efficiently fetch language preferences for all NON-OWNER participants
+    const contactIds = Array.from(allRecipients.values())
+      .filter((r) => !r.isOwner && r.contactId)
+      .map((r) => r.contactId);
 
+    const contacts = await this.Contact.find({
+      _id: { $in: contactIds },
+    }).select("language");
+    const languageMap = new Map(
+      contacts.map((c) => [c._id.toString(), c.language])
+    );
+
+    // 4. Loop through all recipients and send notifications
+    for (const recipient of allRecipients.values()) {
+      // Determine the correct language for this recipient
+      if (recipient.isOwner) {
+        recipient.language = packageOwner.language || "en";
+      } else {
+        recipient.language =
+          languageMap.get(recipient.contactId.toString()) || "en";
+      }
+
+      const accessLink = recipient.isOwner
+        ? `${process.env.CLIENT_URL}/package/${pkg._id}`
+        : `${process.env.CLIENT_URL}/package/${pkg._id}/participant/${recipient.participantId}`;
+
+      // Pass the entire enriched recipient object to the email service
       await this.EmailService.sendRejectionNotification(
-        recipient.email,
-        recipient.name,
+        recipient,
         initiatorName,
         pkg.name,
         rejectorName,
         rejectionReason,
-        universalAccessLink // Pass the correct link based on role
+        accessLink
       );
     }
   }
-
   /**
    * Helper method to find a participant in the package
    */
@@ -2150,42 +2212,48 @@ class PackageService {
       const packageOwner = await this.User.findById(pkg.ownerId);
       const ownerName = `${packageOwner.firstName} ${packageOwner.lastName}`;
 
-      // 1. Notify the original participant (confirmation)
+      // --- NEW: Fetch language for the original participant ---
+      const originalContact = await this.Contact.findById(
+        originalParticipant.contactId
+      ).select("language");
+      originalParticipant.language = originalContact
+        ? originalContact.language
+        : "en";
+      // --- END NEW ---
+
+      // 1. Notify the original participant (confirmation) - THIS CALL IS UPDATED
       await this.EmailService.sendReassignmentConfirmation(
-        originalParticipant.contactEmail,
-        originalParticipant.contactName,
+        originalParticipant, // Pass the entire enriched object
         ownerName,
         pkg.name,
         `${newContact.firstName} ${newContact.lastName}`,
         reason
       );
 
-      // 2. Notify the new assignee
+      // 2. Notify the new assignee - THIS CALL IS UPDATED
       const actionUrl = `${process.env.CLIENT_URL}/package/${pkg._id}/participant/${newParticipantId}`;
-
       await this.EmailService.sendReassignmentNotification(
-        newContact.email,
-        `${newContact.firstName} ${newContact.lastName}`,
+        newContact, // Pass the entire newContact object
         ownerName,
         pkg.name,
         originalParticipant.contactName,
         actionUrl
       );
 
-      // 3. Notify the package owner
+      // 3. Notify the package owner - THIS CALL IS UPDATED
       await this.EmailService.sendReassignmentOwnerNotification(
-        packageOwner.email,
-        ownerName,
+        packageOwner, // Pass the entire owner object
         pkg.name,
         originalParticipant.contactName,
         `${newContact.firstName} ${newContact.lastName}`,
-        reason
+        reason,
+        pkg._id // Pass packageId for the link
       );
     } catch (error) {
       console.error("Error sending reassignment notifications:", error);
-      // Don't throw error here as reassignment was successful
     }
   }
+
   /**
    * Check if package is expired before any action
    */
@@ -2423,22 +2491,68 @@ class PackageService {
    * A helper to send revocation notifications to all participants.
    */
   async _sendRevocationNotifications(pkg) {
-    const owner = pkg.ownerId; // Already populated
+    const owner = pkg.ownerId; // Already populated from revokePackage
     const initiatorName = `${owner.firstName} ${owner.lastName}`;
 
-    const allEmails = new Set();
-    // Add the owner's email to get a confirmation
-    allEmails.add(owner.email);
-    // Add all participants' emails
-    (pkg.fields || []).forEach((f) => {
-      (f.assignedUsers || []).forEach((u) => allEmails.add(u.contactEmail));
-    });
-    // Add all receivers' emails
-    (pkg.receivers || []).forEach((r) => allEmails.add(r.contactEmail));
+    const allRecipients = new Map();
 
-    for (const email of allEmails) {
+    // 1. Gather all participants (action-takers and receivers)
+    (pkg.fields || []).forEach((f) => {
+      (f.assignedUsers || []).forEach((u) => {
+        if (!allRecipients.has(u.contactEmail)) {
+          allRecipients.set(u.contactEmail, {
+            contactId: u.contactId,
+            name: u.contactName,
+            email: u.contactEmail,
+            isOwner: false,
+          });
+        }
+      });
+    });
+    (pkg.receivers || []).forEach((r) => {
+      if (!allRecipients.has(r.contactEmail)) {
+        allRecipients.set(r.contactEmail, {
+          contactId: r.contactId,
+          name: r.contactName,
+          email: r.contactEmail,
+          isOwner: false,
+        });
+      }
+    });
+
+    // 2. Add the owner to the list
+    if (!allRecipients.has(owner.email)) {
+      allRecipients.set(owner.email, {
+        name: initiatorName,
+        email: owner.email,
+        isOwner: true,
+      });
+    }
+
+    // 3. Efficiently fetch language preferences for all non-owner contacts
+    const contactIds = Array.from(allRecipients.values())
+      .filter((r) => !r.isOwner && r.contactId)
+      .map((r) => r.contactId);
+
+    const contacts = await this.Contact.find({
+      _id: { $in: contactIds },
+    }).select("language");
+    const languageMap = new Map(
+      contacts.map((c) => [c._id.toString(), c.language])
+    );
+
+    // 4. Loop through recipients and send notifications
+    for (const recipient of allRecipients.values()) {
+      // Determine the correct language
+      if (recipient.isOwner) {
+        recipient.language = owner.language || "en";
+      } else {
+        recipient.language =
+          languageMap.get(recipient.contactId.toString()) || "en";
+      }
+
       await this.EmailService.sendDocumentRevokedNotification(
-        email,
+        recipient, // Pass the entire enriched object
         initiatorName,
         pkg.name
       );
@@ -2473,25 +2587,28 @@ class PackageService {
    */
   async _sendNewReceiverNotifications(pkg, addedBy, newReceiver) {
     const packageOwner = await this.User.findById(pkg.ownerId).select(
-      "firstName lastName email"
+      "firstName lastName email language"
     );
     const ownerName = `${packageOwner.firstName} ${packageOwner.lastName}`;
     const viewUrl = `${process.env.CLIENT_URL}/package/${pkg._id}/participant/${newReceiver.id}`;
 
-    // 1. Notify the new receiver
+    // --- NEW: Fetch language for the new receiver ---
+    const newContact = await this.Contact.findById(
+      newReceiver.contactId
+    ).select("language");
+    newReceiver.language = newContact ? newContact.language : "en";
+
     await this.EmailService.sendNewReceiverNotification(
-      newReceiver.contactEmail,
-      newReceiver.contactName,
+      newReceiver, // Pass the entire enriched object
       ownerName,
       addedBy.contactName,
       pkg.name,
       viewUrl
     );
 
-    // 2. Notify the package owner
+    // 2. Notify the package owner - THIS CALL IS UPDATED
     await this.EmailService.sendNewReceiverOwnerNotification(
-      packageOwner.email,
-      ownerName,
+      packageOwner, // Pass the entire owner object
       newReceiver.contactName,
       addedBy.contactName,
       pkg.name
@@ -2507,7 +2624,7 @@ class PackageService {
     try {
       // 1. Get the initiator (package owner)
       const owner = await this.User.findById(pkg.ownerId).select(
-        "email firstName lastName"
+        "email firstName lastName language"
       );
       if (!owner) return;
 
@@ -2551,38 +2668,30 @@ class PackageService {
         });
       }
 
-      // 4. Create HTML lists for the email template
-      const completedList = [];
-      const pendingList = [];
+      // 3. Create ARRAYS of names for the email template (NOT HTML)
+      const completedNames = [];
+      const pendingNames = [];
 
       participants.forEach((p) => {
         if (p.isComplete) {
-          completedList.push(`<li>✔️ ${p.name}</li>`);
+          completedNames.push(p.name);
         } else {
-          pendingList.push(`<li>... ${p.name}</li>`);
+          pendingNames.push(p.name);
         }
       });
 
-      const completedListHtml = `<ul>${completedList.join("")}</ul>`;
-      const pendingListHtml =
-        pendingList.length > 0
-          ? `<ul>${pendingList.join("")}</ul>`
-          : "<p>All participants have completed their actions!</p>";
-
-      // 5. Send the email
-      const actionLink = `${process.env.CLIENT_URL}/dashboard`; // Link to initiator's dashboard
+      // 4. Send the email using the updated service method
+      const actionLink = `${process.env.CLIENT_URL}/dashboard`;
       await this.EmailService.sendParticipantActionNotification(
-        owner.email,
-        initiatorName,
+        owner, // Pass the entire owner object
         pkg.name,
         actorName,
-        completedListHtml,
-        pendingListHtml,
+        completedNames, // Pass the array of names
+        pendingNames, // Pass the array of names
         actionLink
       );
     } catch (error) {
       console.error("Failed to send action update notification:", error);
-      // Do not throw an error, as the main operation (e.g., signing) was successful.
     }
   }
 

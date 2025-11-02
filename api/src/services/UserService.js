@@ -36,6 +36,7 @@ class UserService {
       isVerified: false,
       verificationToken,
       verificationTokenExpiresAt,
+      language: userData.language || "en",
     });
 
     // 4. Send the verification email
@@ -483,7 +484,8 @@ class UserService {
       console.error(`Failed to cancel subscription for user ${userId}:`, error);
     }
   }
-  // --- REQUEST EMAIL CHANGE WITH OTP (UPDATED - Using User Schema) ---
+
+  //  requestEmailChange METHOD ---
   async requestEmailChange(userId, newEmail) {
     const user = await this.User.findById(userId);
     if (!user) {
@@ -512,13 +514,7 @@ class UserService {
     user.emailChangeAttempts = 0; // Reset attempts
     await user.save();
 
-    // Send OTP to CURRENT email
-    await this.emailService.sendEmailChangeOtp(
-      user.email,
-      user.firstName,
-      newEmail,
-      otp
-    );
+    await this.emailService.sendEmailChangeOtp(user, newEmail, otp);
 
     return {
       message: "OTP sent to your current email address.",
@@ -601,11 +597,7 @@ class UserService {
 
     // Optionally: Send notification to OLD email
     try {
-      await this.emailService.sendEmailChangeNotification(
-        oldEmail,
-        user.firstName,
-        newEmail
-      );
+      await this.emailService.sendEmailChangeNotification(user, oldEmail);
     } catch (error) {
       console.error("Failed to send notification to old email:", error);
       // Don't fail the whole operation if notification fails
@@ -613,6 +605,7 @@ class UserService {
 
     return await this._sanitizeUserWithSignedUrl(user);
   }
+  
 }
 
 module.exports = UserService;

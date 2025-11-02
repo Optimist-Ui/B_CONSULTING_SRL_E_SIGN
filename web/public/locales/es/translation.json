@@ -476,6 +476,10 @@
             "signin": {
                 "prompt": "¿Ya tienes una cuenta?",
                 "link": "Iniciar Sesión"
+            },
+            "language": {
+                "label": "Idioma preferido",
+                "placeholder": "Selecciona tu idioma"
             }
         },
         "validation": {

@@ -481,6 +481,10 @@
             "signin": {
                 "prompt": "Haben Sie bereits ein Konto?",
                 "link": "Anmelden"
+            },
+            "language": {
+                "label": "Bevorzugte Sprache",
+                "placeholder": "Wählen Sie Ihre Sprache"
             }
         },
         "validation": {

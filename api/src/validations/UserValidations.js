@@ -7,6 +7,10 @@ const signupValidation = [
   body("password")
     .isLength({ min: 6 })
     .withMessage("Password must be at least 6 characters long"),
+  body("language")
+    .optional()
+    .isIn(["en", "es", "fr", "de", "it", "el"])
+    .withMessage("Invalid language code"),
 ];
 
 const loginValidation = [
