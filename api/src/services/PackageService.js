@@ -775,115 +775,74 @@ class PackageService {
   }
 
   // SMS OTP METHODS
-  async verifySmsOTP(packageId, participantId, fieldId, otp, ip) {
-    const otpDoc = await this.OTP.findOne({
-      packageId,
-      fieldId,
-      participantId,
-      method: "SMS OTP",
-    });
-
-    if (!otpDoc || otpDoc.expiresAt < new Date()) {
-      throw new Error("Invalid or expired SMS OTP.");
-    }
-    if (otpDoc.attempts >= 4) {
-      await this.OTP.deleteOne({ _id: otpDoc._id });
-      throw new Error("Maximum SMS OTP attempts exceeded.");
-    }
-    if (otpDoc.otp !== otp) {
-      otpDoc.attempts += 1;
-      await otpDoc.save();
-      throw new Error("Incorrect SMS OTP.");
-    }
-
-    // Clean up OTP
-    await this.OTP.deleteOne({ _id: otpDoc._id });
-
-    const pkg = await this.Package.findById(packageId).populate(
-      "ownerId",
-      "email"
-    );
-    if (!pkg) {
-      throw new Error("Package not found after OTP verification.");
+  async sendSmsOTP(packageId, participantId, fieldId, phone) {
+    const pkg = await this.Package.findById(packageId);
+    if (!pkg || pkg.status !== "Sent") {
+      throw new Error("Package not found or not active.");
     }
     this.checkPackageExpiry(pkg);
 
-    // 🔥 NEW LOGIC: Find the current field and participant
-    const currentField = pkg.fields.find((f) => f.id === fieldId);
-    const assignedUser = currentField.assignedUsers.find(
-      (au) => au.id === participantId
+    const field = pkg.fields.find(
+      (f) => f.id === fieldId && f.type === "signature"
     );
-
-    const signDate = new Date();
-    const participantContactId = assignedUser.contactId.toString();
-
-    // 🔥 NEW: Find ALL signature fields assigned to this participant
-    const allSignatureFieldsForParticipant = pkg.fields.filter(
-      (field) =>
-        field.type === "signature" &&
-        field.assignedUsers.some(
-          (user) =>
-            user.contactId.toString() === participantContactId &&
-            user.role === "Signer" &&
-            !user.signed
-        )
-    );
-
-    // 🔥 Apply the signature to ALL matching fields at once
-    allSignatureFieldsForParticipant.forEach((field) => {
-      const userAssignment = field.assignedUsers.find(
-        (user) =>
-          user.contactId.toString() === participantContactId &&
-          user.role === "Signer"
-      );
-
-      if (userAssignment) {
-        // Update audit trail properties
-        userAssignment.signed = true;
-        userAssignment.signedAt = signDate;
-        userAssignment.signedMethod = "SMS OTP";
-        userAssignment.signedIP = ip;
-        userAssignment.signedWithOtp = otp;
-
-        // Store signature details in field value for UI
-        field.value = {
-          signedBy: userAssignment.contactName,
-          email: userAssignment.contactEmail,
-          date: signDate.toISOString(),
-          method: "SMS OTP",
-          ip: ip,
-          otpCode: otp,
-        };
-      }
-    });
-
-    // Check if package is completed
-    if (this.isPackageCompleted(pkg)) {
-      pkg.status = "Completed";
-      const packageCreator = await this.User.findById(pkg.ownerId);
-      const initiatorName = `${packageCreator.firstName} ${packageCreator.lastName}`;
-      await this._sendCompletionNotifications(pkg, initiatorName);
-    } else {
-      await this._sendActionUpdateNotification(pkg, assignedUser);
+    if (!field) {
+      throw new Error("Signature field not found.");
     }
 
-    await pkg.save();
-    await this.emitPackageUpdate(pkg);
+    const assignedUser = field.assignedUsers.find(
+      (au) => au.id === participantId
+    );
+    if (
+      !assignedUser ||
+      assignedUser.role !== "Signer" ||
+      !assignedUser.signatureMethods.includes("SMS OTP") || // <-- Change this line
+      assignedUser.signed
+    ) {
+      throw new Error(
+        "Invalid participant, this signature method is not enabled, or the signature is already completed."
+      );
+    }
 
-    const updatedPackageForParticipant = await this.getPackageForParticipant(
+    // Get and validate contact phone number
+    const contact = await this.Contact.findById(assignedUser.contactId);
+    if (!contact || !contact.phone) {
+      throw new Error("Contact phone number not found.");
+    }
+
+    // Normalize phone numbers for comparison
+    const normalizePhone = (phoneNum) => phoneNum.replace(/[^\d+]/g, "");
+    if (normalizePhone(contact.phone) !== normalizePhone(phone)) {
+      throw new Error("Phone number does not match assigned participant.");
+    }
+
+    // Generate 6-digit OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiresAt = new Date(Date.now() + 60 * 1000); // 60 seconds
+
+    // Store OTP with method identifier
+    await this.OTP.deleteMany({ packageId, fieldId, participantId });
+    await this.OTP.create({
       packageId,
-      participantId
+      fieldId,
+      participantId,
+      otp,
+      method: "SMS OTP",
+      expiresAt,
+    });
+
+    // Send SMS OTP
+    await this.SmsService.sendSignatureOtp(
+      contact.phone,
+      assignedUser.contactName,
+      pkg.name,
+      otp
     );
 
     return {
-      message: `SMS OTP signature completed for ${allSignatureFieldsForParticipant.length} field(s).`,
-      package: updatedPackageForParticipant,
-      signatureDetails: {
-        method: "SMS OTP",
-        signedAt: signDate.toISOString(),
-        signedBy: assignedUser.contactName,
-        fieldsSignedCount: allSignatureFieldsForParticipant.length,
-      },
+      message: "OTP sent to your phone.",
+      method: "SMS OTP",
+      expiresIn: 60,
+      phoneNumber: this._maskPhoneNumber(contact.phone),
     };
   }
 
