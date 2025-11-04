@@ -2141,6 +2141,9 @@
             "userAssigned": "{{name}} tildelt som {{role}}",
             "userAssignmentRemoved": "Brugertildeling fjernet"
         },
+        "buttons": {
+            "addAssignment": "Tilføj Tildeling"
+        },
         "errors": {
             "labelRequired": "Etiket er påkrævet",
             "labelEmpty": "Etiket må ikke være tom",

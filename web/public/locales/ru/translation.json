@@ -2218,6 +2218,9 @@
             "userAssigned": "{{name}} назначен как {{role}}",
             "userAssignmentRemoved": "Назначение пользователя удалено"
         },
+        "buttons": {
+            "addAssignment": "Добавить Назначение"
+        },
         "errors": {
             "labelRequired": "Метка обязательна",
             "labelEmpty": "Метка не может быть пустой",

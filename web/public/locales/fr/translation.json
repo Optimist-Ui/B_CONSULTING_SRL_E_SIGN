@@ -2170,6 +2170,9 @@
             "userAssigned": "{{name}} assigné en tant que {{role}}",
             "userAssignmentRemoved": "Assignation d'utilisateur supprimée"
         },
+        "buttons": {
+            "addAssignment": "Ajouter une assignation"
+        },
         "errors": {
             "labelRequired": "L'étiquette est requise",
             "labelEmpty": "L'étiquette ne peut pas être vide",

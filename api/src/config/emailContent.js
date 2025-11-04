@@ -2272,6 +2272,80 @@ const emailContent = {
       preferences: "Προτιμήσεις διαγραφής",
     },
   },
+  reviewRequest: {
+    en: {
+      subject: "We'd Love Your Feedback",
+      heading: "We'd Love Your Feedback",
+      greeting: "Hello {{participant_name}},",
+      message:
+        "We hope you had a great experience with the <strong>{{package_name}}</strong> package. Your feedback is important to us and helps us improve.",
+      buttonText: "Leave a Review",
+      closingMessage:
+        "This should only take a moment. Thank you for helping us make I-Sign.eu better!",
+      unsubscribe: "Unsubscribe",
+      preferences: "Unsubscribe Preferences",
+    },
+    es: {
+      subject: "Nos Encantaría Conocer Tu Opinión",
+      heading: "Nos Encantaría Conocer Tu Opinión",
+      greeting: "Hola {{participant_name}},",
+      message:
+        "Esperamos que hayas tenido una gran experiencia con el paquete <strong>{{package_name}}</strong>. Tu opinión es importante para nosotros y nos ayuda a mejorar.",
+      buttonText: "Dejar una Reseña",
+      closingMessage:
+        "Esto solo tomará un momento. ¡Gracias por ayudarnos a hacer I-Sign.eu mejor!",
+      unsubscribe: "Darse de baja",
+      preferences: "Preferencias de cancelación",
+    },
+    fr: {
+      subject: "Nous Aimerions Votre Avis",
+      heading: "Nous Aimerions Votre Avis",
+      greeting: "Bonjour {{participant_name}},",
+      message:
+        "Nous espérons que vous avez eu une excellente expérience avec le package <strong>{{package_name}}</strong>. Votre avis est important pour nous et nous aide à nous améliorer.",
+      buttonText: "Laisser un Avis",
+      closingMessage:
+        "Cela ne prendra qu'un instant. Merci de nous aider à améliorer I-Sign.eu !",
+      unsubscribe: "Se désabonner",
+      preferences: "Préférences de désabonnement",
+    },
+    de: {
+      subject: "Wir Würden Uns Über Ihr Feedback Freuen",
+      heading: "Wir Würden Uns Über Ihr Feedback Freuen",
+      greeting: "Hallo {{participant_name}},",
+      message:
+        "Wir hoffen, dass Sie eine großartige Erfahrung mit dem Paket <strong>{{package_name}}</strong> gemacht haben. Ihr Feedback ist uns wichtig und hilft uns, uns zu verbessern.",
+      buttonText: "Bewertung Abgeben",
+      closingMessage:
+        "Dies dauert nur einen Moment. Vielen Dank, dass Sie uns helfen, I-Sign.eu besser zu machen!",
+      unsubscribe: "Abmelden",
+      preferences: "Abmelde-Einstellungen",
+    },
+    it: {
+      subject: "Ci Piacerebbe Avere Il Tuo Feedback",
+      heading: "Ci Piacerebbe Avere Il Tuo Feedback",
+      greeting: "Ciao {{participant_name}},",
+      message:
+        "Speriamo che tu abbia avuto un'ottima esperienza con il pacchetto <strong>{{package_name}}</strong>. Il tuo feedback è importante per noi e ci aiuta a migliorare.",
+      buttonText: "Lascia una Recensione",
+      closingMessage:
+        "Questo richiederà solo un momento. Grazie per aiutarci a rendere I-Sign.eu migliore!",
+      unsubscribe: "Annulla iscrizione",
+      preferences: "Preferenze di annullamento iscrizione",
+    },
+    el: {
+      subject: "Θα Θέλαμε Τα Σχόλιά Σας",
+      heading: "Θα Θέλαμε Τα Σχόλιά Σας",
+      greeting: "Γεια σας {{participant_name}},",
+      message:
+        "Ελπίζουμε να είχατε μια εξαιρετική εμπειρία με το πακέτο <strong>{{package_name}}</strong>. Τα σχόλιά σας είναι σημαντικά για εμάς και μας βοηθούν να βελτιωθούμε.",
+      buttonText: "Αφήστε μια Κριτική",
+      closingMessage:
+        "Αυτό θα πάρει μόνο μια στιγμή. Ευχαριστούμε που μας βοηθάτε να κάνουμε το I-Sign.eu καλύτερο!",
+      unsubscribe: "Διαγραφή",
+      preferences: "Προτιμήσεις διαγραφής",
+    },
+  },
   reviewImprovement: {
     en: {
       subject: "Thank You For Your Feedback",

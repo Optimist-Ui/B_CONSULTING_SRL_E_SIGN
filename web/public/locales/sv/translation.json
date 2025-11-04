@@ -2141,6 +2141,9 @@
             "userAssigned": "{{name}} tilldelad som {{role}}",
             "userAssignmentRemoved": "Användartilldelning borttagen"
         },
+        "buttons": {
+            "addAssignment": "Lägg till Tilldelning"
+        },
         "errors": {
             "labelRequired": "Etikett krävs",
             "labelEmpty": "Etiketten kan inte vara tom",

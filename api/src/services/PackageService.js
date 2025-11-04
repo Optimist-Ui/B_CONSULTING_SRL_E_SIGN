@@ -795,7 +795,7 @@ class PackageService {
     if (
       !assignedUser ||
       assignedUser.role !== "Signer" ||
-      !assignedUser.signatureMethods.includes("SMS OTP") || // <-- Change this line
+      !assignedUser.signatureMethods.includes("SMS OTP") ||
       assignedUser.signed
     ) {
       throw new Error(
@@ -803,8 +803,10 @@ class PackageService {
       );
     }
 
-    // Get and validate contact phone number
-    const contact = await this.Contact.findById(assignedUser.contactId);
+    // Get and validate contact phone number AND language
+    const contact = await this.Contact.findById(assignedUser.contactId).select(
+      "phone language"
+    );
     if (!contact || !contact.phone) {
       throw new Error("Contact phone number not found.");
     }
@@ -830,12 +832,13 @@ class PackageService {
       expiresAt,
     });
 
-    // Send SMS OTP
+    // 🔥 NEW: Send SMS OTP with language support
     await this.SmsService.sendSignatureOtp(
       contact.phone,
       assignedUser.contactName,
       pkg.name,
-      otp
+      otp,
+      contact.language || "en" // ✅ Pass language parameter
     );
 
     return {
@@ -1841,6 +1844,7 @@ class PackageService {
 
   /**
    * Sends notifications when a package is completed.
+   * Includes review invitation emails to all participants.
    * @private
    */
   async _sendCompletionNotifications(pkg, initiatorName) {
@@ -1849,12 +1853,12 @@ class PackageService {
     );
     const allRecipients = new Map();
 
-    // 1. Gather all participants and, crucially, their contactId
+    // 1. Gather all participants and their contactId
     pkg.fields.forEach((field) => {
       field.assignedUsers.forEach((user) => {
         if (!allRecipients.has(user.contactEmail)) {
           allRecipients.set(user.contactEmail, {
-            contactId: user.contactId, // <-- Important for language lookup
+            contactId: user.contactId,
             participantId: user.id,
             email: user.contactEmail,
             name: user.contactName,
@@ -1867,7 +1871,7 @@ class PackageService {
     pkg.receivers.forEach((receiver) => {
       if (!allRecipients.has(receiver.contactEmail)) {
         allRecipients.set(receiver.contactEmail, {
-          contactId: receiver.contactId, // <-- Important for language lookup
+          contactId: receiver.contactId,
           participantId: receiver.id,
           email: receiver.contactEmail,
           name: receiver.contactName,
@@ -1899,12 +1903,27 @@ class PackageService {
     for (const recipient of allRecipients.values()) {
       const universalAccessLink = `${process.env.CLIENT_URL}/package/${pkg._id}/participant/${recipient.participantId}`;
 
-      // The recipient object now contains the 'language' property
+      // Send completion notification
       await this.EmailService.sendDocumentCompletedNotification(
         recipient,
         initiatorName,
         pkg.name,
         universalAccessLink
+      );
+
+      // 🔥 FIXED: Create proper participant object for review email
+      const participantForReview = {
+        contactEmail: recipient.email,
+        contactName: recipient.name,
+        language: recipient.language || "en",
+      };
+
+      const reviewLink = `${process.env.CLIENT_URL}/package/${pkg._id}/participant/${recipient.participantId}/review`;
+
+      await this.EmailService.sendRequestForReviewEmail(
+        participantForReview, // ✅ Pass the full object
+        pkg.name, // ✅ Package name
+        reviewLink // ✅ Review link
       );
     }
 
@@ -1912,9 +1931,26 @@ class PackageService {
     if (packageOwner) {
       const dashboardLink = `${process.env.CLIENT_URL}/dashboard`;
       await this.EmailService.sendInitiatorCompletionNotification(
-        packageOwner, // Pass the entire owner object
+        packageOwner,
         pkg.name,
         dashboardLink
+      );
+
+      // 🔥 FIXED: Create proper participant object for owner
+      const ownerAsParticipant = {
+        contactEmail: packageOwner.email,
+        contactName: `${packageOwner.firstName} ${packageOwner.lastName}`,
+        language: packageOwner.language || "en",
+      };
+
+      const ownerReviewLink = `${process.env.CLIENT_URL}/package/${
+        pkg._id
+      }/participant/${packageOwner._id.toString()}/review`;
+
+      await this.EmailService.sendRequestForReviewEmail(
+        ownerAsParticipant, // ✅ Pass the full object
+        pkg.name, // ✅ Package name
+        ownerReviewLink // ✅ Review link
       );
     }
   }

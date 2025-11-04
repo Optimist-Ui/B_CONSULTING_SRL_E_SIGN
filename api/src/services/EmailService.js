@@ -440,7 +440,7 @@ class EmailService {
     const language = recipient.language || "en";
     const content = getEmailContent("receiverNotification", language);
 
-    const greetingText = this._replacePlaceplaceholders(content.greeting, {
+    const greetingText = this._replacePlaceholders(content.greeting, {
       recipient_name: recipient.contactName,
     });
 
@@ -1598,35 +1598,51 @@ class EmailService {
       );
     }
   }
+
   /**
    * Sends an email to a participant inviting them to review a completed package.
-   * @param {string} recipientEmail - The participant's email.
-   * @param {string} participantName - The participant's name.
+   * @param {object} participant - The full participant object { contactEmail, contactName, language }.
    * @param {string} packageName - The name of the package.
    * @param {string} reviewLink - The direct URL to leave a review.
    */
-  async sendRequestForReviewEmail(
-    recipientEmail,
-    participantName,
-    packageName,
-    reviewLink
-  ) {
+  async sendRequestForReviewEmail(participant, packageName, reviewLink) {
+    const language = participant.language || "en";
+    const content = getEmailContent("reviewRequest", language);
+
+    // Replace placeholders in greeting and message
+    const greetingText = this._replacePlaceholders(content.greeting, {
+      participant_name: participant.contactName,
+    });
+
+    const messageText = this._replacePlaceholders(content.message, {
+      package_name: packageName,
+    });
+
     const msg = {
-      to: recipientEmail,
+      to: participant.contactEmail,
       from: this.fromEmail,
       templateId: process.env.SENDGRID_REVIEW_REQUEST_TEMPLATE_ID,
       dynamic_template_data: {
-        participant_name: participantName,
-        package_name: packageName,
+        subject: content.subject,
+        heading: content.heading,
+        greeting: greetingText,
+        message: messageText,
+        button_text: content.buttonText,
+        closing_message: content.closingMessage,
         review_link: reviewLink,
+        unsubscribe_text: content.unsubscribe,
+        preferences_text: content.preferences,
       },
     };
+
     try {
       await sgMail.send(msg);
-      console.log(`Review request email sent to: ${recipientEmail}`);
+      console.log(
+        `Review request email sent to: ${participant.contactEmail} in ${language}`
+      );
     } catch (error) {
       console.error(
-        `Error sending review request email to ${recipientEmail}:`,
+        `Error sending review request email to ${participant.contactEmail}:`,
         error.response?.body || error
       );
     }

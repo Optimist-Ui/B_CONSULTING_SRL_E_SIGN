@@ -303,17 +303,10 @@ class SubscriptionService {
       console.log(`New status: ${subscription.status}`);
       console.log(`Invoice status: ${subscription.latest_invoice?.status}`);
 
-      // DON'T update history here - webhook will handle it via customer.subscription.updated
-
-      // Send confirmation email if payment succeeded
-      const invoice = subscription.latest_invoice;
-      if (invoice && typeof invoice === "object" && invoice.status === "paid") {
-        try {
-          await this.processSubscriptionConfirmationEmail(invoice);
-        } catch (emailError) {
-          console.error(`Failed to send confirmation email:`, emailError);
-        }
-      }
+      // DON'T send emails here - webhook will handle it via invoice.payment_succeeded
+      console.log(
+        `Trial ended successfully. Webhook will handle email notifications.`
+      );
 
       return {
         message: "Your trial has ended. Your paid subscription is now active.",
@@ -471,7 +464,7 @@ class SubscriptionService {
           }
         );
       } else if (isUpgradeOrDowngrade) {
-        // ✅ FIXED: Upgrade/Downgrade logic with FULL payment
+        // ✅ FIXED: Upgrade/Downgrade logic
         transitionType = "upgrade_downgrade";
         const currentSub = await this.stripe.subscriptions.retrieve(
           user.subscription.subscriptionId
@@ -481,42 +474,56 @@ class SubscriptionService {
           `Processing ${transitionType} from plan ${user.subscription.planName} to ${newPlan.name}`
         );
 
-        // 🔥 CRITICAL FIX: Cancel current subscription and create new one
-        // This ensures the user pays the FULL new plan price
-
         // Step 1: Cancel the current subscription at period end
         await this.stripe.subscriptions.update(currentSub.id, {
           cancel_at_period_end: true,
         });
 
-        // Step 2: Calculate remaining time in current period
+        // Step 2: Calculate remaining time properly
         const now = Math.floor(Date.now() / 1000);
         const currentPeriodEnd = currentSub.current_period_end;
-        const remainingDays = Math.ceil((currentPeriodEnd - now) / 86400);
+        const remainingDays = currentPeriodEnd
+          ? Math.ceil((currentPeriodEnd - now) / 86400)
+          : 0;
 
         console.log(`Remaining days in current period: ${remainingDays}`);
 
         // Step 3: Create NEW subscription starting immediately
-        // User will pay FULL price for the new plan
         subscription = await this.stripe.subscriptions.create({
           customer: stripeCustomerId,
           items: [{ price: priceId }],
           default_payment_method: paymentMethodId,
-          proration_behavior: "none", // ✅ No proration - charge full amount
-          cancel_at_period_end: false, // ✅ Enable auto-renewal
+          proration_behavior: "none",
+          cancel_at_period_end: false,
           expand: ["latest_invoice"],
         });
 
         console.log(`New subscription created: ${subscription.id}`);
-        console.log(
-          `User will be charged full amount: ${
-            newPlan.monthlyPrice || newPlan.yearlyPrice
-          }`
-        );
 
-        // Step 4: Calculate document limit for new subscription
-        // Give FULL document limit of new plan (no prorating)
-        transitionType = "replacement"; // Use different transition type for history
+        // Step 4: Send upgrade/downgrade email immediately (not from webhook)
+        try {
+          const amount = newPlan.monthlyPrice || newPlan.yearlyPrice;
+          const renewalDate = subscription.current_period_end
+            ? new Date(subscription.current_period_end * 1000)
+            : new Date(
+                Date.now() + (isYearly ? 365 : 30) * 24 * 60 * 60 * 1000
+              );
+
+          await this.emailService.sendSubscriptionConfirmation(
+            user,
+            newPlan.name,
+            amount,
+            renewalDate,
+            subscription.latest_invoice?.hosted_invoice_url
+          );
+          console.log(
+            `Upgrade/downgrade confirmation email sent to ${user.email}`
+          );
+        } catch (emailError) {
+          console.error(`Failed to send upgrade/downgrade email:`, emailError);
+        }
+
+        transitionType = "replacement";
       } else {
         // ✅ NEW SUBSCRIPTION - First time purchase
         subscription = await this.stripe.subscriptions.create({
@@ -794,11 +801,23 @@ class SubscriptionService {
       );
     }
   }
-  async handleSubscriptionUpdate(subscriptionId) {
+  async handleSubscriptionUpdate(
+    subscriptionId,
+    eventType = null,
+    isUpgradeDowngrade = false
+  ) {
     try {
       const stripeSubscription = await this.stripe.subscriptions.retrieve(
         subscriptionId
       );
+
+      // 🔥 NEW: Skip processing for upgrade/downgrade subscriptions in webhook
+      if (isUpgradeDowngrade) {
+        console.log(
+          `Skipping webhook processing for upgrade/downgrade subscription ${subscriptionId}`
+        );
+        return;
+      }
 
       const user = await this.userService.findUserByStripeCustomerId(
         stripeSubscription.customer
@@ -903,9 +922,25 @@ class SubscriptionService {
         isNew: isNewSubscription,
         isTrialToPaid,
         isRenewal,
+        eventType, // Log the event type
       });
 
-      // Handle trial-to-paid transition
+      // CRITICAL FIX: Prevent duplicate trial-to-active emails
+      // Only send trial-to-active email from invoice.payment_succeeded, NOT from customer.subscription.updated
+      let shouldSendTrialToActiveEmail = false;
+
+      if (isTrialToPaid && eventType === "invoice.payment_succeeded") {
+        shouldSendTrialToActiveEmail = true;
+        console.log(
+          `Will send trial-to-active email for subscription ${subscriptionId}`
+        );
+      } else if (isTrialToPaid) {
+        console.log(
+          `Skipping trial-to-active email for ${subscriptionId} - triggered by ${eventType}`
+        );
+      }
+
+      // Handle trial-to-paid transition (history updates)
       if (isTrialToPaid) {
         const plan = await this.planService.findPlanById(
           user.subscription.planId
@@ -1014,6 +1049,11 @@ class SubscriptionService {
       console.log(
         `Successfully updated subscription ${subscriptionId} for user ${user._id}`
       );
+
+      // CRITICAL FIX: Send trial-to-active email here if needed
+      if (shouldSendTrialToActiveEmail) {
+        await this.sendTrialToActiveEmail(user, stripeSubscription);
+      }
     } catch (error) {
       console.error(
         `Error in handleSubscriptionUpdate for ${subscriptionId}:`,
@@ -1059,6 +1099,34 @@ class SubscriptionService {
    */
   async processSubscriptionConfirmationEmail(invoice) {
     try {
+      // CRITICAL FIX: Skip ALL emails that might be duplicates
+      const isTrialToPaid = invoice.billing_reason === "subscription_update";
+
+      // Also skip subscription_create for very new subscriptions (likely upgrades)
+      let isUpgradeDowngrade = false;
+      if (
+        invoice.subscription &&
+        invoice.billing_reason === "subscription_create"
+      ) {
+        try {
+          const subscription = await this.stripe.subscriptions.retrieve(
+            invoice.subscription
+          );
+          const now = Math.floor(Date.now() / 1000);
+          const subscriptionAge = now - subscription.created;
+          isUpgradeDowngrade = subscriptionAge < 300; // Less than 5 minutes
+        } catch (error) {
+          console.warn(`Could not check subscription age:`, error);
+        }
+      }
+
+      if (isTrialToPaid || isUpgradeDowngrade) {
+        console.log(
+          `Skipping duplicate email in processSubscriptionConfirmationEmail - trialToPaid: ${isTrialToPaid}, upgradeDowngrade: ${isUpgradeDowngrade}`
+        );
+        return;
+      }
+
       const user = await this.userService.findUserByStripeCustomerId(
         invoice.customer
       );
@@ -1077,23 +1145,18 @@ class SubscriptionService {
         : null;
       const invoiceUrl = invoice.hosted_invoice_url;
 
-      // 🔥 NEW: Detect if this is a trial-to-paid transition
-      const isTrialToPaid = invoice.billing_reason === "subscription_update";
-
-      if (isTrialToPaid) {
-        // Send trial-to-active email instead of generic confirmation
-        const firstBillingDateObject = new Date(invoice.created * 1000);
-
-        await this.emailService.sendTrialToActiveTransitionEmail(
-          user, // Pass entire user object for language
+      // Only handle new subscriptions and renewals here
+      if (invoice.billing_reason === "subscription_create") {
+        // New subscription payment (first payment)
+        await this.emailService.sendSubscriptionConfirmation(
+          user,
           planName,
-          firstBillingDateObject, // First billing date
-          renewalDateObject, // Next billing date
           amount,
+          renewalDateObject,
           invoiceUrl
         );
-      } else {
-        // Regular subscription confirmation (new purchase or renewal)
+      } else if (invoice.billing_reason === "subscription_cycle") {
+        // Regular renewal
         await this.emailService.sendSubscriptionConfirmation(
           user,
           planName,
@@ -1120,6 +1183,9 @@ class SubscriptionService {
   ) {
     const now = new Date();
     const history = user.subscriptionHistory || [];
+
+    // Calculate current remaining documents BEFORE making changes
+    const currentRemainingDocs = user.getRemainingDocuments();
     let newHistoryLimit = newPlan.documentLimit;
 
     if (transitionType === "trial_to_paid") {
@@ -1130,25 +1196,15 @@ class SubscriptionService {
           h.endDate = now;
         }
       });
-    } else if (transitionType === "top_up" && user.subscription) {
-      // Calculate remaining documents from all active plans
-      const remainingDocsFromOldPlan = user.getRemainingDocuments();
+    } else if (transitionType === "replacement") {
+      // 🔥 CRITICAL FIX: For upgrades/downgrades, carry over remaining documents
+      // This implements your requirement: "his total will be 80" (remaining 20 + new 60)
+      newHistoryLimit = currentRemainingDocs + newPlan.documentLimit;
 
-      // Prorate the document limit for the new plan
-      const periodStart = stripeSub.current_period_start;
-      const periodEnd = stripeSub.current_period_end;
-      const nowSeconds = Math.floor(Date.now() / 1000);
-      const totalDuration = periodEnd - periodStart;
-      const remainingDuration = periodEnd - nowSeconds;
-
-      let proratedNewDocs = newPlan.documentLimit;
-      if (totalDuration > 0 && remainingDuration > 0) {
-        const fraction = remainingDuration / totalDuration;
-        proratedNewDocs = Math.floor(fraction * newPlan.documentLimit);
-      }
-
-      // The total limit for the new history entry is what they had left + the prorated new amount
-      newHistoryLimit = remainingDocsFromOldPlan + proratedNewDocs;
+      console.log(`Upgrade/downgrade document calculation:`);
+      console.log(`- Current remaining documents: ${currentRemainingDocs}`);
+      console.log(`- New plan base limit: ${newPlan.documentLimit}`);
+      console.log(`- New total limit: ${newHistoryLimit}`);
 
       // Deactivate all previous active plans
       history.forEach((h) => {
@@ -1160,17 +1216,14 @@ class SubscriptionService {
     }
 
     // CRITICAL FIX: Ensure we have a valid end date from Stripe
-    const item = stripeSub.items?.data[0]; // 🔥 New: Get the item
+    const item = stripeSub.items?.data[0];
 
     let endDate;
     if (item?.current_period_end) {
-      // 🔥 Fix: Use item-level
       endDate = new Date(item.current_period_end * 1000);
     } else if (stripeSub.current_period_end) {
-      // Backward compat
       endDate = new Date(stripeSub.current_period_end * 1000);
     } else {
-      // Fallback: set to 30 or 365 days from now if Stripe doesn't provide the date
       console.warn("No current_period_end from Stripe, using fallback");
       endDate = new Date(
         now.getTime() + (isYearly ? 365 : 30) * 24 * 60 * 60 * 1000
@@ -1178,14 +1231,12 @@ class SubscriptionService {
     }
 
     // Add the new active entry
-    // FIXED: Map transitionType to valid enum values
     let historyType;
-    if (transitionType === "top_up") {
-      historyType = "top_up";
+    if (transitionType === "replacement") {
+      historyType = "paid"; // Upgrades/downgrades are paid subscriptions
     } else if (transitionType === "trial_to_paid") {
       historyType = "paid";
     } else {
-      // transitionType === "new" should be saved as "paid"
       historyType = "paid";
     }
 
@@ -1196,13 +1247,66 @@ class SubscriptionService {
       startDate: now,
       endDate: endDate,
       documentLimit: newHistoryLimit,
-      documentsUsed: 0,
+      documentsUsed: 0, // Reset usage for the new period
       status: "active",
     };
 
     history.push(newHistoryEntry);
 
     return history;
+  }
+
+  /**
+   * Sends trial-to-active email with proper invoice data
+   */
+  async sendTrialToActiveEmail(user, stripeSubscription) {
+    try {
+      // Fetch the latest paid invoice for this subscription
+      const invoices = await this.stripe.invoices.list({
+        subscription: stripeSubscription.id,
+        limit: 1,
+        status: "paid",
+      });
+
+      const latestInvoice = invoices.data[0];
+      if (!latestInvoice) {
+        console.warn(
+          `No paid invoice found for subscription ${stripeSubscription.id}`
+        );
+        return;
+      }
+
+      const plan = await this.planService.findPlanById(
+        user.subscription.planId
+      );
+      const planName = plan?.name || user.subscription.planName;
+
+      const amount = latestInvoice.amount_paid / 100;
+      const invoiceUrl = latestInvoice.hosted_invoice_url;
+
+      // Calculate dates
+      const firstBillingDateObject = new Date(latestInvoice.created * 1000);
+
+      // Get next billing date from subscription period
+      const nextBillingDateObject = stripeSubscription.current_period_end
+        ? new Date(stripeSubscription.current_period_end * 1000)
+        : null;
+
+      await this.emailService.sendTrialToActiveTransitionEmail(
+        user,
+        planName,
+        firstBillingDateObject,
+        nextBillingDateObject,
+        amount,
+        invoiceUrl
+      );
+
+      console.log(
+        `Trial-to-active email sent for subscription ${stripeSubscription.id}`
+      );
+    } catch (error) {
+      console.error(`Error sending trial-to-active email:`, error);
+    }
   }
 }
 

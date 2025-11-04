@@ -2142,6 +2142,9 @@
             "userAssigned": "{{name}} als {{role}} zugewiesen",
             "userAssignmentRemoved": "Benutzerzuweisung entfernt"
         },
+        "buttons": {
+            "addAssignment": "Zuweisung hinzufügen"
+        },
         "errors": {
             "labelRequired": "Bezeichnung ist erforderlich",
             "labelEmpty": "Bezeichnung darf nicht leer sein",

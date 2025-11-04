@@ -2145,6 +2145,9 @@
             "userAssigned": "{{name}} asignado como {{role}}",
             "userAssignmentRemoved": "Asignación de usuario eliminada"
         },
+         "buttons": {
+            "addAssignment": "Añadir Asignación"
+        },
         "errors": {
             "labelRequired": "La etiqueta es obligatoria",
             "labelEmpty": "La etiqueta no puede estar vacía",

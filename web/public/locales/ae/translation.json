@@ -2141,6 +2141,9 @@
             "userAssigned": "تم تعيين {{name}} كـ {{role}}",
             "userAssignmentRemoved": "تمت إزالة تعيين المستخدم"
         },
+        "buttons": {
+            "addAssignment": "اضافة تعيين"
+        },
         "errors": {
             "labelRequired": "التسمية مطلوبة",
             "labelEmpty": "لا يمكن أن تكون التسمية فارغة",

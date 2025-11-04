@@ -2141,6 +2141,9 @@
             "userAssigned": "{{name}} assigned as {{role}}",
             "userAssignmentRemoved": "User assignment removed"
         },
+        "buttons": {
+            "addAssignment": "Add Assignment"
+        },
         "errors": {
             "labelRequired": "Label is required",
             "labelEmpty": "Label cannot be empty",

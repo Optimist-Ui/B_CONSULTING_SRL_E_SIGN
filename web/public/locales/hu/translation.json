@@ -2141,6 +2141,9 @@
             "userAssigned": "{{name}} hozzárendelve mint {{role}}",
             "userAssignmentRemoved": "Felhasználói hozzárendelés eltávolítva"
         },
+        "buttons": {
+            "addAssignment": "Hozzárendelés Hozzaadása"
+        },
         "errors": {
             "labelRequired": "Címke megadása kötelező",
             "labelEmpty": "A címke nem lehet üres",

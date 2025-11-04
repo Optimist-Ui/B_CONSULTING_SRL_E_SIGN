@@ -2141,6 +2141,9 @@
             "userAssigned": "{{name}} が {{role}} として割り当てられました",
             "userAssignmentRemoved": "ユーザーの割り当てが削除されました"
         },
+        "buttons": {
+            "addAssignment": "割り当てを追加"
+        },
         "errors": {
             "labelRequired": "ラベルは必須です",
             "labelEmpty": "ラベルは空にできません",

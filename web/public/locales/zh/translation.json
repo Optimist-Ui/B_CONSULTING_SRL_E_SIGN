@@ -2141,6 +2141,9 @@
             "userAssigned": "{{name}} 已分配为 {{role}}",
             "userAssignmentRemoved": "用户分配已移除"
         },
+        "buttons": {
+            "addAssignment": "添加分配"
+        },
         "errors": {
             "labelRequired": "标签是必填项",
             "labelEmpty": "标签不能为空",

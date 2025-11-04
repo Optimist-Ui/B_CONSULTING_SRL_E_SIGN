@@ -2141,6 +2141,9 @@
             "userAssigned": "{{name}}, {{role}} olarak atandı",
             "userAssignmentRemoved": "Kullanıcı ataması kaldırıldı"
         },
+         "buttons": {
+            "addAssignment": "Atama Ekle"
+        },
         "errors": {
             "labelRequired": "Etiket gereklidir",
             "labelEmpty": "Etiket boş olamaz",

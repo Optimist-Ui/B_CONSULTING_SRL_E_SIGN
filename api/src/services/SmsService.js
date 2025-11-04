@@ -1,4 +1,5 @@
 const axios = require("axios");
+const { getSmsContent } = require("../config/smsContent");
 
 class SmsService {
   constructor() {
@@ -18,6 +19,21 @@ class SmsService {
         },
       });
     }
+  }
+
+  /**
+   * Helper method to replace placeholders in SMS text
+   * @param {string} text - Text with placeholders like {{name}}
+   * @param {object} data - Data object with values to replace
+   * @returns {string} Text with replaced placeholders
+   */
+  _replacePlaceholders(text, data) {
+    let result = text;
+    Object.keys(data).forEach((key) => {
+      const placeholder = `{{${key}}}`;
+      result = result.replace(new RegExp(placeholder, "g"), data[key]);
+    });
+    return result;
   }
 
   /**
@@ -143,14 +159,31 @@ class SmsService {
   }
 
   /**
-   * Sends a signature OTP SMS with a standardized format
+   * Sends a signature OTP SMS with language support
    * @param {string} phoneNumber
    * @param {string} recipientName
    * @param {string} documentName
    * @param {string} otp
+   * @param {string} language - Language code (e.g., 'en', 'es', 'fr')
    */
-  async sendSignatureOtp(phoneNumber, recipientName, documentName, otp) {
-    const message = `Hi ${recipientName}, your signature OTP for document "${documentName}" is: ${otp}. Valid for 1 minute. Do not share this code.`;
+  async sendSignatureOtp(
+    phoneNumber,
+    recipientName,
+    documentName,
+    otp,
+    language = "en"
+  ) {
+    // Get localized SMS content
+    const content = getSmsContent("signatureOtp", language);
+
+    // Replace placeholders with actual values
+    const message = this._replacePlaceholders(content.message, {
+      recipient_name: recipientName,
+      document_name: documentName,
+      otp: otp,
+    });
+
+    console.log(`Sending signature OTP SMS in ${language} to ${phoneNumber}`);
 
     return await this.sendSms(phoneNumber, message);
   }

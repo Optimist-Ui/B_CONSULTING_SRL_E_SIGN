@@ -12,7 +12,7 @@ class ReviewService {
     // Case 1: The participant ID matches the owner's ID
     if (pkg.ownerId.toString() === participantId) {
       const owner = await this.User.findById(pkg.ownerId).select(
-        "firstName lastName email"
+        "firstName lastName email language"
       );
       if (!owner) return null;
       return {
@@ -20,10 +20,11 @@ class ReviewService {
         contactName: `${owner.firstName} ${owner.lastName}`,
         contactEmail: owner.email,
         role: "Initiator",
+        language: owner.language || "en", // Add language from User model
       };
     }
 
-    // Case 2: The reviewer is a Signer, Approver, etc.
+    // Case 2: The reviewer is a Signer, Approver, FormFiller, etc.
     let participant;
     for (const field of pkg.fields) {
       const foundUser = field.assignedUsers.find((u) => u.id === participantId);
@@ -33,14 +34,21 @@ class ReviewService {
       }
     }
 
-    return participant
-      ? {
-          id: participant.id,
-          contactName: participant.contactName,
-          contactEmail: participant.contactEmail,
-          role: participant.role,
-        }
-      : null;
+    if (!participant) return null;
+
+    // Fetch the language preference from Contact
+    const contact = await this.Contact.findById(participant.contactId).select(
+      "language"
+    );
+
+    return {
+      id: participant.id,
+      contactId: participant.contactId,
+      contactName: participant.contactName,
+      contactEmail: participant.contactEmail,
+      role: participant.role,
+      language: contact ? contact.language : "en",
+    };
   }
 
   // Simplified: No longer needs authenticatedUserId

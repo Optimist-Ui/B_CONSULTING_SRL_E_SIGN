@@ -2145,6 +2145,9 @@
             "userAssigned": "Ο/Η {{name}} ανατέθηκε ως {{role}}",
             "userAssignmentRemoved": "Η ανάθεση χρήστη αφαιρέθηκε"
         },
+        "buttons": {
+            "addAssignment": "Προσθήκη ανάθεσης"
+        },
         "errors": {
             "labelRequired": "Η ετικέτα είναι υποχρεωτική",
             "labelEmpty": "Η ετικέτα δεν μπορεί να είναι κενή",
