@@ -476,6 +476,10 @@
             "signin": {
                 "prompt": "すでにアカウントをお持ちの場合",
                 "link": "サインイン"
+            },
+            "language": {
+                "label": "優先言語",
+                "placeholder": "言語を選択してください"
             }
         },
         "validation": {
@@ -2136,6 +2140,9 @@
             "noUsersAssigned": "ユーザーが割り当てられていません。",
             "userAssigned": "{{name}} が {{role}} として割り当てられました",
             "userAssignmentRemoved": "ユーザーの割り当てが削除されました"
+        },
+        "buttons": {
+            "addAssignment": "割り当てを追加"
         },
         "errors": {
             "labelRequired": "ラベルは必須です",

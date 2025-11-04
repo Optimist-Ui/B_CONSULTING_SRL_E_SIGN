@@ -51,17 +51,31 @@ class WebhookController {
           }
           break;
 
+        // In WebhookController - add this case
         case "customer.subscription.updated":
           const updatedSub = event.data.object;
           console.log(
             `Subscription updated: ${updatedSub.id}, status: ${updatedSub.status}`
           );
 
-          // CRITICAL FIX: Only process active or trialing subscriptions
-          // Don't sync incomplete, past_due, unpaid, or canceled subscriptions
+          // CRITICAL FIX: Skip processing for very new subscriptions (upgrades/downgrades)
+          // This prevents duplicate processing during upgrade/downgrade scenarios
+          const now = Math.floor(Date.now() / 1000);
+          const subscriptionAge = now - updatedSub.created;
+          const isNewUpgradeDowngrade = subscriptionAge < 300; // Less than 5 minutes
+
+          if (isNewUpgradeDowngrade) {
+            console.log(
+              `Skipping subscription update for ${updatedSub.id} - detected as upgrade/downgrade (age: ${subscriptionAge}s)`
+            );
+            break;
+          }
+
+          // Only process active or trialing subscriptions that aren't recent upgrades
           if (["active", "trialing"].includes(updatedSub.status)) {
             await this.subscriptionService.handleSubscriptionUpdate(
-              updatedSub.id
+              updatedSub.id,
+              "customer.subscription.updated"
             );
           } else if (updatedSub.status === "incomplete") {
             console.log(
@@ -71,8 +85,6 @@ class WebhookController {
             console.log(
               `Subscription ${updatedSub.id} has payment issues: ${updatedSub.status}`
             );
-            // Optionally handle payment issues here
-            // await this.subscriptionService.handlePaymentIssue(updatedSub.id);
           }
           break;
 
@@ -88,40 +100,70 @@ class WebhookController {
           console.log(`Payment succeeded for invoice: ${invoice.id}`);
           console.log(`Billing reason: ${invoice.billing_reason}`);
           console.log(`Subscription: ${invoice.subscription}`);
+          console.log(`Amount paid: ${invoice.amount_paid / 100}`);
 
-          // CRITICAL FIX: This is where we activate paid subscriptions
+          // CRITICAL FIX: Check if this is an upgrade/downgrade scenario
+          let isUpgradeDowngrade = false;
           if (invoice.subscription) {
-            const subscription = await this.stripe.subscriptions.retrieve(
-              invoice.subscription
-            );
-
-            console.log(
-              `Retrieved subscription status: ${subscription.status}`
-            );
-
-            // Now that payment succeeded, update the subscription in our database
-            if (["active", "trialing"].includes(subscription.status)) {
-              await this.subscriptionService.handleSubscriptionUpdate(
-                subscription.id
+            try {
+              const subscription = await this.stripe.subscriptions.retrieve(
+                invoice.subscription
               );
+
+              // Check if this subscription was created very recently (likely upgrade/downgrade)
+              const now = Math.floor(Date.now() / 1000);
+              const subscriptionAge = now - subscription.created;
+              isUpgradeDowngrade = subscriptionAge < 300; // Less than 5 minutes old
+
+              console.log(
+                `Retrieved subscription status: ${subscription.status}`
+              );
+              console.log(
+                `Subscription age: ${subscriptionAge}s, isUpgradeDowngrade: ${isUpgradeDowngrade}`
+              );
+
+              // Now that payment succeeded, update the subscription in our database
+              if (["active", "trialing"].includes(subscription.status)) {
+                await this.subscriptionService.handleSubscriptionUpdate(
+                  subscription.id,
+                  "invoice.payment_succeeded", // Pass event type to prevent duplicates
+                  isUpgradeDowngrade // Pass upgrade/downgrade flag
+                );
+              }
+            } catch (error) {
+              console.error(`Error retrieving subscription:`, error);
             }
           }
 
-          // Send confirmation emails based on billing reason
-          if (invoice.billing_reason === "subscription_create") {
-            // New subscription payment (first payment)
-            await this.subscriptionService.processSubscriptionConfirmationEmail(
-              invoice
+          // CRITICAL FIX: Enhanced email logic to prevent duplicates
+          const isPaidInvoice = invoice.amount_paid > 0;
+          const isTrialToPaid =
+            invoice.billing_reason === "subscription_update";
+
+          if (isPaidInvoice && !isTrialToPaid && !isUpgradeDowngrade) {
+            // Send confirmation emails for new subscriptions and renewals ONLY
+            if (invoice.billing_reason === "subscription_create") {
+              // New subscription payment (first payment)
+              await this.subscriptionService.processSubscriptionConfirmationEmail(
+                invoice
+              );
+            } else if (invoice.billing_reason === "subscription_cycle") {
+              // Regular renewal
+              await this.subscriptionService.processSubscriptionConfirmationEmail(
+                invoice
+              );
+            }
+          } else if (!isPaidInvoice) {
+            console.log(
+              `Skipping confirmation email for $0 invoice (trial activation)`
             );
-          } else if (invoice.billing_reason === "subscription_update") {
-            // Trial-to-paid conversion - send confirmation
-            await this.subscriptionService.processSubscriptionConfirmationEmail(
-              invoice
+          } else if (isTrialToPaid) {
+            console.log(
+              `Trial-to-paid transition detected - email handled in handleSubscriptionUpdate`
             );
-          } else if (invoice.billing_reason === "subscription_cycle") {
-            // Regular renewal
-            await this.subscriptionService.processSubscriptionConfirmationEmail(
-              invoice
+          } else if (isUpgradeDowngrade) {
+            console.log(
+              `Upgrade/downgrade detected - email handled in createSubscription`
             );
           }
           break;

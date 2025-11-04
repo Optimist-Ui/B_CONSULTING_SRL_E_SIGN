@@ -476,6 +476,10 @@
             "signin": {
                 "prompt": "Уже есть аккаунт?",
                 "link": "Войти"
+            },
+            "language": {
+                "label": "Предпочитаемый язык",
+                "placeholder": "Выберите ваш язык"
             }
         },
         "validation": {
@@ -2213,6 +2217,9 @@
             "noUsersAssigned": "Пользователи не назначены.",
             "userAssigned": "{{name}} назначен как {{role}}",
             "userAssignmentRemoved": "Назначение пользователя удалено"
+        },
+        "buttons": {
+            "addAssignment": "Добавить Назначение"
         },
         "errors": {
             "labelRequired": "Метка обязательна",

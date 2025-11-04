@@ -476,6 +476,10 @@
             "signin": {
                 "prompt": "Har du redan ett konto?",
                 "link": "Logga in"
+            },
+            "language": {
+                "label": "Föredraget språk",
+                "placeholder": "Välj ditt språk"
             }
         },
         "validation": {
@@ -2136,6 +2140,9 @@
             "noUsersAssigned": "Inga användare tilldelade.",
             "userAssigned": "{{name}} tilldelad som {{role}}",
             "userAssignmentRemoved": "Användartilldelning borttagen"
+        },
+        "buttons": {
+            "addAssignment": "Lägg till Tilldelning"
         },
         "errors": {
             "labelRequired": "Etikett krävs",

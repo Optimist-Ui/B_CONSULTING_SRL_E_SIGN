@@ -9,4 +9,5 @@ export const languageOptions: LanguageOption[] = [
     { value: 'fr', label: 'Français (French)' },
     { value: 'de', label: 'Deutsch (German)' },
     { value: 'it', label: 'Italiano (Italian)' },
+    { value: 'el', label: 'Ελληνικά (Greek)' },
 ];

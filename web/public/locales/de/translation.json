@@ -481,6 +481,10 @@
             "signin": {
                 "prompt": "Haben Sie bereits ein Konto?",
                 "link": "Anmelden"
+            },
+            "language": {
+                "label": "Bevorzugte Sprache",
+                "placeholder": "Wählen Sie Ihre Sprache"
             }
         },
         "validation": {
@@ -2137,6 +2141,9 @@
             "noUsersAssigned": "Keine Benutzer zugewiesen.",
             "userAssigned": "{{name}} als {{role}} zugewiesen",
             "userAssignmentRemoved": "Benutzerzuweisung entfernt"
+        },
+        "buttons": {
+            "addAssignment": "Zuweisung hinzufügen"
         },
         "errors": {
             "labelRequired": "Bezeichnung ist erforderlich",
