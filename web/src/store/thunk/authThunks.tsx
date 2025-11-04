@@ -10,6 +10,7 @@ interface SignupUserArgs {
     lastName: string;
     email: string;
     password: string;
+    language: string;
 }
 
 interface LoginUserArgs {

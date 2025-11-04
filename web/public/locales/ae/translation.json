@@ -476,6 +476,10 @@
             "signin": {
                 "prompt": "هل لديك حساب بالفعل؟",
                 "link": "تسجيل الدخول"
+            },
+            "language": {
+                "label": "اللغة المفضلة",
+                "placeholder": "اختر لغتك"
             }
         },
         "validation": {
@@ -2136,6 +2140,9 @@
             "noUsersAssigned": "لم يتم تعيين مستخدمين.",
             "userAssigned": "تم تعيين {{name}} كـ {{role}}",
             "userAssignmentRemoved": "تمت إزالة تعيين المستخدم"
+        },
+        "buttons": {
+            "addAssignment": "اضافة تعيين"
         },
         "errors": {
             "labelRequired": "التسمية مطلوبة",

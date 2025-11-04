@@ -476,6 +476,10 @@
             "signin": {
                 "prompt": "Already have an account?",
                 "link": "Sign In"
+            },
+            "language": {
+                "label": "Preferred Language",
+                "placeholder": "Select your language"
             }
         },
         "validation": {
@@ -2136,6 +2140,9 @@
             "noUsersAssigned": "No users assigned.",
             "userAssigned": "{{name}} assigned as {{role}}",
             "userAssignmentRemoved": "User assignment removed"
+        },
+        "buttons": {
+            "addAssignment": "Add Assignment"
         },
         "errors": {
             "labelRequired": "Label is required",

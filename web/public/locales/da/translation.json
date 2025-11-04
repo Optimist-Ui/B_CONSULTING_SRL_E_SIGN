@@ -481,6 +481,10 @@
             "signin": {
                 "prompt": "Har du allerede en konto?",
                 "link": "Log Ind"
+            },
+            "language": {
+                "label": "Foretrukket sprog",
+                "placeholder": "Vælg dit sprog"
             }
         },
         "validation": {
@@ -2136,6 +2140,9 @@
             "noUsersAssigned": "Ingen brugere tildelt.",
             "userAssigned": "{{name}} tildelt som {{role}}",
             "userAssignmentRemoved": "Brugertildeling fjernet"
+        },
+        "buttons": {
+            "addAssignment": "Tilføj Tildeling"
         },
         "errors": {
             "labelRequired": "Etiket er påkrævet",

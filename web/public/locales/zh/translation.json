@@ -476,6 +476,10 @@
             "signin": {
                 "prompt": "已有账户？",
                 "link": "登录"
+            },
+            "language": {
+                "label": "首选语言",
+                "placeholder": "选择您的语言"
             }
         },
         "validation": {
@@ -2136,6 +2140,9 @@
             "noUsersAssigned": "未分配用户。",
             "userAssigned": "{{name}} 已分配为 {{role}}",
             "userAssignmentRemoved": "用户分配已移除"
+        },
+        "buttons": {
+            "addAssignment": "添加分配"
         },
         "errors": {
             "labelRequired": "标签是必填项",

@@ -481,6 +481,10 @@
             "signin": {
                 "prompt": "Már van fiókja?",
                 "link": "Bejelentkezés"
+            },
+            "language": {
+                "label": "Preferált nyelv",
+                "placeholder": "Válassza ki a nyelvét"
             }
         },
         "validation": {
@@ -2136,6 +2140,9 @@
             "noUsersAssigned": "Nincs hozzárendelt felhasználó.",
             "userAssigned": "{{name}} hozzárendelve mint {{role}}",
             "userAssignmentRemoved": "Felhasználói hozzárendelés eltávolítva"
+        },
+        "buttons": {
+            "addAssignment": "Hozzárendelés Hozzaadása"
         },
         "errors": {
             "labelRequired": "Címke megadása kötelező",

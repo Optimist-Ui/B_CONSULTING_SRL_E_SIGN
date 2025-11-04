@@ -476,6 +476,10 @@
             "signin": {
                 "prompt": "Vous avez déjà un compte ?",
                 "link": "Se connecter"
+            },
+            "language": {
+                "label": "Langue préférée",
+                "placeholder": "Sélectionnez votre langue"
             }
         },
         "validation": {
@@ -2165,6 +2169,9 @@
             "noUsersAssigned": "Aucun utilisateur assigné.",
             "userAssigned": "{{name}} assigné en tant que {{role}}",
             "userAssignmentRemoved": "Assignation d'utilisateur supprimée"
+        },
+        "buttons": {
+            "addAssignment": "Ajouter une assignation"
         },
         "errors": {
             "labelRequired": "L'étiquette est requise",

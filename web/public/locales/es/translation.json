@@ -476,6 +476,10 @@
             "signin": {
                 "prompt": "¿Ya tienes una cuenta?",
                 "link": "Iniciar Sesión"
+            },
+            "language": {
+                "label": "Idioma preferido",
+                "placeholder": "Selecciona tu idioma"
             }
         },
         "validation": {
@@ -2140,6 +2144,9 @@
             "noUsersAssigned": "No hay usuarios asignados.",
             "userAssigned": "{{name}} asignado como {{role}}",
             "userAssignmentRemoved": "Asignación de usuario eliminada"
+        },
+         "buttons": {
+            "addAssignment": "Añadir Asignación"
         },
         "errors": {
             "labelRequired": "La etiqueta es obligatoria",

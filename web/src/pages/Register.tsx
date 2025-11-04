@@ -36,6 +36,7 @@ const getValidationSchema = (t: (key: string) => string) =>
             .required(t('register.validation.lastName.required')),
         email: Yup.string().email(t('register.validation.email.invalid')).max(100, t('register.validation.email.max')).required(t('register.validation.email.required')),
         password: Yup.string().min(6, t('register.validation.password.min')).max(128, t('register.validation.password.max')).required(t('register.validation.password.required')),
+        language: Yup.string().required(),
     });
 
 const Register = () => {
@@ -54,7 +55,7 @@ const Register = () => {
     const [isVisible, setIsVisible] = useState(false);
 
     // Initial form values
-    const initialValues = { firstName: '', lastName: '', email: '', password: '' };
+    const initialValues = { firstName: '', lastName: '', email: '', password: '', language: locale || 'en' };
 
     useEffect(() => {
         dispatch(setPageTitle(t('register.meta.title')));
@@ -173,152 +174,223 @@ const Register = () => {
                                     <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">i-sign.eu</h1>
                                 </Link>
                             </div>
-                            <Formik initialValues={initialValues} validationSchema={validationSchema} onSubmit={handleSubmit}>
-                                {({ errors, touched, isSubmitting }) => (
-                                    <Form className="space-y-5">
-                                        <div className="space-y-2">
-                                            <label htmlFor="firstName" className="text-white font-medium block">
-                                                {t('register.form.firstName.label')}
-                                            </label>
-                                            <div className="relative group">
-                                                <Field
-                                                    id="firstName"
-                                                    name="firstName"
-                                                    type="text"
-                                                    placeholder={t('register.form.firstName.placeholder')}
-                                                    maxLength={50}
-                                                    className={`w-full bg-white/10 border ${
-                                                        errors.firstName && touched.firstName ? 'border-red-400' : 'border-white/20'
-                                                    } rounded-xl px-4 py-3 pl-12 text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 ${
-                                                        errors.firstName && touched.firstName ? 'focus:ring-red-400' : 'focus:ring-blue-400'
-                                                    } focus:border-transparent transition-all duration-300`}
-                                                />
-                                                <span
-                                                    className={`absolute left-4 top-1/2 -translate-y-1/2 ${
-                                                        errors.firstName && touched.firstName ? 'text-red-400' : 'text-gray-400 group-focus-within:text-blue-400'
-                                                    } transition-colors duration-300`}
-                                                >
-                                                    <IconUser fill={true} />
-                                                </span>
+                            <Formik initialValues={initialValues} validationSchema={validationSchema} onSubmit={handleSubmit} enableReinitialize={true}>
+                                {({ errors, touched, isSubmitting, setFieldValue, values }) => {
+                                    // Sync language field when locale dropdown changes
+                                    useEffect(() => {
+                                        if (values.language !== flag) {
+                                            setFieldValue('language', flag);
+                                        }
+                                    }, [flag, setFieldValue, values.language]);
+
+                                    return (
+                                        <Form className="space-y-5">
+                                            <div className="space-y-2">
+                                                <label htmlFor="firstName" className="text-white font-medium block">
+                                                    {t('register.form.firstName.label')}
+                                                </label>
+                                                <div className="relative group">
+                                                    <Field
+                                                        id="firstName"
+                                                        name="firstName"
+                                                        type="text"
+                                                        placeholder={t('register.form.firstName.placeholder')}
+                                                        maxLength={50}
+                                                        className={`w-full bg-white/10 border ${
+                                                            errors.firstName && touched.firstName ? 'border-red-400' : 'border-white/20'
+                                                        } rounded-xl px-4 py-3 pl-12 text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 ${
+                                                            errors.firstName && touched.firstName ? 'focus:ring-red-400' : 'focus:ring-blue-400'
+                                                        } focus:border-transparent transition-all duration-300`}
+                                                    />
+                                                    <span
+                                                        className={`absolute left-4 top-1/2 -translate-y-1/2 ${
+                                                            errors.firstName && touched.firstName ? 'text-red-400' : 'text-gray-400 group-focus-within:text-blue-400'
+                                                        } transition-colors duration-300`}
+                                                    >
+                                                        <IconUser fill={true} />
+                                                    </span>
+                                                </div>
+                                                <ErrorMessage name="firstName" component="p" className="text-red-400 text-sm mt-1 flex items-center gap-1" />
                                             </div>
-                                            <ErrorMessage name="firstName" component="p" className="text-red-400 text-sm mt-1 flex items-center gap-1" />
-                                        </div>
-                                        <div className="space-y-2">
-                                            <label htmlFor="lastName" className="text-white font-medium block">
-                                                {t('register.form.lastName.label')}
-                                            </label>
-                                            <div className="relative group">
-                                                <Field
-                                                    id="lastName"
-                                                    name="lastName"
-                                                    type="text"
-                                                    placeholder={t('register.form.lastName.placeholder')}
-                                                    maxLength={50}
-                                                    className={`w-full bg-white/10 border ${
-                                                        errors.lastName && touched.lastName ? 'border-red-400' : 'border-white/20'
-                                                    } rounded-xl px-4 py-3 pl-12 text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 ${
-                                                        errors.lastName && touched.lastName ? 'focus:ring-red-400' : 'focus:ring-blue-400'
-                                                    } focus:border-transparent transition-all duration-300`}
-                                                />
-                                                <span
-                                                    className={`absolute left-4 top-1/2 -translate-y-1/2 ${
-                                                        errors.lastName && touched.lastName ? 'text-red-400' : 'text-gray-400 group-focus-within:text-blue-400'
-                                                    } transition-colors duration-300`}
-                                                >
-                                                    <IconUser fill={true} />
-                                                </span>
+                                            <div className="space-y-2">
+                                                <label htmlFor="lastName" className="text-white font-medium block">
+                                                    {t('register.form.lastName.label')}
+                                                </label>
+                                                <div className="relative group">
+                                                    <Field
+                                                        id="lastName"
+                                                        name="lastName"
+                                                        type="text"
+                                                        placeholder={t('register.form.lastName.placeholder')}
+                                                        maxLength={50}
+                                                        className={`w-full bg-white/10 border ${
+                                                            errors.lastName && touched.lastName ? 'border-red-400' : 'border-white/20'
+                                                        } rounded-xl px-4 py-3 pl-12 text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 ${
+                                                            errors.lastName && touched.lastName ? 'focus:ring-red-400' : 'focus:ring-blue-400'
+                                                        } focus:border-transparent transition-all duration-300`}
+                                                    />
+                                                    <span
+                                                        className={`absolute left-4 top-1/2 -translate-y-1/2 ${
+                                                            errors.lastName && touched.lastName ? 'text-red-400' : 'text-gray-400 group-focus-within:text-blue-400'
+                                                        } transition-colors duration-300`}
+                                                    >
+                                                        <IconUser fill={true} />
+                                                    </span>
+                                                </div>
+                                                <ErrorMessage name="lastName" component="p" className="text-red-400 text-sm mt-1 flex items-center gap-1" />
                                             </div>
-                                            <ErrorMessage name="lastName" component="p" className="text-red-400 text-sm mt-1 flex items-center gap-1" />
-                                        </div>
-                                        <div className="space-y-2">
-                                            <label htmlFor="email" className="text-white font-medium block">
-                                                {t('register.form.email.label')}
-                                            </label>
-                                            <div className="relative group">
-                                                <Field
-                                                    id="email"
-                                                    name="email"
-                                                    type="email"
-                                                    placeholder={t('register.form.email.placeholder')}
-                                                    maxLength={100}
-                                                    className={`w-full bg-white/10 border ${
-                                                        errors.email && touched.email ? 'border-red-400' : 'border-white/20'
-                                                    } rounded-xl px-4 py-3 pl-12 text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 ${
-                                                        errors.email && touched.email ? 'focus:ring-red-400' : 'focus:ring-blue-400'
-                                                    } focus:border-transparent transition-all duration-300`}
-                                                />
-                                                <span
-                                                    className={`absolute left-4 top-1/2 -translate-y-1/2 ${
-                                                        errors.email && touched.email ? 'text-red-400' : 'text-gray-400 group-focus-within:text-blue-400'
-                                                    } transition-colors duration-300`}
-                                                >
-                                                    <IconMail fill={true} />
-                                                </span>
+                                            <div className="space-y-2">
+                                                <label htmlFor="email" className="text-white font-medium block">
+                                                    {t('register.form.email.label')}
+                                                </label>
+                                                <div className="relative group">
+                                                    <Field
+                                                        id="email"
+                                                        name="email"
+                                                        type="email"
+                                                        placeholder={t('register.form.email.placeholder')}
+                                                        maxLength={100}
+                                                        className={`w-full bg-white/10 border ${
+                                                            errors.email && touched.email ? 'border-red-400' : 'border-white/20'
+                                                        } rounded-xl px-4 py-3 pl-12 text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 ${
+                                                            errors.email && touched.email ? 'focus:ring-red-400' : 'focus:ring-blue-400'
+                                                        } focus:border-transparent transition-all duration-300`}
+                                                    />
+                                                    <span
+                                                        className={`absolute left-4 top-1/2 -translate-y-1/2 ${
+                                                            errors.email && touched.email ? 'text-red-400' : 'text-gray-400 group-focus-within:text-blue-400'
+                                                        } transition-colors duration-300`}
+                                                    >
+                                                        <IconMail fill={true} />
+                                                    </span>
+                                                </div>
+                                                <ErrorMessage name="email" component="p" className="text-red-400 text-sm mt-1 flex items-center gap-1" />
                                             </div>
-                                            <ErrorMessage name="email" component="p" className="text-red-400 text-sm mt-1 flex items-center gap-1" />
-                                        </div>
-                                        <div className="space-y-2">
-                                            <label htmlFor="password" className="text-white font-medium block">
-                                                {t('register.form.password.label')}
-                                            </label>
-                                            <div className="relative group">
-                                                <Field
-                                                    id="password"
-                                                    name="password"
-                                                    type={showPassword ? 'text' : 'password'}
-                                                    placeholder={t('register.form.password.placeholder')}
-                                                    maxLength={128}
-                                                    className={`w-full bg-white/10 border ${
-                                                        errors.password && touched.password ? 'border-red-400' : 'border-white/20'
-                                                    } rounded-xl px-4 py-3 pl-12 pr-12 text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 ${
-                                                        errors.password && touched.password ? 'focus:ring-red-400' : 'focus:ring-blue-400'
-                                                    } focus:border-transparent transition-all duration-300`}
-                                                />
-                                                <span
-                                                    className={`absolute left-4 top-1/2 -translate-y-1/2 ${
-                                                        errors.password && touched.password ? 'text-red-400' : 'text-gray-400 group-focus-within:text-blue-400'
-                                                    } transition-colors duration-300`}
-                                                >
-                                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path
-                                                            strokeLinecap="round"
-                                                            strokeLinejoin="round"
-                                                            strokeWidth={2}
-                                                            d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                                                        />
-                                                    </svg>
-                                                </span>
-                                                <button
-                                                    type="button"
-                                                    onClick={() => setShowPassword(!showPassword)}
-                                                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors duration-300"
-                                                >
-                                                    {showPassword ? <FaEyeSlashTyped className="w-5 h-5" /> : <IconEye />}
-                                                </button>
+                                            <div className="space-y-2">
+                                                <label htmlFor="language" className="text-white font-medium block">
+                                                    {t('register.form.language.label')}
+                                                </label>
+                                                <div className="relative group">
+                                                    <Field
+                                                        as="select"
+                                                        id="language"
+                                                        name="language"
+                                                        onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+                                                            const newLang = e.target.value;
+                                                            setFieldValue('language', newLang);
+                                                            setLocale(newLang); // Add this line to sync with top dropdown
+                                                        }}
+                                                        className={`w-full bg-white/10 border ${
+                                                            errors.language && touched.language ? 'border-red-400' : 'border-white/20'
+                                                        } rounded-xl px-4 py-3 pl-12 text-white focus:outline-none focus:ring-2 ${
+                                                            errors.language && touched.language ? 'focus:ring-red-400' : 'focus:ring-blue-400'
+                                                        } focus:border-transparent transition-all duration-300 appearance-none cursor-pointer`}
+                                                        style={{
+                                                            backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='rgba(255,255,255,0.6)'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`,
+                                                            backgroundRepeat: 'no-repeat',
+                                                            backgroundPosition: 'right 1rem center',
+                                                            backgroundSize: '1.25rem',
+                                                        }}
+                                                    >
+                                                        <option value="en" className="bg-slate-800 text-white">
+                                                            English
+                                                        </option>
+                                                        <option value="es" className="bg-slate-800 text-white">
+                                                            Español (Spanish)
+                                                        </option>
+                                                        <option value="fr" className="bg-slate-800 text-white">
+                                                            Français (French)
+                                                        </option>
+                                                        <option value="de" className="bg-slate-800 text-white">
+                                                            Deutsch (German)
+                                                        </option>
+                                                        <option value="it" className="bg-slate-800 text-white">
+                                                            Italiano (Italian)
+                                                        </option>
+                                                        <option value="el" className="bg-slate-800 text-white">
+                                                            Ελληνικά (Greek)
+                                                        </option>
+                                                    </Field>
+                                                    <span
+                                                        className={`absolute left-4 top-1/2 -translate-y-1/2 ${
+                                                            errors.language && touched.language ? 'text-red-400' : 'text-gray-400 group-focus-within:text-blue-400'
+                                                        } transition-colors duration-300 pointer-events-none`}
+                                                    >
+                                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path
+                                                                strokeLinecap="round"
+                                                                strokeLinejoin="round"
+                                                                strokeWidth={2}
+                                                                d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"
+                                                            />
+                                                        </svg>
+                                                    </span>
+                                                </div>
+                                                <ErrorMessage name="language" component="p" className="text-red-400 text-sm mt-1 flex items-center gap-1" />
                                             </div>
-                                            <ErrorMessage name="password" component="p" className="text-red-400 text-sm mt-1 flex items-center gap-1" />
-                                        </div>
-                                        <button
-                                            type="submit"
-                                            disabled={loading || isSubmitting}
-                                            className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-semibold py-3 rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-blue-500/25 transform disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-2 mt-6"
-                                        >
-                                            {loading || isSubmitting ? (
-                                                <>
-                                                    <span className="animate-spin border-2 border-white border-l-transparent rounded-full w-5 h-5 inline-block"></span>
-                                                    <span>{t('register.form.button.loading')}</span>
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <span>{t('register.form.button.default')}</span>
-                                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                                                    </svg>
-                                                </>
-                                            )}
-                                        </button>
-                                    </Form>
-                                )}
+                                            <div className="space-y-2">
+                                                <label htmlFor="password" className="text-white font-medium block">
+                                                    {t('register.form.password.label')}
+                                                </label>
+                                                <div className="relative group">
+                                                    <Field
+                                                        id="password"
+                                                        name="password"
+                                                        type={showPassword ? 'text' : 'password'}
+                                                        placeholder={t('register.form.password.placeholder')}
+                                                        maxLength={128}
+                                                        className={`w-full bg-white/10 border ${
+                                                            errors.password && touched.password ? 'border-red-400' : 'border-white/20'
+                                                        } rounded-xl px-4 py-3 pl-12 pr-12 text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 ${
+                                                            errors.password && touched.password ? 'focus:ring-red-400' : 'focus:ring-blue-400'
+                                                        } focus:border-transparent transition-all duration-300`}
+                                                    />
+                                                    <span
+                                                        className={`absolute left-4 top-1/2 -translate-y-1/2 ${
+                                                            errors.password && touched.password ? 'text-red-400' : 'text-gray-400 group-focus-within:text-blue-400'
+                                                        } transition-colors duration-300`}
+                                                    >
+                                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path
+                                                                strokeLinecap="round"
+                                                                strokeLinejoin="round"
+                                                                strokeWidth={2}
+                                                                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                                                            />
+                                                        </svg>
+                                                    </span>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setShowPassword(!showPassword)}
+                                                        className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors duration-300"
+                                                    >
+                                                        {showPassword ? <FaEyeSlashTyped className="w-5 h-5" /> : <IconEye />}
+                                                    </button>
+                                                </div>
+                                                <ErrorMessage name="password" component="p" className="text-red-400 text-sm mt-1 flex items-center gap-1" />
+                                            </div>
+                                            <button
+                                                type="submit"
+                                                disabled={loading || isSubmitting}
+                                                className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-semibold py-3 rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-blue-500/25 transform disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-2 mt-6"
+                                            >
+                                                {loading || isSubmitting ? (
+                                                    <>
+                                                        <span className="animate-spin border-2 border-white border-l-transparent rounded-full w-5 h-5 inline-block"></span>
+                                                        <span>{t('register.form.button.loading')}</span>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <span>{t('register.form.button.default')}</span>
+                                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                                        </svg>
+                                                    </>
+                                                )}
+                                            </button>
+                                        </Form>
+                                    );
+                                }}
                             </Formik>
                             <div className="mt-8 text-center">
                                 <p className="text-gray-300">
