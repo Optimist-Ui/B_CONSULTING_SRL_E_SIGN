@@ -2504,7 +2504,7 @@
             "reason": "Raison :"
         },
         "pageInfo": "Page {{current}} sur {{total}}",
-        "fieldsOnPage": "{{count}} champ{{#count !== 1 ? 's' : ''}} sur cette page",
+        "fieldsOnPage": "{{count}} champs sur cette page",
         "reviewComplete": {
             "title": "Examen du document terminé",
             "message": "Vous avez atteint la fin du document. Veuillez examiner tous les champs et accepter les conditions ci-dessous pour procéder à la signature."

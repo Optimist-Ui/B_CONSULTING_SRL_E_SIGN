@@ -2475,7 +2475,7 @@
             "reason": "Anledning:"
         },
         "pageInfo": "Sida {{current}} av {{total}}",
-        "fieldsOnPage": "{{count}} fält{{#count !== 1 ? '' : ''}} på denna sida",
+        "fieldsOnPage": "{{count}} fält på denna sida",
         "reviewComplete": {
             "title": "Dokumentgranskning Slutförd",
             "message": "Du har nått slutet av dokumentet. Vänligen granska alla fält och acceptera villkoren nedan för att fortsätta med signeringen."

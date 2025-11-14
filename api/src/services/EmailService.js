@@ -481,10 +481,11 @@ class EmailService {
 
   /**
    * Sends a single, consolidated notification to any participant who must take action.
+   * Includes both app deep link and web fallback options.
    * @param {object} recipient - The recipient contact object { contactName, contactEmail, language }.
-   * @param {object} packageDetails - The package object { name }.
+   * @param {object} packageDetails - The package object { name, _id }.
    * @param {string} senderName - The name of the user who initiated the package.
-   * @param {string} actionUrl - The unique URL for the recipient to access the package.
+   * @param {string} actionUrl - The unique URL for the recipient to access the package (web).
    * @param {string} customMessage - The optional custom message from the sender.
    */
   async sendActionRequiredNotification(
@@ -513,6 +514,14 @@ class EmailService {
       { sender_name: senderName }
     );
 
+    // Generate deep link for the app using the package ID and recipient ID
+    // actionUrl format: ${CLIENT_URL}/package/${pkg._id}/participant/${user.id}
+    // Extract participant ID from actionUrl for the deep link
+    const participantId = recipient.id;
+    const appDeepLink = `esign://package/${packageDetails._id}/participant/${participantId}?action=sign`;
+
+    console.log(appDeepLink);
+
     const msg = {
       to: recipient.contactEmail,
       from: this.fromEmail,
@@ -525,8 +534,18 @@ class EmailService {
         custom_message_header: customMessageHeaderText,
         custom_message: customMessage,
         has_custom_message: !!customMessage,
-        action_link: actionUrl,
-        button_text: content.buttonText,
+
+        // App deep link (primary action)
+        app_deep_link: appDeepLink,
+        app_button_text: content.appButtonText,
+
+        // Web link (fallback/secondary action) - using the actionUrl passed in
+        web_action_link: actionUrl,
+        web_button_text: content.webButtonText,
+
+        // Divider text
+        or_text: content.orText,
+
         instruction_text: content.instructionText,
         footer_text: content.footerText,
         unsubscribe_text: content.unsubscribe,
@@ -1594,6 +1613,152 @@ class EmailService {
     } catch (error) {
       console.error(
         `Error sending trial to active transition email to ${user.email}:`,
+        error.response?.body || error
+      );
+    }
+  }
+
+  /**
+   * Sends a reminder email 1 day before subscription expiry
+   * @param {object} user - The full user object
+   * @param {string} planName - The name of the expiring plan
+   * @param {Date} expiryDateObject - The Date object when subscription expires
+   * @param {number} documentsUsed - Number of documents used
+   * @param {number} documentLimit - Total document limit
+   */
+  async sendSubscriptionExpiryReminder(
+    user,
+    planName,
+    expiryDateObject,
+    documentsUsed,
+    documentLimit
+  ) {
+    const language = user.language || "en";
+    const content = getEmailContent("subscriptionExpiryReminder", language);
+
+    const greetingText = this._replacePlaceholders(content.greeting, {
+      user_name: user.firstName,
+    });
+    const messageText = this._replacePlaceholders(content.message, {
+      plan_name: planName,
+      expiry_date: new Intl.DateTimeFormat(language, {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      }).format(expiryDateObject),
+    });
+
+    const formattedExpiryDate = new Intl.DateTimeFormat(language, {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    }).format(expiryDateObject);
+
+    const msg = {
+      to: user.email,
+      from: this.fromEmail,
+      templateId: process.env.SENDGRID_SUBSCRIPTION_EXPIRY_REMINDER_TEMPLATE_ID,
+      dynamic_template_data: {
+        subject: content.subject,
+        heading: content.heading,
+        greeting: greetingText,
+        message: messageText,
+        plan_label: content.planLabel,
+        plan_name: planName,
+        expiry_label: content.expiryLabel,
+        expiry_date: formattedExpiryDate,
+        documents_label: content.documentsLabel,
+        documents_used: `${documentsUsed} / ${documentLimit}`,
+        button_text: content.buttonText,
+        billing_portal_link: `${process.env.CLIENT_URL}/subscriptions`,
+        manage_subscription_text: content.manageSubscriptionText,
+        billing_portal_link_text: content.billingPortalLinkText,
+        unsubscribe: content.unsubscribe,
+        unsubscribe_preferences: content.preferences,
+      },
+    };
+
+    try {
+      await sgMail.send(msg);
+      console.log(
+        `Subscription expiry reminder sent to: ${user.email} in ${language}`
+      );
+    } catch (error) {
+      console.error(
+        `Error sending subscription expiry reminder to ${user.email}:`,
+        error.response?.body || error
+      );
+    }
+  }
+
+  /**
+   * Sends a confirmation email when subscription has expired
+   * @param {object} user - The full user object
+   * @param {string} planName - The name of the expired plan
+   * @param {Date} expiryDateObject - The Date object when subscription expired
+   * @param {number} documentsUsed - Number of documents used
+   * @param {number} documentLimit - Total document limit
+   */
+  async sendSubscriptionExpiredEmail(
+    user,
+    planName,
+    expiryDateObject,
+    documentsUsed,
+    documentLimit
+  ) {
+    const language = user.language || "en";
+    const content = getEmailContent("subscriptionExpired", language);
+
+    const greetingText = this._replacePlaceholders(content.greeting, {
+      user_name: user.firstName,
+    });
+    const messageText = this._replacePlaceholders(content.message, {
+      plan_name: planName,
+      expiry_date: new Intl.DateTimeFormat(language, {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      }).format(expiryDateObject),
+    });
+
+    const formattedExpiryDate = new Intl.DateTimeFormat(language, {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    }).format(expiryDateObject);
+
+    const msg = {
+      to: user.email,
+      from: this.fromEmail,
+      templateId: process.env.SENDGRID_SUBSCRIPTION_EXPIRED_TEMPLATE_ID,
+      dynamic_template_data: {
+        subject: content.subject,
+        heading: content.heading,
+        greeting: greetingText,
+        message: messageText,
+        plan_label: content.planLabel,
+        plan_name: planName,
+        expiry_label: content.expiryLabel,
+        expiry_date: formattedExpiryDate,
+        documents_label: content.documentsLabel,
+        documents_used: `${documentsUsed} / ${documentLimit}`,
+        button_text: content.buttonText,
+        billing_portal_link: `${process.env.CLIENT_URL}/subscriptions`,
+        manage_subscription_text: content.manageSubscriptionText,
+        billing_portal_link_text: content.billingPortalLinkText,
+        unsubscribe: content.unsubscribe,
+        unsubscribe_preferences: content.preferences,
+      },
+    };
+
+    try {
+      await sgMail.send(msg);
+      console.log(
+        `Subscription expired notification sent to: ${user.email} in ${language}`
+      );
+    } catch (error) {
+      console.error(
+        `Error sending subscription expired email to ${user.email}:`,
         error.response?.body || error
       );
     }

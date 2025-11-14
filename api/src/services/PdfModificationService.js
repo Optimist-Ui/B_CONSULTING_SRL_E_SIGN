@@ -127,7 +127,17 @@ class PdfModificationService {
         const sig = field.value;
         const signerName = sig.signedBy;
         const signerEmail = sig.email || sig.signedByEmail || "N/A";
-        const signatureDate = new Date(sig.date).toLocaleString();
+        const signatureDate =
+          new Date(sig.date).toLocaleString("en-GB", {
+            timeZone: "UTC",
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+            hour12: false,
+          }) + " UTC";
         const signatureMethod = sig.method || "Email OTP";
         const otpCode = sig.otpCode || "N/A";
         const certificationText = "Digitally Signed by I-Sign.eu";
@@ -462,7 +472,22 @@ class PdfModificationService {
    * Creates a structured and professional audit trail.
    */
   createAuditTrail(pkg) {
-    const formatDate = (dateString) => new Date(dateString).toLocaleString();
+    const formatDate = (dateString) => {
+      if (!dateString) return "N/A";
+      const d = new Date(dateString);
+      return (
+        d.toLocaleString("en-GB", {
+          timeZone: "UTC",
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+          hour12: false,
+        }) + " UTC"
+      );
+    };
 
     let audit = {
       header: {
@@ -702,7 +727,19 @@ class PdfModificationService {
       currentY -= 14;
 
       // Draw date and IP
-      const dateText = `Signed: ${new Date(event.signedAt).toLocaleString()}`;
+      const dateText = `Signed: ${new Date(event.signedAt).toLocaleString(
+        "en-GB",
+        {
+          timeZone: "UTC",
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+          hour12: false,
+        }
+      )} UTC`;
       page.drawText(dateText, {
         x: margin + 20,
         y: currentY,
@@ -810,7 +847,19 @@ class PdfModificationService {
         currentY -= 13;
 
         // Draw date
-        const dateText = `Filled: ${new Date(event.filledAt).toLocaleString()}`;
+        const dateText = `Filled: ${new Date(event.filledAt).toLocaleString(
+          "en-GB",
+          {
+            timeZone: "UTC",
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+            hour12: false,
+          }
+        )} UTC`;
         page.drawText(dateText, {
           x: margin + 20,
           y: currentY,
