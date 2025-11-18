@@ -2475,7 +2475,7 @@
             "reason": "Ok:"
         },
         "pageInfo": "{{current}}. oldal a {{total}} oldalból",
-        "fieldsOnPage": "{{count}} mező{{#count !== 1 ? '' : ''}} ezen az oldalon",
+        "fieldsOnPage": "{{count}} mező ezen az oldalon",
         "reviewComplete": {
             "title": "Dokumentum Áttekintés Befejezve",
             "message": "Elérte a dokumentum végét. Kérjük, tekintse át az összes mezőt, és fogadja el az alábbi feltételeket az aláírás folytatásához."

@@ -2475,7 +2475,7 @@
             "reason": "Motivo:"
         },
         "pageInfo": "Pagina {{current}} di {{total}}",
-        "fieldsOnPage": "{{count}} campo{{#count !== 1 ? 'i' : ''}} in questa pagina",
+        "fieldsOnPage": "{{count}} campo in questa pagina",
         "reviewComplete": {
             "title": "Revisione Documento Completata",
             "message": "Hai raggiunto la fine del documento. Rivedi tutti i campi e accetta i termini di seguito per procedere con la firma."

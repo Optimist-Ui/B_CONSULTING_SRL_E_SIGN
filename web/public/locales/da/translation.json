@@ -2475,7 +2475,7 @@
             "reason": "Årsag:"
         },
         "pageInfo": "Side {{current}} af {{total}}",
-        "fieldsOnPage": "{{count}} felt{{#count !== 1 ? 'er' : ''}} på denne side",
+        "fieldsOnPage": "{{count}} felter på denne side",
         "reviewComplete": {
             "title": "Dokumentgennemgang Fuldført",
             "message": "Du er nået til slutningen af dokumentet. Gennemgå venligst alle felter og accepter vilkårene nedenfor for at fortsætte med underskrivelsen."
