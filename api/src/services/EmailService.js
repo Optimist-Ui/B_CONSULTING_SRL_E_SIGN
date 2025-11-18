@@ -536,7 +536,7 @@ class EmailService {
         has_custom_message: !!customMessage,
 
         // App deep link (primary action)
-        app_deep_link: appDeepLink,
+        app_deep_link: actionUrl,
         app_button_text: content.appButtonText,
 
         // Web link (fallback/secondary action) - using the actionUrl passed in

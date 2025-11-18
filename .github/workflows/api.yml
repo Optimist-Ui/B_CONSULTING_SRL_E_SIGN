@@ -15,7 +15,13 @@ jobs:
     runs-on: ubuntu-latest
 
     environment:
-      name: ${{ github.ref_name == 'main' && 'production' || (github.ref_name == 'dev' && 'development' || github.ref_name) }}
+      name: >-
+        ${{ 
+          github.ref_name == 'main' && 'production' ||
+          github.ref_name == 'uat' && 'uat' ||
+          github.ref_name == 'dev' && 'development' ||
+          'development'
+        }}
 
     steps:
       - name: Checkout
@@ -30,168 +36,108 @@ jobs:
 
       - name: Set environment variables
         run: |
-          echo "ECR_REPO=${{ secrets.ECR_REPO_API }}" >> $GITHUB_ENV
+          echo "ECR_REPO=${{ secrets.ECR_REPO_ESIGN }}" >> $GITHUB_ENV  # Use correct repo if different
           case "${{ github.ref_name }}" in
             dev)
-              echo "ENVIRONMENT=development" >> $GITHUB_ENV
-              echo "CONTAINER_NAME=esign-api-dev" >> $GITHUB_ENV
-              echo "HOST_PORT=3002" >> $GITHUB_ENV
+              echo "ENVIRONMENT=development"      >> $GITHUB_ENV
+              echo "CONTAINER_NAME=esign-api-dev"  >> $GITHUB_ENV
+              echo "HOST_PORT=4003"                >> $GITHUB_ENV
+              echo "EC2_HOST=${{ secrets.EC2_SHARED_DEV_UAT }}" >> $GITHUB_ENV
               ;;
             uat)
-              echo "ENVIRONMENT=uat" >> $GITHUB_ENV
-              echo "CONTAINER_NAME=esign-api-uat" >> $GITHUB_ENV
-              echo "HOST_PORT=3003" >> $GITHUB_ENV
+              echo "ENVIRONMENT=uat"              >> $GITHUB_ENV
+              echo "CONTAINER_NAME=esign-api-uat"  >> $GITHUB_ENV
+              echo "HOST_PORT=4004"                >> $GITHUB_ENV
+              echo "EC2_HOST=${{ secrets.EC2_SHARED_DEV_UAT }}" >> $GITHUB_ENV
               ;;
             main)
-              echo "ENVIRONMENT=production" >> $GITHUB_ENV
+              echo "ENVIRONMENT=production"        >> $GITHUB_ENV
               echo "CONTAINER_NAME=esign-api-prod" >> $GITHUB_ENV
-              echo "HOST_PORT=3001" >> $GITHUB_ENV
+              echo "HOST_PORT=3001"                >> $GITHUB_ENV
+              echo "EC2_HOST=${{ secrets.EC2_HOST }}" >> $GITHUB_ENV  # Prod isolated
               ;;
             *)
-              echo "ENVIRONMENT=development" >> $GITHUB_ENV
-              echo "CONTAINER_NAME=esign-api-dev" >> $GITHUB_ENV
-              echo "HOST_PORT=3002" >> $GITHUB_ENV
+              echo "ENVIRONMENT=development"      >> $GITHUB_ENV
+              echo "CONTAINER_NAME=esign-api-dev"  >> $GITHUB_ENV
+              echo "HOST_PORT=4003"                >> $GITHUB_ENV
+              echo "EC2_HOST=${{ secrets.EC2_SHARED_DEV_UAT }}" >> $GITHUB_ENV
               ;;
           esac
 
-      - name: Build & Push image
+      - name: Test AWS & ECR access
         run: |
-          AWS_ACCOUNT_ID="${{ secrets.AWS_ACCOUNT_ID }}"
-          AWS_REGION="${{ env.AWS_REGION }}"
-          ECR_REPO="${{ env.ECR_REPO }}"
-          COMMIT_SHA="${{ github.sha }}"
+          aws sts get-caller-identity
+          aws ecr get-login-password --region ${{ env.AWS_REGION }} > /dev/null && echo "ECR OK"
 
-          IMAGE_URI="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO}:${COMMIT_SHA}"
-          ECR_REGISTRY="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
+      - name: Build & Push Docker image
+        run: |
+          IMAGE_URI="${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPO }}:${{ github.sha }}"
+          ECR_REGISTRY="${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com"
 
-          echo "Building Docker image..."
-          docker build -f infra/docker/Dockerfile.api -t $IMAGE_URI .
-
-          echo "Logging into ECR..."
-          aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY
-
-          echo "Pushing image to ECR..."
-          docker push $IMAGE_URI
-
+          docker build -f infra/docker/Dockerfile.api -t "$IMAGE_URI" .
+          aws ecr get-login-password --region ${{ env.AWS_REGION }} | docker login --username AWS --password-stdin "$ECR_REGISTRY"
+          docker push "$IMAGE_URI"
           echo "IMAGE_URI=$IMAGE_URI" >> $GITHUB_ENV
 
       - name: Deploy to EC2 via SSH
         uses: appleboy/ssh-action@v1.0.0
-        env:
-          AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
-          AWS_REGION: ${{ secrets.AWS_REGION }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          OPENAI_MODEL: ${{ secrets.OPENAI_MODEL }}
-          OPENAI_MAX_TOKENS: ${{ secrets.OPENAI_MAX_TOKENS }}
-          CHATBOT_CONFIDENCE_THRESHOLD: ${{ secrets.CHATBOT_CONFIDENCE_THRESHOLD }}
-          CHATBOT_MAX_HISTORY: ${{ secrets.CHATBOT_MAX_HISTORY }}
-          IMAGE_URI: ${{ env.IMAGE_URI }}
-          CONTAINER_NAME: ${{ env.CONTAINER_NAME }}
-          HOST_PORT: ${{ env.HOST_PORT }}
-          SENDGRID_TEMPLATES: ${{ secrets.SENDGRID_TEMPLATES }}
-          PORT: ${{ secrets.PORT }}
-          MONGO_URI: ${{ secrets.MONGO_URI }}
-          JWT_SECRET: ${{ secrets.JWT_SECRET }}
-          CLIENT_URL: ${{ secrets.CLIENT_URL }}
-          AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
-          S3_MAX_FILE_SIZE: ${{ secrets.S3_MAX_FILE_SIZE }}
-          S3_SIGNED_URL_EXPIRY: ${{ secrets.S3_SIGNED_URL_EXPIRY }}
-          SPRYNG_API_TOKEN: ${{ secrets.SPRYNG_API_TOKEN }}
-          BCRYPT_ROUNDS: ${{ secrets.BCRYPT_ROUNDS }}
-          REMINDER_CRON: ${{ secrets.REMINDER_CRON }}
-          ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
-          SENDGRID_FROM_EMAIL: ${{ secrets.SENDGRID_FROM_EMAIL }}
-          SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
-          STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
-          STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_WEBHOOK_SECRET }}
-          STARTER_YEARLY_PRICE_ID: ${{ secrets.STARTER_YEARLY_PRICE_ID }}
-          STARTER_MONTHLY_PRICE_ID: ${{ secrets.STARTER_MONTHLY_PRICE_ID }}
-          PRO_YEARLY_PRICE_ID: ${{ secrets.PRO_YEARLY_PRICE_ID }}
-          PRO_MONTHLY_PRICE_ID: ${{ secrets.PRO_MONTHLY_PRICE_ID }}
         with:
-          host: ${{ secrets.EC2_HOST }}
+          host: ${{ env.EC2_HOST }}
           username: ec2-user
           key: ${{ secrets.EC2_SSH_KEY }}
-          envs: AWS_ACCOUNT_ID,AWS_REGION,AWS_ACCESS_KEY_ID,AWS_SECRET_ACCESS_KEY,IMAGE_URI,CONTAINER_NAME,HOST_PORT,SENDGRID_TEMPLATES,PORT,MONGO_URI,JWT_SECRET,CLIENT_URL,AWS_S3_BUCKET,S3_MAX_FILE_SIZE,S3_SIGNED_URL_EXPIRY,OPENAI_API_KEY,OPENAI_MODEL,OPENAI_MAX_TOKENS,CHATBOT_CONFIDENCE_THRESHOLD,CHATBOT_MAX_HISTORY,SPRYNG_API_TOKEN,BCRYPT_ROUNDS,REMINDER_CRON,ADMIN_EMAIL,SENDGRID_FROM_EMAIL,SENDGRID_API_KEY,STRIPE_SECRET_KEY,STRIPE_WEBHOOK_SECRET,STARTER_YEARLY_PRICE_ID,STARTER_MONTHLY_PRICE_ID,PRO_YEARLY_PRICE_ID,PRO_MONTHLY_PRICE_ID
           script: |
-            set -e  # Exit on any error
+            IMAGE_URI="${{ env.IMAGE_URI }}"
+            CONTAINER_NAME="${{ env.CONTAINER_NAME }}"
+            HOST_PORT="${{ env.HOST_PORT }}"
 
-            # Set variables for clarity - these come from envs now
-            ECR_REGISTRY="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
+            # ECR Login (works via IAM role on EC2)
+            aws ecr get-login-password --region ${{ env.AWS_REGION }} | docker login --username AWS --password-stdin "${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com"
 
-            echo "=== Pre-deployment Cleanup ==="
-            # Clean up Docker system to free space
+            # Cleanup
+            docker stop "$CONTAINER_NAME" || true
+            docker rm -f "$CONTAINER_NAME" || true
             docker system prune -f
 
-            # Remove old images except the latest few
-            docker images --format "table {{.Repository}}:{{.Tag}}\t{{.CreatedAt}}" | grep esign-api | tail -n +6 | awk '{print $1}' | xargs -r docker rmi -f || true
+            # Pull new image
+            docker pull "$IMAGE_URI"
 
-            echo "=== Disk Space Check ==="
-            df -h /
-            docker system df
+            # Temp env file for SendGrid templates
+            echo "${{ secrets.SENDGRID_TEMPLATES }}" > /tmp/sendgrid_templates.env
 
-            echo "=== ECR Login ==="
-            aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY
-
-            echo "=== Pulling Image ==="
-            echo "Pulling image: $IMAGE_URI"
-            docker pull $IMAGE_URI
-
-            echo "=== Container Management ==="
-            # Stop and remove existing container
-            docker stop $CONTAINER_NAME || true
-            docker rm -f $CONTAINER_NAME || true
-
-            echo "=== Environment Setup ==="
-            # Create temporary env file for SendGrid templates
-            echo "$SENDGRID_TEMPLATES" > /tmp/sendgrid_templates.env
-
-            echo "=== Container Deployment ==="
-            echo "Running container with IMAGE_URI: $IMAGE_URI"
-            # Run new container with environment-specific variables
+            # Run container — ALL env vars preserved exactly
             docker run -d \
               --env-file /tmp/sendgrid_templates.env \
               --name "$CONTAINER_NAME" \
               --restart unless-stopped \
-              -p "$HOST_PORT:$PORT" \
-              -e "PORT=$PORT" \
-              -e "MONGO_URI=$MONGO_URI" \
-              -e "JWT_SECRET=$JWT_SECRET" \
-              -e "CLIENT_URL=$CLIENT_URL" \
-              -e "AWS_REGION=$AWS_REGION" \
-              -e "AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID" \
-              -e "AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY" \
-              -e "AWS_S3_BUCKET=$AWS_S3_BUCKET" \
-              -e "OPENAI_API_KEY=$OPENAI_API_KEY" \
-              -e "OPENAI_MODEL=$OPENAI_MODEL" \
-              -e "OPENAI_MAX_TOKENS=$OPENAI_MAX_TOKENS" \
-              -e "CHATBOT_CONFIDENCE_THRESHOLD=$CHATBOT_CONFIDENCE_THRESHOLD" \
-              -e "CHATBOT_MAX_HISTORY=$CHATBOT_MAX_HISTORY" \
-              -e "S3_SIGNED_URL_EXPIRY=$S3_SIGNED_URL_EXPIRY" \
-              -e "S3_MAX_FILE_SIZE=$S3_MAX_FILE_SIZE" \
-              -e "SPRYNG_API_TOKEN=$SPRYNG_API_TOKEN" \
-              -e "STRIPE_WEBHOOK_SECRET=$STRIPE_WEBHOOK_SECRET" \
-              -e "STRIPE_SECRET_KEY=$STRIPE_SECRET_KEY" \
-              -e "STARTER_YEARLY_PRICE_ID=$STARTER_YEARLY_PRICE_ID" \
-              -e "STARTER_MONTHLY_PRICE_ID=$STARTER_MONTHLY_PRICE_ID" \
-              -e "PRO_YEARLY_PRICE_ID=$PRO_YEARLY_PRICE_ID" \
-              -e "PRO_MONTHLY_PRICE_ID=$PRO_MONTHLY_PRICE_ID" \
-              -e "BCRYPT_ROUNDS=$BCRYPT_ROUNDS" \
-              -e "REMINDER_CRON=$REMINDER_CRON" \
-              -e "ADMIN_EMAIL=$ADMIN_EMAIL" \
-              -e "SENDGRID_FROM_EMAIL=$SENDGRID_FROM_EMAIL" \
-              -e "SENDGRID_API_KEY=$SENDGRID_API_KEY" \
+              -p "$HOST_PORT:${{ secrets.PORT }}" \
+              -e PORT="${{ secrets.PORT }}" \
+              -e MONGO_URI="${{ secrets.MONGO_URI }}" \
+              -e JWT_SECRET="${{ secrets.JWT_SECRET }}" \
+              -e CLIENT_URL="${{ secrets.CLIENT_URL }}" \
+              -e AWS_REGION="${{ env.AWS_REGION }}" \
+              -e AWS_ACCESS_KEY_ID="${{ secrets.AWS_ACCESS_KEY_ID }}" \
+              -e AWS_SECRET_ACCESS_KEY="${{ secrets.AWS_SECRET_ACCESS_KEY }}" \
+              -e AWS_S3_BUCKET="${{ secrets.AWS_S3_BUCKET }}" \
+              -e OPENAI_API_KEY="${{ secrets.OPENAI_API_KEY }}" \
+              -e OPENAI_MODEL="${{ secrets.OPENAI_MODEL }}" \
+              -e OPENAI_MAX_TOKENS="${{ secrets.OPENAI_MAX_TOKENS }}" \
+              -e CHATBOT_CONFIDENCE_THRESHOLD="${{ secrets.CHATBOT_CONFIDENCE_THRESHOLD }}" \
+              -e CHATBOT_MAX_HISTORY="${{ secrets.CHATBOT_MAX_HISTORY }}" \
+              -e S3_MAX_FILE_SIZE="${{ secrets.S3_MAX_FILE_SIZE }}" \
+              -e S3_SIGNED_URL_EXPIRY="${{ secrets.S3_SIGNED_URL_EXPIRY }}" \
+              -e SPRYNG_API_TOKEN="${{ secrets.SPRYNG_API_TOKEN }}" \
+              -e BCRYPT_ROUNDS="${{ secrets.BCRYPT_ROUNDS }}" \
+              -e REMINDER_CRON="${{ secrets.REMINDER_CRON }}" \
+              -e ADMIN_EMAIL="${{ secrets.ADMIN_EMAIL }}" \
+              -e SENDGRID_FROM_EMAIL="${{ secrets.SENDGRID_FROM_EMAIL }}" \
+              -e SENDGRID_API_KEY="${{ secrets.SENDGRID_API_KEY }}" \
+              -e STRIPE_SECRET_KEY="${{ secrets.STRIPE_SECRET_KEY }}" \
+              -e STRIPE_WEBHOOK_SECRET="${{ secrets.STRIPE_WEBHOOK_SECRET }}" \
+              -e STARTER_YEARLY_PRICE_ID="${{ secrets.STARTER_YEARLY_PRICE_ID }}" \
+              -e STARTER_MONTHLY_PRICE_ID="${{ secrets.STARTER_MONTHLY_PRICE_ID }}" \
+              -e PRO_YEARLY_PRICE_ID="${{ secrets.PRO_YEARLY_PRICE_ID }}" \
+              -e PRO_MONTHLY_PRICE_ID="${{ secrets.PRO_MONTHLY_PRICE_ID }}" \
               "$IMAGE_URI"
 
-            echo "=== Verification ==="
-            # Verify container is running
-            sleep 5
-            docker ps | grep "$CONTAINER_NAME"
-
-            echo "=== Cleanup ==="
-            # Clean up temporary file
             rm -f /tmp/sendgrid_templates.env
-
-            echo "✅ Deployment completed for $CONTAINER_NAME on port $HOST_PORT"
+            echo "Deployed $CONTAINER_NAME → Port $HOST_PORT"
