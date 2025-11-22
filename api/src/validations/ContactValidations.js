@@ -10,7 +10,6 @@ const createContactValidation = [
   body("email").isEmail().withMessage("A valid email is required"),
   body("title").optional().isString().withMessage("Title must be a string"),
   body("phone")
-    .optional()
     .isString()
     .withMessage("Phone must be a valid phone number format"),
   body("dob")
@@ -48,7 +47,6 @@ const updateContactValidation = [
   body("email").optional().isEmail().withMessage("A valid email is required"),
   body("title").optional().isString().withMessage("Title must be a string"),
   body("phone")
-    .optional()
     .isString()
     .withMessage("Phone must be a valid phone number format"),
   body("dob")
