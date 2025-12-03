@@ -2476,7 +2476,7 @@
             "reason": "Grund:"
         },
         "pageInfo": "Seite {{current}} von {{total}}",
-        "fieldsOnPage": "{{count}} Feld{{#count !== 1 ? 'er' : ''}} auf dieser Seite",
+        "fieldsOnPage": "{{count}} Feld auf dieser Seite",
         "reviewComplete": {
             "title": "Dokumentprüfung abgeschlossen",
             "message": "Sie haben das Ende des Dokuments erreicht. Bitte überprüfen Sie alle Felder und akzeptieren Sie die unten stehenden Bedingungen, um mit der Unterzeichnung fortzufahren."

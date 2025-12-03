@@ -7,11 +7,11 @@ const contactSchema = new Schema(
     firstName: { type: String, required: true },
     lastName: { type: String, required: true },
     email: { type: String, required: true, trim: true, lowercase: true },
-    title: { type: String }, // e.g., "CEO", "Project Manager"
-    phone: { type: String },
+    title: { type: String },
+    phone: { type: String, required: true },
     dob: { type: Date },
     language: { type: String, default: "en" },
-    // For custom fields, a flexible key-value map is best
+    // For custom fields,
     customFields: {
       type: Map,
       of: String,

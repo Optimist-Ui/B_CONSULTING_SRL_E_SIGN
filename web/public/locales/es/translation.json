@@ -2479,7 +2479,7 @@
             "reason": "Motivo:"
         },
         "pageInfo": "Página {{current}} de {{total}}",
-        "fieldsOnPage": "{{count}} campo{{#count !== 1 ? 's' : ''}} en esta página",
+        "fieldsOnPage": "{{count}} campo en esta página",
         "reviewComplete": {
             "title": "Revisión del Documento Completa",
             "message": "Has llegado al final del documento. Por favor, revisa todos los campos y acepta los términos a continuación para proceder con la firma."

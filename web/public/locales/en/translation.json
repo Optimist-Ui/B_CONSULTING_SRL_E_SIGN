@@ -2475,7 +2475,7 @@
             "reason": "Reason:"
         },
         "pageInfo": "Page {{current}} of {{total}}",
-        "fieldsOnPage": "{{count}} field{{#count !== 1 ? 's' : ''}} on this page",
+        "fieldsOnPage": "{{count}} field on this page",
         "reviewComplete": {
             "title": "Document Review Complete",
             "message": "You have reached the end of the document. Please review all fields and accept the terms below to proceed with signing."

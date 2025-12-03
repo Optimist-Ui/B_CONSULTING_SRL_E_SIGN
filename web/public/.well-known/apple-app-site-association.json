@@ -1,0 +1,16 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "69QX53F9VW.com.isign.app",
+        "paths": [
+          "/reset-password/*",
+          "/verify-email/*",
+          "/package/*/participant/*",
+          "/package/*/participant/*/review"
+        ]
+      }
+    ]
+  }
+}

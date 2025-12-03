@@ -111,6 +111,10 @@ const userSchema = new Schema(
       type: Boolean,
       default: false,
     },
+    subscriptionExpiryReminderSent: {
+      type: Date,
+      sparse: true,
+    },
     isDeactivated: { type: Boolean, default: false },
     deactivationDate: { type: Date, sparse: true },
     deletionScheduledAt: { type: Date, sparse: true },

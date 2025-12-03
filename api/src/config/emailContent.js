@@ -878,9 +878,11 @@ const emailContent = {
       message:
         '<strong>{{sender_name}}</strong> has sent you the document "<strong>{{package_name}}</strong>" which requires your input.',
       customMessageHeader: "A message from {{sender_name}}:",
-      buttonText: "Access Document",
+      appButtonText: "Open in App",
+      webButtonText: "Open in Browser",
+      orText: "or",
       instructionText:
-        "Please follow the link to complete your assigned tasks.",
+        "Click 'Open in App' if you have i-sign installed, or use 'Open in Browser' to access from any device.",
       footerText:
         "Questions about this document? Reply to this email to contact the sender directly.",
       unsubscribe: "Unsubscribe",
@@ -892,9 +894,11 @@ const emailContent = {
       message:
         '<strong>{{sender_name}}</strong> te ha enviado el documento "<strong>{{package_name}}</strong>" que requiere tu intervención.',
       customMessageHeader: "Un mensaje de {{sender_name}}:",
-      buttonText: "Acceder al documento",
+      appButtonText: "Abrir en la aplicación",
+      webButtonText: "Abrir en el navegador",
+      orText: "o",
       instructionText:
-        "Por favor, sigue el enlace para completar las tareas asignadas.",
+        "Haz clic en 'Abrir en la aplicación' si tienes i-sign instalado, o usa 'Abrir en el navegador' para acceder desde cualquier dispositivo.",
       footerText:
         "¿Preguntas sobre este documento? Responde a este correo para contactar directamente al remitente.",
       unsubscribe: "Darse de baja",
@@ -906,9 +910,11 @@ const emailContent = {
       message:
         "<strong>{{sender_name}}</strong> vous a envoyé le document « <strong>{{package_name}}</strong> » qui nécessite votre intervention.",
       customMessageHeader: "Un message de {{sender_name}} :",
-      buttonText: "Accéder au document",
+      appButtonText: "Ouvrir dans l'application",
+      webButtonText: "Ouvrir dans le navigateur",
+      orText: "ou",
       instructionText:
-        "Veuillez suivre le lien pour accomplir les tâches qui vous sont assignées.",
+        "Cliquez sur 'Ouvrir dans l'application' si vous avez i-sign installé, ou utilisez 'Ouvrir dans le navigateur' pour y accéder depuis n'importe quel appareil.",
       footerText:
         "Des questions sur ce document ? Répondez à cet e-mail pour contacter directement l'expéditeur.",
       unsubscribe: "Se désabonner",
@@ -918,11 +924,13 @@ const emailContent = {
       heading: "Ihre Handlung ist erforderlich",
       greeting: "Hallo {{recipient_name}},",
       message:
-        "<strong>{{sender_name}}</strong> hat Ihnen das Dokument „<strong>{{package_name}}</strong>“ gesendet, das Ihre Eingabe erfordert.",
+        '<strong>{{sender_name}}</strong> hat Ihnen das Dokument „<strong>{{package_name}}</strong>" gesendet, das Ihre Eingabe erfordert.',
       customMessageHeader: "Eine Nachricht von {{sender_name}}:",
-      buttonText: "Dokument aufrufen",
+      appButtonText: "In App öffnen",
+      webButtonText: "Im Browser öffnen",
+      orText: "oder",
       instructionText:
-        "Bitte folgen Sie dem Link, um Ihre zugewiesenen Aufgaben zu erledigen.",
+        "Klicken Sie auf 'In App öffnen', wenn Sie i-sign installiert haben, oder verwenden Sie 'Im Browser öffnen', um von jedem Gerät aus darauf zuzugreifen.",
       footerText:
         "Fragen zu diesem Dokument? Antworten Sie auf diese E-Mail, um den Absender direkt zu kontaktieren.",
       unsubscribe: "Abmelden",
@@ -934,8 +942,11 @@ const emailContent = {
       message:
         '<strong>{{sender_name}}</strong> ti ha inviato il documento "<strong>{{package_name}}</strong>" che richiede il tuo intervento.',
       customMessageHeader: "Un messaggio da {{sender_name}}:",
-      buttonText: "Accedi al documento",
-      instructionText: "Segui il link per completare i compiti assegnati.",
+      appButtonText: "Apri nell'app",
+      webButtonText: "Apri nel browser",
+      orText: "o",
+      instructionText:
+        "Fai clic su 'Apri nell'app' se hai i-sign installato, oppure usa 'Apri nel browser' per accedere da qualsiasi dispositivo.",
       footerText:
         "Domande su questo documento? Rispondi a questa email per contattare direttamente il mittente.",
       unsubscribe: "Annulla iscrizione",
@@ -947,9 +958,11 @@ const emailContent = {
       message:
         "Ο/Η <strong>{{sender_name}}</strong> σας έχει στείλει το έγγραφο «<strong>{{package_name}}</strong>» το οποίο απαιτεί τη συμβολή σας.",
       customMessageHeader: "Ένα μήνυμα από τον/την {{sender_name}}:",
-      buttonText: "Πρόσβαση στο έγγραφο",
+      appButtonText: "Άνοιγμα στην εφαρμογή",
+      webButtonText: "Άνοιγμα στο πρόγραμμα περιήγησης",
+      orText: "ή",
       instructionText:
-        "Παρακαλούμε ακολουθήστε τον σύνδεσμο για να ολοκληρώσετε τις ανατεθειμένες εργασίες σας.",
+        "Κάντε κλικ στο 'Άνοιγμα στην εφαρμογή' αν έχετε εγκαταστήσει το i-sign, ή χρησιμοποιήστε το 'Άνοιγμα στο πρόγραμμα περιήγησης' για πρόσβαση από οποιαδήποτε συσκευή.",
       footerText:
         "Ερωτήσεις σχετικά με αυτό το έγγραφο; Απαντήστε σε αυτό το email για να επικοινωνήσετε απευθείας με τον αποστολέα.",
       unsubscribe: "Διαγραφή",
@@ -2271,6 +2284,199 @@ const emailContent = {
       unsubscribe: "Διαγραφή",
       preferences: "Προτιμήσεις διαγραφής",
     },
+  },
+  subscriptionExpiryReminder: {
+    en: {
+      subject: "Your I-Sign Subscription Expires Tomorrow",
+      heading: "Your Subscription Expires Soon",
+      greeting: "Hello {{user_name}},",
+      message:
+        "Your <strong>{{plan_name}}</strong> subscription will expire on <strong>{{expiry_date}}</strong>. To continue enjoying uninterrupted access, please renew your subscription.",
+      planLabel: "Current Plan",
+      expiryLabel: "Expires On",
+      documentsLabel: "Documents Used",
+      buttonText: "Renew Subscription",
+      manageSubscriptionText: "Manage your subscription from your",
+      billingPortalLinkText: "billing portal",
+      unsubscribe: "Unsubscribe",
+      preferences: "Unsubscribe Preferences",
+    },
+    es: {
+      subject: "Tu suscripción a I-Sign expira mañana",
+      heading: "Tu suscripción expira pronto",
+      greeting: "Hola {{user_name}},",
+      message:
+        "Tu suscripción <strong>{{plan_name}}</strong> expirará el <strong>{{expiry_date}}</strong>. Para seguir disfrutando de acceso ininterrumpido, renueva tu suscripción.",
+      planLabel: "Plan actual",
+      expiryLabel: "Expira el",
+      documentsLabel: "Documentos utilizados",
+      buttonText: "Renovar suscripción",
+      manageSubscriptionText: "Gestiona tu suscripción desde tu",
+      billingPortalLinkText: "portal de facturación",
+      unsubscribe: "Darse de baja",
+      preferences: "Preferencias de cancelación",
+    },
+    fr: {
+      subject: "Votre abonnement I-Sign expire demain",
+      heading: "Votre abonnement expire bientôt",
+      greeting: "Bonjour {{user_name}},",
+      message:
+        "Votre abonnement <strong>{{plan_name}}</strong> expirera le <strong>{{expiry_date}}</strong>. Pour continuer à profiter d’un accès ininterrompu, veuillez renouveler votre abonnement.",
+      planLabel: "Forfait actuel",
+      expiryLabel: "Expire le",
+      documentsLabel: "Documents utilisés",
+      buttonText: "Renouveler l’abonnement",
+      manageSubscriptionText: "Gérez votre abonnement depuis votre",
+      billingPortalLinkText: "portail de facturation",
+      unsubscribe: "Se désabonner",
+      preferences: "Préférences de désabonnement",
+    },
+
+    de: {
+      subject: "Ihr I-Sign-Abonnement läuft morgen ab",
+      heading: "Ihr Abonnement läuft bald ab",
+      greeting: "Hallo {{user_name}},",
+      message:
+        "Ihr <strong>{{plan_name}}</strong>-Abonnement läuft am <strong>{{expiry_date}}</strong> ab. Um weiterhin ununterbrochenen Zugriff zu genießen, verlängern Sie bitte Ihr Abonnement.",
+      planLabel: "Aktueller Plan",
+      expiryLabel: "Läuft ab am",
+      documentsLabel: "Verwendete Dokumente",
+      buttonText: "Abonnement verlängern",
+      manageSubscriptionText: "Verwalten Sie Ihr Abonnement in Ihrem",
+      billingPortalLinkText: "Abrechnungsportal",
+      unsubscribe: "Abmelden",
+      preferences: "Abmelde-Einstellungen",
+    },
+
+    it: {
+      subject: "Il tuo abbonamento I-Sign scade domani",
+      heading: "Il tuo abbonamento sta per scadere",
+      greeting: "Ciao {{user_name}},",
+      message:
+        "Il tuo abbonamento al piano <strong>{{plan_name}}</strong> scadrà il <strong>{{expiry_date}}</strong>. Per continuare a usufruire dell’accesso senza interruzioni, rinnova il tuo abbonamento.",
+      planLabel: "Piano attuale",
+      expiryLabel: "Scade il",
+      documentsLabel: "Documenti utilizzati",
+      buttonText: "Rinnova abbonamento",
+      manageSubscriptionText: "Gestisci il tuo abbonamento dal tuo",
+      billingPortalLinkText: "portale di fatturazione",
+      unsubscribe: "Annulla iscrizione",
+      preferences: "Preferenze di annullamento",
+    },
+
+    el: {
+      subject: "Η συνδρομή σας στο I-Sign λήγει αύριο",
+      heading: "Η συνδρομή σας λήγει σύντομα",
+      greeting: "Γεια σας {{user_name}},",
+      message:
+        "Η συνδρομή σας στο πρόγραμμα <strong>{{plan_name}}</strong> θα λήξει στις <strong>{{expiry_date}}</strong>. Για να συνεχίσετε να έχετε απρόσκοπτη πρόσβαση, παρακαλούμε ανανεώστε τη συνδρομή σας.",
+      planLabel: "Τρέχον πρόγραμμα",
+      expiryLabel: "Λήγει στις",
+      documentsLabel: "Έγγραφα που χρησιμοποιήθηκαν",
+      buttonText: "Ανανέωση συνδρομής",
+      manageSubscriptionText: "Διαχειριστείτε τη συνδρομή σας από την",
+      billingPortalLinkText: "πύλη χρεώσεων",
+      unsubscribe: "Διαγραφή",
+      preferences: "Προτιμήσεις διαγραφής",
+    },
+
+    // Add other languages similarly...
+  },
+  subscriptionExpired: {
+    en: {
+      subject: "Your I-Sign Subscription Has Expired",
+      heading: "Your Subscription Has Expired",
+      greeting: "Hello {{user_name}},",
+      message:
+        "Your <strong>{{plan_name}}</strong> subscription expired on <strong>{{expiry_date}}</strong>. To regain access to all features, please renew your subscription.",
+      planLabel: "Expired Plan",
+      expiryLabel: "Expired On",
+      documentsLabel: "Documents Used",
+      buttonText: "Renew Now",
+      manageSubscriptionText: "Renew your subscription from your",
+      billingPortalLinkText: "billing portal",
+      unsubscribe: "Unsubscribe",
+      preferences: "Unsubscribe Preferences",
+    },
+    es: {
+      subject: "Tu suscripción a I-Sign ha expirado",
+      heading: "Tu suscripción ha expirado",
+      greeting: "Hola {{user_name}},",
+      message:
+        "Tu suscripción <strong>{{plan_name}}</strong> expiró el <strong>{{expiry_date}}</strong>. Para recuperar el acceso a todas las funciones, renueva tu suscripción.",
+      planLabel: "Plan expirado",
+      expiryLabel: "Expiró el",
+      documentsLabel: "Documentos utilizados",
+      buttonText: "Renovar ahora",
+      manageSubscriptionText: "Renueva tu suscripción desde tu",
+      billingPortalLinkText: "portal de facturación",
+      unsubscribe: "Darse de baja",
+      preferences: "Preferencias de cancelación",
+    },
+    fr: {
+      subject: "Votre abonnement I-Sign a expiré",
+      heading: "Votre abonnement a expiré",
+      greeting: "Bonjour {{user_name}},",
+      message:
+        "Votre abonnement <strong>{{plan_name}}</strong> a expiré le <strong>{{expiry_date}}</strong>. Pour retrouver l’accès à toutes les fonctionnalités, veuillez renouveler votre abonnement.",
+      planLabel: "Forfait expiré",
+      expiryLabel: "Expiré le",
+      documentsLabel: "Documents utilisés",
+      buttonText: "Renouveler maintenant",
+      manageSubscriptionText: "Renouvelez votre abonnement depuis votre",
+      billingPortalLinkText: "portail de facturation",
+      unsubscribe: "Se désabonner",
+      preferences: "Préférences de désabonnement",
+    },
+
+    de: {
+      subject: "Ihr I-Sign-Abonnement ist abgelaufen",
+      heading: "Ihr Abonnement ist abgelaufen",
+      greeting: "Hallo {{user_name}},",
+      message:
+        "Ihr <strong>{{plan_name}}</strong>-Abonnement ist am <strong>{{expiry_date}}</strong> abgelaufen. Um wieder vollen Zugriff auf alle Funktionen zu erhalten, verlängern Sie bitte Ihr Abonnement.",
+      planLabel: "Abgelaufener Plan",
+      expiryLabel: "Abgelaufen am",
+      documentsLabel: "Verwendete Dokumente",
+      buttonText: "Jetzt verlängern",
+      manageSubscriptionText: "Verlängern Sie Ihr Abonnement in Ihrem",
+      billingPortalLinkText: "Abrechnungsportal",
+      unsubscribe: "Abmelden",
+      preferences: "Abmelde-Einstellungen",
+    },
+
+    it: {
+      subject: "Il tuo abbonamento I-Sign è scaduto",
+      heading: "Il tuo abbonamento è scaduto",
+      greeting: "Ciao {{user_name}},",
+      message:
+        "Il tuo abbonamento al piano <strong>{{plan_name}}</strong> è scaduto il <strong>{{expiry_date}}</strong>. Per riottenere l’accesso completo, rinnova il tuo abbonamento.",
+      planLabel: "Piano scaduto",
+      expiryLabel: "Scaduto il",
+      documentsLabel: "Documenti utilizzati",
+      buttonText: "Rinnova ora",
+      manageSubscriptionText: "Rinnova il tuo abbonamento dal tuo",
+      billingPortalLinkText: "portale di fatturazione",
+      unsubscribe: "Annulla iscrizione",
+      preferences: "Preferenze di annullamento",
+    },
+
+    el: {
+      subject: "Η συνδρομή σας στο I-Sign έχει λήξει",
+      heading: "Η συνδρομή σας έχει λήξει",
+      greeting: "Γεια σας {{user_name}},",
+      message:
+        "Η συνδρομή σας στο πρόγραμμα <strong>{{plan_name}}</strong> έληξε στις <strong>{{expiry_date}}</strong>. Για να ανακτήσετε πρόσβαση σε όλες τις λειτουργίες, παρακαλούμε ανανεώστε τη συνδρομή σας.",
+      planLabel: "Έληξε το πρόγραμμα",
+      expiryLabel: "Έληξε στις",
+      documentsLabel: "Έγγραφα που χρησιμοποιήθηκαν",
+      buttonText: "Ανανέωση τώρα",
+      manageSubscriptionText: "Ανανεώστε τη συνδρομή σας από την",
+      billingPortalLinkText: "πύλη χρεώσεων",
+      unsubscribe: "Διαγραφή",
+      preferences: "Προτιμήσεις διαγραφής",
+    },
+    // Add other languages similarly...
   },
   reviewRequest: {
     en: {
