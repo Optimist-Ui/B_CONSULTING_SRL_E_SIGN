@@ -2091,6 +2091,70 @@ class EmailService {
       throw error;
     }
   }
+
+  /**
+   * Sends a notification to the user when they've reached their document limit
+   * @param {object} user - User object { firstName, lastName, email, language }
+   * @param {string} packageName - Name of the package that was just created
+   */
+  async sendCreditLimitReachedNotification(user, packageName) {
+    const language = user.language || "en";
+    const content = getEmailContent("creditLimitReached", language);
+
+    const userName = `${user.firstName} ${user.lastName}`;
+
+    // Prepare dynamic content strings
+    const subjectText = this._replacePlaceholders(content.subject, {});
+    const greetingText = this._replacePlaceholders(content.greeting, {
+      user_name: userName,
+    });
+    const messageText = this._replacePlaceholders(content.message, {
+      package_name: packageName,
+    });
+
+    // Generate links
+    const upgradePlanLink = `${process.env.CLIENT_URL}/subscriptions`;
+    const dashboardLink = `${process.env.CLIENT_URL}/dashboard`;
+
+    const msg = {
+      to: user.email,
+      from: this.fromEmail,
+      templateId: process.env.SENDGRID_CREDIT_LIMIT_TEMPLATE_ID, // You'll need to create this template
+      dynamic_template_data: {
+        subject: subjectText,
+        heading: content.heading,
+        greeting: greetingText,
+        message: messageText,
+        warning_text: content.warningText,
+
+        // Primary action (upgrade plan)
+        action_link: upgradePlanLink,
+        action_button_text: content.actionButtonText,
+
+        // Secondary action (dashboard)
+        secondary_link: dashboardLink,
+        secondary_button_text: content.secondaryButtonText,
+
+        // Divider text
+        or_text: content.orText,
+
+        footer_text: content.footerText,
+        unsubscribe_text: content.unsubscribe,
+      },
+    };
+
+    try {
+      await sgMail.send(msg);
+      console.log(
+        `Credit limit reached email sent to ${user.email} in ${language} for package: ${packageName}`
+      );
+    } catch (error) {
+      console.error(
+        `Error sending credit limit reached email to ${user.email}:`,
+        error.response?.body || error
+      );
+    }
+  }
 }
 
 module.exports = EmailService;
