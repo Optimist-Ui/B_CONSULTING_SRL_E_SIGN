@@ -3072,6 +3072,98 @@ const emailContent = {
       preferences: "Προτιμήσεις διαγραφής",
     },
   },
+  creditLimitReached: {
+    en: {
+      subject: "Document Limit Reached - Action Required",
+      heading: "Your Document Limit Has Been Reached",
+      greeting: "Hello {{user_name}},",
+      message:
+        'You have successfully created the document "<strong>{{package_name}}</strong>", but this has used your last available document credit.',
+      warningText:
+        "You cannot create new documents until you upgrade your plan or purchase additional credits.",
+      actionButtonText: "Upgrade Plan",
+      secondaryButtonText: "View Dashboard",
+      orText: "or",
+      footerText:
+        "Need help choosing a plan? Contact our support team for assistance.",
+      unsubscribe: "Unsubscribe",
+    },
+    es: {
+      subject: "Límite de documentos alcanzado - Acción requerida",
+      heading: "Has alcanzado tu límite de documentos",
+      greeting: "Hola {{user_name}},",
+      message:
+        'Has creado exitosamente el documento "<strong>{{package_name}}</strong>", pero esto ha utilizado tu último crédito de documento disponible.',
+      warningText:
+        "No puedes crear nuevos documentos hasta que actualices tu plan o compres créditos adicionales.",
+      actionButtonText: "Actualizar plan",
+      secondaryButtonText: "Ver panel",
+      orText: "o",
+      footerText:
+        "¿Necesitas ayuda para elegir un plan? Contacta a nuestro equipo de soporte.",
+      unsubscribe: "Darse de baja",
+    },
+    fr: {
+      subject: "Limite de documents atteinte - Action requise",
+      heading: "Votre limite de documents a été atteinte",
+      greeting: "Bonjour {{user_name}},",
+      message:
+        "Vous avez créé avec succès le document « <strong>{{package_name}}</strong> », mais cela a utilisé votre dernier crédit de document disponible.",
+      warningText:
+        "Vous ne pouvez pas créer de nouveaux documents tant que vous n'avez pas mis à niveau votre forfait ou acheté des crédits supplémentaires.",
+      actionButtonText: "Mettre à niveau le forfait",
+      secondaryButtonText: "Voir le tableau de bord",
+      orText: "ou",
+      footerText:
+        "Besoin d'aide pour choisir un forfait ? Contactez notre équipe d'assistance.",
+      unsubscribe: "Se désabonner",
+    },
+    de: {
+      subject: "Dokumentlimit erreicht - Handlung erforderlich",
+      heading: "Ihr Dokumentlimit wurde erreicht",
+      greeting: "Hallo {{user_name}},",
+      message:
+        'Sie haben das Dokument „<strong>{{package_name}}</strong>" erfolgreich erstellt, aber dies hat Ihr letztes verfügbares Dokumentguthaben verwendet.',
+      warningText:
+        "Sie können keine neuen Dokumente erstellen, bis Sie Ihren Plan aktualisieren oder zusätzliche Guthaben kaufen.",
+      actionButtonText: "Plan aktualisieren",
+      secondaryButtonText: "Dashboard anzeigen",
+      orText: "oder",
+      footerText:
+        "Benötigen Sie Hilfe bei der Auswahl eines Plans? Kontaktieren Sie unser Support-Team.",
+      unsubscribe: "Abmelden",
+    },
+    it: {
+      subject: "Limite documenti raggiunto - Azione richiesta",
+      heading: "Hai raggiunto il limite di documenti",
+      greeting: "Ciao {{user_name}},",
+      message:
+        'Hai creato con successo il documento "<strong>{{package_name}}</strong>", ma questo ha utilizzato il tuo ultimo credito documento disponibile.',
+      warningText:
+        "Non puoi creare nuovi documenti finché non aggiorni il tuo piano o acquisti crediti aggiuntivi.",
+      actionButtonText: "Aggiorna piano",
+      secondaryButtonText: "Visualizza dashboard",
+      orText: "o",
+      footerText:
+        "Hai bisogno di aiuto nella scelta di un piano? Contatta il nostro team di supporto.",
+      unsubscribe: "Annulla iscrizione",
+    },
+    el: {
+      subject: "Το όριο εγγράφων επιτεύχθηκε - Απαιτείται ενέργεια",
+      heading: "Το όριο εγγράφων σας έχει επιτευχθεί",
+      greeting: "Γεια σας {{user_name}},",
+      message:
+        "Δημιουργήσατε με επιτυχία το έγγραφο «<strong>{{package_name}}</strong>», αλλά αυτό χρησιμοποίησε την τελευταία σας διαθέσιμη πίστωση εγγράφου.",
+      warningText:
+        "Δεν μπορείτε να δημιουργήσετε νέα έγγραφα μέχρι να αναβαθμίσετε το πλάνο σας ή να αγοράσετε επιπλέον πιστώσεις.",
+      actionButtonText: "Αναβάθμιση πλάνου",
+      secondaryButtonText: "Προβολή πίνακα ελέγχου",
+      orText: "ή",
+      footerText:
+        "Χρειάζεστε βοήθεια στην επιλογή ενός πλάνου; Επικοινωνήστε με την ομάδα υποστήριξής μας.",
+      unsubscribe: "Διαγραφή",
+    },
+  },
   // Add more email types here later (verification, password reset, etc.)
 };
 

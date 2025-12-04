@@ -443,9 +443,20 @@ const InteractiveField: React.FC<InteractiveFieldProps> = ({ field, value, rejec
                 );
             } else {
                 const currentUserAssignment = field.assignedUsers.find((user) => user.contactId === packageData?.currentUser?.contactId);
-                const signatureMethod = currentUserAssignment?.signatureMethod || t('interactiveField.emailOtp');
+                const signatureMethods = currentUserAssignment?.signatureMethods || [];
+                const signatureMethod = signatureMethods.length > 1 ? 'Both' : signatureMethods[0] || t('interactiveField.emailOtp');
 
                 const getSignatureMethodInfo = () => {
+                    // Check if there are multiple methods
+                    if (signatureMethods.length > 1 || signatureMethod === 'Both') {
+                        return {
+                            subtitle: t('interactiveField.chooseMethod'),
+                            iconColor: 'text-purple-600',
+                            bgGradient: 'bg-gradient-to-br from-purple-50 to-indigo-50',
+                            borderColor: 'border-purple-300',
+                        };
+                    }
+
                     switch (signatureMethod) {
                         case 'SMS OTP':
                             return {
@@ -460,13 +471,6 @@ const InteractiveField: React.FC<InteractiveFieldProps> = ({ field, value, rejec
                                 iconColor: 'text-indigo-600',
                                 bgGradient: 'bg-gradient-to-br from-indigo-50 to-blue-50',
                                 borderColor: 'border-indigo-300',
-                            };
-                        case 'Both':
-                            return {
-                                subtitle: t('interactiveField.chooseMethod'),
-                                iconColor: 'text-purple-600',
-                                bgGradient: 'bg-gradient-to-br from-purple-50 to-indigo-50',
-                                borderColor: 'border-purple-300',
                             };
                         default:
                             return {

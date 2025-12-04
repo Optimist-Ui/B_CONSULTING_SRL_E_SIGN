@@ -125,6 +125,10 @@ class PackageService {
       // Fetch the user and increment usage by the calculated credits
       const user = await this.User.findById(userId);
       if (user) {
+        // 🔥 NEW: Check if this will use the last credits
+        const remainingBefore = user.getRemainingDocuments();
+        const willReachLimit = remainingBefore === creditsNeeded;
+
         // Increment multiple times based on credits needed
         for (let i = 0; i < creditsNeeded; i++) {
           const success = user.incrementDocumentUsage();
@@ -135,6 +139,14 @@ class PackageService {
           }
         }
         await user.save();
+
+        // 🔥 NEW: Send warning email if limit reached
+        if (willReachLimit) {
+          await this.EmailService.sendCreditLimitReachedNotification(
+            user,
+            newPackage.name
+          );
+        }
       }
 
       const packageCreator = await this.User.findById(userId);
@@ -339,6 +351,10 @@ class PackageService {
       // Fetch the user and increment usage by the calculated credits
       const user = await this.User.findById(userId);
       if (user) {
+        // 🔥 NEW: Check if this will use the last credits
+        const remainingBefore = user.getRemainingDocuments();
+        const willReachLimit = remainingBefore === creditsNeeded;
+
         // Increment multiple times based on credits needed
         for (let i = 0; i < creditsNeeded; i++) {
           const success = user.incrementDocumentUsage();
@@ -349,6 +365,14 @@ class PackageService {
           }
         }
         await user.save();
+
+        // 🔥 NEW: Send warning email if limit reached
+        if (willReachLimit) {
+          await this.EmailService.sendCreditLimitReachedNotification(
+            user,
+            packageData.name
+          );
+        }
       }
 
       const packageCreator = await this.User.findById(userId);
@@ -690,6 +714,8 @@ class PackageService {
     }
 
     // --- All checks passed ---
+    // 🔥 CRITICAL: Store the method BEFORE deleting the OTP document
+    const verifiedMethod = otpDoc.method; // This will be "Email OTP" or "SMS OTP"
     await this.OTP.deleteOne({ _id: otpDoc._id });
 
     const pkg = await this.Package.findById(packageId).populate(
@@ -734,16 +760,23 @@ class PackageService {
         // Update audit trail properties
         userAssignment.signed = true;
         userAssignment.signedAt = signDate;
-        userAssignment.signedMethod = "Email OTP";
+        userAssignment.signedMethod = verifiedMethod; // 🔥 USE THE ACTUAL METHOD
         userAssignment.signedIP = ip;
         userAssignment.signedWithOtp = otp;
 
         // Store signature details in field value for UI
         field.value = {
           signedBy: userAssignment.contactName,
-          email: userAssignment.contactEmail,
+          email:
+            verifiedMethod === "Email OTP"
+              ? userAssignment.contactEmail
+              : undefined,
+          phone:
+            verifiedMethod === "SMS OTP"
+              ? assignedUser.contactPhone
+              : undefined, // 🔥 ADD PHONE FOR SMS
           date: signDate.toISOString(),
-          method: "Email OTP",
+          method: verifiedMethod, // 🔥 USE THE ACTUAL METHOD
           otpCode: otp,
         };
       }
@@ -1717,23 +1750,49 @@ class PackageService {
     );
 
     const signDate = new Date();
+    const participantContactId = assignedUser.contactId.toString();
 
-    // Update audit trail properties
-    assignedUser.signed = true;
-    assignedUser.signedAt = signDate;
-    assignedUser.signedMethod = method;
-    assignedUser.signedIP = ip;
-    assignedUser.signedWithOtp = otp;
+    // 🔥 NEW: Find ALL signature fields assigned to this participant
+    const allSignatureFieldsForParticipant = pkg.fields.filter(
+      (field) =>
+        field.type === "signature" &&
+        field.assignedUsers.some(
+          (user) =>
+            user.contactId.toString() === participantContactId &&
+            user.role === "Signer" &&
+            !user.signed // Only apply to unsigned fields
+        )
+    );
 
-    // Store signature details in field value for UI
-    field.value = {
-      signedBy: assignedUser.contactName,
-      email: assignedUser.contactEmail,
-      date: signDate.toISOString(),
-      method: method,
-      ip: ip, // Additional audit info
-      otpCode: otp,
-    };
+    // 🔥 Apply the signature to ALL matching fields at once
+    allSignatureFieldsForParticipant.forEach((field) => {
+      const userAssignment = field.assignedUsers.find(
+        (user) =>
+          user.contactId.toString() === participantContactId &&
+          user.role === "Signer"
+      );
+
+      if (userAssignment) {
+        // Update audit trail properties
+        userAssignment.signed = true;
+        userAssignment.signedAt = signDate;
+        userAssignment.signedMethod = method;
+        userAssignment.signedIP = ip;
+        userAssignment.signedWithOtp = otp;
+
+        // Store signature details in field value for UI
+        field.value = {
+          signedBy: userAssignment.contactName,
+          email:
+            method === "Email OTP" ? userAssignment.contactEmail : undefined,
+          phone: method === "SMS OTP" ? assignedUser.contactPhone : undefined, // 🔥 ADD PHONE FOR SMS
+          date: signDate.toISOString(),
+          method: method,
+          ip: ip,
+          otpCode: otp,
+        };
+      }
+    });
 
     // Check if package is completed
     if (this.isPackageCompleted(pkg)) {
@@ -1741,6 +1800,8 @@ class PackageService {
       const packageCreator = await this.User.findById(pkg.ownerId);
       const initiatorName = `${packageCreator.firstName} ${packageCreator.lastName}`;
       await this._sendCompletionNotifications(pkg, initiatorName);
+    } else {
+      await this._sendActionUpdateNotification(pkg, assignedUser);
     }
 
     // Save changes
@@ -1756,8 +1817,9 @@ class PackageService {
     );
 
     return {
-      message: `Signature completed via ${method}.`,
+      message: `Signature completed via ${method} for ${allSignatureFieldsForParticipant.length} field(s).`,
       package: updatedPackageForParticipant,
+      fieldsSignedCount: allSignatureFieldsForParticipant.length,
       signatureDetails: {
         method: method,
         signedAt: signDate.toISOString(),
