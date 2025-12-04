@@ -23,7 +23,6 @@ interface ReadOnlyFieldProps {
 
 const ReadOnlyField: React.FC<ReadOnlyFieldProps> = ({ field, rejectionDetails, packageStatus }) => {
     const { t } = useTranslation();
-    console.log(field);
     // Determine field size category for responsive styling
     const getFieldSizeCategory = () => {
         const area = field.width * field.height;
