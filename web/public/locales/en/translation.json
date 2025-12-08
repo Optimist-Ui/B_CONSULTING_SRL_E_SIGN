@@ -2851,5 +2851,42 @@
     "languageSwitcher": {
         "title": "Language",
         "selectLanguage": "Select Language"
+    },
+    "apps": {
+        "tag": "Mobile Apps",
+        "title": {
+            "main": "Take Signatures",
+            "highlight": "On The Go"
+        },
+        "description": "Sign documents anytime, anywhere with our powerful mobile apps for iOS and Android.",
+        "features": {
+            "signAnywhere": {
+                "title": "Sign Anywhere",
+                "description": "Complete signatures on any device, anytime"
+            },
+            "emailSmsReminders": {
+                "title": "Email & SMS Reminders",
+                "description": "Automated reminders every 24 hours"
+            },
+            "reassignment": {
+                "title": "Easy Reassignment",
+                "description": "Transfer documents to new signers instantly"
+            },
+            "otpVerification": {
+                "title": "OTP Verification",
+                "description": "Sign securely via SMS or email OTP"
+            }
+        },
+        "download": {
+            "title": "Download Now",
+            "getItOn": "GET IT ON",
+            "downloadOn": "Download on the"
+        },
+        "stats": {
+            "rating": "App Store Rating",
+            "downloads": "Active Downloads",
+            "countries": "Countries",
+            "support": "Support"
+        }
     }
 }
