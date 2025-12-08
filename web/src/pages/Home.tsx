@@ -10,6 +10,7 @@ import HomeFooter from '../components/home/HomeFooter';
 import { organizationSchema, softwareAppSchema, serviceSchema, faqSchema, breadcrumbSchema } from '../components/SEO/StructuredData';
 import SEOHelmet from '../components/SEO/SEOHelmet';
 import { seoConfig } from '../utils/seoConfig';
+import HomeApps from '../components/home/HomeApps';
 
 const Home = () => {
     return (
@@ -27,6 +28,7 @@ const Home = () => {
                 <HomeNavbar />
                 <HomeHero />
                 <HomeFeatures />
+                <HomeApps /> 
                 <HomeWhyChoose />
                 <HomePlans />
                 <HomeFaq />
