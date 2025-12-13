@@ -1,5 +1,4 @@
 const { createContainer, asClass, asFunction, asValue } = require("awilix");
-const Stripe = require("stripe");
 const db = require("./db");
 const User = require("../models/UserModel");
 const Package = require("../models/PackageModel");

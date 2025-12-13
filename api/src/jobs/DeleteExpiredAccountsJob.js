@@ -1,11 +1,15 @@
+// src/jobs/DeleteExpiredAccountsJob.js - STRIPE COMPLETELY REMOVED
+
 const BaseJob = require("./BaseJob");
 
 class DeleteExpiredAccountsJob extends BaseJob {
   constructor(container) {
     super(container);
     this.userService = container.resolve("userService");
-    this.stripe = container.resolve("stripe");
     this.User = container.resolve("User");
+    this.vivaWalletSubscriptionService = container.resolve(
+      "vivaWalletSubscriptionService"
+    );
   }
 
   get schedule() {
@@ -23,19 +27,20 @@ class DeleteExpiredAccountsJob extends BaseJob {
 
     for (const user of expiredUsers) {
       try {
-        // Cancel subscription if it still exists
+        // ✅ Cancel subscription if it still exists
         if (user.subscription && user.subscription.subscriptionId) {
           try {
-            await this.stripe.subscriptions.cancel(
-              user.subscription.subscriptionId
+            // Cancel through Viva Wallet service
+            await this.vivaWalletSubscriptionService.cancelSubscription(
+              user._id
             );
             console.log(
               `Cancelled subscription ${user.subscription.subscriptionId} for user ${user._id}`
             );
-          } catch (stripeError) {
+          } catch (cancelError) {
             console.error(
               `Failed to cancel subscription for user ${user._id}:`,
-              stripeError.message
+              cancelError.message
             );
             // Continue with deletion even if cancellation fails
           }
@@ -52,9 +57,16 @@ class DeleteExpiredAccountsJob extends BaseJob {
       }
     }
 
+    this.updateLastRun();
+
     console.log(
       `Account deletion job completed. Processed ${expiredUsers.length} accounts.`
     );
+
+    return {
+      processed: expiredUsers.length,
+      message: "Account deletion completed",
+    };
   }
 }
 

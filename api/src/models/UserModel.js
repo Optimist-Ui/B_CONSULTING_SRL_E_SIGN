@@ -128,13 +128,6 @@ const userSchema = new Schema(
     // 🆕 Viva Wallet Payment Sources (stored locally)
     vivaWalletPaymentSources: [vivaWalletPaymentSourceSchema],
 
-    // Keep Stripe fields for backward compatibility (optional - remove if fully migrating)
-    stripeCustomerId: {
-      type: String,
-      unique: true,
-      sparse: true,
-    },
-
     subscription: {
       subscriptionId: { type: String },
       planId: { type: Schema.Types.ObjectId, ref: "Plan" },

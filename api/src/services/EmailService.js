@@ -1287,7 +1287,7 @@ class EmailService {
    * @param {string} planName - The name of the subscribed plan (e.g., "Pro").
    * @param {number} amount - The numeric amount charged (e.g., 19.99).
    * @param {Date} renewalDateObject - The Date object for when the subscription will renew.
-   * @param {string} invoiceUrl - The direct URL to the Stripe invoice.
+   * @param {string} invoiceUrl - The direct URL to the  invoice.
    */
   async sendSubscriptionConfirmation(
     user,
@@ -1539,7 +1539,7 @@ class EmailService {
    * @param {Date} firstBillingDateObject - When they were first charged.
    * @param {Date} nextBillingDateObject - When the next charge will occur.
    * @param {number} amount - The numeric amount charged.
-   * @param {string} invoiceUrl - Link to the Stripe invoice.
+   * @param {string} invoiceUrl - Link to the  invoice.
    */
   async sendTrialToActiveTransitionEmail(
     user,

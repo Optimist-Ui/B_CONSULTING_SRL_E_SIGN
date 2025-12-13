@@ -1,4 +1,4 @@
-// src/jobs/SubscriptionExpiryJob.js
+// src/jobs/SubscriptionExpiryJob.js - FIXED BILLING INTERVAL BUG
 
 const BaseJob = require("./BaseJob");
 const vivaConfig = require("../config/vivaWalletConfig");
@@ -151,10 +151,6 @@ class SubscriptionExpiryJob extends BaseJob {
       console.log(`   Billing: ${billingInterval}, Amount: €${amount / 100}`);
       console.log(`   Payment Source: ${defaultSource.transactionId}`);
 
-      const credentials = Buffer.from(
-        `${vivaConfig.merchantId}:${vivaConfig.apiKey}`
-      ).toString("base64");
-
       const recurringPaymentData = {
         Amount: amount,
         CustomerTrns: `${plan.name} subscription renewal`,
@@ -179,12 +175,10 @@ class SubscriptionExpiryJob extends BaseJob {
       const newTransactionId = paymentResponse.data.TransactionId;
       console.log(`✅ Renewal payment successful: ${newTransactionId}`);
 
-      // Calculate new period
+      // ✅ FIX: Calculate new period based on billing interval
       const now = new Date();
       const newPeriodEnd = new Date(user.subscription.current_period_end);
-      newPeriodEnd.setMonth(newPeriodEnd.getMonth() + 1);
 
-      // ✅ FIX: Extend period based on billing interval
       if (isYearly) {
         newPeriodEnd.setFullYear(newPeriodEnd.getFullYear() + 1);
       } else {
@@ -216,7 +210,7 @@ class SubscriptionExpiryJob extends BaseJob {
       user.subscription.current_period_start = now;
       user.subscription.current_period_end = newPeriodEnd;
       user.subscription.status = "active";
-      user.subscription.billingInterval = billingInterval;
+      user.subscription.billingInterval = billingInterval; // ✅ Preserve billing interval
 
       await user.save();
 
@@ -268,10 +262,18 @@ class SubscriptionExpiryJob extends BaseJob {
         const plan = await this.planService.findPlanById(
           user.subscription.planId
         );
+
+        // ✅ FIX: Use billing interval to determine amount
+        const billingInterval = user.subscription.billingInterval || "month";
+        const isYearly = billingInterval === "year";
+        const amount = plan
+          ? (isYearly ? plan.yearlyPrice : plan.monthlyPrice) / 100
+          : 0;
+
         await this.emailService.sendPaymentFailedEmail(
           user.email,
           user.firstName,
-          plan?.monthlyPrice / 100 || 0,
+          amount,
           "EUR",
           null
         );

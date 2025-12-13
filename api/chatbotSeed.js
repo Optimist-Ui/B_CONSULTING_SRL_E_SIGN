@@ -622,7 +622,7 @@ const knowledgeBase = [
     subcategory: "languages_integrations",
     question: "What languages and integrations are supported?",
     answer:
-      "**Languages:** The platform supports over 10 languages including English, Arabic, Chinese, Japanese, Greek, Russian, French, Dutch, and more. You can change your language preference in profile settings. **Integrations:** We support Stripe webhooks for payment processing. Team workspaces and more advanced integrations are coming soon.",
+      "**Languages:** The platform supports over 10 languages including English, Arabic, Chinese, Japanese, Greek, Russian, French, Dutch, and more. You can change your language preference in profile settings. **Integrations:** We support Vivawallet webhooks for payment processing. Team workspaces and more advanced integrations are coming soon.",
     keywords: [
       "languages",
       "translation",
@@ -630,13 +630,13 @@ const knowledgeBase = [
       "chinese",
       "greek",
       "integrations",
-      "stripe",
+      "vivawallet",
       "webhooks",
     ],
     priority: 6,
     translations: {
-      fr: "**Langues :** +10 supportées (Anglais, Arabe, Chinois, Grec, Russe, etc.). **Intégrations :** Webhooks Stripe supportés. Espaces de travail d'équipe à venir.",
-      nl: "**Talen:** +10 ondersteund (Engels, Arabisch, Chinees, Grieks, Russisch, enz.). **Integraties:** Stripe webhooks ondersteund. Teamwerkruimten komen binnenkort.",
+      fr: "**Langues :** +10 supportées (Anglais, Arabe, Chinois, Grec, Russe, etc.). **Intégrations :** Webhooks Vivawallet supportés. Espaces de travail d'équipe à venir.",
+      nl: "**Talen:** +10 ondersteund (Engels, Arabisch, Chinees, Grieks, Russisch, enz.). **Integraties:** Vivawallet webhooks ondersteund. Teamwerkruimten komen binnenkort.",
     },
   },
   {
