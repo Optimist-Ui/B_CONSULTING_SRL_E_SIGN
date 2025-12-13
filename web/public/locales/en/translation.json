@@ -1267,7 +1267,8 @@
         "header": {
             "title": "Payment Methods",
             "description": "Securely manage your payment options for seamless e-signing experiences",
-            "addButton": "Add Payment Method"
+            "addButton": "Add Payment Method",
+            "processing": "Processing..."
         },
         "emptyState": {
             "title": "No Payment Methods Added",
@@ -1276,17 +1277,19 @@
         },
         "addModalTitle": "Add New Payment Method",
         "addForm": {
-            "cardInfoLabel": "Card Information",
-            "secureNote": "Your payment information is encrypted and securely processed by Stripe.",
+            "nameLabel": "Cardholder Name",
+            "namePlaceholder": "e.g. John Doe",
+            "emailLabel": "Email Address",
+            "emailPlaceholder": "e.g. john@example.com",
+            "secureNote": "You will be redirected to Viva Wallet to securely verify your card details.",
             "buttons": {
                 "cancel": "Cancel",
-                "add": "Add Payment Method",
-                "adding": "Adding..."
+                "add": "Proceed to Verification",
+                "processing": "Redirecting..."
             },
             "errors": {
-                "cardElementNotFound": "Card element not found",
-                "cardProcessingError": "An error occurred while processing your card.",
-                "addMethodFailed": "Failed to add payment method."
+                "fillAllFields": "Please fill in all fields.",
+                "addMethodFailed": "Failed to initiate payment method verification."
             }
         },
         "card": {
@@ -1306,9 +1309,33 @@
             "cancelButton": "Cancel"
         },
         "messages": {
-            "addSuccess": "Payment method added successfully!",
+            "addSuccess": "Payment verification initiated successfully!",
             "setDefaultSuccess": "Default payment method updated successfully!",
             "deleteSuccess": "Payment method removed successfully!"
+        }
+    },
+    "paymentCallback": {
+        "processing": {
+            "title": "Verifying Payment",
+            "message": "Please wait while we verify your card details..."
+        },
+        "success": {
+            "title": "Verification Successful!",
+            "message": "Your payment method has been verified and added successfully.",
+            "text": "Your card is now ready for use.",
+            "redirecting": "Redirecting back to payment methods..."
+        },
+        "failed": {
+            "title": "Verification Failed",
+            "message": "We could not verify your payment method.",
+            "text": "Please try again or use a different card.",
+            "backButton": "Return to Payment Methods"
+        },
+        "cancelled": {
+            "title": "Verification Cancelled",
+            "message": "You cancelled the payment verification process.",
+            "text": "No changes were made to your account.",
+            "redirecting": "Redirecting..."
         }
     },
     "subscriptions": {
@@ -1445,28 +1472,53 @@
     },
     "invoiceHistory": {
         "title": "Invoice History",
-        "closeLabel": "Close modal",
         "loading": "Loading invoices...",
+        "closeLabel": "Close",
         "locale": "en-US",
         "table": {
             "headers": {
                 "date": "Date",
+                "description": "Description",
+                "type": "Type",
                 "amount": "Amount",
                 "status": "Status",
+                "card": "Payment Method",
                 "action": "Action"
             },
-            "viewAction": "View Invoice"
+            "viewAction": "View Details"
         },
         "status": {
             "paid": "Paid",
-            "open": "Open",
-            "void": "Void",
-            "uncollectible": "Uncollectible"
+            "failed": "Failed",
+            "pending": "Pending"
+        },
+        "types": {
+            "new_subscription": "New Subscription",
+            "renewal": "Renewal",
+            "trial_conversion": "Trial Conversion",
+            "plan_change": "Plan Change",
+            "payment": "Payment"
         },
         "empty": {
             "title": "No Invoices Found",
-            "description": "Your billing history will appear here once you are billed."
+            "description": "You don't have any invoices yet. They will appear here after your first payment."
         }
+    },
+    "invoiceDetail": {
+        "title": "Invoice Details",
+        "loading": "Loading invoice...",
+        "billedTo": "Billed To",
+        "transactionDetails": "Transaction Details",
+        "transactionId": "Transaction ID",
+        "orderCode": "Order Code",
+        "paymentMethod": "Payment Method",
+        "description": "Description",
+        "type": "Type",
+        "amount": "Amount",
+        "total": "Total Amount",
+        "thankYou": "Thank you for your business!",
+        "print": "Print / Download",
+        "close": "Close"
     },
     "contacts": {
         "pageTitle": "Contacts",
@@ -1849,7 +1901,7 @@
     },
     "packageReview": {
         "loading": "Loading package details...",
-        "locale": "en-US",
+        "locale": "en",
         "tabs": {
             "summary": "Summary",
             "recipients": "Recipients",
@@ -2802,6 +2854,11 @@
             "noPaymentMethod": "Please select or add a payment method to continue.",
             "planNotAvailable": "This plan is not available for purchase at the moment.",
             "unknownError": "An unexpected error occurred."
+        },
+        "noPaymentMethod": {
+            "title": "No Payment Method Found",
+            "description": "To proceed with your subscription, please add a secure payment method to your account.",
+            "addButton": "Add Payment Method"
         }
     },
     "fieldPropertiesPanel": {
