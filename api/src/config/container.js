@@ -60,12 +60,6 @@ const VivaWalletWebhookHandler = require("../services/VivaWalletWebhookHandler")
 
 const container = createContainer();
 
-// 👇 Initialize Stripe and register it
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-container.register({
-  stripe: asValue(stripe),
-});
-
 container.register({
   db: asValue(db),
 
