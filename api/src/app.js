@@ -29,19 +29,7 @@ const clientURL = process.env.CLIENT_URL || "http://localhost:5173";
 // This tells Express to read the real client IP from X-Forwarded-For header
 app.set("trust proxy", 1);
 
-const corsOptions = {
-  origin: "*", // <--- CHANGE THIS to "*"
-  methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
-  allowedHeaders: [
-    "Content-Type",
-    "Authorization",
-    "ngrok-skip-browser-warning",
-  ],
-  credentials: false, // Important: If origin is "*", credentials (cookies) cannot be true.
-  optionsSuccessStatus: 204,
-};
-app.use(cors(corsOptions));
-// app.use(cors({ origin: clientURL, credentials: true }));
+app.use(cors({ origin: clientURL, credentials: true }));
 app.use(helmet({ crossOriginResourcePolicy: false }));
 
 app.use("/api/webhooks", webhookRoutes);
