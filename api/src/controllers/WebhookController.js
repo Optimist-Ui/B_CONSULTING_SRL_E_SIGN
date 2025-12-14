@@ -1,4 +1,4 @@
-// src/controllers/WebhookController.js
+// src/controllers/WebhookController.js - FIXED VERSION
 
 const vivaConfig = require("../config/vivaWalletConfig");
 const { successResponse, errorResponse } = require("../utils/responseHandler");
@@ -11,7 +11,6 @@ class WebhookController {
 
   /**
    * 🔐 Viva Wallet Webhook Verification (GET request)
-   * This is called by Viva Wallet to verify your webhook endpoint
    */
   async verifyWebhookEndpoint(req, res) {
     try {
@@ -32,10 +31,7 @@ class WebhookController {
 
   /**
    * 📨 Handle Viva Wallet Webhook Events (POST request)
-   * Event Types:
-   * - 1796: Transaction Payment Created (card verification, subscriptions, renewals)
-   * - 1797: Transaction Failed
-   * - 1798: Transaction Reversed (Refund)
+   * ✅ FIXED: Card verification is handled BEFORE the webhook handler
    */
   async handleVivaWalletWebhook(req, res) {
     try {
@@ -54,17 +50,29 @@ class WebhookController {
 
       console.log(`📨 Processing Event: Type ${eventTypeId}, ID ${eventId}`);
 
-      // Handle card verification separately
+      // ✅ FIX: Handle card verification FIRST (before webhook handler)
       if (eventTypeId === 1796) {
         const eventData = payload.EventData || payload;
         const merchantTrns = eventData.MerchantTrns || "";
 
+        // Card verification check
         if (merchantTrns.startsWith("CARD_VERIFY_")) {
-          await this.handleCardVerification(payload);
+          console.log(`💳 Detected card verification transaction`);
+
+          // ✅ CRITICAL: Call savePaymentSource directly here
+          await this.handleCardVerification(eventData);
+
+          // Still acknowledge to Viva
+          return successResponse(res, "Card verification processed", {
+            received: true,
+            eventId: eventId,
+            eventType: eventTypeId,
+            processed: true,
+          });
         }
       }
 
-      // Handle all events through webhook handler
+      // Handle all other events through webhook handler
       const result = await this.webhookHandler.handleWebhook(payload);
 
       // Always return success to Viva Wallet
@@ -86,36 +94,59 @@ class WebhookController {
   }
 
   /**
-   * Handle card verification webhook (EventTypeId: 1796)
+   * ✅ Handle card verification webhook (EventTypeId: 1796)
+   * UPDATED: Better error handling and logging
    */
-  async handleCardVerification(payload) {
+  async handleCardVerification(eventData) {
     try {
-      const eventData = payload.EventData || payload;
       const transactionId = eventData.TransactionId;
       const merchantTrns = eventData.MerchantTrns;
+      const statusId = eventData.StatusId;
 
       console.log(`🔍 Card verification webhook:`, {
         transactionId,
         merchantTrns,
+        statusId,
       });
 
-      // Check if this is a card verification transaction
+      // Only process successful transactions
+      if (statusId !== "F") {
+        console.log(
+          `⚠️ Transaction ${transactionId} not successful yet (Status: ${statusId})`
+        );
+        return;
+      }
+
+      // Extract userId from merchantTrns
       if (merchantTrns && merchantTrns.startsWith("CARD_VERIFY_")) {
         const userId = merchantTrns.replace("CARD_VERIFY_", "");
 
         console.log(`💳 Saving payment source for user: ${userId}`);
 
-        await this.vivaWalletPaymentService.savePaymentSource(
+        // ✅ THIS IS THE KEY CALL
+        const result = await this.vivaWalletPaymentService.savePaymentSource(
           userId,
           transactionId
         );
 
-        console.log(
-          `✅ Card saved successfully via webhook for user: ${userId}`
-        );
+        if (result.alreadyExists) {
+          console.log(
+            `ℹ️ Card already exists: ${result.cardType} ending in ${result.last4}`
+          );
+        } else {
+          console.log(
+            `✅ NEW CARD SAVED: ${result.cardType} ending in ${result.last4}`
+          );
+          console.log(`   Transaction ID: ${transactionId}`);
+          console.log(`   Payment Source ID: ${result.paymentSourceId}`);
+          console.log(`   Is Default: ${result.isDefault}`);
+        }
+      } else {
+        console.error(`❌ Invalid merchantTrns format: ${merchantTrns}`);
       }
     } catch (error) {
       console.error("❌ Card verification webhook error:", error.message);
+      console.error("Stack trace:", error.stack);
       // Don't throw - we want to acknowledge the webhook
     }
   }
