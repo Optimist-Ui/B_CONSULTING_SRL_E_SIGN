@@ -67,14 +67,25 @@ class VivaWalletPaymentService {
 
   /**
    * Save payment source after successful payment (called from webhook)
+   * ✅ ENHANCED: Better error handling and logging
    */
   async savePaymentSource(userId, transactionId) {
     try {
+      console.log(
+        `🔄 savePaymentSource called for user ${userId}, transaction ${transactionId}`
+      );
+
       const user = await this.User.findById(userId);
-      if (!user) throw new Error("User not found");
+      if (!user) {
+        console.error(`❌ User ${userId} not found`);
+        throw new Error("User not found");
+      }
+
+      console.log(`✅ User found: ${user.email}`);
 
       if (!user.vivaWalletPaymentSources) {
         user.vivaWalletPaymentSources = [];
+        console.log(`📝 Initialized empty payment sources array`);
       }
 
       // Check if transaction already processed
@@ -96,25 +107,37 @@ class VivaWalletPaymentService {
 
       // Fetch transaction details from Viva Wallet
       const client = await vivaConfig.createAuthenticatedClient();
-      console.log(`🔄 Fetching transaction ${transactionId} details...`);
+      console.log(
+        `🔄 Fetching transaction ${transactionId} details from Viva Wallet API...`
+      );
 
       const txResponse = await client.get(
         `/checkout/v2/transactions/${transactionId}`
       );
       const transaction = txResponse.data;
 
+      console.log(
+        `📊 Transaction API Response:`,
+        JSON.stringify(transaction, null, 2)
+      );
       console.log(`📊 Transaction status: ${transaction.statusId}`);
 
       // Verify transaction is successful
       if (transaction.statusId !== "F") {
+        console.error(
+          `❌ Transaction not successful. Status: ${transaction.statusId}`
+        );
         throw new Error(
           `Transaction not successful. Status: ${transaction.statusId}`
         );
       }
 
+      console.log(`✅ Transaction verified as successful`);
+
       // Save customer ID if not already saved
-      if (!user.vivaWalletCustomerId) {
+      if (!user.vivaWalletCustomerId && transaction.customerCode) {
         user.vivaWalletCustomerId = transaction.customerCode;
+        console.log(`📝 Saved customer code: ${transaction.customerCode}`);
       }
 
       // Detect card type from card number
@@ -127,6 +150,8 @@ class VivaWalletPaymentService {
       else if (cardNumber.startsWith("6")) cardType = "Discover";
 
       const last4 = transaction.cardNumber?.slice(-4) || "XXXX";
+
+      console.log(`💳 Card details: ${cardType} ending in ${last4}`);
 
       // Check if card already exists (prevent duplicates)
       const existingCard = user.vivaWalletPaymentSources.find(
@@ -146,6 +171,8 @@ class VivaWalletPaymentService {
       }
 
       // Save new card
+      const isFirstCard = user.vivaWalletPaymentSources.length === 0;
+
       const newSource = {
         id: `viva_${transactionId}`,
         transactionId: transactionId,
@@ -153,16 +180,28 @@ class VivaWalletPaymentService {
         last4: last4,
         expiryMonth: transaction.cardExpirationMonth,
         expiryYear: transaction.cardExpirationYear,
-        isDefault: user.vivaWalletPaymentSources.length === 0, // First card is default
+        isDefault: isFirstCard, // First card is default
         createdAt: new Date(),
       };
+
+      console.log(
+        `💾 Saving new payment source:`,
+        JSON.stringify(newSource, null, 2)
+      );
 
       user.vivaWalletPaymentSources.push(newSource);
       await user.save();
 
+      const totalCards = user.vivaWalletPaymentSources.length;
+
+      console.log(`✅✅✅ CARD SAVED SUCCESSFULLY ✅✅✅`);
+      console.log(`   User: ${user.email} (${userId})`);
+      console.log(`   Card: ${cardType} ending in ${last4}`);
       console.log(
-        `✅ Card saved: ${cardType} ending in ${last4} (Total: ${user.vivaWalletPaymentSources.length})`
+        `   Expiry: ${transaction.cardExpirationMonth}/${transaction.cardExpirationYear}`
       );
+      console.log(`   Is Default: ${isFirstCard}`);
+      console.log(`   Total Cards: ${totalCards}`);
 
       return {
         paymentSourceId: newSource.id,
@@ -173,7 +212,17 @@ class VivaWalletPaymentService {
         isDefault: newSource.isDefault,
       };
     } catch (error) {
-      console.error("❌ Save payment source failed:", error.message);
+      console.error("❌❌❌ savePaymentSource ERROR:", error.message);
+      console.error("Stack trace:", error.stack);
+
+      if (error.response) {
+        console.error(
+          "API Error Response:",
+          JSON.stringify(error.response.data, null, 2)
+        );
+        console.error("API Status:", error.response.status);
+      }
+
       throw new Error(
         `Failed to save payment source: ${
           error.response?.data?.message || error.message
@@ -181,7 +230,7 @@ class VivaWalletPaymentService {
       );
     }
   }
-
+  
   /**
    * Get all payment sources for a user
    */

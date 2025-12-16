@@ -31,7 +31,7 @@ class WebhookController {
 
   /**
    * 📨 Handle Viva Wallet Webhook Events (POST request)
-   * ✅ FIXED: Card verification is handled BEFORE the webhook handler
+   * ✅ FIXED: Better error handling and logging
    */
   async handleVivaWalletWebhook(req, res) {
     try {
@@ -55,14 +55,18 @@ class WebhookController {
         const eventData = payload.EventData || payload;
         const merchantTrns = eventData.MerchantTrns || "";
 
+        console.log(
+          `🔍 EventTypeId 1796 detected. MerchantTrns: ${merchantTrns}`
+        );
+
         // Card verification check
         if (merchantTrns.startsWith("CARD_VERIFY_")) {
-          console.log(`💳 Detected card verification transaction`);
+          console.log(`💳 Card verification transaction detected`);
 
           // ✅ CRITICAL: Call savePaymentSource directly here
           await this.handleCardVerification(eventData);
 
-          // Still acknowledge to Viva
+          // Acknowledge to Viva
           return successResponse(res, "Card verification processed", {
             received: true,
             eventId: eventId,
@@ -84,6 +88,7 @@ class WebhookController {
       });
     } catch (error) {
       console.error("❌ Webhook processing error:", error.message);
+      console.error("Stack trace:", error.stack);
 
       // Still return success to avoid webhook retry storms
       return successResponse(res, "Webhook received (error logged)", {
@@ -95,7 +100,7 @@ class WebhookController {
 
   /**
    * ✅ Handle card verification webhook (EventTypeId: 1796)
-   * UPDATED: Better error handling and logging
+   * CRITICAL FIX: Better error handling and detailed logging
    */
   async handleCardVerification(eventData) {
     try {
@@ -103,50 +108,82 @@ class WebhookController {
       const merchantTrns = eventData.MerchantTrns;
       const statusId = eventData.StatusId;
 
-      console.log(`🔍 Card verification webhook:`, {
+      console.log(`🔍 Card verification webhook received:`, {
         transactionId,
         merchantTrns,
         statusId,
+        fullEventData: JSON.stringify(eventData, null, 2),
       });
+
+      // ✅ FIX 1: Check if statusId exists
+      if (!statusId) {
+        console.error(`❌ No statusId in transaction ${transactionId}`);
+        return;
+      }
+
+      // ✅ FIX 2: Log the exact status
+      console.log(
+        `📊 Transaction status: "${statusId}" (expecting "F" for success)`
+      );
 
       // Only process successful transactions
       if (statusId !== "F") {
         console.log(
-          `⚠️ Transaction ${transactionId} not successful yet (Status: ${statusId})`
+          `⚠️ Transaction ${transactionId} not successful yet (Status: ${statusId}). Waiting for success webhook.`
         );
         return;
       }
 
-      // Extract userId from merchantTrns
-      if (merchantTrns && merchantTrns.startsWith("CARD_VERIFY_")) {
-        const userId = merchantTrns.replace("CARD_VERIFY_", "");
+      console.log(`✅ Transaction ${transactionId} is successful (Status: F)`);
 
-        console.log(`💳 Saving payment source for user: ${userId}`);
+      // ✅ FIX 3: Validate merchantTrns format
+      if (!merchantTrns) {
+        console.error(`❌ No merchantTrns in transaction ${transactionId}`);
+        return;
+      }
 
-        // ✅ THIS IS THE KEY CALL
-        const result = await this.vivaWalletPaymentService.savePaymentSource(
-          userId,
-          transactionId
+      if (!merchantTrns.startsWith("CARD_VERIFY_")) {
+        console.error(
+          `❌ Invalid merchantTrns format: ${merchantTrns} (expected CARD_VERIFY_*)`
         );
+        return;
+      }
 
-        if (result.alreadyExists) {
-          console.log(
-            `ℹ️ Card already exists: ${result.cardType} ending in ${result.last4}`
-          );
-        } else {
-          console.log(
-            `✅ NEW CARD SAVED: ${result.cardType} ending in ${result.last4}`
-          );
-          console.log(`   Transaction ID: ${transactionId}`);
-          console.log(`   Payment Source ID: ${result.paymentSourceId}`);
-          console.log(`   Is Default: ${result.isDefault}`);
-        }
+      // Extract userId
+      const userId = merchantTrns.replace("CARD_VERIFY_", "");
+
+      // ✅ FIX 4: Validate userId format (MongoDB ObjectId is 24 hex chars)
+      if (!/^[a-f0-9]{24}$/.test(userId)) {
+        console.error(`❌ Invalid userId format extracted: ${userId}`);
+        return;
+      }
+
+      console.log(`💳 Saving payment source for user: ${userId}`);
+      console.log(`📝 Transaction ID: ${transactionId}`);
+
+      // ✅ THIS IS THE KEY CALL
+      const result = await this.vivaWalletPaymentService.savePaymentSource(
+        userId,
+        transactionId
+      );
+
+      if (result.alreadyExists) {
+        console.log(
+          `ℹ️ Card already exists: ${result.cardType} ending in ${result.last4}`
+        );
       } else {
-        console.error(`❌ Invalid merchantTrns format: ${merchantTrns}`);
+        console.log(`✅ ✅ ✅ NEW CARD SAVED SUCCESSFULLY ✅ ✅ ✅`);
+        console.log(`   Card Type: ${result.cardType}`);
+        console.log(`   Last 4: ${result.last4}`);
+        console.log(`   Transaction ID: ${transactionId}`);
+        console.log(`   Payment Source ID: ${result.paymentSourceId}`);
+        console.log(`   Is Default: ${result.isDefault}`);
+        console.log(`   Expiry: ${result.expiryMonth}/${result.expiryYear}`);
       }
     } catch (error) {
-      console.error("❌ Card verification webhook error:", error.message);
+      console.error("❌❌❌ Card verification webhook error:", error.message);
       console.error("Stack trace:", error.stack);
+      console.error("Event data:", JSON.stringify(eventData, null, 2));
       // Don't throw - we want to acknowledge the webhook
     }
   }

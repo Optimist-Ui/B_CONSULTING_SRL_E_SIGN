@@ -60,7 +60,8 @@ class VivaWalletWebhookHandler {
   }
 
   /**
-   * ✅ FIXED: Handle transaction created - separate card saving from transaction tracking
+   * ✅ PRODUCTION FIX: Handle transaction created
+   * Card verification is now handled in WebhookController, NOT here
    */
   async handleTransactionCreated(payload) {
     try {
@@ -76,6 +77,7 @@ class VivaWalletWebhookHandler {
       );
       console.log(`   Merchant Trns: ${merchantTrns}`);
 
+      // ✅ Skip if not successful
       if (statusId !== "F") {
         console.log(
           `⚠️ Transaction ${transactionId} not successful (Status: ${statusId})`
@@ -83,18 +85,24 @@ class VivaWalletWebhookHandler {
         return { success: true, message: "Transaction not successful yet" };
       }
 
-      // ✅ Card verification - handled separately, don't duplicate here
+      // ✅ CRITICAL FIX: Skip card verification entirely - it's handled in WebhookController
       if (merchantTrns.startsWith("CARD_VERIFY_")) {
-        console.log(`✓ Card verification transaction: ${transactionId}`);
-        return { success: true, message: "Card verification processed" };
+        console.log(
+          `✓ Card verification handled by WebhookController, skipping here`
+        );
+        return {
+          success: true,
+          message: "Card verification handled separately",
+        };
       }
 
-      // ✅ For subscription payments, save for invoices only
+      // ✅ For subscription-related transactions, save for invoices only
       const userId = this.extractUserIdFromMerchantTrns(merchantTrns);
       if (userId) {
         await this.saveTransactionForInvoices(userId, eventData);
       }
 
+      // ✅ Handle different subscription transaction types
       if (merchantTrns.startsWith("NEW_SUB_")) {
         await this.handleNewSubscriptionConfirmation(merchantTrns, eventData);
         return { success: true, message: "New subscription confirmed" };
