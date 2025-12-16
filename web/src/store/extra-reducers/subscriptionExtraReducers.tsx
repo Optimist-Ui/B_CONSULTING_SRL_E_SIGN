@@ -9,6 +9,7 @@ import {
     fetchInvoices,
     createTrialSubscription,
     endTrialEarly,
+    fetchInvoiceDetail,
 } from '../thunk/subscriptionThunks'; // --- Import new thunk
 import { SubscriptionState } from '../slices/subscriptionSlice';
 
@@ -139,6 +140,19 @@ export const buildSubscriptionExtraReducers = (builder: ActionReducerMapBuilder<
         })
         .addCase(fetchInvoices.rejected, (state, action) => {
             state.isFetchingInvoices = false;
+            state.error = action.payload as string;
+        })
+        // ✅ NEW: Fetch Invoice Detail Cases
+        .addCase(fetchInvoiceDetail.pending, (state) => {
+            state.isFetchingInvoiceDetail = true;
+            state.error = null;
+        })
+        .addCase(fetchInvoiceDetail.fulfilled, (state, action) => {
+            state.isFetchingInvoiceDetail = false;
+            state.currentInvoice = action.payload;
+        })
+        .addCase(fetchInvoiceDetail.rejected, (state, action) => {
+            state.isFetchingInvoiceDetail = false;
             state.error = action.payload as string;
         });
 };

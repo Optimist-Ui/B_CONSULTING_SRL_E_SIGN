@@ -28,11 +28,11 @@ const clientURL = process.env.CLIENT_URL || "http://localhost:5173";
 // 👇 Trust the proxy (Nginx in your case)
 // This tells Express to read the real client IP from X-Forwarded-For header
 app.set("trust proxy", 1);
+app.use("/api/webhooks", webhookRoutes);
 
 app.use(cors({ origin: clientURL, credentials: true }));
 app.use(helmet({ crossOriginResourcePolicy: false }));
 
-app.use("/api/webhooks/stripe", webhookRoutes);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
