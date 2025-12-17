@@ -37,8 +37,6 @@ class WebhookController {
     try {
       const payload = req.body;
 
-      console.log("📨 Webhook received:", JSON.stringify(payload, null, 2));
-
       // Validate payload
       if (!payload.EventTypeId && !payload.MessageId) {
         console.error("❌ Invalid webhook payload");
@@ -47,6 +45,12 @@ class WebhookController {
 
       const eventId = payload.MessageId || payload.EventId;
       const eventTypeId = payload.EventTypeId;
+
+      // ✅ FIX: Check idempotency globally first
+      if (this.webhookHandler.hasBeenProcessed(eventId)) {
+        console.log(`✓ Event ${eventId} already processed (Controller Check)`);
+        return successResponse(res, "Already processed", { received: true });
+      }
 
       console.log(`📨 Processing Event: Type ${eventTypeId}, ID ${eventId}`);
 
@@ -108,83 +112,39 @@ class WebhookController {
       const merchantTrns = eventData.MerchantTrns;
       const statusId = eventData.StatusId;
 
-      console.log(`🔍 Card verification webhook received:`, {
-        transactionId,
-        merchantTrns,
-        statusId,
-        fullEventData: JSON.stringify(eventData, null, 2),
-      });
+      // REMOVED: Huge console.log of fullEventData
+      // REMOVED: "Transaction status expecting F" logs
 
-      // ✅ FIX 1: Check if statusId exists
-      if (!statusId) {
-        console.error(`❌ No statusId in transaction ${transactionId}`);
+      if (!statusId || statusId !== "F") {
+        // Keep this strictly for debugging failures, or remove if not needed
+        // console.log(`⚠️ Transaction ${transactionId} pending/failed (Status: ${statusId})`);
         return;
       }
 
-      // ✅ FIX 2: Log the exact status
-      console.log(
-        `📊 Transaction status: "${statusId}" (expecting "F" for success)`
-      );
+      if (!merchantTrns || !merchantTrns.startsWith("CARD_VERIFY_")) return;
 
-      // Only process successful transactions
-      if (statusId !== "F") {
-        console.log(
-          `⚠️ Transaction ${transactionId} not successful yet (Status: ${statusId}). Waiting for success webhook.`
-        );
-        return;
-      }
-
-      console.log(`✅ Transaction ${transactionId} is successful (Status: F)`);
-
-      // ✅ FIX 3: Validate merchantTrns format
-      if (!merchantTrns) {
-        console.error(`❌ No merchantTrns in transaction ${transactionId}`);
-        return;
-      }
-
-      if (!merchantTrns.startsWith("CARD_VERIFY_")) {
-        console.error(
-          `❌ Invalid merchantTrns format: ${merchantTrns} (expected CARD_VERIFY_*)`
-        );
-        return;
-      }
-
-      // Extract userId
       const userId = merchantTrns.replace("CARD_VERIFY_", "");
 
-      // ✅ FIX 4: Validate userId format (MongoDB ObjectId is 24 hex chars)
       if (!/^[a-f0-9]{24}$/.test(userId)) {
-        console.error(`❌ Invalid userId format extracted: ${userId}`);
+        console.error(`❌ Invalid userId format in webhook: ${userId}`);
         return;
       }
 
-      console.log(`💳 Saving payment source for user: ${userId}`);
-      console.log(`📝 Transaction ID: ${transactionId}`);
+      // REMOVED: "Saving payment source for user..." (Service handles the log)
 
-      // ✅ THIS IS THE KEY CALL
       const result = await this.vivaWalletPaymentService.savePaymentSource(
         userId,
         transactionId
       );
 
+      // REMOVED: The second "✅ ✅ ✅ NEW CARD SAVED" block.
+      // The Service layer already logs the success. We don't need it twice.
       if (result.alreadyExists) {
-        console.log(
-          `ℹ️ Card already exists: ${result.cardType} ending in ${result.last4}`
-        );
-      } else {
-        console.log(`✅ ✅ ✅ NEW CARD SAVED SUCCESSFULLY ✅ ✅ ✅`);
-        console.log(`   Card Type: ${result.cardType}`);
-        console.log(`   Last 4: ${result.last4}`);
-        console.log(`   Transaction ID: ${transactionId}`);
-        console.log(`   Payment Source ID: ${result.paymentSourceId}`);
-        console.log(`   Is Default: ${result.isDefault}`);
-        console.log(`   Expiry: ${result.expiryMonth}/${result.expiryYear}`);
+        console.log(`ℹ️ [Webhook] Card already exists for User ${userId}`);
       }
     } catch (error) {
-      console.error("❌❌❌ Card verification webhook error:", error.message);
-      console.error("Stack trace:", error.stack);
-      console.error("Event data:", JSON.stringify(eventData, null, 2));
-      // Don't throw - we want to acknowledge the webhook
+      console.error("❌ Card verification webhook error:", error.message);
+      // Quietly fail or log to error monitoring service
     }
   }
 }

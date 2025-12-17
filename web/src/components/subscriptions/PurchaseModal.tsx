@@ -180,6 +180,9 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({ isOpen, onClose, plan, is
         window.location.href = '/payment-methods';
     };
 
+    const formatPrice = (priceInCents: number): string => {
+        return (priceInCents / 100).toFixed(2);
+    };
     // ✅ Render modal content
     const renderContent = () => {
         if (initialLoad) return <ModalSpinner />;
@@ -217,7 +220,7 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({ isOpen, onClose, plan, is
                                 })}
                             </p>
                         </div>
-                        <p className="text-xl font-bold text-gray-900 dark:text-white">€{isYearly ? plan.yearlyPrice : plan.monthlyPrice}</p>
+                        <p className="text-xl font-bold text-gray-900 dark:text-white">€{isYearly ? formatPrice(plan.yearlyPrice) : formatPrice(plan.monthlyPrice)}</p>
                     </div>
                 </div>
 
@@ -277,7 +280,7 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({ isOpen, onClose, plan, is
                         ) : (
                             t('purchaseModal.subscribe', {
                                 action: isTopUp ? t('purchaseModal.topUp') : t('purchaseModal.subscribeNow'),
-                                price: isYearly ? plan.yearlyPrice : plan.monthlyPrice,
+                                price: isYearly ? formatPrice(plan.yearlyPrice) : formatPrice(plan.monthlyPrice),
                             })
                         )}
                     </button>

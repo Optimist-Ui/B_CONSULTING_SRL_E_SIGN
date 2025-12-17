@@ -71,25 +71,13 @@ class VivaWalletWebhookHandler {
       const statusId = eventData.StatusId;
       const amount = eventData.Amount;
 
-      console.log(`📨 Transaction created: ${transactionId}`);
-      console.log(
-        `   Status: ${statusId}, Amount: €${(amount / 100).toFixed(2)}`
-      );
-      console.log(`   Merchant Trns: ${merchantTrns}`);
-
       // ✅ Skip if not successful
       if (statusId !== "F") {
-        console.log(
-          `⚠️ Transaction ${transactionId} not successful (Status: ${statusId})`
-        );
         return { success: true, message: "Transaction not successful yet" };
       }
 
       // ✅ CRITICAL FIX: Skip card verification entirely - it's handled in WebhookController
       if (merchantTrns.startsWith("CARD_VERIFY_")) {
-        console.log(
-          `✓ Card verification handled by WebhookController, skipping here`
-        );
         return {
           success: true,
           message: "Card verification handled separately",
@@ -117,7 +105,6 @@ class VivaWalletWebhookHandler {
       }
 
       if (merchantTrns.startsWith("PLAN_CHANGE_")) {
-        console.log(`✓ Plan change transaction logged: ${transactionId}`);
         return { success: true, message: "Plan change logged" };
       }
 
@@ -125,11 +112,9 @@ class VivaWalletWebhookHandler {
         merchantTrns.startsWith("RENEWAL_") ||
         merchantTrns.startsWith("AUTO_RENEWAL_")
       ) {
-        console.log(`✓ Renewal transaction logged: ${transactionId}`);
         return { success: true, message: "Renewal logged" };
       }
 
-      console.log(`ℹ️ Transaction ${transactionId} processed`);
       return { success: true, message: "Transaction processed" };
     } catch (error) {
       console.error("❌ Error handling transaction created:", error);
