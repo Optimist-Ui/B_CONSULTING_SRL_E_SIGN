@@ -71,9 +71,9 @@ export const PaymentMethodCard: React.FC<PaymentMethodCardProps> = ({ paymentMet
                 </div>
             </div>
 
-            <div className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+            {/* <div className="text-sm text-gray-500 dark:text-gray-400 mb-6">
                 {t('paymentMethods.card.expires')} {paymentMethod.exp_month?.toString().padStart(2, '0')}/{paymentMethod.exp_year}
-            </div>
+            </div> */}
 
             <div className="flex space-x-3">
                 {!paymentMethod.isDefault && (

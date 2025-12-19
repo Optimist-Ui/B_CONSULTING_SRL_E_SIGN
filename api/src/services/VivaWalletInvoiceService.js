@@ -1,4 +1,4 @@
-// src/services/VivaWalletInvoiceService.js - FIXED WITH CORRECT FIELD NAMES
+// src/services/VivaWalletInvoiceService.js
 
 const vivaConfig = require("../config/vivaWalletConfig");
 
@@ -9,6 +9,7 @@ class VivaWalletInvoiceService {
 
   /**
    * ✅ List all invoices/transactions for a user
+   * FIX: Filters out Card Verifications and €0.00/€0.01 transactions
    */
   async listInvoices(userId) {
     try {
@@ -20,34 +21,30 @@ class VivaWalletInvoiceService {
         throw new Error("User not found");
       }
 
-      console.log(`🔍 Fetching invoices for user ${userId}`);
-      console.log(`   Email: ${user.email}`);
-      console.log(
-        `   Payment sources: ${user.vivaWalletPaymentSources?.length || 0}`
-      );
+      // console.log(`🔍 Fetching invoices for user ${userId}`);
 
       if (
         !user.vivaWalletPaymentSources ||
         user.vivaWalletPaymentSources.length === 0
       ) {
-        console.log(`   ℹ️  No payment sources found for user`);
         return [];
       }
 
       const client = await vivaConfig.createAuthenticatedClient();
       const invoices = [];
 
+      // Use a Set to prevent duplicate invoices if multiple sources point to the same transaction
+      const processedTransactionIds = new Set();
+
       for (const paymentSource of user.vivaWalletPaymentSources) {
-        if (!paymentSource.transactionId) {
-          console.log(`   ⚠️  Skipping payment source without transaction ID`);
+        if (
+          !paymentSource.transactionId ||
+          processedTransactionIds.has(paymentSource.transactionId)
+        ) {
           continue;
         }
 
         try {
-          console.log(
-            `   🔄 Fetching transaction: ${paymentSource.transactionId}`
-          );
-
           const response = await client.get(
             `/checkout/v2/transactions/${paymentSource.transactionId}`
           );
@@ -55,23 +52,47 @@ class VivaWalletInvoiceService {
           const tx = response.data;
           const transactionId = paymentSource.transactionId;
 
-          console.log(`   ✅ Retrieved transaction ${transactionId}`);
-          console.log(
-            `      Status: ${tx.statusId}, Amount: €${(tx.amount / 100).toFixed(
-              2
-            )}`
-          );
+          // Mark as processed
+          processedTransactionIds.add(transactionId);
+
+          // ---------------------------------------------------------
+          // 🛑 FILTER LOGIC: Skip Verifications & Micro-transactions
+          // ---------------------------------------------------------
+
+          const description = (
+            tx.customerTrns ||
+            tx.merchantTrns ||
+            ""
+          ).toLowerCase();
+          const amountEur = parseFloat((tx.amount).toFixed(2));
+          const type = this.getTransactionType(tx.merchantTrns);
+
+          // 1. Skip if specifically marked as verification
+          if (type === "card_verification") continue;
+
+          // 2. Skip if description contains "verification"
+          if (
+            description.includes("verification") ||
+            description.includes("verify")
+          )
+            continue;
+
+          // 3. Skip if amount is less than €0.10 (Viva verification is usually €0.01 or €0.00)
+          // Adjust this threshold if you sell items for €0.05
+          if (amountEur < 0.1) continue;
+
+          // ---------------------------------------------------------
 
           // Check for successful payment (statusId: "F" = Finished/Success)
           if (tx.statusId === "F") {
             const invoice = {
               id: transactionId,
               date: tx.insDate,
-              amount: (tx.amount / 100).toFixed(2), // ✅ CORRECT: Convert cents to euros HERE
+              amount: amountEur.toFixed(2),
               currency: "EUR",
               status: "paid",
               description: tx.customerTrns || tx.merchantTrns || "Payment",
-              transactionType: this.getTransactionType(tx.merchantTrns),
+              transactionType: type,
               cardLast4:
                 paymentSource.last4 || tx.cardNumber?.slice(-4) || "****",
               cardType:
@@ -83,13 +104,6 @@ class VivaWalletInvoiceService {
             };
 
             invoices.push(invoice);
-            console.log(
-              `   📄 Invoice added: ${invoice.id} - €${invoice.amount}`
-            );
-          } else {
-            console.log(
-              `   ⏭️  Skipping non-successful transaction (status: ${tx.statusId})`
-            );
           }
         } catch (error) {
           console.error(
@@ -102,21 +116,21 @@ class VivaWalletInvoiceService {
       // Sort by date (most recent first)
       invoices.sort((a, b) => new Date(b.date) - new Date(a.date));
 
-      console.log(`✅ Fetched ${invoices.length} invoices for user ${userId}`);
       return invoices;
     } catch (error) {
       console.error(`❌ Error fetching invoices for user ${userId}:`, error);
-      console.error(`   Error details:`, error.response?.data || error.message);
       return [];
     }
   }
 
   /**
    * Get transaction type from merchant reference
+   * ✅ Added 'card_verification' detection
    */
   getTransactionType(merchantTrns) {
     if (!merchantTrns) return "payment";
 
+    if (merchantTrns.startsWith("CARD_VERIFY_")) return "card_verification"; // 👈 Added this
     if (merchantTrns.startsWith("TRIAL_TO_PAID_")) return "trial_conversion";
     if (merchantTrns.startsWith("TRIAL_CONVERT_")) return "trial_conversion";
     if (merchantTrns.startsWith("NEW_SUB_")) return "new_subscription";
@@ -138,6 +152,10 @@ class VivaWalletInvoiceService {
         return "Credit";
       case 2:
         return "Debit";
+      case 3:
+        return "MasterCard"; // Added common code
+      case 4:
+        return "Amex"; // Added common code
       default:
         return "Card";
     }
@@ -148,18 +166,12 @@ class VivaWalletInvoiceService {
    */
   getInvoiceUrl(transactionId, orderCode) {
     const baseUrl = vivaConfig.checkoutURL || "https://demo.vivapayments.com";
-
-    // Option 1: Direct receipt URL (most reliable)
     if (orderCode) {
       return `${baseUrl}/web/checkout/receipt?t=${orderCode}`;
     }
-
-    // Option 2: Transaction details page
     if (transactionId) {
       return `${baseUrl}/transactions?transactionId=${transactionId}`;
     }
-
-    // Fallback
     return `${baseUrl}/transactions`;
   }
 
@@ -168,31 +180,19 @@ class VivaWalletInvoiceService {
    */
   async getInvoiceById(userId, transactionId) {
     try {
-      console.log(
-        `🔍 Fetching invoice detail: ${transactionId} for user ${userId}`
-      );
-
       const client = await vivaConfig.createAuthenticatedClient();
-
       const response = await client.get(
         `/checkout/v2/transactions/${transactionId}`
       );
       const tx = response.data;
-
-      console.log(
-        `   ✅ Viva API response received for transaction ${transactionId}`
-      );
 
       // Verify this transaction belongs to the user
       const user = await this.User.findById(userId).select(
         "vivaWalletCustomerId email vivaWalletPaymentSources firstName lastName"
       );
 
-      if (!user) {
-        throw new Error("User not found");
-      }
+      if (!user) throw new Error("User not found");
 
-      // Check if transaction belongs to user
       const belongsToUser =
         user.vivaWalletPaymentSources?.some(
           (ps) => ps.transactionId === transactionId
@@ -201,17 +201,13 @@ class VivaWalletInvoiceService {
         (tx.merchantTrns && tx.merchantTrns.includes(userId));
 
       if (!belongsToUser) {
-        console.log(`   ❌ Transaction does not belong to user`);
         throw new Error("Invoice not found or does not belong to user");
       }
 
-      console.log(`   ✅ Transaction verified and belongs to user`);
-
-      // ✅ CORRECT: Convert cents to euros
       return {
         id: transactionId,
         date: tx.insDate,
-        amount: (tx.amount / 100).toFixed(2), // ✅ Convert cents to euros
+        amount: (tx.amount).toFixed(2),
         currency: "EUR",
         status: tx.statusId === "F" ? "paid" : "failed",
         description: tx.customerTrns || tx.merchantTrns || "Payment",
@@ -230,9 +226,11 @@ class VivaWalletInvoiceService {
 
   /**
    * Get invoice statistics for a user
+   * ✅ Updated to respect the filtering in listInvoices
    */
   async getInvoiceStats(userId) {
     try {
+      // Reuse listInvoices so statistics match the list (filtering out verifications)
       const invoices = await this.listInvoices(userId);
 
       const stats = {

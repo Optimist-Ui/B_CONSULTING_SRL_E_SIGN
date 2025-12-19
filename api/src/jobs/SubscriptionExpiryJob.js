@@ -225,7 +225,7 @@ class SubscriptionExpiryJob extends BaseJob {
         await this.emailService.sendSubscriptionConfirmation(
           user,
           plan.name,
-          amount / 100,
+          amount,
           newPeriodEnd,
           null
         );

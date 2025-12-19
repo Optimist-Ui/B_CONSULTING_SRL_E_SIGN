@@ -309,7 +309,7 @@ class VivaWalletWebhookHandler {
       await this.emailService.sendSubscriptionConfirmation(
         user,
         plan.name,
-        eventData.Amount / 100,
+        eventData.Amount,
         user.subscription.current_period_end,
         null
       );
@@ -352,7 +352,7 @@ class VivaWalletWebhookHandler {
         plan.name,
         user.subscription.current_period_start,
         user.subscription.current_period_end,
-        eventData.Amount / 100,
+        eventData.Amount,
         null
       );
 
