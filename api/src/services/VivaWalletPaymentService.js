@@ -21,8 +21,9 @@ class VivaWalletPaymentService {
         returnUrl || process.env.CLIENT_URL || "http://localhost:5173";
       const fullReturnUrl = `${baseUrl}/payment-callback`;
 
+      const verificationAmount = parseInt(process.env.CARD_VERIFICATION_AMOUNT);
       const orderData = {
-        amount: 100, // €1.00 for card verification
+        amount: verificationAmount, // €1.00 for card verification
         customerTrns: `Card verification for ${name}`,
         customer: {
           email: email || user.email,

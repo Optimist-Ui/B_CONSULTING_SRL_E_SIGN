@@ -267,7 +267,7 @@ class SubscriptionExpiryJob extends BaseJob {
         const billingInterval = user.subscription.billingInterval || "month";
         const isYearly = billingInterval === "year";
         const amount = plan
-          ? (isYearly ? plan.yearlyPrice : plan.monthlyPrice) / 100
+          ? (isYearly ? plan.yearlyPrice : plan.monthlyPrice)
           : 0;
 
         await this.emailService.sendPaymentFailedEmail(
