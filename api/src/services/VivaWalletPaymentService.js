@@ -21,8 +21,9 @@ class VivaWalletPaymentService {
         returnUrl || process.env.CLIENT_URL || "http://localhost:5173";
       const fullReturnUrl = `${baseUrl}/payment-callback`;
 
+      const verificationAmount = parseInt(process.env.CARD_VERIFICATION_AMOUNT);
       const orderData = {
-        amount: 100, // €1.00 for card verification
+        amount: verificationAmount, // €1.00 for card verification
         customerTrns: `Card verification for ${name}`,
         customer: {
           email: email || user.email,
@@ -67,85 +68,35 @@ class VivaWalletPaymentService {
 
   /**
    * Save payment source after successful payment (called from webhook)
+   * ✅ FIXED: Uses Atomic Update to prevent duplicates during race conditions
    */
   async savePaymentSource(userId, transactionId) {
     try {
-      const user = await this.User.findById(userId);
-      if (!user) throw new Error("User not found");
-
-      if (!user.vivaWalletPaymentSources) {
-        user.vivaWalletPaymentSources = [];
-      }
-
-      // Check if transaction already processed
-      const existingByTransaction = user.vivaWalletPaymentSources.find(
-        (source) => source.transactionId === transactionId
-      );
-
-      if (existingByTransaction) {
-        console.log(`⚠️ Transaction ${transactionId} already processed`);
-        return {
-          paymentSourceId: existingByTransaction.id,
-          cardType: existingByTransaction.cardType,
-          last4: existingByTransaction.last4,
-          expiryMonth: existingByTransaction.expiryMonth,
-          expiryYear: existingByTransaction.expiryYear,
-          alreadyExists: true,
-        };
-      }
-
-      // Fetch transaction details from Viva Wallet
+      // 1. Fetch transaction details from Viva Wallet FIRST
+      // We do this before DB operations to ensure we have valid data
       const client = await vivaConfig.createAuthenticatedClient();
-      console.log(`🔄 Fetching transaction ${transactionId} details...`);
 
       const txResponse = await client.get(
         `/checkout/v2/transactions/${transactionId}`
       );
       const transaction = txResponse.data;
 
-      console.log(`📊 Transaction status: ${transaction.statusId}`);
-
-      // Verify transaction is successful
+      // 2. Verify transaction success
       if (transaction.statusId !== "F") {
         throw new Error(
           `Transaction not successful. Status: ${transaction.statusId}`
         );
       }
 
-      // Save customer ID if not already saved
-      if (!user.vivaWalletCustomerId) {
-        user.vivaWalletCustomerId = transaction.customerCode;
-      }
-
-      // Detect card type from card number
+      // 3. Prepare Card Data
+      const last4 = transaction.cardNumber?.slice(-4) || "XXXX";
       const cardNumber = transaction.cardNumber || "";
       let cardType = "Unknown";
-
       if (cardNumber.startsWith("4")) cardType = "Visa";
       else if (cardNumber.startsWith("5")) cardType = "Mastercard";
       else if (cardNumber.startsWith("3")) cardType = "Amex";
       else if (cardNumber.startsWith("6")) cardType = "Discover";
 
-      const last4 = transaction.cardNumber?.slice(-4) || "XXXX";
-
-      // Check if card already exists (prevent duplicates)
-      const existingCard = user.vivaWalletPaymentSources.find(
-        (source) => source.last4 === last4 && source.cardType === cardType
-      );
-
-      if (existingCard) {
-        console.log(`⚠️ Card ${cardType} ending in ${last4} already exists`);
-        return {
-          paymentSourceId: existingCard.id,
-          cardType: existingCard.cardType,
-          last4: existingCard.last4,
-          expiryMonth: existingCard.expiryMonth,
-          expiryYear: existingCard.expiryYear,
-          alreadyExists: true,
-        };
-      }
-
-      // Save new card
       const newSource = {
         id: `viva_${transactionId}`,
         transactionId: transactionId,
@@ -153,27 +104,80 @@ class VivaWalletPaymentService {
         last4: last4,
         expiryMonth: transaction.cardExpirationMonth,
         expiryYear: transaction.cardExpirationYear,
-        isDefault: user.vivaWalletPaymentSources.length === 0, // First card is default
+        // We temporarily set false, we will handle default logic in the update
+        isDefault: false,
         createdAt: new Date(),
       };
 
-      user.vivaWalletPaymentSources.push(newSource);
-      await user.save();
-
-      console.log(
-        `✅ Card saved: ${cardType} ending in ${last4} (Total: ${user.vivaWalletPaymentSources.length})`
+      // 4. ATOMIC UPDATE (The Fix)
+      // We try to push the new source ONLY if transactionId does not exist in the array.
+      // We also verify the User exists in the same query.
+      const updatedUser = await this.User.findOneAndUpdate(
+        {
+          _id: userId,
+          "vivaWalletPaymentSources.transactionId": { $ne: transactionId }, // ✅ GUARD: Prevents duplicates
+        },
+        {
+          $push: { vivaWalletPaymentSources: newSource },
+          // Optional: Save customer ID if missing
+          ...(transaction.customerCode
+            ? { $set: { vivaWalletCustomerId: transaction.customerCode } }
+            : {}),
+        },
+        { new: true } // Return the updated document
       );
 
-      return {
-        paymentSourceId: newSource.id,
-        cardType: cardType,
-        last4: last4,
-        expiryMonth: transaction.cardExpirationMonth,
-        expiryYear: transaction.cardExpirationYear,
-        isDefault: newSource.isDefault,
-      };
+      // 5. Handle Result
+      if (updatedUser) {
+        // ✅ SUCCESS: Card was added
+
+        // Post-hook: specific logic for "First Card is Default"
+        // Since we can't do complex logic in $push, we check after update if it's the only card
+        if (updatedUser.vivaWalletPaymentSources.length === 1) {
+          await this.User.updateOne(
+            {
+              _id: userId,
+              "vivaWalletPaymentSources.transactionId": transactionId,
+            },
+            { $set: { "vivaWalletPaymentSources.$.isDefault": true } }
+          );
+          newSource.isDefault = true;
+        }
+
+        console.log(
+          `✅ [Payment] Card saved: ${cardType} *${last4} (User: ${userId})`
+        );
+
+        return {
+          paymentSourceId: newSource.id,
+          cardType: cardType,
+          last4: last4,
+          expiryMonth: transaction.cardExpirationMonth,
+          expiryYear: transaction.cardExpirationYear,
+          isDefault: newSource.isDefault,
+        };
+      } else {
+        // ⚠️ FAILED: User not found OR Card already exists
+        // Let's figure out which one
+        const userCheck = await this.User.findById(userId);
+        if (!userCheck) throw new Error("User not found");
+
+        // Find the existing card to return its details
+        const existingCard = userCheck.vivaWalletPaymentSources.find(
+          (s) => s.transactionId === transactionId
+        );
+
+        return {
+          paymentSourceId: existingCard?.id,
+          cardType: existingCard?.cardType,
+          last4: existingCard?.last4,
+          expiryMonth: existingCard?.expiryMonth,
+          expiryYear: existingCard?.expiryYear,
+          alreadyExists: true,
+        };
+      }
     } catch (error) {
-      console.error("❌ Save payment source failed:", error.message);
+      console.error("❌❌❌ savePaymentSource ERROR:", error.message);
       throw new Error(
         `Failed to save payment source: ${
           error.response?.data?.message || error.message

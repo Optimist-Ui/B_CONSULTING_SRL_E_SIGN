@@ -12,18 +12,15 @@ class VivaWalletConfig {
 
     // API calls (create order, get transaction)
     this.baseURL =
-      process.env.VIVA_WALLET_BASE_URL?.trim() ||
-      "https://demo-api.vivapayments.com";
+      process.env.VIVA_WALLET_BASE_URL?.trim();
 
     // OAuth token
     this.accountsURL =
-      process.env.VIVA_WALLET_ACCOUNTS_URL?.trim() ||
-      "https://demo-accounts.vivapayments.com";
+      process.env.VIVA_WALLET_ACCOUNTS_URL?.trim();
 
     // Checkout page & webhook verification
     this.checkoutURL =
-      process.env.VIVA_WALLET_CHECKOUT_URL?.trim() ||
-      "https://demo.vivapayments.com";
+      process.env.VIVA_WALLET_CHECKOUT_URL?.trim();
 
     this.accessToken = null;
     this.tokenExpiry = null;

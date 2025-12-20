@@ -15,9 +15,9 @@ const defaultState = {
     sidebar: false,
     pageTitle: '',
     languageList: [
+        { code: 'en', name: 'English' },
         { code: 'zh', name: 'Chinese' },
         { code: 'da', name: 'Danish' },
-        { code: 'en', name: 'English' },
         { code: 'fr', name: 'French' },
         { code: 'de', name: 'German' },
         { code: 'el', name: 'Greek' },
@@ -42,14 +42,14 @@ const initialState = {
     rtlClass: localStorage.getItem('rtlClass') || themeConfig.rtlClass,
     animation: localStorage.getItem('animation') || themeConfig.animation,
     navbar: localStorage.getItem('navbar') || themeConfig.navbar,
-    locale: localStorage.getItem('i18nextLng') || themeConfig.locale,
+    locale: (localStorage.getItem('i18nextLng') || themeConfig.locale).split('-')[0],
     isDarkMode: false,
     sidebar: false,
     semidark: localStorage.getItem('semidark') || themeConfig.semidark,
     languageList: [
+        { code: 'en', name: 'English' },
         { code: 'zh', name: 'Chinese' },
         { code: 'da', name: 'Danish' },
-        { code: 'en', name: 'English' },
         { code: 'fr', name: 'French' },
         { code: 'de', name: 'German' },
         { code: 'el', name: 'Greek' },
@@ -126,9 +126,11 @@ const themeConfigSlice = createSlice({
             state.semidark = payload;
         },
         toggleLocale(state, { payload }) {
+            // CHANGE 3: Ensure we only set the 2-letter code
             payload = payload || state.locale;
-            i18next.changeLanguage(payload);
-            state.locale = payload;
+            const normalizedLocale = payload.split('-')[0];
+            i18next.changeLanguage(normalizedLocale);
+            state.locale = normalizedLocale;
         },
         toggleSidebar(state) {
             state.sidebar = !state.sidebar;

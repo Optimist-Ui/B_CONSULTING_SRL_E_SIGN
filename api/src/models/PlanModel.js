@@ -9,14 +9,6 @@ const planSchema = new mongoose.Schema({
     enum: ["Starter", "Pro", "Enterprise"],
   },
 
-  // 🔴 DEPRECATED: Stripe fields (keep for backward compatibility or remove)
-  monthlyPriceId: {
-    type: String,
-  },
-  yearlyPriceId: {
-    type: String,
-  },
-
   // Pricing (in cents for consistency)
   monthlyPrice: {
     type: Number,
@@ -56,10 +48,6 @@ const planSchema = new mongoose.Schema({
   // Optional: Different pricing for different regions
   pricing: {
     EUR: {
-      monthly: { type: Number },
-      yearly: { type: Number },
-    },
-    USD: {
       monthly: { type: Number },
       yearly: { type: Number },
     },

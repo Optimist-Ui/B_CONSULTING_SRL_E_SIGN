@@ -60,7 +60,8 @@ class VivaWalletWebhookHandler {
   }
 
   /**
-   * ✅ FIXED: Handle transaction created - separate card saving from transaction tracking
+   * ✅ PRODUCTION FIX: Handle transaction created
+   * Card verification is now handled in WebhookController, NOT here
    */
   async handleTransactionCreated(payload) {
     try {
@@ -70,31 +71,26 @@ class VivaWalletWebhookHandler {
       const statusId = eventData.StatusId;
       const amount = eventData.Amount;
 
-      console.log(`📨 Transaction created: ${transactionId}`);
-      console.log(
-        `   Status: ${statusId}, Amount: €${(amount / 100).toFixed(2)}`
-      );
-      console.log(`   Merchant Trns: ${merchantTrns}`);
-
+      // ✅ Skip if not successful
       if (statusId !== "F") {
-        console.log(
-          `⚠️ Transaction ${transactionId} not successful (Status: ${statusId})`
-        );
         return { success: true, message: "Transaction not successful yet" };
       }
 
-      // ✅ Card verification - handled separately, don't duplicate here
+      // ✅ CRITICAL FIX: Skip card verification entirely - it's handled in WebhookController
       if (merchantTrns.startsWith("CARD_VERIFY_")) {
-        console.log(`✓ Card verification transaction: ${transactionId}`);
-        return { success: true, message: "Card verification processed" };
+        return {
+          success: true,
+          message: "Card verification handled separately",
+        };
       }
 
-      // ✅ For subscription payments, save for invoices only
+      // ✅ For subscription-related transactions, save for invoices only
       const userId = this.extractUserIdFromMerchantTrns(merchantTrns);
       if (userId) {
         await this.saveTransactionForInvoices(userId, eventData);
       }
 
+      // ✅ Handle different subscription transaction types
       if (merchantTrns.startsWith("NEW_SUB_")) {
         await this.handleNewSubscriptionConfirmation(merchantTrns, eventData);
         return { success: true, message: "New subscription confirmed" };
@@ -109,7 +105,6 @@ class VivaWalletWebhookHandler {
       }
 
       if (merchantTrns.startsWith("PLAN_CHANGE_")) {
-        console.log(`✓ Plan change transaction logged: ${transactionId}`);
         return { success: true, message: "Plan change logged" };
       }
 
@@ -117,11 +112,9 @@ class VivaWalletWebhookHandler {
         merchantTrns.startsWith("RENEWAL_") ||
         merchantTrns.startsWith("AUTO_RENEWAL_")
       ) {
-        console.log(`✓ Renewal transaction logged: ${transactionId}`);
         return { success: true, message: "Renewal logged" };
       }
 
-      console.log(`ℹ️ Transaction ${transactionId} processed`);
       return { success: true, message: "Transaction processed" };
     } catch (error) {
       console.error("❌ Error handling transaction created:", error);
@@ -316,7 +309,7 @@ class VivaWalletWebhookHandler {
       await this.emailService.sendSubscriptionConfirmation(
         user,
         plan.name,
-        eventData.Amount / 100,
+        eventData.Amount,
         user.subscription.current_period_end,
         null
       );
@@ -359,7 +352,7 @@ class VivaWalletWebhookHandler {
         plan.name,
         user.subscription.current_period_start,
         user.subscription.current_period_end,
-        eventData.Amount / 100,
+        eventData.Amount,
         null
       );
 

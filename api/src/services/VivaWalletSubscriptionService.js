@@ -504,7 +504,7 @@ class VivaWalletSubscriptionService {
           await this.emailService.sendSubscriptionConfirmation(
             user,
             newPlan.name,
-            amount / 100,
+            amount,
             periodEnd,
             null
           );

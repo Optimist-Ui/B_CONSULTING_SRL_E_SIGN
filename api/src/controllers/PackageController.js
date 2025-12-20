@@ -394,9 +394,10 @@ class PackageController {
 
       // Set headers for file download
       res.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
+      const encodedFileName = encodeURIComponent(fileName);
       res.setHeader(
         "Content-Disposition",
-        `attachment; filename="${fileName}"`
+        `attachment; filename="${encodedFileName}"`
       );
       res.setHeader("Content-Type", "application/pdf");
       res.send(pdfBuffer);
@@ -419,9 +420,10 @@ class PackageController {
         );
 
       res.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
+      const encodedFileName = encodeURIComponent(fileName);
       res.setHeader(
         "Content-Disposition",
-        `attachment; filename="${fileName}"`
+        `attachment; filename="${encodedFileName}"`
       );
       res.setHeader("Content-Type", "application/pdf");
       res.send(pdfBuffer);
