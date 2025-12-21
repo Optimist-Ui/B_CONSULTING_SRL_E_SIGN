@@ -1,4 +1,4 @@
-// src/components/subscriptions/PurchaseModal.tsx - VIVA WALLET VERSION
+// src/components/subscriptions/PurchaseModal.tsx - WITH INLINE PAYMENT METHOD ADDITION
 import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import Swal from 'sweetalert2';
@@ -10,7 +10,7 @@ import { IRootState, AppDispatch } from '../../store';
 import { Plan } from '../../store/slices/planSlice';
 import { PaymentMethod } from '../../store/slices/paymentMethodSlice';
 import { createSubscription, createTrialSubscription, fetchSubscription } from '../../store/thunk/subscriptionThunks';
-import { fetchPaymentMethods } from '../../store/thunk/paymentMethodThunks';
+import { fetchPaymentMethods, createPaymentOrder } from '../../store/thunk/paymentMethodThunks';
 import { invalidateStatusCache } from '../../store/slices/subscriptionSlice';
 
 // Re-usable components
@@ -19,6 +19,7 @@ import IconStar from '../Icon/IconStar';
 import IconPlus from '../Icon/IconPlus';
 import IconArchive from '../Icon/IconArchive';
 import IconCreditCard from '../Icon/IconCreditCard';
+import IconLock from '../Icon/IconLock';
 
 // Simple spinner for the modal's loading state
 const ModalSpinner = () => (
@@ -73,7 +74,7 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({ isOpen, onClose, plan, is
     const { t } = useTranslation();
     const dispatch = useDispatch<AppDispatch>();
 
-    const { paymentMethods, loading: pmLoading } = useSelector((state: IRootState) => state.paymentMethods);
+    const { paymentMethods, loading: pmLoading, isCreatingOrder } = useSelector((state: IRootState) => state.paymentMethods);
     const { subscription } = useSelector((state: IRootState) => state.subscription);
     const { user } = useSelector((state: IRootState) => state.auth);
     const hasHadTrial = user?.hasHadTrial ?? false;
@@ -86,15 +87,29 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({ isOpen, onClose, plan, is
     const [error, setError] = useState('');
     const [initialLoad, setInitialLoad] = useState(true);
 
+    // Payment method addition states
+    const [showAddPaymentForm, setShowAddPaymentForm] = useState(false);
+    const [userName, setUserName] = useState<string>('');
+    const [userEmail, setUserEmail] = useState<string>('');
+
     // ✅ Load payment methods on modal open
     useEffect(() => {
         if (isOpen) {
             setInitialLoad(true);
             setSelectedPM('');
             setError('');
+            setShowAddPaymentForm(false);
             dispatch(fetchPaymentMethods()).finally(() => setInitialLoad(false));
         }
     }, [isOpen, dispatch]);
+
+    // ✅ Set user details for payment form
+    useEffect(() => {
+        if (user) {
+            setUserName(`${user.firstName} ${user.lastName}`);
+            setUserEmail(user.email);
+        }
+    }, [user]);
 
     // ✅ Auto-select default payment method
     useEffect(() => {
@@ -108,6 +123,29 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({ isOpen, onClose, plan, is
 
     // ✅ Check if user needs to add payment method
     const needsPaymentMethod = paymentMethods.length === 0;
+
+    // ✅ Handle adding a new payment method
+    const handleAddPaymentMethod = async () => {
+        if (!userName.trim() || !userEmail.trim()) {
+            setError(t('paymentMethods.addForm.errors.fillAllFields'));
+            return;
+        }
+
+        try {
+            const result = await dispatch(
+                createPaymentOrder({
+                    name: userName,
+                    email: userEmail,
+                    returnUrl: `${window.location.origin}/payment-callback`,
+                })
+            ).unwrap();
+
+            // Redirect to Viva Wallet checkout
+            window.location.href = result.checkoutUrl;
+        } catch (err: any) {
+            setError(err.toString() || t('purchaseModal.errors.unknownError'));
+        }
+    };
 
     // ✅ Handle subscription purchase/trial
     const handleTransaction = async (isTrialAction: boolean) => {
@@ -174,34 +212,95 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({ isOpen, onClose, plan, is
         showSuccessToast(t('purchaseModal.success.trial'), t('purchaseModal.success.trialMessage', { planName: plan.name }));
     };
 
-    // ✅ Navigate to payment methods page
-    const handleAddPaymentMethod = () => {
-        onClose();
-        window.location.href = '/payment-methods';
-    };
-
     const formatPrice = (priceInCents: number): string => {
         return (priceInCents / 100).toFixed(2);
     };
+
+    // ✅ Render add payment method form
+    const renderAddPaymentForm = () => {
+        return (
+            <div className="space-y-6">
+                <div className="text-center mb-6">
+                    <div className="mx-auto h-16 w-16 text-blue-500 mb-4">
+                        <IconCreditCard className="h-full w-full" />
+                    </div>
+                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">{t('purchaseModal.addPaymentMethod.title')}</h3>
+                    <p className="text-gray-600 dark:text-gray-400 text-sm">{t('purchaseModal.addPaymentMethod.description')}</p>
+                </div>
+
+                <form
+                    onSubmit={(e) => {
+                        e.preventDefault();
+                        handleAddPaymentMethod();
+                    }}
+                    className="space-y-4"
+                >
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t('paymentMethods.addForm.nameLabel')}</label>
+                        <input
+                            type="text"
+                            value={userName}
+                            onChange={(e) => setUserName(e.target.value)}
+                            placeholder={t('paymentMethods.addForm.namePlaceholder')}
+                            className="form-input w-full"
+                            required
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t('paymentMethods.addForm.emailLabel')}</label>
+                        <input
+                            type="email"
+                            value={userEmail}
+                            onChange={(e) => setUserEmail(e.target.value)}
+                            placeholder={t('paymentMethods.addForm.emailPlaceholder')}
+                            className="form-input w-full"
+                            required
+                        />
+                    </div>
+
+                    <div className="text-sm text-gray-500 dark:text-gray-400 flex items-center bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg">
+                        <IconLock className="w-4 h-4 mr-2 text-blue-500 flex-shrink-0" />
+                        {t('paymentMethods.addForm.secureNote')}
+                    </div>
+
+                    {error && <p className="text-red-600 text-sm bg-red-50 dark:bg-red-900/20 p-3 rounded-lg">{error}</p>}
+
+                    <div className="flex space-x-3 pt-4">
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setShowAddPaymentForm(false);
+                                setError('');
+                            }}
+                            disabled={isCreatingOrder}
+                            className="btn btn-outline-secondary flex-1 py-3 disabled:opacity-50"
+                        >
+                            {t('paymentMethods.addForm.buttons.cancel')}
+                        </button>
+                        <button type="submit" disabled={isCreatingOrder} className="btn btn-primary flex-1 py-3 disabled:opacity-50">
+                            {isCreatingOrder ? (
+                                <span className="flex items-center justify-center">
+                                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                                    {t('paymentMethods.addForm.buttons.processing')}
+                                </span>
+                            ) : (
+                                t('paymentMethods.addForm.buttons.add')
+                            )}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        );
+    };
+
     // ✅ Render modal content
     const renderContent = () => {
         if (initialLoad) return <ModalSpinner />;
 
-        // ✅ Show "Add Payment Method" prompt if none exist
-        if (needsPaymentMethod) {
-            return (
-                <div className="space-y-6 text-center py-8">
-                    <div className="mx-auto h-20 w-20 text-gray-400 mb-4">
-                        <IconCreditCard className="h-full w-full" />
-                    </div>
-                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white">{t('purchaseModal.noPaymentMethod.title')}</h3>
-                    <p className="text-gray-600 dark:text-gray-400">{t('purchaseModal.noPaymentMethod.description')}</p>
-                    <button onClick={handleAddPaymentMethod} className="btn btn-primary px-6 py-3 rounded-lg flex items-center justify-center mx-auto">
-                        <IconPlus className="w-5 h-5 mr-2" />
-                        {t('purchaseModal.noPaymentMethod.addButton')}
-                    </button>
-                </div>
-            );
+        // ✅ Show add payment method form if requested or if no payment methods exist
+        if (showAddPaymentForm || (needsPaymentMethod && !showAddPaymentForm)) {
+            return renderAddPaymentForm();
         }
 
         return (
@@ -240,7 +339,7 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({ isOpen, onClose, plan, is
                             <SelectablePaymentMethodCard key={pm.id} pm={pm} isSelected={selectedPM === pm.id} onClick={() => setSelectedPM(pm.id)} />
                         ))}
                     </div>
-                    <button onClick={handleAddPaymentMethod} className="btn btn-outline-secondary w-full mt-4 flex items-center justify-center">
+                    <button onClick={() => setShowAddPaymentForm(true)} className="btn btn-outline-secondary w-full mt-4 flex items-center justify-center">
                         <IconPlus className="w-5 h-5 mr-2" />
                         {t('purchaseModal.useDifferentCard')}
                     </button>

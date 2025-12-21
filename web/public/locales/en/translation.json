@@ -2840,6 +2840,10 @@
         "subscribeNow": "Subscribe",
         "subscribe": "{{action}} Now (€{{price}})",
         "termsAgreement": "By continuing, you agree to our Terms of Service.",
+         "addPaymentMethod": {
+            "title": "Add Payment Method",
+            "description": "Please enter your billing details to add a new secure payment method."
+        },
         "success": {
             "topUp": "Top-up Successful!",
             "topUpMessage": "You now have more documents available on your {{planName}} plan!",

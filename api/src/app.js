@@ -30,19 +30,19 @@ const clientURL = process.env.CLIENT_URL || "http://localhost:5173";
 app.set("trust proxy", 1);
 app.use("/api/webhooks", webhookRoutes);
 
-// const corsOptions = {
-//   origin: "*", // <--- CHANGE THIS to "*"
-//   methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
-//   allowedHeaders: [
-//     "Content-Type",
-//     "Authorization",
-//     "ngrok-skip-browser-warning",
-//   ],
-//   credentials: false, // Important: If origin is "*", credentials (cookies) cannot be true.
-//   optionsSuccessStatus: 204,
-// };
-app.use(cors({ origin: clientURL, credentials: true }));
-// app.use(cors(corsOptions));
+ const corsOptions = {
+  origin: "*", // <--- CHANGE THIS to "*"
+  methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+  allowedHeaders: [
+    "Content-Type",
+    "Authorization",
+    "ngrok-skip-browser-warning",
+  ],
+  credentials: false, // Important: If origin is "*", credentials (cookies) cannot be true.
+  optionsSuccessStatus: 204,
+};
+// app.use(cors({ origin: clientURL, credentials: true }));
+app.use(cors(corsOptions));
 app.use(helmet({ crossOriginResourcePolicy: false }));
 
 
