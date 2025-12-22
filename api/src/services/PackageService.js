@@ -10,6 +10,7 @@ class PackageService {
     pdfModificationService,
     packageEventEmitter,
     s3Service,
+    pushNotificationService,
   }) {
     this.Package = Package;
     this.Contact = Contact;
@@ -20,7 +21,8 @@ class PackageService {
     this.SmsService = smsService;
     this.pdfModifier = pdfModificationService;
     this.packageEventEmitter = packageEventEmitter;
-    this.s3Service = s3Service; // 👈 ADD THIS
+    this.s3Service = s3Service;
+    this.pushNotificationService = pushNotificationService;
   }
 
   async uploadPackage(userId, s3File) {
@@ -1973,6 +1975,17 @@ class PackageService {
         universalAccessLink
       );
 
+      // Send push notification (document_signed)
+      const pushTitle = "Document Signed by All Participants";
+      const pushBody = `${pkg.name} has been signed by all participants`;
+      await this._sendPushNotificationToUserByEmail(
+        recipient.email,
+        "document_signed",
+        pkg._id.toString(),
+        pushTitle,
+        pushBody
+      );
+
       // 🔥 FIXED: Create proper participant object for review email
       const participantForReview = {
         contactEmail: recipient.email,
@@ -1998,6 +2011,17 @@ class PackageService {
         dashboardLink
       );
 
+      // Send push notification to owner (document_signed)
+      const pushTitle = "Document Signed by All Participants";
+      const pushBody = `${pkg.name} has been signed by all participants`;
+      await this._sendPushNotificationToUserByEmail(
+        packageOwner.email,
+        "document_signed",
+        pkg._id.toString(),
+        pushTitle,
+        pushBody
+      );
+
       // 🔥 FIXED: Create proper participant object for owner
       const ownerAsParticipant = {
         contactEmail: packageOwner.email,
@@ -2014,6 +2038,43 @@ class PackageService {
         pkg.name, // ✅ Package name
         ownerReviewLink // ✅ Review link
       );
+    }
+  }
+
+  /**
+   * Helper method to send push notification to a user by email
+   * @private
+   */
+  async _sendPushNotificationToUserByEmail(
+    email,
+    type,
+    packageId,
+    title,
+    body
+  ) {
+    if (!this.pushNotificationService) return;
+
+    try {
+      // Find user by email
+      const user = await this.User.findOne({ email: email.toLowerCase() }).select(
+        "deviceTokens"
+      );
+
+      if (user && user.deviceTokens && user.deviceTokens.length > 0) {
+        await this.pushNotificationService.sendNotificationToUser(
+          user,
+          type,
+          packageId,
+          title,
+          body
+        );
+      }
+    } catch (error) {
+      console.error(
+        `Error sending push notification to ${email}:`,
+        error
+      );
+      // Don't throw - push notifications are non-critical
     }
   }
 
@@ -2613,6 +2674,17 @@ class PackageService {
         initiatorName,
         pkg.name
       );
+
+      // Send push notification (document_revoked)
+      const pushTitle = "Document Revoked";
+      const pushBody = `${pkg.name} has been revoked by ${initiatorName}`;
+      await this._sendPushNotificationToUserByEmail(
+        recipient.email,
+        "document_revoked",
+        pkg._id.toString(),
+        pushTitle,
+        pushBody
+      );
     }
   }
 
@@ -2746,6 +2818,17 @@ class PackageService {
         completedNames, // Pass the array of names
         pendingNames, // Pass the array of names
         actionLink
+      );
+
+      // Send push notification (document_signing)
+      const pushTitle = "Document Signing Update";
+      const pushBody = `${actorName} has signed ${pkg.name}`;
+      await this._sendPushNotificationToUserByEmail(
+        owner.email,
+        "document_signing",
+        pkg._id.toString(),
+        pushTitle,
+        pushBody
       );
     } catch (error) {
       console.error("Failed to send action update notification:", error);

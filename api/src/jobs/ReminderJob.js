@@ -7,6 +7,7 @@ class ReminderJob extends BaseJob {
     this.User = container.resolve("User");
     this.emailService = container.resolve("emailService");
     this.Contact = container.resolve("Contact");
+    this.pushNotificationService = container.resolve("pushNotificationService");
   }
 
   /**
@@ -208,6 +209,33 @@ class ReminderJob extends BaseJob {
           pkg.options.expiresAt,
           actionUrl
         );
+
+        // Send push notification (document_reminder)
+        if (this.pushNotificationService) {
+          try {
+            const user = await this.User.findOne({
+              email: recipient.email.toLowerCase(),
+            }).select("deviceTokens");
+
+            if (user && user.deviceTokens && user.deviceTokens.length > 0) {
+              const pushTitle = "Document Reminder";
+              const pushBody = `${pkg.name} expires in ${timeString}`;
+              await this.pushNotificationService.sendNotificationToUser(
+                user,
+                "document_reminder",
+                pkg._id.toString(),
+                pushTitle,
+                pushBody
+              );
+            }
+          } catch (error) {
+            console.error(
+              `Error sending push notification reminder to ${recipient.email}:`,
+              error
+            );
+            // Don't throw - push notifications are non-critical
+          }
+        }
       }
     } catch (error) {
       console.error(

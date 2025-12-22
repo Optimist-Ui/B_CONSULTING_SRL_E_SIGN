@@ -8,6 +8,7 @@ class ExpiryJob extends BaseJob {
     this.emailService = container.resolve("emailService");
     this.packageService = container.resolve("packageService");
     this.Contact = container.resolve("Contact");
+    this.pushNotificationService = container.resolve("pushNotificationService");
   }
 
   /**
@@ -214,6 +215,34 @@ class ExpiryJob extends BaseJob {
             pkg.options.expiresAt
           );
           emailsSent.push(recipient.email);
+
+          // Send push notification (document_expiring) - Note: This is for expiring soon, not expired
+          // For actual expiry, we might want a different type, but using document_expiring for now
+          if (this.pushNotificationService) {
+            try {
+              const user = await this.User.findOne({
+                email: recipient.email.toLowerCase(),
+              }).select("deviceTokens");
+
+              if (user && user.deviceTokens && user.deviceTokens.length > 0) {
+                const pushTitle = "Document Expiring Soon";
+                const pushBody = `${pkg.name} is expiring soon`;
+                await this.pushNotificationService.sendNotificationToUser(
+                  user,
+                  "document_expiring",
+                  pkg._id.toString(),
+                  pushTitle,
+                  pushBody
+                );
+              }
+            } catch (error) {
+              console.error(
+                `Error sending push notification expiry to ${recipient.email}:`,
+                error
+              );
+              // Don't throw - push notifications are non-critical
+            }
+          }
         } catch (error) {
           console.error(
             `Failed to send expiry email to ${recipient.email}:`,

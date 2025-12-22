@@ -605,7 +605,71 @@ class UserService {
 
     return await this._sanitizeUserWithSignedUrl(user);
   }
-  
+
+  /**
+   * Register a device token for push notifications
+   * @param {string} userId - User ID
+   * @param {string} deviceToken - FCM device token
+   * @param {string} platform - Platform ('android' or 'ios')
+   * @returns {Promise<Object>} Updated user
+   */
+  async registerDeviceToken(userId, deviceToken, platform) {
+    const user = await this.User.findById(userId);
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    // Initialize deviceTokens array if it doesn't exist
+    if (!user.deviceTokens) {
+      user.deviceTokens = [];
+    }
+
+    // Check if token already exists for this user
+    const existingToken = user.deviceTokens.find(
+      (dt) => dt.token === deviceToken
+    );
+
+    if (existingToken) {
+      // Update platform and timestamp if token exists
+      existingToken.platform = platform;
+      existingToken.createdAt = new Date();
+    } else {
+      // Add new token
+      user.deviceTokens.push({
+        token: deviceToken,
+        platform: platform,
+        createdAt: new Date(),
+      });
+    }
+
+    await user.save();
+    return { message: "Device token registered successfully" };
+  }
+
+  /**
+   * Unregister a device token
+   * @param {string} userId - User ID
+   * @param {string} deviceToken - FCM device token to remove
+   * @returns {Promise<Object>} Result
+   */
+  async unregisterDeviceToken(userId, deviceToken) {
+    const user = await this.User.findById(userId);
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    if (!user.deviceTokens || user.deviceTokens.length === 0) {
+      return { message: "No device tokens found" };
+    }
+
+    // Remove the token
+    user.deviceTokens = user.deviceTokens.filter(
+      (dt) => dt.token !== deviceToken
+    );
+
+    await user.save();
+    return { message: "Device token unregistered successfully" };
+  }
 }
 
 module.exports = UserService;

@@ -31,6 +31,7 @@ const EmailService = require("../services/EmailService");
 const S3Service = require("../services/S3Service");
 const SmsService = require("../services/SmsService");
 const PdfModificationService = require("../services/PdfModificationService");
+const PushNotificationService = require("../services/PushNotificationService");
 
 const SocketManager = require("../websocket/SocketManager");
 const PackageEventEmitter = require("../websocket/events/packageEvents");
@@ -97,6 +98,7 @@ container.register({
   smsService: asClass(SmsService).singleton(),
   s3Service: asClass(S3Service).singleton(),
   pdfModificationService: asClass(PdfModificationService).singleton(),
+  pushNotificationService: asClass(PushNotificationService).singleton(),
   cronService: asClass(CronService).singleton(),
 
   socketManager: asClass(SocketManager).singleton(),
