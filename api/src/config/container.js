@@ -1,5 +1,4 @@
 const { createContainer, asClass, asFunction, asValue } = require("awilix");
-const Stripe = require("stripe");
 const db = require("./db");
 const User = require("../models/UserModel");
 const Package = require("../models/PackageModel");
@@ -19,8 +18,8 @@ const UserService = require("../services/UserService");
 const PackageService = require("../services/PackageService");
 const ContactService = require("../services/ContactService");
 const TemplateService = require("../services/TemplateService");
-const PaymentMethod = require("../services/PaymentMethod");
-const SubscriptionService = require("../services/SubscriptionService");
+const VivaWalletPaymentService = require("../services/VivaWalletPaymentService");
+const VivaWalletInvoiceService = require("../services/VivaWalletInvoiceService");
 const PlanService = require("../services/PlanService");
 const ReviewService = require("../services/ReviewService");
 const OpenAIService = require("../services/OpenAIService");
@@ -56,13 +55,10 @@ const paymentMethodRoutes = require("../routes/PaymentMethodRoutes");
 const reviewRoutes = require("../routes/ReviewRoutes");
 const chatbotRoutes = require("../routes/ChatbotRoutes");
 
-const container = createContainer();
+const VivaWalletSubscriptionService = require("../services/VivaWalletSubscriptionService");
+const VivaWalletWebhookHandler = require("../services/VivaWalletWebhookHandler");
 
-// 👇 Initialize Stripe and register it
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-container.register({
-  stripe: asValue(stripe),
-});
+const container = createContainer();
 
 container.register({
   db: asValue(db),
@@ -86,8 +82,10 @@ container.register({
   packageService: asClass(PackageService).singleton(),
   contactService: asClass(ContactService).singleton(),
   templateService: asClass(TemplateService).singleton(),
-  paymentMethod: asClass(PaymentMethod).singleton(),
-  subscriptionService: asClass(SubscriptionService).singleton(),
+  vivaWalletPaymentService: asClass(VivaWalletPaymentService).singleton(),
+  vivaWalletInvoiceService: asClass(VivaWalletInvoiceService).singleton(),
+  vivaWalletSubscriptionService: asClass(VivaWalletSubscriptionService).singleton(),
+  vivaWalletWebhookHandler: asClass(VivaWalletWebhookHandler).singleton(),
   planService: asClass(PlanService).singleton(),
   reviewService: asClass(ReviewService).singleton(),
   // Chatbot Services

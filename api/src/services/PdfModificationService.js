@@ -1,4 +1,5 @@
 const { PDFDocument, rgb, StandardFonts } = require("pdf-lib");
+const fontkit = require("@pdf-lib/fontkit");
 const fs = require("fs").promises;
 const path = require("path");
 
@@ -29,11 +30,57 @@ class PdfModificationService {
 
     const pdfDoc = await PDFDocument.load(existingPdfBytes);
 
-    // Embed fonts
+    // 1. REGISTER FONTKIT
+    pdfDoc.registerFontkit(fontkit);
+
+    // 2. LOAD CUSTOM FONTS (That support Greek)
+    // Ensure you have these .ttf files in your project
+    const fontPathRegular = path.join(
+      process.cwd(),
+      "src",
+      "public",
+      "fonts",
+      "Roboto-Regular.ttf"
+    );
+    const fontPathBold = path.join(
+      process.cwd(),
+      "src",
+      "public",
+      "fonts",
+      "Roboto-Bold.ttf"
+    );
+    const fontPathItalic = path.join(
+      process.cwd(),
+      "src",
+      "public",
+      "fonts",
+      "Roboto-Italic.ttf"
+    );
+
+    const [fontRegularBytes, fontBoldBytes, fontItalicBytes] =
+      await Promise.all([
+        fs.readFile(fontPathRegular),
+        fs.readFile(fontPathBold),
+        fs.readFile(fontPathItalic).catch(() => fs.readFile(fontPathRegular)), // Fallback if no italic
+      ]);
+
+    // 3. EMBED CUSTOM FONTS INSTEAD OF STANDARD FONTS
+    const customFontRegular = await pdfDoc.embedFont(fontRegularBytes, {
+      subset: true,
+    });
+    const customFontBold = await pdfDoc.embedFont(fontBoldBytes, {
+      subset: true,
+    });
+    const customFontItalic = await pdfDoc.embedFont(fontItalicBytes, {
+      subset: true,
+    });
+
+    // 4. UPDATE THE FONTS OBJECT
+    // We map your existing keys to the new Unicode-compatible fonts
     const fonts = {
-      helvetica: await pdfDoc.embedFont(StandardFonts.Helvetica),
-      helveticaBold: await pdfDoc.embedFont(StandardFonts.HelveticaBold),
-      helveticaOblique: await pdfDoc.embedFont(StandardFonts.HelveticaOblique),
+      helvetica: customFontRegular, // Replaced Helvetica with Roboto Regular
+      helveticaBold: customFontBold, // Replaced HelveticaBold with Roboto Bold
+      helveticaOblique: customFontItalic, // Replaced HelveticaOblique with Roboto Italic
     };
 
     // Load company logo

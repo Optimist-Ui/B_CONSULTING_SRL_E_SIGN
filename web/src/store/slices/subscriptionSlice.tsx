@@ -1,4 +1,5 @@
-// ===== 1. Updated subscriptionSlice.ts =====
+// src/store/slices/subscriptionSlice.ts - UPDATED WITH INVOICE URL
+
 import { createSlice } from '@reduxjs/toolkit';
 import { buildSubscriptionExtraReducers } from '../extra-reducers/subscriptionExtraReducers';
 import { logout } from './authSlice';
@@ -24,18 +25,21 @@ export interface Subscription {
     trialEndDate?: string | null;
     isTrialing: boolean;
     planInterval: 'year' | 'month';
-    planPrice: number;
+    planPrice: number | string;
     cancelAtPeriodEnd: boolean;
 }
 
-// Shape of a single invoice record
+// ✅ UPDATED: Viva Wallet invoice structure WITH invoiceUrl
 export interface Invoice {
-    id: string;
-    createdAt: string;
-    amount: string;
-    currency: string;
-    status: string;
-    downloadUrl: string;
+    id: string; // Viva Wallet transaction ID
+    date: string; // Transaction date
+    amount: string; // Formatted amount (e.g., "9.99")
+    currency: string; // "EUR"
+    status: 'paid' | 'failed' | 'pending' | 'open' | 'void' | 'uncollectible';
+    description: string; // Transaction description
+    transactionType: 'new_subscription' | 'renewal' | 'trial_conversion' | 'plan_change' | 'payment';
+    cardLast4: string; // Last 4 digits of card used
+    invoiceUrl?: string; // ✅ NEW: URL to view/download invoice from Viva Wallet
 }
 
 // Shape of the entire slice state
@@ -43,6 +47,7 @@ export interface SubscriptionState {
     subscription: Subscription | null;
     subscriptionStatus: SubscriptionStatus | null;
     invoices: Invoice[];
+    currentInvoice: InvoiceDetail | null;
     loading: boolean;
     error: string | null;
     // Separate loading flags for granular UI feedback
@@ -52,6 +57,7 @@ export interface SubscriptionState {
     isCancelling: boolean;
     isReactivating: boolean;
     isFetchingInvoices: boolean;
+    isFetchingInvoiceDetail: boolean;
     isEndingTrial: boolean;
     // Cache control
     lastStatusFetch: number | null;
@@ -62,6 +68,7 @@ const initialState: SubscriptionState = {
     subscription: null,
     subscriptionStatus: null,
     invoices: [],
+    currentInvoice: null,
     loading: false,
     error: null,
     isFetchingDetails: false,
@@ -70,10 +77,48 @@ const initialState: SubscriptionState = {
     isCancelling: false,
     isReactivating: false,
     isFetchingInvoices: false,
+    isFetchingInvoiceDetail: false, // ✅ NEW
     isEndingTrial: false,
     lastStatusFetch: null,
     lastDetailsFetch: null,
 };
+
+// ✅ NEW: Detailed invoice structure
+export interface InvoiceDetail {
+    // Transaction Details
+    id: string;
+    date: string;
+    amount: string;
+    currency: string;
+    status: 'paid' | 'failed' | 'pending' | 'open' | 'void' | 'uncollectible';
+    description: string;
+    transactionType: 'new_subscription' | 'renewal' | 'trial_conversion' | 'plan_change' | 'payment';
+
+    // Payment Details
+    cardLast4: string;
+    cardType: string;
+
+    // Customer Details
+    customerName: string;
+    customerEmail: string;
+
+    // Subscription Details
+    planName: string;
+    documentLimit: number;
+
+    // Billing Details
+    billingAddress?: {
+        country: string;
+        city: string;
+    };
+
+    // Additional metadata
+    orderCode?: string;
+    invoiceNumber: string;
+
+    // Full transaction details (optional)
+    fullDetails?: any;
+}
 
 const subscriptionSlice = createSlice({
     name: 'subscription',
@@ -90,16 +135,18 @@ const subscriptionSlice = createSlice({
         invalidateDetailsCache: (state) => {
             state.lastDetailsFetch = null;
         },
+        clearCurrentInvoice: (state) => {
+            state.currentInvoice = null;
+        },
     },
     extraReducers: (builder) => {
         buildSubscriptionExtraReducers(builder);
         builder.addCase(logout, () => {
-            // Return the initialState to completely reset the slice
             return initialState;
         });
     },
 });
 
-export const { clearSubscriptionError, resetSubscriptionState, invalidateStatusCache, invalidateDetailsCache } = subscriptionSlice.actions;
+export const { clearSubscriptionError, resetSubscriptionState, invalidateStatusCache, invalidateDetailsCache, clearCurrentInvoice } = subscriptionSlice.actions;
 
 export default subscriptionSlice.reducer;

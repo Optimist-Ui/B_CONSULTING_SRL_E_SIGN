@@ -1,57 +1,109 @@
+// src/controllers/PaymentMethodController.js
+
 const { successResponse, errorResponse } = require("../utils/responseHandler");
 
 class PaymentMethodController {
-
-  constructor({ paymentMethod }) {
-    // We reuse the subscription service as it contains all Stripe logic
-    this.PaymentMethod = paymentMethod;
+  constructor({ vivaWalletPaymentService }) {
+    this.vivaWalletPaymentService = vivaWalletPaymentService;
   }
 
+  /**
+   * List all payment methods for a user
+   */
   async list(req, res) {
     try {
-      const paymentMethods = await this.PaymentMethod.listPaymentMethods(req.user.id);
-      successResponse(res, paymentMethods, "Payment methods fetched successfully.");
+      const result = await this.vivaWalletPaymentService.getPaymentSources(
+        req.user.id
+      );
+
+      const paymentMethods = result.paymentSources.map((source) => ({
+        id: source.id,
+        cardType: source.cardType,
+        last4: source.last4,
+        exp_month: source.expiryMonth,
+        exp_year: source.expiryYear,
+        isDefault: source.isDefault,
+      }));
+
+      successResponse(
+        res,
+        paymentMethods,
+        "Payment methods fetched successfully."
+      );
     } catch (error) {
       errorResponse(res, error, "Failed to fetch payment methods.");
     }
   }
 
-  async attach(req, res) {
+  /**
+   * Create a payment order to add a new payment method
+   * Frontend will redirect user to Viva Wallet checkout
+   */
+  async createOrder(req, res) {
     try {
-      const { paymentMethodId } = req.body;
-      const result = await this.PaymentMethod.attachPaymentMethod({
-        userId: req.user.id,
-        paymentMethodId,
-      });
-      successResponse(res, result, result.message, 201);
+      const { name, email, returnUrl } = req.body;
+
+      const result = await this.vivaWalletPaymentService.createPaymentOrder(
+        req.user.id,
+        name,
+        email,
+        returnUrl
+      );
+
+      successResponse(
+        res,
+        {
+          orderCode: result.orderCode,
+          checkoutUrl: result.checkoutUrl,
+        },
+        "Payment order created successfully. Redirect user to checkoutUrl.",
+        201
+      );
     } catch (error) {
-      errorResponse(res, error, "Failed to attach payment method.");
-    }
-  }
-  
-  async setDefault(req, res) {
-    try {
-        const { paymentMethodId } = req.body;
-        const result = await this.PaymentMethod.setDefaultPaymentMethod({
-            userId: req.user.id,
-            paymentMethodId,
-        });
-        successResponse(res, result, result.message);
-    } catch (error) {
-        errorResponse(res, error, "Failed to set default payment method.");
+      errorResponse(res, error, "Failed to create payment order.");
     }
   }
 
+  /**
+   * Set a payment method as default
+   */
+  async setDefault(req, res) {
+    try {
+      const { paymentSourceId } = req.body;
+
+      await this.vivaWalletPaymentService.setDefaultPaymentSource(
+        req.user.id,
+        paymentSourceId
+      );
+
+      successResponse(
+        res,
+        { defaultPaymentSourceId: paymentSourceId },
+        "Default payment method updated successfully."
+      );
+    } catch (error) {
+      errorResponse(res, error, "Failed to set default payment method.");
+    }
+  }
+
+  /**
+   * Delete (detach) a payment method
+   */
   async detach(req, res) {
     try {
-      const { paymentMethodId } = req.params;
-      const result = await this.PaymentMethod.deletePaymentMethod({
-        userId: req.user.id,
-        paymentMethodId,
-      });
-      successResponse(res, result, result.message);
-    } catch (error)
-    {
+      const { paymentSourceId } = req.params;
+
+      await this.vivaWalletPaymentService.deletePaymentSource(
+        req.user.id,
+        paymentSourceId
+      );
+
+      successResponse(
+        res,
+        { success: true },
+        "Payment method removed successfully."
+      );
+    } catch (error) {
       errorResponse(res, error, "Failed to remove payment method.");
     }
   }

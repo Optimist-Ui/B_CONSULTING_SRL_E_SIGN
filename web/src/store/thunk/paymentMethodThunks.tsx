@@ -4,23 +4,27 @@ import api from '../../utils/api';
 import { PaymentMethod } from '../slices/paymentMethodSlice';
 
 // Interfaces
-interface AttachPaymentMethodArgs {
-    paymentMethodId: string;
+interface CreatePaymentOrderArgs {
+    name: string;
+    email: string;
+    returnUrl: string;
+}
+
+interface CreatePaymentOrderResponse {
+    orderCode: string;
+    checkoutUrl: string;
 }
 
 interface SetDefaultPaymentMethodArgs {
-    paymentMethodId: string;
+    paymentSourceId: string;
 }
 
 interface DeletePaymentMethodArgs {
-    paymentMethodId: string;
+    paymentSourceId: string;
 }
 
 // --- Fetch Payment Methods Thunk ---
-export const fetchPaymentMethods = createAsyncThunk<
-    PaymentMethod[],
-    void
->('paymentMethods/fetchPaymentMethods', async (_, { rejectWithValue }) => {
+export const fetchPaymentMethods = createAsyncThunk<PaymentMethod[], void>('paymentMethods/fetchPaymentMethods', async (_, { rejectWithValue }) => {
     try {
         const response = await api.get('/api/payment-methods');
         return response.data.data;
@@ -29,39 +33,37 @@ export const fetchPaymentMethods = createAsyncThunk<
     }
 });
 
-// --- Attach Payment Method Thunk ---
-export const attachPaymentMethod = createAsyncThunk<
-    { message: string },
-    AttachPaymentMethodArgs
->('paymentMethods/attachPaymentMethod', async ({ paymentMethodId }, { rejectWithValue }) => {
+// --- Create Payment Order Thunk (Viva Wallet) ---
+export const createPaymentOrder = createAsyncThunk<CreatePaymentOrderResponse, CreatePaymentOrderArgs>('paymentMethods/createPaymentOrder', async ({ name, email, returnUrl }, { rejectWithValue }) => {
     try {
-        const response = await api.post('/api/payment-methods/attach', { paymentMethodId });
+        const response = await api.post('/api/payment-methods/create-order', {
+            name,
+            email,
+            returnUrl,
+        });
         return response.data.data;
     } catch (error: any) {
-        return rejectWithValue(error.response?.data?.error || 'Failed to attach payment method.');
+        return rejectWithValue(error.response?.data?.error || 'Failed to create payment order.');
     }
 });
 
 // --- Set Default Payment Method Thunk ---
-export const setDefaultPaymentMethod = createAsyncThunk<
-    { message: string },
-    SetDefaultPaymentMethodArgs
->('paymentMethods/setDefaultPaymentMethod', async ({ paymentMethodId }, { rejectWithValue }) => {
-    try {
-        const response = await api.patch('/api/payment-methods/set-default', { paymentMethodId });
-        return response.data.data;
-    } catch (error: any) {
-        return rejectWithValue(error.response?.data?.error || 'Failed to set default payment method.');
+export const setDefaultPaymentMethod = createAsyncThunk<{ message: string }, SetDefaultPaymentMethodArgs>(
+    'paymentMethods/setDefaultPaymentMethod',
+    async ({ paymentSourceId }, { rejectWithValue }) => {
+        try {
+            const response = await api.patch('/api/payment-methods/set-default', { paymentSourceId });
+            return response.data.data;
+        } catch (error: any) {
+            return rejectWithValue(error.response?.data?.error || 'Failed to set default payment method.');
+        }
     }
-});
+);
 
 // --- Delete Payment Method Thunk ---
-export const deletePaymentMethod = createAsyncThunk<
-    { message: string },
-    DeletePaymentMethodArgs
->('paymentMethods/deletePaymentMethod', async ({ paymentMethodId }, { rejectWithValue }) => {
+export const deletePaymentMethod = createAsyncThunk<{ message: string }, DeletePaymentMethodArgs>('paymentMethods/deletePaymentMethod', async ({ paymentSourceId }, { rejectWithValue }) => {
     try {
-        const response = await api.delete(`/api/payment-methods/${paymentMethodId}`);
+        const response = await api.delete(`/api/payment-methods/${paymentSourceId}`);
         return response.data.data;
     } catch (error: any) {
         return rejectWithValue(error.response?.data?.error || 'Failed to delete payment method.');
