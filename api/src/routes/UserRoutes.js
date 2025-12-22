@@ -8,6 +8,8 @@ const {
   changePasswordValidation,
   requestEmailChangeValidation,
   verifyEmailChangeOtpValidation,
+  registerDeviceTokenValidation,
+  unregisterDeviceTokenValidation,
 } = require("../validations/UserValidations");
 const validate = require("../middlewares/validate");
 const authenticateUser = require("../middlewares/authenticate");
@@ -407,6 +409,78 @@ module.exports = (container) => {
     resetPasswordValidation,
     validate,
     userController.resetPassword.bind(userController)
+  );
+
+  /**
+   * @swagger
+   * /api/users/device-token:
+   *   post:
+   *     tags: [Users]
+   *     summary: Register device token for push notifications
+   *     description: Registers a Firebase Cloud Messaging (FCM) device token for push notifications.
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             required: [deviceToken, platform]
+   *             properties:
+   *               deviceToken:
+   *                 type: string
+   *                 example: "fcm_token_here"
+   *               platform:
+   *                 type: string
+   *                 enum: [android, ios]
+   *                 example: "android"
+   *     responses:
+   *       '200':
+   *         description: Device token registered successfully.
+   *       '400':
+   *         description: Validation error.
+   *       '401':
+   *         description: Unauthorized.
+   */
+  router.post(
+    "/device-token",
+    authenticateUser,
+    registerDeviceTokenValidation,
+    validate,
+    userController.registerDeviceToken.bind(userController)
+  );
+
+  /**
+   * @swagger
+   * /api/users/device-token:
+   *   delete:
+   *     tags: [Users]
+   *     summary: Unregister device token
+   *     description: Removes a Firebase Cloud Messaging (FCM) device token from the user's account.
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             required: [deviceToken]
+   *             properties:
+   *               deviceToken:
+   *                 type: string
+   *                 example: "fcm_token_here"
+   *     responses:
+   *       '200':
+   *         description: Device token unregistered successfully.
+   *       '400':
+   *         description: Validation error.
+   *       '401':
+   *         description: Unauthorized.
+   */
+  router.delete(
+    "/device-token",
+    authenticateUser,
+    unregisterDeviceTokenValidation,
+    validate,
+    userController.unregisterDeviceToken.bind(userController)
   );
 
   return router;
