@@ -155,8 +155,9 @@ jobs:
             echo "$SENDGRID_TEMPLATES" > /tmp/sendgrid_templates.env
 
              # Write FIREBASE_SERVICE_ACCOUNT separately to avoid shell interpretation issues
-            cat > /tmp/firebase.env <<'FIREBASE_EOF'FIREBASE_SERVICE_ACCOUNT=$FIREBASE_SERVICE_ACCOUNT 
-            FIREBASE_EOF
+            cat > /tmp/firebase.env <<EOF
+            FIREBASE_SERVICE_ACCOUNT=$FIREBASE_SERVICE_ACCOUNT
+            EOF
 
             docker run -d \
               --env-file /tmp/sendgrid_templates.env \
