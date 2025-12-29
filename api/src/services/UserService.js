@@ -3,8 +3,11 @@ const crypto = require("crypto");
 const { generateToken } = require("../utils/jwtHandler");
 
 class UserService {
-  constructor({ User, emailService, stripe, s3Service }) {
-    this.stripe = stripe;
+  constructor({
+    User,
+    emailService,
+    s3Service,
+  }) {
     this.User = User;
     this.emailService = emailService;
     this.s3Service = s3Service;
@@ -289,24 +292,19 @@ class UserService {
       throw new Error("Invalid or expired reactivation token.");
     }
 
-    // SYNC WITH STRIPE: Verify subscription still exists and is valid
+    // ✅ VIVA WALLET: Verify subscription still exists and is valid
     if (user.subscription && user.subscription.subscriptionId) {
       try {
-        const stripeSubscription = await this.stripe.subscriptions.retrieve(
-          user.subscription.subscriptionId
-        );
+        // Check if subscription is still valid by checking period end
+        const now = new Date();
+        const periodEnd = user.subscription.current_period_end
+          ? new Date(user.subscription.current_period_end)
+          : null;
 
-        // Update local status to match Stripe
-        user.subscription.status = stripeSubscription.status;
-
-        // If subscription was externally cancelled or expired, clear it
-        if (
-          !["active", "trialing", "past_due"].includes(
-            stripeSubscription.status
-          )
-        ) {
+        // If subscription has expired, clear it
+        if (!periodEnd || periodEnd < now) {
           console.log(
-            `Subscription status is ${stripeSubscription.status}, clearing local data`
+            `Subscription expired (ended ${periodEnd?.toISOString()}), clearing local data`
           );
           user.subscription = undefined;
 
@@ -318,23 +316,24 @@ class UserService {
               }
             });
           }
+        } else {
+          // Subscription is still valid, keep current status
+          console.log(
+            `Subscription still valid until ${periodEnd.toISOString()}`
+          );
         }
       } catch (error) {
-        // Subscription doesn't exist in Stripe
-        if (error.statusCode === 404) {
-          console.log("Subscription not found in Stripe, clearing local data");
-          user.subscription = undefined;
+        console.error("Error checking subscription validity:", error);
+        // On error, clear subscription to be safe
+        user.subscription = undefined;
 
-          if (user.subscriptionHistory) {
-            user.subscriptionHistory.forEach((entry) => {
-              if (entry.status === "active") {
-                entry.status = "expired";
-                entry.endDate = new Date();
-              }
-            });
-          }
-        } else {
-          throw error;
+        if (user.subscriptionHistory) {
+          user.subscriptionHistory.forEach((entry) => {
+            if (entry.status === "active") {
+              entry.status = "expired";
+              entry.endDate = new Date();
+            }
+          });
         }
       }
     }
@@ -402,15 +401,6 @@ class UserService {
     return await this._sanitizeUserWithSignedUrl(user);
   }
 
-  async findUserByStripeCustomerId(stripeCustomerId) {
-    try {
-      return await this.User.findOne({ stripeCustomerId });
-    } catch (error) {
-      console.error("Error finding user by Stripe customer ID:", error);
-      throw error;
-    }
-  }
-
   async findUserBySubscriptionId(subscriptionId) {
     try {
       return await this.User.findOne({
@@ -451,38 +441,6 @@ class UserService {
       subscription: { $exists: true },
       "subscription.status": { $in: ["active", "trialing"] },
     });
-  }
-
-  /**
-   * Cancels subscription immediately.
-   */
-  async cancelSubscriptionImmediately(userId) {
-    const user = await this.User.findById(userId).select(
-      "subscription subscriptionHistory"
-    );
-    if (!user || !user.subscription || !user.subscription.subscriptionId) {
-      return;
-    }
-
-    try {
-      await this.stripe.subscriptions.cancel(user.subscription.subscriptionId);
-
-      // CRITICAL FIX: Also expire all active subscription history
-      if (user.subscriptionHistory) {
-        user.subscriptionHistory.forEach((entry) => {
-          if (entry.status === "active") {
-            entry.status = "expired";
-            entry.endDate = new Date(); // Mark when it was cancelled
-          }
-        });
-      }
-
-      // Clear subscription and save history changes
-      user.subscription = undefined;
-      await user.save();
-    } catch (error) {
-      console.error(`Failed to cancel subscription for user ${userId}:`, error);
-    }
   }
 
   //  requestEmailChange METHOD ---

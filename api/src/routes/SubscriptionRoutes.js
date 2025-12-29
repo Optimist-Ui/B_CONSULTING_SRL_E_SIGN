@@ -1,6 +1,7 @@
 const express = require("express");
 const {
   createSubscriptionValidation,
+  createTrialSubscriptionValidation,
 } = require("../validations/SubscriptionValidations");
 const authenticateUser = require("../middlewares/authenticate");
 const validate = require("../middlewares/validate");
@@ -92,7 +93,7 @@ module.exports = (container) => {
    */
   router.post(
     "/create-trial",
-    createSubscriptionValidation,
+    createTrialSubscriptionValidation,
     validate,
     subscriptionController.createTrialSubscription.bind(subscriptionController)
   );
@@ -249,6 +250,39 @@ module.exports = (container) => {
   router.get(
     "/invoices",
     subscriptionController.listInvoices.bind(subscriptionController)
+  );
+
+  /**
+   * @swagger
+   * /api/plans/invoices/{invoiceId}:
+   *   get:
+   *     tags: [Subscriptions]
+   *     summary: Get detailed invoice information
+   *     description: Retrieves detailed information for a specific invoice
+   *     parameters:
+   *       - in: path
+   *         name: invoiceId
+   *         required: true
+   *         schema:
+   *           type: string
+   *         description: The Viva Wallet transaction ID
+   *     responses:
+   *       '200':
+   *         description: Invoice details retrieved successfully
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/InvoiceDetail'
+   *       '401':
+   *         description: Unauthorized
+   *       '403':
+   *         description: Invoice does not belong to user
+   *       '404':
+   *         description: Invoice not found
+   */
+  router.get(
+    "/invoices/:invoiceId",
+    subscriptionController.getInvoiceDetail.bind(subscriptionController)
   );
 
   return router;

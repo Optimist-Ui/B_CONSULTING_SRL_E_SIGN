@@ -99,7 +99,7 @@ const HomeNavbar: React.FC = () => {
     };
 
     // Get current language details
-    const currentLanguage = languageList.find((lang: any) => lang.code === locale) || languageList[0];
+    const currentLanguage = languageList.find((lang: any) => lang.code === locale) || languageList.find((lang: any) => lang.code === 'en') || languageList[0];
 
     const renderAuthButtons = () => {
         if (isAuthenticated) {
@@ -222,7 +222,7 @@ const HomeNavbar: React.FC = () => {
                                     onClick={() => setIsLangDropdownOpen(!isLangDropdownOpen)}
                                     className="flex items-center gap-2 bg-slate-800/50 hover:bg-slate-700/50 border border-slate-600/50 rounded-lg px-3 py-2 text-gray-300 hover:text-white transition-all duration-300"
                                 >
-                                    <img src={`/assets/images/flags/${locale.toUpperCase()}.svg`} alt={currentLanguage.name} className="h-4 w-4 rounded-full object-cover" />
+                                    <img src={`/assets/images/flags/${currentLanguage.code.toUpperCase()}.svg`} alt={currentLanguage.name} className="h-4 w-4 rounded-full object-cover" />
                                     <span className="text-sm font-medium">{currentLanguage.name}</span>
                                     <FiChevronDownTyped className={`w-4 h-4 transition-transform duration-200 ${isLangDropdownOpen ? 'rotate-180' : ''}`} />
                                 </button>

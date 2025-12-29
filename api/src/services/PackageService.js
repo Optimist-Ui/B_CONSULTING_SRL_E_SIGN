@@ -2451,6 +2451,33 @@ class PackageService {
         reason
       );
 
+      // Send push notification to original participant (participant_reassigned)
+      if (this.pushNotificationService) {
+        try {
+          const user = await this.User.findOne({
+            email: originalParticipant.contactEmail.toLowerCase(),
+          }).select("deviceTokens");
+
+          if (user && user.deviceTokens && user.deviceTokens.length > 0) {
+            const pushTitle = "Assignment Reassigned";
+            const pushBody = `Your assignment for ${pkg.name} has been reassigned to ${newContact.firstName} ${newContact.lastName}`;
+            await this.pushNotificationService.sendNotificationToUser(
+              user,
+              "participant_reassigned",
+              pkg._id.toString(),
+              pushTitle,
+              pushBody
+            );
+          }
+        } catch (error) {
+          console.error(
+            `Error sending push notification to original participant ${originalParticipant.contactEmail}:`,
+            error
+          );
+          // Don't throw - push notifications are non-critical
+        }
+      }
+
       // 2. Notify the new assignee - THIS CALL IS UPDATED
       const actionUrl = `${process.env.CLIENT_URL}/package/${pkg._id}/participant/${newParticipantId}`;
       await this.EmailService.sendReassignmentNotification(
@@ -2461,6 +2488,33 @@ class PackageService {
         actionUrl
       );
 
+      // Send push notification to new assignee (document_invitation)
+      if (this.pushNotificationService) {
+        try {
+          const user = await this.User.findOne({
+            email: newContact.email.toLowerCase(),
+          }).select("deviceTokens");
+
+          if (user && user.deviceTokens && user.deviceTokens.length > 0) {
+            const pushTitle = "New Assignment";
+            const pushBody = `${ownerName} assigned you to ${pkg.name} (reassigned from ${originalParticipant.contactName})`;
+            await this.pushNotificationService.sendNotificationToUser(
+              user,
+              "document_invitation",
+              pkg._id.toString(),
+              pushTitle,
+              pushBody
+            );
+          }
+        } catch (error) {
+          console.error(
+            `Error sending push notification to new assignee ${newContact.email}:`,
+            error
+          );
+          // Don't throw - push notifications are non-critical
+        }
+      }
+
       // 3. Notify the package owner - THIS CALL IS UPDATED
       await this.EmailService.sendReassignmentOwnerNotification(
         packageOwner, // Pass the entire owner object
@@ -2470,6 +2524,27 @@ class PackageService {
         reason,
         pkg._id // Pass packageId for the link
       );
+
+      // Send push notification to owner (participant_reassigned)
+      if (this.pushNotificationService) {
+        try {
+          const pushTitle = "Participant Reassigned";
+          const pushBody = `${pkg.name}: ${originalParticipant.contactName} reassigned to ${newContact.firstName} ${newContact.lastName}`;
+          await this._sendPushNotificationToUserByEmail(
+            packageOwner.email,
+            "participant_reassigned",
+            pkg._id.toString(),
+            pushTitle,
+            pushBody
+          );
+        } catch (error) {
+          console.error(
+            `Error sending push notification to owner ${packageOwner.email}:`,
+            error
+          );
+          // Don't throw - push notifications are non-critical
+        }
+      }
     } catch (error) {
       console.error("Error sending reassignment notifications:", error);
     }

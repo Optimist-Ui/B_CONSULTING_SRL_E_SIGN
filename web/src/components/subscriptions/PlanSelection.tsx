@@ -1,3 +1,5 @@
+// src/components/subscriptions/PlanSelection.tsx - FIXED PRICE DISPLAY
+
 import React, { useState, useMemo, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
@@ -48,7 +50,12 @@ const PlanSelection: React.FC<PlanSelectionProps> = ({ onCancelChange }) => {
         if (!Array.isArray(rawPlans)) return [];
         return rawPlans
             .map((plan) => {
-                let uiData = { descriptionKey: '', isPopular: false, gradient: 'from-gray-500 to-gray-700', isEnterprise: plan.name === 'Enterprise' };
+                let uiData = {
+                    descriptionKey: '',
+                    isPopular: false,
+                    gradient: 'from-gray-500 to-gray-700',
+                    isEnterprise: plan.name === 'Enterprise',
+                };
                 switch (plan.name) {
                     case 'Starter':
                         uiData.descriptionKey = 'planSelection.plans.starter.description';
@@ -86,7 +93,9 @@ const PlanSelection: React.FC<PlanSelectionProps> = ({ onCancelChange }) => {
         if (plan.name === currentPlanName) {
             return selectedInterval === currentInterval
                 ? t('planSelection.buttons.topUp')
-                : t('planSelection.buttons.switchToBilling', { interval: isYearly ? t('planSelection.billing.yearly') : t('planSelection.billing.monthly') });
+                : t('planSelection.buttons.switchToBilling', {
+                      interval: isYearly ? t('planSelection.billing.yearly') : t('planSelection.billing.monthly'),
+                  });
         } else {
             return t('planSelection.buttons.switchToPlan', { planName: plan.name });
         }
@@ -95,6 +104,11 @@ const PlanSelection: React.FC<PlanSelectionProps> = ({ onCancelChange }) => {
     const handleSelectPlan = (plan: Plan) => {
         setSelectedPlan(plan);
         setIsModalOpen(true);
+    };
+
+    // ✅ Helper function to format price (divide by 100 to get euros)
+    const formatPrice = (priceInCents: number): string => {
+        return (priceInCents / 100).toFixed(2);
     };
 
     return (
@@ -127,6 +141,7 @@ const PlanSelection: React.FC<PlanSelectionProps> = ({ onCancelChange }) => {
                     {hasActiveSubscription ? t('planSelection.header.descriptionChange') : t('planSelection.header.descriptionChoose')}
                 </p>
             </div>
+
             <div className="flex justify-center mb-10">
                 <div className="inline-flex items-center bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50 rounded-2xl p-1.5 shadow-lg">
                     <button
@@ -154,6 +169,7 @@ const PlanSelection: React.FC<PlanSelectionProps> = ({ onCancelChange }) => {
                     </button>
                 </div>
             </div>
+
             {loading ? (
                 <Spinner />
             ) : error ? (
@@ -174,21 +190,31 @@ const PlanSelection: React.FC<PlanSelectionProps> = ({ onCancelChange }) => {
                                     </div>
                                 </div>
                             )}
+
                             <div className="p-8 pb-6">
                                 <h3 className="text-2xl font-bold text-gray-900 dark:text-white">{plan.name}</h3>
                                 <p className="text-gray-600 dark:text-gray-400 leading-relaxed min-h-[3rem] mt-2">{t(plan.descriptionKey)}</p>
                             </div>
+
                             {!plan.isEnterprise && (
                                 <div className="px-8 py-6 bg-gray-50 dark:bg-gray-800/40 border-y border-gray-100 dark:border-gray-700/50">
                                     <div className="flex items-baseline justify-center">
-                                        <span className="text-5xl font-bold text-gray-900 dark:text-white">€{isYearly ? (plan.yearlyPrice / 12).toFixed(0) : plan.monthlyPrice}</span>
+                                        <span className="text-5xl font-bold text-gray-900 dark:text-white">
+                                            {/* ✅ FIXED: Display price correctly */}€{isYearly ? formatPrice(plan.yearlyPrice / 12) : formatPrice(plan.monthlyPrice)}
+                                        </span>
                                         <span className="ml-1 text-xl font-medium text-gray-500 dark:text-gray-400">/{t('planSelection.perMonth')}</span>
                                     </div>
                                     {isYearly && (
-                                        <p className="text-center text-sm text-green-600 dark:text-green-400 mt-1 font-semibold">{t('planSelection.billedYearly', { price: plan.yearlyPrice })}</p>
+                                        <p className="text-center text-sm text-green-600 dark:text-green-400 mt-1 font-semibold">
+                                            {/* ✅ FIXED: Display yearly price correctly */}
+                                            {t('planSelection.billedYearly', {
+                                                price: formatPrice(plan.yearlyPrice),
+                                            })}
+                                        </p>
                                     )}
                                 </div>
                             )}
+
                             <div className="p-8 pt-6 flex-grow">
                                 <ul className="space-y-4">
                                     {plan.features.map((feature, idx) => (
@@ -203,6 +229,7 @@ const PlanSelection: React.FC<PlanSelectionProps> = ({ onCancelChange }) => {
                                     ))}
                                 </ul>
                             </div>
+
                             <div className="p-8 pt-4 mt-auto">
                                 {plan.isEnterprise ? (
                                     <button onClick={() => navigate('/enterprise-contact')} className="btn btn-outline-primary w-full text-lg py-3">
@@ -240,6 +267,7 @@ const PlanSelection: React.FC<PlanSelectionProps> = ({ onCancelChange }) => {
                     ))}
                 </div>
             )}
+
             {selectedPlan && <PurchaseModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} plan={selectedPlan} isYearly={isYearly} />}
         </div>
     );

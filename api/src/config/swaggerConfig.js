@@ -46,7 +46,7 @@ const options = {
       {
         name: "Payment Methods",
         description:
-          "Operations for managing an authenticated user's saved payment methods with Stripe.",
+          "Operations for managing an authenticated user's saved payment methods with Viva Wallet.",
       },
       // 👇 NEW TAG
       {
@@ -249,13 +249,12 @@ const options = {
         // 👇 NEW SCHEMAS FOR PAYMENT METHODS
         PaymentMethod: {
           type: "object",
-          description:
-            "Represents a saved payment method (e.g., a credit card).",
+          description: "Represents a saved payment method (tokenized card).",
           properties: {
             id: {
               type: "string",
-              description: "Stripe Payment Method ID.",
-              example: "pm_1JqQbRLdWTb3gH5sV4cM9gAb",
+              description: "Viva Wallet Payment Source ID.",
+              example: "viva_123abc456",
             },
             brand: {
               type: "string",
@@ -283,15 +282,26 @@ const options = {
             },
           },
         },
-        PaymentMethodIdInput: {
+        PaymentSourceInput: {
           type: "object",
-          required: ["paymentMethodId"],
+          required: ["paymentSourceId"],
           properties: {
-            paymentMethodId: {
+            paymentSourceId: {
               type: "string",
-              description:
-                "The ID of the Stripe Payment Method (e.g., pm_1J2b3c4d5e6f...).",
-              example: "pm_1JqQbRLdWTb3gH5sV4cM9gAb",
+              description: "The ID of the Viva Wallet Payment Source.",
+              example: "viva_123abc456",
+            },
+          },
+        },
+        // Input for creating an Order Code (Redirect)
+        CreateOrderInput: {
+          type: "object",
+          properties: {
+            name: { type: "string", example: "John Doe" },
+            email: { type: "string", example: "john@example.com" },
+            returnUrl: {
+              type: "string",
+              example: "https://yourapp.com/payment-callback",
             },
           },
         },
@@ -434,7 +444,7 @@ const options = {
               example: "For professionals with advanced needs.",
             },
             price: { type: "number", format: "float", example: 49.99 },
-            currency: { type: "string", example: "usd" },
+            currency: { type: "string", example: "EUR" },
             features: {
               type: "array",
               items: { type: "string" },
@@ -444,7 +454,7 @@ const options = {
                 "Advanced Branding",
               ],
             },
-            stripePriceId: { type: "string", example: "price_1Jq..." },
+            externalPlanId: { type: "string", example: "plan_viva_001" },
           },
         },
         Subscription: {
@@ -472,28 +482,28 @@ const options = {
         },
         CreateSubscriptionInput: {
           type: "object",
-          required: ["priceId", "paymentMethodId"],
+          required: ["planId", "paymentSourceId"],
           properties: {
-            priceId: {
+            planId: {
               type: "string",
-              description: "The Stripe Price ID for the selected plan.",
-              example: "price_1JqQbRLdWTb3gH5sV4cM9gAb",
+              description: "The DB ID or External ID for the selected plan.",
+              example: "60d0fe4f5311236168a109de",
             },
-            paymentMethodId: {
+            paymentSourceId: {
               type: "string",
-              description: "The ID of the Stripe Payment Method.",
-              example: "pm_1JqQbRLdWTb3gH5sV4cM9gAc",
+              description: "The ID of the Viva Wallet Payment Source.",
+              example: "viva_123abc456",
             },
           },
         },
         Invoice: {
           type: "object",
-          description: "Represents a Stripe invoice.",
+          description: "Represents a billing invoice.",
           properties: {
-            id: { type: "string", example: "in_1Jq..." },
+            id: { type: "string", example: "inv_12345" },
             amount_paid: { type: "integer", example: 4999 },
-            created: { type: "integer", format: "unix-timestamp" },
-            currency: { type: "string", example: "usd" },
+            created: { type: "string", format: "date-time" },
+            currency: { type: "string", example: "EUR" },
             status: {
               type: "string",
               enum: ["paid", "open", "uncollectible"],
@@ -502,7 +512,7 @@ const options = {
             invoice_pdf: {
               type: "string",
               format: "uri",
-              example: "https://pay.stripe.com/invoice/...",
+              example: "https://.../invoices/download/inv_12345.pdf",
             },
           },
         },

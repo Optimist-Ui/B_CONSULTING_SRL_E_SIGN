@@ -43,6 +43,10 @@ const HomePlans = () => {
         };
     }, []);
 
+    const formatPrice = (priceInCents: number): string => {
+        return (priceInCents / 100).toFixed(0); // Removing decimals for cleaner Home UI
+    };
+
     // Prepare plan data for rendering by merging API data with static UI enhancements
     const plans = useMemo(() => {
         const planOrder = ['Starter', 'Pro', 'Enterprise'];
@@ -178,12 +182,15 @@ const HomePlans = () => {
                                         <div className="px-8 py-6 bg-gradient-to-r from-gray-50/80 to-blue-50/40 group-hover:from-white/10 group-hover:to-blue-400/10 transition-all duration-500 border-y border-gray-100/50 group-hover:border-white/20">
                                             <div className="flex items-baseline justify-center">
                                                 <span className="text-5xl font-bold text-gray-900 group-hover:text-white transition-colors duration-500">
-                                                    €{isYearly ? (plan.yearlyPrice / 12).toFixed(0) : plan.monthlyPrice}
+                                                    €{isYearly ? formatPrice(plan.yearlyPrice / 12) : formatPrice(plan.monthlyPrice)}
                                                 </span>
                                                 <span className="ml-1 text-xl font-medium text-gray-500 group-hover:text-gray-300">{t('pricing.plans.perMonth')}</span>
                                             </div>
                                             {isYearly && (
-                                                <p className="text-center text-sm text-gray-500 group-hover:text-gray-400 mt-1">{t('pricing.plans.billedYearly', { price: plan.yearlyPrice })}</p>
+                                                <p className="text-center text-sm text-gray-500 group-hover:text-gray-400 mt-1">
+                                                    {' '}
+                                                    {t('pricing.plans.billedYearly', { price: formatPrice(plan.yearlyPrice) })}
+                                                </p>
                                             )}
                                         </div>
                                     )}

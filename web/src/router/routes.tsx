@@ -11,6 +11,7 @@ const Index = lazy(() => import('../pages/Index'));
 const Contacts = lazy(() => import('../pages/Contacts'));
 const Profile = lazy(() => import('../pages/Profile'));
 const PaymentMethods = lazy(() => import('../pages/PaymentMethods'));
+const PaymentCallback = lazy(() => import('../pages/PaymentCallback'));
 const Subscriptions = lazy(() => import('../pages/Subscriptions'));
 const SubscriptionRequired = lazy(() => import('../pages/SubscriptionRequired'));
 
@@ -104,6 +105,15 @@ const routes = [
         element: (
             <ProtectedRoute>
                 <PaymentMethods />
+            </ProtectedRoute>
+        ),
+        layout: 'default',
+    },
+    {
+        path: '/payment-callback',
+        element: (
+            <ProtectedRoute>
+                <PaymentCallback />
             </ProtectedRoute>
         ),
         layout: 'default',

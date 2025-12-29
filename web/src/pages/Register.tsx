@@ -48,14 +48,15 @@ const Register = () => {
     const { loading } = useSelector((state: IRootState) => state.auth);
     const { rtlClass, locale, languageList } = useSelector((state: IRootState) => state.themeConfig);
     const isRtl = rtlClass === 'rtl';
+    const safeLocale = (locale || 'en').split('-')[0];
 
     // Component state
-    const [flag, setFlag] = useState(locale);
+    const [flag, setFlag] = useState(safeLocale);
     const [showPassword, setShowPassword] = useState(false);
     const [isVisible, setIsVisible] = useState(false);
 
     // Initial form values
-    const initialValues = { firstName: '', lastName: '', email: '', password: '', language: locale || 'en' };
+    const initialValues = { firstName: '', lastName: '', email: '', password: '', language: safeLocale };
 
     useEffect(() => {
         dispatch(setPageTitle(t('register.meta.title')));

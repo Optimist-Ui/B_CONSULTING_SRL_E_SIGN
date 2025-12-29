@@ -1,11 +1,6 @@
 // src/store/extra-reducers/paymentMethodExtraReducers.ts
 import { ActionReducerMapBuilder } from '@reduxjs/toolkit';
-import { 
-    fetchPaymentMethods, 
-    attachPaymentMethod, 
-    setDefaultPaymentMethod, 
-    deletePaymentMethod 
-} from '../thunk/paymentMethodThunks';
+import { fetchPaymentMethods, createPaymentOrder, setDefaultPaymentMethod, deletePaymentMethod } from '../thunk/paymentMethodThunks';
 import { PaymentMethodState } from '../slices/paymentMethodSlice';
 
 export const buildPaymentMethodExtraReducers = (builder: ActionReducerMapBuilder<PaymentMethodState>) => {
@@ -25,18 +20,18 @@ export const buildPaymentMethodExtraReducers = (builder: ActionReducerMapBuilder
             state.error = action.payload as string;
         })
 
-        // --- Attach Payment Method Cases ---
-        .addCase(attachPaymentMethod.pending, (state) => {
-            state.isAttaching = true;
+        // --- Create Payment Order Cases (Viva Wallet) ---
+        .addCase(createPaymentOrder.pending, (state) => {
+            state.isCreatingOrder = true;
             state.error = null;
         })
-        .addCase(attachPaymentMethod.fulfilled, (state) => {
-            state.isAttaching = false;
+        .addCase(createPaymentOrder.fulfilled, (state) => {
+            state.isCreatingOrder = false;
             state.error = null;
-            // Note: We'll refetch payment methods after successful attachment
+            // User will be redirected to Viva Wallet checkout
         })
-        .addCase(attachPaymentMethod.rejected, (state, action) => {
-            state.isAttaching = false;
+        .addCase(createPaymentOrder.rejected, (state, action) => {
+            state.isCreatingOrder = false;
             state.error = action.payload as string;
         })
 
@@ -58,15 +53,15 @@ export const buildPaymentMethodExtraReducers = (builder: ActionReducerMapBuilder
         // --- Delete Payment Method Cases ---
         .addCase(deletePaymentMethod.pending, (state, action) => {
             // Track which payment method is being deleted
-            state.isDeleting = action.meta.arg.paymentMethodId;
+            state.isDeleting = action.meta.arg.paymentSourceId;
             state.error = null;
         })
         .addCase(deletePaymentMethod.fulfilled, (state, action) => {
             state.isDeleting = null;
             state.error = null;
             // Remove the deleted payment method from the state
-            const deletedId = action.meta.arg.paymentMethodId;
-            state.paymentMethods = state.paymentMethods.filter(pm => pm.id !== deletedId);
+            const deletedId = action.meta.arg.paymentSourceId;
+            state.paymentMethods = state.paymentMethods.filter((pm) => pm.id !== deletedId);
         })
         .addCase(deletePaymentMethod.rejected, (state, action) => {
             state.isDeleting = null;
