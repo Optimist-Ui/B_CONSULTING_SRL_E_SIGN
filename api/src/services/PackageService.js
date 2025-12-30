@@ -2112,6 +2112,9 @@ class PackageService {
    * @param {string} senderName - The name of the package initiator.
    */
   async _sendInitialNotifications(pkg, senderName) {
+    console.log(
+      `📧 Starting initial notifications for package: ${pkg.name} (ID: ${pkg._id})`
+    );
     const actionTakers = new Map();
     const notificationReceivers = new Map();
 
@@ -2125,6 +2128,10 @@ class PackageService {
         }
       }
     }
+
+    console.log(
+      `📋 Found ${actionTakers.size} action-takers and ${notificationReceivers.size} receivers`
+    );
 
     if (pkg.receivers) {
       for (const receiver of pkg.receivers) {
@@ -2171,24 +2178,41 @@ class PackageService {
             email: user.contactEmail.toLowerCase(),
           }).select("deviceTokens");
 
-          if (userRecord && userRecord.deviceTokens && userRecord.deviceTokens.length > 0) {
-            const pushTitle = "Action Required";
-            const pushBody = `${senderName} sent you ${pkg.name} for signing`;
-            await this.pushNotificationService.sendNotificationToUser(
-              userRecord,
-              "document_invitation",
-              pkg._id.toString(),
-              pushTitle,
-              pushBody
+          if (userRecord) {
+            if (userRecord.deviceTokens && userRecord.deviceTokens.length > 0) {
+              const pushTitle = "Action Required";
+              const pushBody = `${senderName} sent you ${pkg.name} for signing`;
+              await this.pushNotificationService.sendNotificationToUser(
+                userRecord,
+                "document_invitation",
+                pkg._id.toString(),
+                pushTitle,
+                pushBody
+              );
+              console.log(
+                `✅ Push notification sent to ${user.contactEmail} for document ${pkg.name}`
+              );
+            } else {
+              console.log(
+                `⚠️ User ${user.contactEmail} found but has no device tokens registered`
+              );
+            }
+          } else {
+            console.log(
+              `⚠️ No User account found for email ${user.contactEmail} - push notification skipped (Contact may not have registered account)`
             );
           }
         } catch (error) {
           console.error(
-            `Error sending push notification to ${user.contactEmail}:`,
+            `❌ Error sending push notification to ${user.contactEmail}:`,
             error
           );
           // Don't throw - push notifications are non-critical
         }
+      } else {
+        console.warn(
+          `⚠️ PushNotificationService not available - push notifications disabled`
+        );
       }
     }
 
@@ -2213,20 +2237,33 @@ class PackageService {
             email: receiver.contactEmail.toLowerCase(),
           }).select("deviceTokens");
 
-          if (userRecord && userRecord.deviceTokens && userRecord.deviceTokens.length > 0) {
-            const pushTitle = "Document Shared";
-            const pushBody = `${senderName} shared ${pkg.name} with you`;
-            await this.pushNotificationService.sendNotificationToUser(
-              userRecord,
-              "document_invitation",
-              pkg._id.toString(),
-              pushTitle,
-              pushBody
+          if (userRecord) {
+            if (userRecord.deviceTokens && userRecord.deviceTokens.length > 0) {
+              const pushTitle = "Document Shared";
+              const pushBody = `${senderName} shared ${pkg.name} with you`;
+              await this.pushNotificationService.sendNotificationToUser(
+                userRecord,
+                "document_invitation",
+                pkg._id.toString(),
+                pushTitle,
+                pushBody
+              );
+              console.log(
+                `✅ Push notification sent to receiver ${receiver.contactEmail} for document ${pkg.name}`
+              );
+            } else {
+              console.log(
+                `⚠️ User ${receiver.contactEmail} found but has no device tokens registered`
+              );
+            }
+          } else {
+            console.log(
+              `⚠️ No User account found for receiver email ${receiver.contactEmail} - push notification skipped`
             );
           }
         } catch (error) {
           console.error(
-            `Error sending push notification to receiver ${receiver.contactEmail}:`,
+            `❌ Error sending push notification to receiver ${receiver.contactEmail}:`,
             error
           );
           // Don't throw - push notifications are non-critical

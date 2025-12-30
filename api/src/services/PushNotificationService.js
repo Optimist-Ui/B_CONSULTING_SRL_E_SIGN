@@ -45,7 +45,24 @@ class PushNotificationService {
                 );
             }
         }
-        this.messaging = admin.messaging();
+        
+        // Initialize messaging only if Firebase is initialized
+        if (admin.apps.length > 0) {
+            try {
+                this.messaging = admin.messaging();
+                // Verify messaging is properly initialized
+                if (!this.messaging) {
+                    console.warn("⚠️ Firebase messaging could not be initialized");
+                } else {
+                    console.log("✅ Firebase messaging initialized");
+                }
+            } catch (error) {
+                console.error("❌ Error initializing Firebase messaging:", error);
+                this.messaging = null;
+            }
+        } else {
+            this.messaging = null;
+        }
     }
 
     /**
@@ -58,9 +75,9 @@ class PushNotificationService {
      * @returns {Promise<Object>} FCM response
      */
     async sendNotification(deviceToken, type, packageId, title, body) {
-        if (!admin.apps.length) {
+        if (!admin.apps.length || !this.messaging) {
             console.warn("⚠️ Firebase Admin SDK not initialized, skipping push notification");
-            return null;
+            return { success: false, error: "firebase_not_initialized" };
         }
 
         const message = {
@@ -107,6 +124,11 @@ class PushNotificationService {
             return { success: 0, failed: 0, invalidTokens: [] };
         }
 
+        if (!this.messaging) {
+            console.warn("⚠️ Firebase messaging not initialized, skipping push notifications");
+            return { success: 0, failed: deviceTokens.length, invalidTokens: [] };
+        }
+
         const message = {
             notification: {
                 title: title,
@@ -119,44 +141,91 @@ class PushNotificationService {
         };
 
         try {
-            // Use sendMulticast for multiple tokens
-            const response = await this.messaging.sendMulticast({
-                ...message,
-                tokens: deviceTokens,
-            });
+            // Check if sendMulticast is available (Firebase Admin SDK v9+)
+            if (typeof this.messaging.sendMulticast === 'function') {
+                // Use sendMulticast for multiple tokens (more efficient)
+                const response = await this.messaging.sendMulticast({
+                    ...message,
+                    tokens: deviceTokens,
+                });
 
-            const invalidTokens = [];
-            let successCount = 0;
-            let failedCount = 0;
+                const invalidTokens = [];
+                let successCount = 0;
+                let failedCount = 0;
 
-            response.responses.forEach((resp, idx) => {
-                if (resp.success) {
+                response.responses.forEach((resp, idx) => {
+                    if (resp.success) {
+                        successCount++;
+                    } else {
+                        failedCount++;
+                        // Check if token is invalid and should be removed
+                        if (
+                            resp.error?.code === "messaging/invalid-registration-token" ||
+                            resp.error?.code === "messaging/registration-token-not-registered"
+                        ) {
+                            invalidTokens.push(deviceTokens[idx]);
+                        }
+                    }
+                });
+
+                console.log(
+                    `📱 Push notifications sent: ${successCount} success, ${failedCount} failed`
+                );
+
+                return {
+                    success: successCount,
+                    failed: failedCount,
+                    invalidTokens: invalidTokens,
+                };
+            } else {
+                // Fallback: Send individual notifications if sendMulticast is not available
+                console.log(`⚠️ sendMulticast not available, sending ${deviceTokens.length} individual notifications`);
+                return await this._sendIndividualNotifications(deviceTokens, type, packageId, title, body);
+            }
+        } catch (error) {
+            console.error("❌ Error sending multicast push notification:", error);
+            // Fallback to individual notifications on error
+            console.log(`⚠️ Falling back to individual notifications due to error`);
+            return await this._sendIndividualNotifications(deviceTokens, type, packageId, title, body);
+        }
+    }
+
+    /**
+     * Fallback method to send notifications individually
+     * @private
+     */
+    async _sendIndividualNotifications(deviceTokens, type, packageId, title, body) {
+        const invalidTokens = [];
+        let successCount = 0;
+        let failedCount = 0;
+
+        // Send notifications one by one
+        for (const token of deviceTokens) {
+            try {
+                const result = await this.sendNotification(token, type, packageId, title, body);
+                if (result && result.success) {
                     successCount++;
                 } else {
                     failedCount++;
-                    // Check if token is invalid and should be removed
-                    if (
-                        resp.error?.code === "messaging/invalid-registration-token" ||
-                        resp.error?.code === "messaging/registration-token-not-registered"
-                    ) {
-                        invalidTokens.push(deviceTokens[idx]);
+                    if (result && result.shouldRemove) {
+                        invalidTokens.push(token);
                     }
                 }
-            });
-
-            console.log(
-                `📱 Push notifications sent: ${successCount} success, ${failedCount} failed`
-            );
-
-            return {
-                success: successCount,
-                failed: failedCount,
-                invalidTokens: invalidTokens,
-            };
-        } catch (error) {
-            console.error("❌ Error sending multicast push notification:", error);
-            return { success: 0, failed: deviceTokens.length, invalidTokens: [] };
+            } catch (error) {
+                console.error(`❌ Error sending notification to token ${token.substring(0, 20)}...:`, error);
+                failedCount++;
+            }
         }
+
+        console.log(
+            `📱 Push notifications sent (individual): ${successCount} success, ${failedCount} failed`
+        );
+
+        return {
+            success: successCount,
+            failed: failedCount,
+            invalidTokens: invalidTokens,
+        };
     }
 
     /**
