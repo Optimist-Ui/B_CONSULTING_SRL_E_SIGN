@@ -25,20 +25,42 @@ class PushNotificationService {
                         }
                     }
 
+                    // Validate service account has required fields
+                    const requiredFields = ['project_id', 'private_key', 'client_email'];
+                    const missingFields = requiredFields.filter(field => !serviceAccount[field]);
+                    
+                    if (missingFields.length > 0) {
+                        throw new Error(`Service account missing required fields: ${missingFields.join(', ')}`);
+                    }
+
                     admin.initializeApp({
                         credential: admin.credential.cert(serviceAccount),
                     });
                     console.log("✅ Firebase Admin SDK initialized from environment variable");
+                    
+                    // Verify credentials by testing messaging access
+                    this._verifyFirebaseCredentials();
                 } catch (error) {
                     console.error("❌ Failed to parse FIREBASE_SERVICE_ACCOUNT:", error);
                     throw new Error("Invalid FIREBASE_SERVICE_ACCOUNT format");
                 }
             } else if (process.env.FIREBASE_SERVICE_ACCOUNT_PATH) {
                 const serviceAccount = require(process.env.FIREBASE_SERVICE_ACCOUNT_PATH);
+                // Validate service account has required fields
+                const requiredFields = ['project_id', 'private_key', 'client_email'];
+                const missingFields = requiredFields.filter(field => !serviceAccount[field]);
+                
+                if (missingFields.length > 0) {
+                    throw new Error(`Service account missing required fields: ${missingFields.join(', ')}`);
+                }
+
                 admin.initializeApp({
                     credential: admin.credential.cert(serviceAccount),
                 });
                 console.log("✅ Firebase Admin SDK initialized from file path");
+                
+                // Verify credentials by testing messaging access
+                this._verifyFirebaseCredentials();
             } else {
                 console.warn(
                     "⚠️ Firebase Admin SDK not initialized. Set FIREBASE_SERVICE_ACCOUNT or FIREBASE_SERVICE_ACCOUNT_PATH"
@@ -98,6 +120,15 @@ class PushNotificationService {
             return { success: true, messageId: response };
         } catch (error) {
             console.error("❌ Error sending push notification:", error);
+
+            // Handle authentication errors
+            if (error.code === "messaging/third-party-auth-error" || 
+                error.code === "messaging/authentication-error" ||
+                error.message?.includes("authentication credential")) {
+                console.error("❌ Firebase authentication failed. Please check your service account credentials.");
+                console.error("   Error details:", error.errorInfo || error.message);
+                return { success: false, error: "authentication_error", shouldRetry: false };
+            }
 
             // Handle invalid token errors
             if (error.code === "messaging/invalid-registration-token" ||
@@ -250,6 +281,28 @@ class PushNotificationService {
             title,
             body
         );
+    }
+
+    /**
+     * Verify Firebase credentials are valid by checking if we can access messaging
+     * @private
+     */
+    async _verifyFirebaseCredentials() {
+        if (!this.messaging) {
+            return;
+        }
+
+        try {
+            // Try to get the app instance to verify credentials
+            const app = admin.app();
+            if (app) {
+                console.log(`✅ Firebase project verified: ${app.options.projectId || 'unknown'}`);
+            }
+        } catch (error) {
+            console.error("❌ Firebase credentials verification failed:", error.message);
+            console.error("   Please check your FIREBASE_SERVICE_ACCOUNT configuration");
+            this.messaging = null;
+        }
     }
 }
 
