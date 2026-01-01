@@ -10,6 +10,7 @@ class PackageService {
     pdfModificationService,
     packageEventEmitter,
     s3Service,
+    pushNotificationService,
   }) {
     this.Package = Package;
     this.Contact = Contact;
@@ -20,7 +21,8 @@ class PackageService {
     this.SmsService = smsService;
     this.pdfModifier = pdfModificationService;
     this.packageEventEmitter = packageEventEmitter;
-    this.s3Service = s3Service; // 👈 ADD THIS
+    this.s3Service = s3Service;
+    this.pushNotificationService = pushNotificationService;
   }
 
   async uploadPackage(userId, s3File) {
@@ -1392,9 +1394,9 @@ class PackageService {
         (history) =>
           history.reassignedBy.participantId === participantId ||
           history.reassignedFrom.contactId.toString() ===
-            packageData.currentUser.contactId.toString() ||
+          packageData.currentUser.contactId.toString() ||
           history.reassignedTo.contactId.toString() ===
-            packageData.currentUser.contactId.toString()
+          packageData.currentUser.contactId.toString()
       ) || [];
 
     packageData.participantReassignmentHistory = participantReassignments;
@@ -1625,6 +1627,33 @@ class PackageService {
         pkg.name,
         actionLink
       );
+
+      // Send push notification (document_reminder)
+      if (this.pushNotificationService) {
+        try {
+          const user = await this.User.findOne({
+            email: participant.contactEmail.toLowerCase(),
+          }).select("deviceTokens");
+
+          if (user && user.deviceTokens && user.deviceTokens.length > 0) {
+            const pushTitle = "Document Reminder";
+            const pushBody = `${initiatorName} sent you a reminder for ${pkg.name}`;
+            await this.pushNotificationService.sendNotificationToUser(
+              user,
+              "document_reminder",
+              pkg._id.toString(),
+              pushTitle,
+              pushBody
+            );
+          }
+        } catch (error) {
+          console.error(
+            `Error sending push notification reminder to ${participant.contactEmail}:`,
+            error
+          );
+          // Don't throw - push notifications are non-critical
+        }
+      }
     }
 
     return {
@@ -1973,6 +2002,17 @@ class PackageService {
         universalAccessLink
       );
 
+      // Send push notification (document_signed)
+      const pushTitle = "Document Signed by All Participants";
+      const pushBody = `${pkg.name} has been signed by all participants`;
+      await this._sendPushNotificationToUserByEmail(
+        recipient.email,
+        "document_signed",
+        pkg._id.toString(),
+        pushTitle,
+        pushBody
+      );
+
       // 🔥 FIXED: Create proper participant object for review email
       const participantForReview = {
         contactEmail: recipient.email,
@@ -1998,6 +2038,17 @@ class PackageService {
         dashboardLink
       );
 
+      // Send push notification to owner (document_signed)
+      const pushTitle = "Document Signed by All Participants";
+      const pushBody = `${pkg.name} has been signed by all participants`;
+      await this._sendPushNotificationToUserByEmail(
+        packageOwner.email,
+        "document_signed",
+        pkg._id.toString(),
+        pushTitle,
+        pushBody
+      );
+
       // 🔥 FIXED: Create proper participant object for owner
       const ownerAsParticipant = {
         contactEmail: packageOwner.email,
@@ -2005,15 +2056,51 @@ class PackageService {
         language: packageOwner.language || "en",
       };
 
-      const ownerReviewLink = `${process.env.CLIENT_URL}/package/${
-        pkg._id
-      }/participant/${packageOwner._id.toString()}/review`;
+      const ownerReviewLink = `${process.env.CLIENT_URL}/package/${pkg._id
+        }/participant/${packageOwner._id.toString()}/review`;
 
       await this.EmailService.sendRequestForReviewEmail(
         ownerAsParticipant, // ✅ Pass the full object
         pkg.name, // ✅ Package name
         ownerReviewLink // ✅ Review link
       );
+    }
+  }
+
+  /**
+   * Helper method to send push notification to a user by email
+   * @private
+   */
+  async _sendPushNotificationToUserByEmail(
+    email,
+    type,
+    packageId,
+    title,
+    body
+  ) {
+    if (!this.pushNotificationService) return;
+
+    try {
+      // Find user by email
+      const user = await this.User.findOne({ email: email.toLowerCase() }).select(
+        "deviceTokens"
+      );
+
+      if (user && user.deviceTokens && user.deviceTokens.length > 0) {
+        await this.pushNotificationService.sendNotificationToUser(
+          user,
+          type,
+          packageId,
+          title,
+          body
+        );
+      }
+    } catch (error) {
+      console.error(
+        `Error sending push notification to ${email}:`,
+        error
+      );
+      // Don't throw - push notifications are non-critical
     }
   }
 
@@ -2025,6 +2112,9 @@ class PackageService {
    * @param {string} senderName - The name of the package initiator.
    */
   async _sendInitialNotifications(pkg, senderName) {
+    console.log(
+      `📧 Starting initial notifications for package: ${pkg.name} (ID: ${pkg._id})`
+    );
     const actionTakers = new Map();
     const notificationReceivers = new Map();
 
@@ -2038,6 +2128,10 @@ class PackageService {
         }
       }
     }
+
+    console.log(
+      `📋 Found ${actionTakers.size} action-takers and ${notificationReceivers.size} receivers`
+    );
 
     if (pkg.receivers) {
       for (const receiver of pkg.receivers) {
@@ -2076,6 +2170,50 @@ class PackageService {
         actionUrl,
         pkg.customMessage
       );
+
+      // Send push notification (document_invitation)
+      if (this.pushNotificationService) {
+        try {
+          const userRecord = await this.User.findOne({
+            email: user.contactEmail.toLowerCase(),
+          }).select("deviceTokens");
+
+          if (userRecord) {
+            if (userRecord.deviceTokens && userRecord.deviceTokens.length > 0) {
+              const pushTitle = "Action Required";
+              const pushBody = `${senderName} sent you ${pkg.name} for signing`;
+              await this.pushNotificationService.sendNotificationToUser(
+                userRecord,
+                "document_invitation",
+                pkg._id.toString(),
+                pushTitle,
+                pushBody
+              );
+              console.log(
+                `✅ Push notification sent to ${user.contactEmail} for document ${pkg.name}`
+              );
+            } else {
+              console.log(
+                `⚠️ User ${user.contactEmail} found but has no device tokens registered`
+              );
+            }
+          } else {
+            console.log(
+              `⚠️ No User account found for email ${user.contactEmail} - push notification skipped (Contact may not have registered account)`
+            );
+          }
+        } catch (error) {
+          console.error(
+            `❌ Error sending push notification to ${user.contactEmail}:`,
+            error
+          );
+          // Don't throw - push notifications are non-critical
+        }
+      } else {
+        console.warn(
+          `⚠️ PushNotificationService not available - push notifications disabled`
+        );
+      }
     }
 
     // 4. Send the "For Your Records" email to all unique notification-only receivers.
@@ -2091,6 +2229,46 @@ class PackageService {
         senderName,
         actionUrl
       );
+
+      // Send push notification (document_invitation) for receivers too
+      if (this.pushNotificationService) {
+        try {
+          const userRecord = await this.User.findOne({
+            email: receiver.contactEmail.toLowerCase(),
+          }).select("deviceTokens");
+
+          if (userRecord) {
+            if (userRecord.deviceTokens && userRecord.deviceTokens.length > 0) {
+              const pushTitle = "Document Shared";
+              const pushBody = `${senderName} shared ${pkg.name} with you`;
+              await this.pushNotificationService.sendNotificationToUser(
+                userRecord,
+                "document_invitation",
+                pkg._id.toString(),
+                pushTitle,
+                pushBody
+              );
+              console.log(
+                `✅ Push notification sent to receiver ${receiver.contactEmail} for document ${pkg.name}`
+              );
+            } else {
+              console.log(
+                `⚠️ User ${receiver.contactEmail} found but has no device tokens registered`
+              );
+            }
+          } else {
+            console.log(
+              `⚠️ No User account found for receiver email ${receiver.contactEmail} - push notification skipped`
+            );
+          }
+        } catch (error) {
+          console.error(
+            `❌ Error sending push notification to receiver ${receiver.contactEmail}:`,
+            error
+          );
+          // Don't throw - push notifications are non-critical
+        }
+      }
     }
   }
 
@@ -2181,6 +2359,29 @@ class PackageService {
         rejectionReason,
         accessLink
       );
+
+      // Send push notification (document_rejected)
+      if (this.pushNotificationService) {
+        try {
+          const pushTitle = "Document Rejected";
+          const pushBody = recipient.isOwner
+            ? `${rejectorName} rejected ${pkg.name}`
+            : `${pkg.name} has been rejected by ${rejectorName}`;
+          await this._sendPushNotificationToUserByEmail(
+            recipient.email,
+            "document_rejected",
+            pkg._id.toString(),
+            pushTitle,
+            pushBody
+          );
+        } catch (error) {
+          console.error(
+            `Error sending push notification for rejection to ${recipient.email}:`,
+            error
+          );
+          // Don't throw - push notifications are non-critical
+        }
+      }
     }
   }
   /**
@@ -2287,6 +2488,33 @@ class PackageService {
         reason
       );
 
+      // Send push notification to original participant (participant_reassigned)
+      if (this.pushNotificationService) {
+        try {
+          const user = await this.User.findOne({
+            email: originalParticipant.contactEmail.toLowerCase(),
+          }).select("deviceTokens");
+
+          if (user && user.deviceTokens && user.deviceTokens.length > 0) {
+            const pushTitle = "Assignment Reassigned";
+            const pushBody = `Your assignment for ${pkg.name} has been reassigned to ${newContact.firstName} ${newContact.lastName}`;
+            await this.pushNotificationService.sendNotificationToUser(
+              user,
+              "participant_reassigned",
+              pkg._id.toString(),
+              pushTitle,
+              pushBody
+            );
+          }
+        } catch (error) {
+          console.error(
+            `Error sending push notification to original participant ${originalParticipant.contactEmail}:`,
+            error
+          );
+          // Don't throw - push notifications are non-critical
+        }
+      }
+
       // 2. Notify the new assignee - THIS CALL IS UPDATED
       const actionUrl = `${process.env.CLIENT_URL}/package/${pkg._id}/participant/${newParticipantId}`;
       await this.EmailService.sendReassignmentNotification(
@@ -2297,6 +2525,33 @@ class PackageService {
         actionUrl
       );
 
+      // Send push notification to new assignee (document_invitation)
+      if (this.pushNotificationService) {
+        try {
+          const user = await this.User.findOne({
+            email: newContact.email.toLowerCase(),
+          }).select("deviceTokens");
+
+          if (user && user.deviceTokens && user.deviceTokens.length > 0) {
+            const pushTitle = "New Assignment";
+            const pushBody = `${ownerName} assigned you to ${pkg.name} (reassigned from ${originalParticipant.contactName})`;
+            await this.pushNotificationService.sendNotificationToUser(
+              user,
+              "document_invitation",
+              pkg._id.toString(),
+              pushTitle,
+              pushBody
+            );
+          }
+        } catch (error) {
+          console.error(
+            `Error sending push notification to new assignee ${newContact.email}:`,
+            error
+          );
+          // Don't throw - push notifications are non-critical
+        }
+      }
+
       // 3. Notify the package owner - THIS CALL IS UPDATED
       await this.EmailService.sendReassignmentOwnerNotification(
         packageOwner, // Pass the entire owner object
@@ -2306,6 +2561,27 @@ class PackageService {
         reason,
         pkg._id // Pass packageId for the link
       );
+
+      // Send push notification to owner (participant_reassigned)
+      if (this.pushNotificationService) {
+        try {
+          const pushTitle = "Participant Reassigned";
+          const pushBody = `${pkg.name}: ${originalParticipant.contactName} reassigned to ${newContact.firstName} ${newContact.lastName}`;
+          await this._sendPushNotificationToUserByEmail(
+            packageOwner.email,
+            "participant_reassigned",
+            pkg._id.toString(),
+            pushTitle,
+            pushBody
+          );
+        } catch (error) {
+          console.error(
+            `Error sending push notification to owner ${packageOwner.email}:`,
+            error
+          );
+          // Don't throw - push notifications are non-critical
+        }
+      }
     } catch (error) {
       console.error("Error sending reassignment notifications:", error);
     }
@@ -2613,6 +2889,17 @@ class PackageService {
         initiatorName,
         pkg.name
       );
+
+      // Send push notification (document_revoked)
+      const pushTitle = "Document Revoked";
+      const pushBody = `${pkg.name} has been revoked by ${initiatorName}`;
+      await this._sendPushNotificationToUserByEmail(
+        recipient.email,
+        "document_revoked",
+        pkg._id.toString(),
+        pushTitle,
+        pushBody
+      );
     }
   }
 
@@ -2663,6 +2950,33 @@ class PackageService {
       viewUrl
     );
 
+    // Send push notification to new receiver (document_invitation)
+    if (this.pushNotificationService) {
+      try {
+        const user = await this.User.findOne({
+          email: newReceiver.contactEmail.toLowerCase(),
+        }).select("deviceTokens");
+
+        if (user && user.deviceTokens && user.deviceTokens.length > 0) {
+          const pushTitle = "New Document Invitation";
+          const pushBody = `${addedBy.contactName} added you to ${pkg.name}`;
+          await this.pushNotificationService.sendNotificationToUser(
+            user,
+            "document_invitation",
+            pkg._id.toString(),
+            pushTitle,
+            pushBody
+          );
+        }
+      } catch (error) {
+        console.error(
+          `Error sending push notification to new receiver ${newReceiver.contactEmail}:`,
+          error
+        );
+        // Don't throw - push notifications are non-critical
+      }
+    }
+
     // 2. Notify the package owner - THIS CALL IS UPDATED
     await this.EmailService.sendNewReceiverOwnerNotification(
       packageOwner, // Pass the entire owner object
@@ -2670,6 +2984,27 @@ class PackageService {
       addedBy.contactName,
       pkg.name
     );
+
+    // Send push notification to owner (participant_added)
+    if (this.pushNotificationService) {
+      try {
+        const pushTitle = "New Participant Added";
+        const pushBody = `${addedBy.contactName} added ${newReceiver.contactName} to ${pkg.name}`;
+        await this._sendPushNotificationToUserByEmail(
+          packageOwner.email,
+          "participant_added",
+          pkg._id.toString(),
+          pushTitle,
+          pushBody
+        );
+      } catch (error) {
+        console.error(
+          `Error sending push notification to owner ${packageOwner.email}:`,
+          error
+        );
+        // Don't throw - push notifications are non-critical
+      }
+    }
   }
 
   /**
@@ -2746,6 +3081,17 @@ class PackageService {
         completedNames, // Pass the array of names
         pendingNames, // Pass the array of names
         actionLink
+      );
+
+      // Send push notification (document_signing)
+      const pushTitle = "Document Signing Update";
+      const pushBody = `${actorName} has signed ${pkg.name}`;
+      await this._sendPushNotificationToUserByEmail(
+        owner.email,
+        "document_signing",
+        pkg._id.toString(),
+        pushTitle,
+        pushBody
       );
     } catch (error) {
       console.error("Failed to send action update notification:", error);

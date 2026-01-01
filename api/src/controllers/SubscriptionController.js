@@ -1,8 +1,10 @@
+// src/controllers/SubscriptionController.js
+
 const { successResponse, errorResponse } = require("../utils/responseHandler");
 
 class SubscriptionController {
-  constructor({ subscriptionService }) {
-    this.subscriptionService = subscriptionService;
+  constructor({ vivaWalletSubscriptionService }) {
+    this.subscriptionService = vivaWalletSubscriptionService;
   }
 
   async getPlans(req, res) {
@@ -24,7 +26,6 @@ class SubscriptionController {
         "Subscription status fetched successfully."
       );
     } catch (error) {
-      // Send a default "inactive" status on any error for security
       const defaultStatus = {
         hasActiveSubscription: false,
         canCreatePackages: false,
@@ -42,13 +43,14 @@ class SubscriptionController {
   async createTrialSubscription(req, res) {
     try {
       const userId = req.user.id;
-      const { priceId, paymentMethodId } = req.body;
+      const { planId, paymentMethodId, billingInterval = "month" } = req.body;
 
       const trialSubscription =
         await this.subscriptionService.createTrialSubscription({
           userId,
-          priceId,
+          planId,
           paymentMethodId,
+          billingInterval,
         });
 
       successResponse(
@@ -58,7 +60,6 @@ class SubscriptionController {
         201
       );
     } catch (error) {
-      // Provide a clear error message to the frontend
       errorResponse(res, error, error.message || "Failed to start free trial.");
     }
   }
@@ -78,13 +79,13 @@ class SubscriptionController {
 
   async createSubscription(req, res) {
     try {
-      const userId = req.user.id; // From authenticate middleware
-      const { priceId, paymentMethodId } = req.body;
+      const userId = req.user.id;
+      const { planId, billingInterval = "month" } = req.body;
 
       const subscription = await this.subscriptionService.createSubscription({
         userId,
-        priceId,
-        paymentMethodId,
+        planId,
+        billingInterval,
       });
 
       successResponse(
@@ -94,7 +95,6 @@ class SubscriptionController {
         201
       );
     } catch (error) {
-      // Pass the original error message to the frontend for better debugging
       errorResponse(
         res,
         error,
@@ -149,6 +149,38 @@ class SubscriptionController {
       successResponse(res, invoices, "Invoices fetched successfully.");
     } catch (error) {
       errorResponse(res, error, "Failed to fetch invoices.");
+    }
+  }
+
+  /**
+   * Get detailed invoice information
+   */
+  async getInvoiceDetail(req, res) {
+    try {
+      const { invoiceId } = req.params;
+      const userId = req.user.id;
+
+      const invoiceDetail = await this.subscriptionService.getInvoiceDetail(
+        userId,
+        invoiceId
+      );
+
+      successResponse(
+        res,
+        invoiceDetail,
+        "Invoice details fetched successfully."
+      );
+    } catch (error) {
+      if (
+        error.message.includes("not found") ||
+        error.message.includes("does not belong")
+      ) {
+        return res.status(404).json({
+          success: false,
+          error: error.message,
+        });
+      }
+      errorResponse(res, error, "Failed to fetch invoice details.");
     }
   }
 }

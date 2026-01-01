@@ -1,7 +1,7 @@
-// ===== 2. Updated subscriptionThunks.ts =====
+// src/store/thunk/subscriptionThunks.ts - VIVA WALLET VERSION
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import api from '../../utils/api';
-import { Subscription, Invoice, SubscriptionStatus } from '../slices/subscriptionSlice';
+import { Subscription, Invoice, SubscriptionStatus, InvoiceDetail } from '../slices/subscriptionSlice';
 import { IRootState } from '../index';
 
 // Cache duration constants (in milliseconds)
@@ -13,19 +13,14 @@ const CACHE_DURATION = {
 
 // --- Type Definitions for Thunk Arguments ---
 interface CreateSubscriptionArgs {
-    priceId: string;
+    planId: string; // Changed from priceId to planId
+    billingInterval?: 'month' | 'year';
     paymentMethodId: string;
 }
 
-interface StripeSubscriptionResponse {
-    id: string;
-    status: string;
-    latest_invoice: {
-        payment_intent?: {
-            client_secret: string;
-            status: string;
-        };
-    };
+interface CreateTrialSubscriptionArgs {
+    planId: string;
+    paymentMethodId: string; // Viva Wallet payment source ID
 }
 
 interface FetchSubscriptionStatusOptions {
@@ -34,6 +29,13 @@ interface FetchSubscriptionStatusOptions {
 
 interface FetchSubscriptionOptions {
     forceRefresh?: boolean;
+}
+
+interface VivaWalletSubscriptionResponse {
+    id: string;
+    status: string;
+    effectiveLimit?: number;
+    message?: string;
 }
 
 // --- Helper Functions ---
@@ -45,7 +47,7 @@ const isCacheValid = (lastFetch: number | null, cacheDuration: number): boolean 
 // --- Thunks ---
 
 /**
- Fetches subscription status with caching
+ * Fetches subscription status with caching
  */
 export const fetchSubscriptionStatus = createAsyncThunk<SubscriptionStatus, FetchSubscriptionStatusOptions | undefined, { state: IRootState }>(
     'subscription/fetchStatus',
@@ -55,7 +57,6 @@ export const fetchSubscriptionStatus = createAsyncThunk<SubscriptionStatus, Fetc
 
         // Check cache validity unless force refresh is requested
         if (!options.forceRefresh && isCacheValid(lastStatusFetch, CACHE_DURATION.STATUS)) {
-            // Return cached data by throwing a special error that we handle in extraReducers
             throw new Error('CACHE_HIT');
         }
 
@@ -69,19 +70,56 @@ export const fetchSubscriptionStatus = createAsyncThunk<SubscriptionStatus, Fetc
 );
 
 /**
- Creates a new subscription
+ * Creates a new subscription with Viva Wallet
  */
-export const createSubscription = createAsyncThunk<StripeSubscriptionResponse, CreateSubscriptionArgs>('subscription/create', async ({ priceId, paymentMethodId }, { rejectWithValue }) => {
+export const createSubscription = createAsyncThunk<VivaWalletSubscriptionResponse, CreateSubscriptionArgs>(
+    'subscription/create',
+    async ({ planId, billingInterval = 'month', paymentMethodId }, { rejectWithValue }) => {
+        try {
+            const response = await api.post('/api/plans/create', {
+                planId,
+                billingInterval,
+                paymentMethodId,
+            });
+            return response.data.data;
+        } catch (error: any) {
+            return rejectWithValue(error.response?.data?.error || 'Failed to create subscription.');
+        }
+    }
+);
+
+/**
+ * Creates a trial subscription with Viva Wallet
+ */
+export const createTrialSubscription = createAsyncThunk<VivaWalletSubscriptionResponse, CreateTrialSubscriptionArgs>(
+    'subscription/createTrial',
+    async ({ planId, paymentMethodId }, { rejectWithValue }) => {
+        try {
+            const response = await api.post('/api/plans/create-trial', {
+                planId,
+                paymentMethodId,
+            });
+            return response.data.data;
+        } catch (error: any) {
+            return rejectWithValue(error.response?.data?.message || 'Failed to start free trial.');
+        }
+    }
+);
+
+/**
+ * Ends trial early and converts to paid subscription
+ */
+export const endTrialEarly = createAsyncThunk('subscription/endTrial', async (_, { rejectWithValue }) => {
     try {
-        const response = await api.post('/api/plans/create', { priceId, paymentMethodId });
+        const response = await api.patch('/api/plans/end-trial');
         return response.data.data;
     } catch (error: any) {
-        return rejectWithValue(error.response?.data?.error || 'Failed to create subscription.');
+        return rejectWithValue(error.response?.data?.message || 'Failed to activate your subscription.');
     }
 });
 
 /**
- Fetches the user's current active subscription details with caching
+ * Fetches the user's current active subscription details with caching
  */
 export const fetchSubscription = createAsyncThunk<Subscription, FetchSubscriptionOptions | undefined, { state: IRootState }>(
     'subscription/fetchCurrent',
@@ -104,7 +142,7 @@ export const fetchSubscription = createAsyncThunk<Subscription, FetchSubscriptio
 );
 
 /**
- Cancels the user's subscription at the end of the current billing period
+ * Cancels the user's subscription at the end of the current billing period
  */
 export const cancelSubscription = createAsyncThunk('subscription/cancel', async (_, { rejectWithValue }) => {
     try {
@@ -116,7 +154,7 @@ export const cancelSubscription = createAsyncThunk('subscription/cancel', async 
 });
 
 /**
- Reactivates a previously cancelled subscription
+ * Reactivates a previously cancelled subscription
  */
 export const reactivateSubscription = createAsyncThunk('subscription/reactivate', async (_, { rejectWithValue }) => {
     try {
@@ -128,7 +166,7 @@ export const reactivateSubscription = createAsyncThunk('subscription/reactivate'
 });
 
 /**
- Fetches the user's invoice history
+ * Fetches the user's invoice history from Viva Wallet
  */
 export const fetchInvoices = createAsyncThunk<Invoice[]>('subscription/fetchInvoices', async (_, { rejectWithValue }) => {
     try {
@@ -140,26 +178,13 @@ export const fetchInvoices = createAsyncThunk<Invoice[]>('subscription/fetchInvo
 });
 
 /**
- Creates a new subscription WITH a 14-day free trial.
+ * ✅ NEW: Fetches detailed information for a specific invoice
  */
-export const createTrialSubscription = createAsyncThunk<StripeSubscriptionResponse, CreateSubscriptionArgs>('subscription/createTrial', async ({ priceId, paymentMethodId }, { rejectWithValue }) => {
+export const fetchInvoiceDetail = createAsyncThunk<InvoiceDetail, string>('subscription/fetchInvoiceDetail', async (invoiceId: string, { rejectWithValue }) => {
     try {
-        const response = await api.post('/api/plans/create-trial', { priceId, paymentMethodId });
+        const response = await api.get(`/api/plans/invoices/${invoiceId}`);
         return response.data.data;
     } catch (error: any) {
-        // The backend sends a clear error message for trial abuse, so we pass it on.
-        return rejectWithValue(error.response?.data?.message || 'Failed to start free trial.');
-    }
-});
-
-/**
- Ends the user's trial period immediately, converting it to a paid plan.
- */
-export const endTrialEarly = createAsyncThunk('subscription/endTrial', async (_, { rejectWithValue }) => {
-    try {
-        const response = await api.patch('/api/plans/end-trial');
-        return response.data.data;
-    } catch (error: any) {
-        return rejectWithValue(error.response?.data?.message || 'Failed to activate your subscription.');
+        return rejectWithValue(error.response?.data?.error || 'Failed to fetch invoice details.');
     }
 });

@@ -33,12 +33,49 @@ const subscriptionHistorySchema = new Schema(
       type: Number,
       default: 0,
     },
-    // No longer needed, calculated dynamically
-    // remainingUnits, carryoverUnits, effectiveLimit, finalUsage
     status: {
       type: String,
       enum: ["active", "completed", "expired"],
       default: "active",
+    },
+  },
+  { _id: false }
+);
+
+// 🆕 Viva Wallet Payment Source Schema
+const vivaWalletPaymentSourceSchema = new Schema(
+  {
+    id: {
+      type: String,
+      required: true,
+    },
+    transactionId: {
+      type: String,
+      required: true,
+      unique: true,
+      sparse: true,
+    },
+    cardType: {
+      type: String,
+      required: true,
+    },
+    last4: {
+      type: String,
+      required: true,
+    },
+    expiryMonth: {
+      type: String,
+    },
+    expiryYear: {
+      type: String,
+    },
+    isDefault: {
+      type: Boolean,
+      default: false,
+    },
+    createdAt: {
+      type: Date,
+      default: Date.now,
     },
   },
   { _id: false }
@@ -76,17 +113,21 @@ const userSchema = new Schema(
     resetToken: { type: String, sparse: true },
     resetTokenExpiresAt: { type: Date, sparse: true },
 
-    // 👇 ADD THESE NEW FIELDS FOR EMAIL CHANGE
+    // Email change fields
     emailChangeOtp: { type: String, sparse: true },
     emailChangeOtpExpiresAt: { type: Date, sparse: true },
-    pendingEmail: { type: String, sparse: true }, // Store the new email temporarily
+    pendingEmail: { type: String, sparse: true },
     emailChangeAttempts: { type: Number, default: 0 },
 
-    stripeCustomerId: {
+    // 🆕 Viva Wallet Customer ID
+    vivaWalletCustomerId: {
       type: String,
-      unique: true,
       sparse: true,
     },
+
+    // 🆕 Viva Wallet Payment Sources (stored locally)
+    vivaWalletPaymentSources: [vivaWalletPaymentSourceSchema],
+
     subscription: {
       subscriptionId: { type: String },
       planId: { type: Schema.Types.ObjectId, ref: "Plan" },
@@ -105,7 +146,15 @@ const userSchema = new Schema(
       current_period_start: { type: Date },
       current_period_end: { type: Date },
       trial_end: { type: Date },
+      billingInterval: {
+        // ✅ ADD THIS FIELD
+        type: String,
+        enum: ["month", "year"],
+        default: "month",
+      },
     },
+
+    
     subscriptionHistory: [subscriptionHistorySchema],
     hasHadTrial: {
       type: Boolean,
@@ -120,6 +169,15 @@ const userSchema = new Schema(
     deletionScheduledAt: { type: Date, sparse: true },
     reactivationToken: { type: String, sparse: true },
     reactivationExpiresAt: { type: Date, sparse: true },
+    
+    // Push notification device tokens
+    deviceTokens: [
+      {
+        token: { type: String, required: true },
+        platform: { type: String, enum: ["android", "ios"], required: true },
+        createdAt: { type: Date, default: Date.now },
+      },
+    ],
   },
   { timestamps: true }
 );
@@ -129,7 +187,7 @@ userSchema.index({ "subscription.subscriptionId": 1 });
 userSchema.index({ "subscription.status": 1 });
 
 /**
- * NEW: Calculates total document limit from all active history entries.
+ * Calculates total document limit from all active history entries.
  */
 userSchema.methods.getTotalDocumentLimit = function () {
   if (!this.subscriptionHistory || this.subscriptionHistory.length === 0)
@@ -143,7 +201,7 @@ userSchema.methods.getTotalDocumentLimit = function () {
 };
 
 /**
- * NEW: Calculates total documents used across all active history entries.
+ * Calculates total documents used across all active history entries.
  */
 userSchema.methods.getTotalDocumentsUsed = function () {
   if (!this.subscriptionHistory || this.subscriptionHistory.length === 0)
@@ -157,8 +215,7 @@ userSchema.methods.getTotalDocumentsUsed = function () {
 };
 
 /**
- * REWRITTEN: Calculates remaining documents by checking all active history entries.
- * This correctly handles stacked limits from top-ups.
+ * Calculates remaining documents by checking all active history entries.
  */
 userSchema.methods.getRemainingDocuments = function () {
   if (
@@ -173,7 +230,7 @@ userSchema.methods.getRemainingDocuments = function () {
 };
 
 /**
- * REWRITTEN: Checks if a user is able to create a document.
+ * Checks if a user is able to create a document.
  */
 userSchema.methods.canCreateDocument = function () {
   if (
@@ -186,32 +243,29 @@ userSchema.methods.canCreateDocument = function () {
 };
 
 /**
- * NEW: Intelligently increments the document usage count on the correct
- * history entry (uses the one with the earliest start date first).
+ * Intelligently increments the document usage count.
  */
 userSchema.methods.incrementDocumentUsage = function () {
   if (!this.canCreateDocument()) {
-    return false; // Cannot increment if limit is reached
+    return false;
   }
 
-  // Find the first active history entry that still has capacity
   const activeEntries = this.subscriptionHistory
     .filter((h) => h.status === "active")
-    .sort((a, b) => a.startDate - b.startDate); // Use oldest credits first
+    .sort((a, b) => a.startDate - b.startDate);
 
   for (const entry of activeEntries) {
     if (entry.documentsUsed < entry.documentLimit) {
       entry.documentsUsed += 1;
-      return true; // Successfully incremented
+      return true;
     }
   }
 
-  return false; // Should not happen if canCreateDocument is true, but for safety
+  return false;
 };
 
-// virtual for getting signed URL
+// Virtual for getting signed URL
 userSchema.virtual("profileImageUrl").get(function () {
-  // This will be populated dynamically in the service
   return this._profileImageUrl || this.profileImage;
 });
 

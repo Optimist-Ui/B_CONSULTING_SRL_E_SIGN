@@ -256,6 +256,24 @@ packageOptionsSchema.methods.canSendAutomaticReminder = function () {
   return true;
 };
 
+/**
+ * Check if automatic reminder should be sent
+ * @param {Date} now - Current timestamp
+ * @returns {boolean}
+ */
+packageOptionsSchema.methods.shouldSendAutomaticReminder = function (now) {
+  if (!this.sendAutomaticReminders || !this.firstReminderDays) {
+    return false;
+  }
+
+  // Must not be expired
+  if (this.expiresAt && now >= this.expiresAt) {
+    return false;
+  }
+
+  return true;
+};
+
 // Add index for cron job performance
 packageSchema.index({
   "options.expiresAt": 1,

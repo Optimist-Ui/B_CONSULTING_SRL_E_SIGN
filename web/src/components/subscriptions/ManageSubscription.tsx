@@ -6,7 +6,7 @@ import { IRootState, AppDispatch } from '../../store';
 import InvoiceHistory from './InvoiceHistory';
 
 // Redux Thunks
-import { cancelSubscription, reactivateSubscription, endTrialEarly } from '../../store/thunk/subscriptionThunks';
+import { cancelSubscription, reactivateSubscription, endTrialEarly, fetchSubscription, fetchSubscriptionStatus } from '../../store/thunk/subscriptionThunks';
 
 // Icons
 import IconUsers from '../Icon/IconUsers';
@@ -83,6 +83,11 @@ const ManageSubscription: React.FC<ManageSubscriptionProps> = ({ onChangePlan })
         );
     }
 
+    const refreshData = () => {
+        dispatch(fetchSubscription({ forceRefresh: true }));
+        dispatch(fetchSubscriptionStatus({ forceRefresh: true }));
+    };
+
     const showMessage = (msg: string, type: 'success' | 'error' = 'success'): void => {
         const toast = Swal.mixin({ toast: true, position: 'bottom-end', showConfirmButton: false, timer: 3500, customClass: { container: 'toast' } });
         toast.fire({ icon: type, title: msg, padding: '10px 20px' });
@@ -109,6 +114,7 @@ const ManageSubscription: React.FC<ManageSubscriptionProps> = ({ onChangePlan })
                 try {
                     await dispatch(cancelSubscription()).unwrap();
                     showMessage(t('manageSubscription.messages.cancelSuccess'));
+                    refreshData();
                 } catch (error: any) {
                     showMessage(error.toString(), 'error');
                 }
@@ -120,6 +126,7 @@ const ManageSubscription: React.FC<ManageSubscriptionProps> = ({ onChangePlan })
         try {
             await dispatch(reactivateSubscription()).unwrap();
             showMessage(t('manageSubscription.messages.reactivateSuccess'));
+            refreshData();
         } catch (error: any) {
             showMessage(error.toString(), 'error');
         }
@@ -139,6 +146,7 @@ const ManageSubscription: React.FC<ManageSubscriptionProps> = ({ onChangePlan })
                 try {
                     await dispatch(endTrialEarly()).unwrap();
                     showMessage(t('manageSubscription.messages.endTrialSuccess'), 'success');
+                    refreshData();
                 } catch (error: any) {
                     showMessage(error, 'error');
                 }

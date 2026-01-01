@@ -14,10 +14,10 @@ const Plan = container.resolve("Plan");
 const plans = [
   {
     name: "Starter",
-    monthlyPriceId: process.env.STARTER_MONTHLY_PRICE_ID,
-    yearlyPriceId: process.env.STARTER_YEARLY_PRICE_ID,
-    monthlyPrice: 9.99,
-    yearlyPrice: 105.5,
+    // monthlyPriceId: process.env.STARTER_MONTHLY_PRICE_ID,
+    // yearlyPriceId: process.env.STARTER_YEARLY_PRICE_ID,
+    monthlyPrice: parseInt(process.env.STARTER_MONTHLY_PRICE), // €9.99 in cents
+    yearlyPrice: parseInt(process.env.STARTER_YEARLY_PRICE), // €99.99 in cents
     documentLimit: 27,
     features: [
       "27 Documents per Month",
@@ -28,13 +28,20 @@ const plans = [
       "Document Tracking & Notifications",
     ],
     isEnterprise: false,
+    vivaWalletEnabled: true,
+    pricing: {
+      EUR: {
+        monthly: parseInt(process.env.STARTER_MONTHLY_PRICE),
+        yearly: parseInt(process.env.STARTER_YEARLY_PRICE),
+      },
+    },
   },
   {
     name: "Pro",
-    monthlyPriceId: process.env.PRO_MONTHLY_PRICE_ID,
-    yearlyPriceId: process.env.PRO_YEARLY_PRICE_ID,
-    monthlyPrice: 19.99,
-    yearlyPrice: 211.0,
+    // monthlyPriceId: process.env.PRO_MONTHLY_PRICE_ID,
+    // yearlyPriceId: process.env.PRO_YEARLY_PRICE_ID,
+    monthlyPrice: parseInt(process.env.PRO_MONTHLY_PRICE), // €29.99 in cents
+    yearlyPrice: parseInt(process.env.PRO_YEARLY_PRICE), // €299.99 in cents
     documentLimit: 60,
     features: [
       "60 Documents per Month", // Key difference
@@ -42,6 +49,13 @@ const plans = [
       "Higher document limit for growing businesses",
     ],
     isEnterprise: false,
+    vivaWalletEnabled: true,
+    pricing: {
+      EUR: {
+        monthly: parseInt(process.env.PRO_MONTHLY_PRICE),
+        yearly: parseInt(process.env.PRO_YEARLY_PRICE),
+      },
+    },
   },
   {
     name: "Enterprise",

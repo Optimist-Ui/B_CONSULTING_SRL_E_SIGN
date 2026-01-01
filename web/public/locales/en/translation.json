@@ -940,6 +940,43 @@
                 "title": "6. Contact Information",
                 "p1_prefix": "For questions about these terms, please contact us at",
                 "p1_suffix": "or through our support portal."
+            },
+            "delivery": {
+                "title": "Service Delivery",
+                "method": {
+                    "title": "Delivery Method",
+                    "p1": "I-sign.eu provides its services through digital delivery methods only. Upon successful subscription or purchase, you will receive:",
+                    "li1": "Immediate access to your account dashboard",
+                    "li2": "Email confirmation with login credentials and service details",
+                    "li3": "Access to all features included in your subscription plan",
+                    "li4": "Automatic activation within minutes of payment confirmation"
+                },
+                "activation": {
+                    "title": "Service Activation",
+                    "p1": "All services are activated immediately upon successful payment processing. You will receive a confirmation email within 5 minutes containing your account details and instructions for accessing the platform."
+                }
+            },
+            "cancellation": {
+                "title": "Cancellation & Refund Policy",
+                "subscription": {
+                    "title": "Subscription Cancellation",
+                    "p1": "You may cancel your subscription at any time through your account settings or by contacting customer support. The following terms apply:",
+                    "li1": "Monthly subscriptions: Cancellation takes effect at the end of the current billing period. No refunds for partial months.",
+                    "li2": "Annual subscriptions: Cancel anytime with prorated refund for unused months (minimum 30 days remaining)",
+                    "li3": "Free trial: Cancel anytime during trial period without charges. If not canceled, auto-converts to paid subscription."
+                },
+                "refund": {
+                    "title": "Refund Policy",
+                    "p1": "We offer refunds under the following conditions:",
+                    "li1": "Technical Issues: Full refund if service is unavailable for more than 48 consecutive hours due to our technical fault",
+                    "li2": "Billing Errors: Immediate full refund for any duplicate charges or billing mistakes",
+                    "li3": "14-Day Guarantee: First-time subscribers can request a full refund within 14 days if unsatisfied with the service"
+                },
+                "process": {
+                    "title": "How to Request Cancellation or Refund",
+                    "p1_prefix": "To request a cancellation or refund, please contact our support team at",
+                    "p1_suffix": "or use the cancellation option in your account settings. Refunds are processed within 5-10 business days to the original payment method."
+                }
             }
         },
         "privacy": {
@@ -1267,7 +1304,8 @@
         "header": {
             "title": "Payment Methods",
             "description": "Securely manage your payment options for seamless e-signing experiences",
-            "addButton": "Add Payment Method"
+            "addButton": "Add Payment Method",
+            "processing": "Processing..."
         },
         "emptyState": {
             "title": "No Payment Methods Added",
@@ -1276,17 +1314,19 @@
         },
         "addModalTitle": "Add New Payment Method",
         "addForm": {
-            "cardInfoLabel": "Card Information",
-            "secureNote": "Your payment information is encrypted and securely processed by Stripe.",
+            "nameLabel": "Cardholder Name",
+            "namePlaceholder": "e.g. John Doe",
+            "emailLabel": "Email Address",
+            "emailPlaceholder": "e.g. john@example.com",
+            "secureNote": "You will be redirected to Viva Wallet to securely verify your card details.",
             "buttons": {
                 "cancel": "Cancel",
-                "add": "Add Payment Method",
-                "adding": "Adding..."
+                "add": "Proceed to Verification",
+                "processing": "Redirecting..."
             },
             "errors": {
-                "cardElementNotFound": "Card element not found",
-                "cardProcessingError": "An error occurred while processing your card.",
-                "addMethodFailed": "Failed to add payment method."
+                "fillAllFields": "Please fill in all fields.",
+                "addMethodFailed": "Failed to initiate payment method verification."
             }
         },
         "card": {
@@ -1306,9 +1346,33 @@
             "cancelButton": "Cancel"
         },
         "messages": {
-            "addSuccess": "Payment method added successfully!",
+            "addSuccess": "Payment verification initiated successfully!",
             "setDefaultSuccess": "Default payment method updated successfully!",
             "deleteSuccess": "Payment method removed successfully!"
+        }
+    },
+    "paymentCallback": {
+        "processing": {
+            "title": "Verifying Payment",
+            "message": "Please wait while we verify your card details..."
+        },
+        "success": {
+            "title": "Verification Successful!",
+            "message": "Your payment method has been verified and added successfully.",
+            "text": "Your card is now ready for use.",
+            "redirecting": "Redirecting back to payment methods..."
+        },
+        "failed": {
+            "title": "Verification Failed",
+            "message": "We could not verify your payment method.",
+            "text": "Please try again or use a different card.",
+            "backButton": "Return to Payment Methods"
+        },
+        "cancelled": {
+            "title": "Verification Cancelled",
+            "message": "You cancelled the payment verification process.",
+            "text": "No changes were made to your account.",
+            "redirecting": "Redirecting..."
         }
     },
     "subscriptions": {
@@ -1445,28 +1509,53 @@
     },
     "invoiceHistory": {
         "title": "Invoice History",
-        "closeLabel": "Close modal",
         "loading": "Loading invoices...",
+        "closeLabel": "Close",
         "locale": "en-US",
         "table": {
             "headers": {
                 "date": "Date",
+                "description": "Description",
+                "type": "Type",
                 "amount": "Amount",
                 "status": "Status",
+                "card": "Payment Method",
                 "action": "Action"
             },
-            "viewAction": "View Invoice"
+            "viewAction": "View Details"
         },
         "status": {
             "paid": "Paid",
-            "open": "Open",
-            "void": "Void",
-            "uncollectible": "Uncollectible"
+            "failed": "Failed",
+            "pending": "Pending"
+        },
+        "types": {
+            "new_subscription": "New Subscription",
+            "renewal": "Renewal",
+            "trial_conversion": "Trial Conversion",
+            "plan_change": "Plan Change",
+            "payment": "Payment"
         },
         "empty": {
             "title": "No Invoices Found",
-            "description": "Your billing history will appear here once you are billed."
+            "description": "You don't have any invoices yet. They will appear here after your first payment."
         }
+    },
+    "invoiceDetail": {
+        "title": "Invoice Details",
+        "loading": "Loading invoice...",
+        "billedTo": "Billed To",
+        "transactionDetails": "Transaction Details",
+        "transactionId": "Transaction ID",
+        "orderCode": "Order Code",
+        "paymentMethod": "Payment Method",
+        "description": "Description",
+        "type": "Type",
+        "amount": "Amount",
+        "total": "Total Amount",
+        "thankYou": "Thank you for your business!",
+        "print": "Print / Download",
+        "close": "Close"
     },
     "contacts": {
         "pageTitle": "Contacts",
@@ -1849,7 +1938,7 @@
     },
     "packageReview": {
         "loading": "Loading package details...",
-        "locale": "en-US",
+        "locale": "en",
         "tabs": {
             "summary": "Summary",
             "recipients": "Recipients",
@@ -2788,6 +2877,10 @@
         "subscribeNow": "Subscribe",
         "subscribe": "{{action}} Now (€{{price}})",
         "termsAgreement": "By continuing, you agree to our Terms of Service.",
+        "addPaymentMethod": {
+            "title": "Add Payment Method",
+            "description": "Please enter your billing details to add a new secure payment method."
+        },
         "success": {
             "topUp": "Top-up Successful!",
             "topUpMessage": "You now have more documents available on your {{planName}} plan!",
@@ -2802,6 +2895,11 @@
             "noPaymentMethod": "Please select or add a payment method to continue.",
             "planNotAvailable": "This plan is not available for purchase at the moment.",
             "unknownError": "An unexpected error occurred."
+        },
+        "noPaymentMethod": {
+            "title": "No Payment Method Found",
+            "description": "To proceed with your subscription, please add a secure payment method to your account.",
+            "addButton": "Add Payment Method"
         }
     },
     "fieldPropertiesPanel": {
