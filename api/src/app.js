@@ -36,11 +36,11 @@ app.use("/api/webhooks", webhookRoutes);
 //   allowedHeaders: [
 //     "Content-Type",
 //     "Authorization",
-//     "ngrok-skip-browser-warning",
+//      "ngrok-skip-browser-warning",
 //   ],
-//   credentials: false, // Important: If origin is "*", credentials (cookies) cannot be true.
-//   optionsSuccessStatus: 204,
-// };
+//    credentials: false, // Important: If origin is "*", credentials (cookies) cannot be true.
+//    optionsSuccessStatus: 204,
+//  };
 app.use(cors({ origin: clientURL, credentials: true }));
 // app.use(cors(corsOptions));
 app.use(helmet({ crossOriginResourcePolicy: false }));

@@ -35,3 +35,7 @@ web/.env
 
 # Keep root .env.example
 !.env.example
+
+# Markdown files (no agent guides pls)
+*.md
+!README.md

@@ -12,11 +12,10 @@ class ExpiryJob extends BaseJob {
   }
 
   /**
-   * Run every 30 minutes (aligns with ReminderJob)
-   * Reduces average expiry delay from 30min to 15min
+   * Run every 30 minutes
    */
   get schedule() {
-    return "*/30 * * * *"; // Changed from '0 * * * *'
+    return process.env.EXPIRY_CRON || "*/30 * * * *";
   }
 
   /**
@@ -57,11 +56,10 @@ class ExpiryJob extends BaseJob {
 
     try {
       // Find packages that should be expired
-      // Only select packages with expiresAt set
       const packagesToExpire = await this.Package.find({
         "options.expiresAt": { $exists: true, $ne: null, $lte: now },
         status: { $in: ["Sent", "Draft"] },
-      }).populate("ownerId", "firstName lastName email");
+      }).populate("ownerId", "firstName lastName email language");
 
       if (packagesToExpire.length === 0) {
         console.log("✅ No packages to expire");
@@ -129,14 +127,15 @@ class ExpiryJob extends BaseJob {
   }
 
   /**
-   * Send expiry notifications to all participants
+   * Send expiry notifications to relevant participants
+   * ✅ FIXED: Now filters to only send to unsigned participants + owner
    */
   async sendExpiryNotifications(pkg) {
     const emailsSent = [];
     const emailsFailed = [];
 
     try {
-      const owner = pkg.ownerId; // Assumes ownerId is populated
+      const owner = pkg.ownerId;
       if (!owner) {
         console.warn(
           `⚠️ Package ${pkg._id} has no owner, skipping notifications`
@@ -147,10 +146,11 @@ class ExpiryJob extends BaseJob {
       const ownerName = `${owner.firstName} ${owner.lastName}`;
       const allRecipients = new Map();
 
-      // 1. Gather all participants and their contactIds
+      // ✅ FIXED: Only gather UNSIGNED participants
       pkg.fields.forEach((field) => {
         (field.assignedUsers || []).forEach((user) => {
-          if (!allRecipients.has(user.contactEmail)) {
+          // Only include unsigned participants
+          if (!user.signed && !allRecipients.has(user.contactEmail)) {
             allRecipients.set(user.contactEmail, {
               contactId: user.contactId,
               name: user.contactName,
@@ -161,6 +161,7 @@ class ExpiryJob extends BaseJob {
         });
       });
 
+      // Include receivers (they don't have a "signed" status, so include all)
       pkg.receivers.forEach((receiver) => {
         if (!allRecipients.has(receiver.contactEmail)) {
           allRecipients.set(receiver.contactEmail, {
@@ -172,7 +173,7 @@ class ExpiryJob extends BaseJob {
         }
       });
 
-      // Add the owner to the list
+      // Always add the owner
       if (!allRecipients.has(owner.email)) {
         allRecipients.set(owner.email, {
           name: ownerName,
@@ -181,7 +182,7 @@ class ExpiryJob extends BaseJob {
         });
       }
 
-      // 2. Efficiently fetch language preferences for all contacts
+      // Fetch language preferences
       const contactIds = Array.from(allRecipients.values())
         .filter((r) => !r.isOwner && r.contactId)
         .map((r) => r.contactId);
@@ -194,10 +195,10 @@ class ExpiryJob extends BaseJob {
       );
 
       console.log(
-        `Sending expiry notifications to ${allRecipients.size} recipients`
+        `Sending expiry notifications to ${allRecipients.size} recipients (unsigned participants + owner)`
       );
 
-      // 3. Loop through recipients and send notifications with the correct language
+      // Send notifications
       for (const recipient of allRecipients.values()) {
         try {
           // Determine language
@@ -209,15 +210,14 @@ class ExpiryJob extends BaseJob {
           }
 
           await this.emailService.sendDocumentExpiredNotification(
-            recipient, // Pass the entire enriched object
+            recipient,
             ownerName,
             pkg.name,
             pkg.options.expiresAt
           );
           emailsSent.push(recipient.email);
 
-          // Send push notification (document_expiring) - Note: This is for expiring soon, not expired
-          // For actual expiry, we might want a different type, but using document_expiring for now
+          // Send push notification
           if (this.pushNotificationService) {
             try {
               const user = await this.User.findOne({
@@ -225,11 +225,11 @@ class ExpiryJob extends BaseJob {
               }).select("deviceTokens");
 
               if (user && user.deviceTokens && user.deviceTokens.length > 0) {
-                const pushTitle = "Document Expiring Soon";
-                const pushBody = `${pkg.name} is expiring soon`;
+                const pushTitle = "Document Expired";
+                const pushBody = `${pkg.name} has expired`;
                 await this.pushNotificationService.sendNotificationToUser(
                   user,
-                  "document_expiring",
+                  "document_expired", // More accurate notification type
                   pkg._id.toString(),
                   pushTitle,
                   pushBody
@@ -237,10 +237,9 @@ class ExpiryJob extends BaseJob {
               }
             } catch (error) {
               console.error(
-                `Error sending push notification expiry to ${recipient.email}:`,
+                `Error sending push notification to ${recipient.email}:`,
                 error
               );
-              // Don't throw - push notifications are non-critical
             }
           }
         } catch (error) {
