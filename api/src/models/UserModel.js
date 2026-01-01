@@ -169,6 +169,15 @@ const userSchema = new Schema(
     deletionScheduledAt: { type: Date, sparse: true },
     reactivationToken: { type: String, sparse: true },
     reactivationExpiresAt: { type: Date, sparse: true },
+    
+    // Push notification device tokens
+    deviceTokens: [
+      {
+        token: { type: String, required: true },
+        platform: { type: String, enum: ["android", "ios"], required: true },
+        createdAt: { type: Date, default: Date.now },
+      },
+    ],
   },
   { timestamps: true }
 );

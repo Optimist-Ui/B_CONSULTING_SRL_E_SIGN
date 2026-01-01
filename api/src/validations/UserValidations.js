@@ -77,6 +77,31 @@ const verifyEmailChangeOtpValidation = [
     .withMessage("Please provide a valid email address"),
 ];
 
+const registerDeviceTokenValidation = [
+  body("deviceToken")
+    .trim()
+    .notEmpty()
+    .withMessage("Device token is required")
+    .isString()
+    .withMessage("Device token must be a string"),
+
+  body("platform")
+    .trim()
+    .notEmpty()
+    .withMessage("Platform is required")
+    .isIn(["android", "ios"])
+    .withMessage("Platform must be 'android' or 'ios'"),
+];
+
+const unregisterDeviceTokenValidation = [
+  body("deviceToken")
+    .trim()
+    .notEmpty()
+    .withMessage("Device token is required")
+    .isString()
+    .withMessage("Device token must be a string"),
+];
+
 module.exports = {
   signupValidation,
   loginValidation,
@@ -86,4 +111,6 @@ module.exports = {
   updateProfileValidation,
   requestEmailChangeValidation,
   verifyEmailChangeOtpValidation,
+  registerDeviceTokenValidation,
+  unregisterDeviceTokenValidation,
 };

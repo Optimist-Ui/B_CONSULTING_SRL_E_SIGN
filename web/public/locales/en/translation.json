@@ -940,6 +940,43 @@
                 "title": "6. Contact Information",
                 "p1_prefix": "For questions about these terms, please contact us at",
                 "p1_suffix": "or through our support portal."
+            },
+            "delivery": {
+                "title": "Service Delivery",
+                "method": {
+                    "title": "Delivery Method",
+                    "p1": "I-sign.eu provides its services through digital delivery methods only. Upon successful subscription or purchase, you will receive:",
+                    "li1": "Immediate access to your account dashboard",
+                    "li2": "Email confirmation with login credentials and service details",
+                    "li3": "Access to all features included in your subscription plan",
+                    "li4": "Automatic activation within minutes of payment confirmation"
+                },
+                "activation": {
+                    "title": "Service Activation",
+                    "p1": "All services are activated immediately upon successful payment processing. You will receive a confirmation email within 5 minutes containing your account details and instructions for accessing the platform."
+                }
+            },
+            "cancellation": {
+                "title": "Cancellation & Refund Policy",
+                "subscription": {
+                    "title": "Subscription Cancellation",
+                    "p1": "You may cancel your subscription at any time through your account settings or by contacting customer support. The following terms apply:",
+                    "li1": "Monthly subscriptions: Cancellation takes effect at the end of the current billing period. No refunds for partial months.",
+                    "li2": "Annual subscriptions: Cancel anytime with prorated refund for unused months (minimum 30 days remaining)",
+                    "li3": "Free trial: Cancel anytime during trial period without charges. If not canceled, auto-converts to paid subscription."
+                },
+                "refund": {
+                    "title": "Refund Policy",
+                    "p1": "We offer refunds under the following conditions:",
+                    "li1": "Technical Issues: Full refund if service is unavailable for more than 48 consecutive hours due to our technical fault",
+                    "li2": "Billing Errors: Immediate full refund for any duplicate charges or billing mistakes",
+                    "li3": "14-Day Guarantee: First-time subscribers can request a full refund within 14 days if unsatisfied with the service"
+                },
+                "process": {
+                    "title": "How to Request Cancellation or Refund",
+                    "p1_prefix": "To request a cancellation or refund, please contact our support team at",
+                    "p1_suffix": "or use the cancellation option in your account settings. Refunds are processed within 5-10 business days to the original payment method."
+                }
             }
         },
         "privacy": {
@@ -2840,7 +2877,7 @@
         "subscribeNow": "Subscribe",
         "subscribe": "{{action}} Now (€{{price}})",
         "termsAgreement": "By continuing, you agree to our Terms of Service.",
-         "addPaymentMethod": {
+        "addPaymentMethod": {
             "title": "Add Payment Method",
             "description": "Please enter your billing details to add a new secure payment method."
         },

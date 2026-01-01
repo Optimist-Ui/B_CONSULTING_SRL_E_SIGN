@@ -11,11 +11,11 @@ class CronService {
    */
   initialize(container) {
     if (this.isInitialized) {
-      console.log("CronService already initialized");
+      console.log("⚠️  CronService already initialized");
       return;
     }
 
-    console.log("Initializing CronService...");
+    console.log("🚀 Initializing CronService...");
 
     // Import and register all jobs
     const ExpiryJob = require("../jobs/ExpiryJob");
@@ -31,12 +31,15 @@ class CronService {
 
     // Register jobs
     this.registerJob("packageExpiry", expiryJob);
-    this.registerJob("expiryReminders", reminderJob);
+    this.registerJob("reminderJob", reminderJob); // Handles both expiry + automatic reminders
     this.registerJob("subscriptionExpiry", subscriptionExpiryJob);
     this.registerJob("deleteExpiredAccounts", deleteExpiredAccountsJob);
 
     this.isInitialized = true;
-    console.log("CronService initialized successfully");
+    console.log("✅ CronService initialized successfully");
+
+    // Log all job schedules
+    this.logJobSchedules();
   }
 
   /**
@@ -44,7 +47,7 @@ class CronService {
    */
   registerJob(name, jobInstance) {
     if (this.jobs.has(name)) {
-      console.log(`Job ${name} already registered`);
+      console.log(`⚠️  Job ${name} already registered`);
       return;
     }
 
@@ -52,11 +55,11 @@ class CronService {
       const cronJob = cron.schedule(
         jobInstance.schedule,
         async () => {
-          console.log(`Running job: ${name}`);
+          console.log(`⏰ Running job: ${name}`);
           try {
             await jobInstance.execute();
           } catch (error) {
-            console.error(`Error in job ${name}:`, error);
+            console.error(`❌ Error in job ${name}:`, error);
           }
         },
         {
@@ -72,20 +75,34 @@ class CronService {
       });
 
       cronJob.start();
-      console.log(`Job ${name} registered and started`);
+      console.log(
+        `✅ Job ${name} registered and started (${jobInstance.schedule})`
+      );
     } catch (error) {
-      console.error(`Failed to register job ${name}:`, error);
+      console.error(`❌ Failed to register job ${name}:`, error);
     }
+  }
+
+  /**
+   * Log all job schedules for visibility
+   */
+  logJobSchedules() {
+    console.log("\n📋 Active Cron Jobs:");
+    console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+    for (const [name, job] of this.jobs) {
+      console.log(`  • ${name.padEnd(25)} → ${job.instance.schedule}`);
+    }
+    console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
   }
 
   /**
    * Start all jobs
    */
   startAll() {
-    console.log("Starting all cron jobs...");
+    console.log("▶️  Starting all cron jobs...");
     for (const [name, job] of this.jobs) {
       job.cronJob.start();
-      console.log(`Started job: ${name}`);
+      console.log(`  ✅ Started job: ${name}`);
     }
   }
 
@@ -93,10 +110,10 @@ class CronService {
    * Stop all jobs
    */
   stopAll() {
-    console.log("Stopping all cron jobs...");
+    console.log("⏸️  Stopping all cron jobs...");
     for (const [name, job] of this.jobs) {
       job.cronJob.stop();
-      console.log(`Stopped job: ${name}`);
+      console.log(`  ⏹️  Stopped job: ${name}`);
     }
   }
 
@@ -107,7 +124,7 @@ class CronService {
     const job = this.jobs.get(name);
     if (job) {
       job.cronJob.stop();
-      console.log(`Stopped job: ${name}`);
+      console.log(`⏹️  Stopped job: ${name}`);
     }
   }
 

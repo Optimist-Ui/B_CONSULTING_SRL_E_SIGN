@@ -171,6 +171,74 @@ class UserController {
       return errorResponse(res, error, "Failed to update email");
     }
   }
+
+  async registerDeviceToken(req, res) {
+    try {
+      const userId = req.user.id;
+      const { deviceToken, platform } = req.body;
+
+      if (!deviceToken || !platform) {
+        return errorResponse(
+          res,
+          new Error("deviceToken and platform are required"),
+          "Missing required fields",
+          400
+        );
+      }
+
+      if (!["android", "ios"].includes(platform)) {
+        return errorResponse(
+          res,
+          new Error("Platform must be 'android' or 'ios'"),
+          "Invalid platform",
+          400
+        );
+      }
+
+      const result = await this.userService.registerDeviceToken(
+        userId,
+        deviceToken,
+        platform
+      );
+
+      return successResponse(
+        res,
+        result,
+        "Device token registered successfully"
+      );
+    } catch (error) {
+      return errorResponse(res, error, "Failed to register device token");
+    }
+  }
+
+  async unregisterDeviceToken(req, res) {
+    try {
+      const userId = req.user.id;
+      const { deviceToken } = req.body;
+
+      if (!deviceToken) {
+        return errorResponse(
+          res,
+          new Error("deviceToken is required"),
+          "Missing device token",
+          400
+        );
+      }
+
+      const result = await this.userService.unregisterDeviceToken(
+        userId,
+        deviceToken
+      );
+
+      return successResponse(
+        res,
+        result,
+        "Device token unregistered successfully"
+      );
+    } catch (error) {
+      return errorResponse(res, error, "Failed to unregister device token");
+    }
+  }
 }
 
 module.exports = UserController;

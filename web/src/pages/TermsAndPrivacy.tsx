@@ -55,7 +55,7 @@ const TermsAndPrivacy = () => {
                                     <p className="text-gray-700 leading-relaxed">
                                         {t('termsAndPrivacy.terms.introduction.p1_prefix')}{' '}
                                         <a href="https://i-sign.eu" target="_blank" rel="noopener noreferrer" className="text-blue-900 hover:underline font-medium">
-                                            i-signs.eu
+                                            i-sign.eu
                                         </a>{' '}
                                         {t('termsAndPrivacy.terms.introduction.p1_suffix')}
                                     </p>
@@ -69,21 +69,21 @@ const TermsAndPrivacy = () => {
                                         <li>
                                             <strong>{t('termsAndPrivacy.terms.scope.li1_strong')}</strong> — {t('termsAndPrivacy.terms.scope.li1_text')}{' '}
                                             <a href="https://i-sign.eu" target="_blank" rel="noopener noreferrer" className="text-blue-900 hover:underline font-medium">
-                                                i-signs.eu
+                                                i-sign.eu
                                             </a>{' '}
                                             {t('termsAndPrivacy.terms.scope.li1_suffix')}
                                         </li>
                                         <li>
                                             <strong>{t('termsAndPrivacy.terms.scope.li2_strong')}</strong> — {t('termsAndPrivacy.terms.scope.li2_text')}{' '}
                                             <a href="https://i-sign.eu" target="_blank" rel="noopener noreferrer" className="text-blue-900 hover:underline font-medium">
-                                                i-signs.eu
+                                                i-sign.eu
                                             </a>{' '}
                                             {t('termsAndPrivacy.terms.scope.li2_suffix')}
                                         </li>
                                         <li>
                                             <strong>{t('termsAndPrivacy.terms.scope.li3_strong')}</strong> — {t('termsAndPrivacy.terms.scope.li3_text')}{' '}
                                             <a href="https://i-sign.eu" target="_blank" rel="noopener noreferrer" className="text-blue-900 hover:underline font-medium">
-                                                i-signs.eu
+                                                i-sign.eu
                                             </a>{' '}
                                             {t('termsAndPrivacy.terms.scope.li3_suffix')}
                                         </li>
@@ -91,7 +91,7 @@ const TermsAndPrivacy = () => {
                                     <p className="text-gray-700 leading-relaxed mt-3">
                                         {t('termsAndPrivacy.terms.scope.p2_prefix')}{' '}
                                         <a href="https://i-sign.eu" target="_blank" rel="noopener noreferrer" className="text-blue-900 hover:underline font-medium">
-                                            i-signs.eu
+                                            i-sign.eu
                                         </a>
                                         , {t('termsAndPrivacy.terms.scope.p2_suffix')}
                                     </p>
@@ -121,7 +121,7 @@ const TermsAndPrivacy = () => {
                                             <p className="text-gray-700 leading-relaxed mb-3">
                                                 {t('termsAndPrivacy.terms.access.eligibility.p1_prefix')}{' '}
                                                 <a href="https://i-sign.eu" target="_blank" rel="noopener noreferrer" className="text-blue-900 hover:underline font-medium">
-                                                    i-signs.eu
+                                                    i-sign.eu
                                                 </a>{' '}
                                                 {t('termsAndPrivacy.terms.access.eligibility.p1_suffix')}
                                             </p>
@@ -133,9 +133,65 @@ const TermsAndPrivacy = () => {
                                             <p className="text-gray-700 leading-relaxed mt-3">
                                                 {t('termsAndPrivacy.terms.access.eligibility.p2_prefix')}{' '}
                                                 <a href="https://i-sign.eu" target="_blank" rel="noopener noreferrer" className="text-blue-900 hover:underline font-medium">
-                                                    i-signs.eu
+                                                    i-sign.eu
                                                 </a>{' '}
                                                 {t('termsAndPrivacy.terms.access.eligibility.p2_suffix')}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </section>
+
+                                {/* ✅ NEW SECTION: Service Delivery */}
+                                <section>
+                                    <h3 className="text-xl font-semibold text-blue-900 mb-4">{t('termsAndPrivacy.terms.delivery.title')}</h3>
+                                    <div className="space-y-4">
+                                        <div>
+                                            <h4 className="font-medium text-gray-900 mb-2">{t('termsAndPrivacy.terms.delivery.method.title')}</h4>
+                                            <p className="text-gray-700 leading-relaxed mb-3">{t('termsAndPrivacy.terms.delivery.method.p1')}</p>
+                                            <ul className="list-disc list-inside text-gray-700 space-y-2 ml-4">
+                                                <li>{t('termsAndPrivacy.terms.delivery.method.li1')}</li>
+                                                <li>{t('termsAndPrivacy.terms.delivery.method.li2')}</li>
+                                                <li>{t('termsAndPrivacy.terms.delivery.method.li3')}</li>
+                                                <li>{t('termsAndPrivacy.terms.delivery.method.li4')}</li>
+                                            </ul>
+                                        </div>
+                                        <div>
+                                            <h4 className="font-medium text-gray-900 mb-2">{t('termsAndPrivacy.terms.delivery.activation.title')}</h4>
+                                            <p className="text-gray-700 leading-relaxed">{t('termsAndPrivacy.terms.delivery.activation.p1')}</p>
+                                        </div>
+                                    </div>
+                                </section>
+
+                                {/* ✅ NEW SECTION: Cancellation & Refund Policy */}
+                                <section>
+                                    <h3 className="text-xl font-semibold text-blue-900 mb-4">{t('termsAndPrivacy.terms.cancellation.title')}</h3>
+                                    <div className="space-y-4">
+                                        <div>
+                                            <h4 className="font-medium text-gray-900 mb-2">{t('termsAndPrivacy.terms.cancellation.subscription.title')}</h4>
+                                            <p className="text-gray-700 leading-relaxed mb-3">{t('termsAndPrivacy.terms.cancellation.subscription.p1')}</p>
+                                            <ul className="list-disc list-inside text-gray-700 space-y-2 ml-4">
+                                                <li>{t('termsAndPrivacy.terms.cancellation.subscription.li1')}</li>
+                                                <li>{t('termsAndPrivacy.terms.cancellation.subscription.li2')}</li>
+                                                <li>{t('termsAndPrivacy.terms.cancellation.subscription.li3')}</li>
+                                            </ul>
+                                        </div>
+                                        <div>
+                                            <h4 className="font-medium text-gray-900 mb-2">{t('termsAndPrivacy.terms.cancellation.refund.title')}</h4>
+                                            <p className="text-gray-700 leading-relaxed mb-3">{t('termsAndPrivacy.terms.cancellation.refund.p1')}</p>
+                                            <ul className="list-disc list-inside text-gray-700 space-y-2 ml-4">
+                                                <li>{t('termsAndPrivacy.terms.cancellation.refund.li1')}</li>
+                                                <li>{t('termsAndPrivacy.terms.cancellation.refund.li2')}</li>
+                                                <li>{t('termsAndPrivacy.terms.cancellation.refund.li3')}</li>
+                                            </ul>
+                                        </div>
+                                        <div>
+                                            <h4 className="font-medium text-gray-900 mb-2">{t('termsAndPrivacy.terms.cancellation.process.title')}</h4>
+                                            <p className="text-gray-700 leading-relaxed">
+                                                {t('termsAndPrivacy.terms.cancellation.process.p1_prefix')}{' '}
+                                                <a href="mailto:support@i-sign.eu" className="text-blue-900 hover:underline font-medium">
+                                                    support@i-sign.eu
+                                                </a>{' '}
+                                                {t('termsAndPrivacy.terms.cancellation.process.p1_suffix')}
                                             </p>
                                         </div>
                                     </div>
@@ -145,8 +201,8 @@ const TermsAndPrivacy = () => {
                                     <h3 className="text-xl font-semibold text-blue-900 mb-4">{t('termsAndPrivacy.terms.contact.title')}</h3>
                                     <p className="text-gray-700 leading-relaxed">
                                         {t('termsAndPrivacy.terms.contact.p1_prefix')}{' '}
-                                        <a href="mailto:legal@i-sign.eu" className="text-blue-900 hover:underline font-medium">
-                                            legal@i-sign.eu
+                                        <a href="mailto:alex@i-sign.eu" className="text-blue-900 hover:underline font-medium">
+                                            alex@i-sign.eu
                                         </a>{' '}
                                         {t('termsAndPrivacy.terms.contact.p1_suffix')}
                                     </p>
@@ -245,8 +301,8 @@ const TermsAndPrivacy = () => {
                     <p>{t('termsAndPrivacy.footer.copyright')}</p>
                     <p className="mt-2">
                         {t('termsAndPrivacy.footer.support_prefix')}{' '}
-                        <a href="mailto:support@i-sign.eu" className="text-blue-900 hover:underline">
-                            support@i-sign.eu
+                        <a href="mailto:alex@i-sign.eu" className="text-blue-900 hover:underline">
+                            alex@i-sign.eu
                         </a>
                     </p>
                 </div>

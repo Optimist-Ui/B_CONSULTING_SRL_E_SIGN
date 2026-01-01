@@ -31,18 +31,6 @@ const HomeFooter = () => {
                         {/* Company Info */}
                         <div className="lg:col-span-2">
                             <div className="flex items-center space-x-2 mb-6">
-                                {/* <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-blue-600 rounded-lg flex items-center justify-center">
-                                    <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z" />
-                                        <path d="M14 2v6h6" />
-                                        <path d="M16 13H8" />
-                                        <path d="M16 17H8" />
-                                        <path d="M10 9H8" />
-                                    </svg>
-                                </div>
-                                <span className="text-2xl font-bold text-white">
-                                    E<span className="text-blue-400">Sign</span>
-                                </span> */}
                                 <img src="/logo-white.png" alt="logo" className="w-44" />
                             </div>
                             <p className="text-gray-400 mb-6 max-w-md leading-relaxed">{t('footer.description')}</p>
@@ -121,8 +109,8 @@ const HomeFooter = () => {
                         {/* Copyright */}
                         <div className="text-gray-500 text-sm">{t('footer.copyright', { year: currentYear })}</div>
 
-                        {/* Social Links & Contact */}
-                        <div className="flex items-center space-x-6">
+                        {/* Contact Info & Viva Logo */}
+                        <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
                             {/* Contact Info */}
                             <div className="hidden sm:flex items-center space-x-4 text-sm text-gray-500">
                                 <div className="flex items-center space-x-1">
@@ -148,12 +136,20 @@ const HomeFooter = () => {
                                     <span>32492537752</span>
                                 </div>
                             </div>
+
+                            {/* Viva Logo - Desktop */}
+                            <div className="hidden sm:flex items-center space-x-2 pl-6 border-l border-slate-700">
+                                <span className="text-xs text-gray-500">Secured by</span>
+                                <a href="https://www.vivawallet.com" target="_blank" rel="noopener noreferrer" className="inline-block hover:opacity-80 transition-opacity">
+                                    <img src="/viva.png" alt="Viva Wallet" className="h-6" />
+                                </a>
+                            </div>
                         </div>
                     </div>
 
-                    {/* Mobile Contact Info */}
+                    {/* Mobile Contact Info & Viva */}
                     <div className="sm:hidden mt-4 pt-4 border-t border-slate-800">
-                        <div className="flex flex-col space-y-2 text-sm text-gray-500">
+                        <div className="flex flex-col space-y-3 text-sm text-gray-500">
                             <div className="flex items-center space-x-2">
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path
@@ -175,6 +171,13 @@ const HomeFooter = () => {
                                     />
                                 </svg>
                                 <span>32492537752</span>
+                            </div>
+                            {/* Viva Logo - Mobile */}
+                            <div className="flex items-center space-x-2 pt-2">
+                                <span className="text-xs">Secured by</span>
+                                <a href="https://www.vivawallet.com" target="_blank" rel="noopener noreferrer" className="inline-block hover:opacity-80 transition-opacity">
+                                    <img src="/viva.png" alt="Viva Wallet" className="h-6" />
+                                </a>
                             </div>
                         </div>
                     </div>
