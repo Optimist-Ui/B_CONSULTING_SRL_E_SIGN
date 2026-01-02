@@ -11,10 +11,34 @@ class ReminderJob extends BaseJob {
   }
 
   /**
-   * Run every 15 minutes for better precision on hourly reminders
+   * Run every 15 minutes for better precision
+   * ✅ FIXED: Validate cron expression to prevent crashes
    */
   get schedule() {
-    return process.env.REMINDER_CRON || "*/15 * * * *";
+    const defaultSchedule = "*/15 * * * *";
+    const envSchedule = process.env.REMINDER_CRON;
+
+    // If env variable is set, validate it
+    if (envSchedule) {
+      try {
+        // Basic cron validation
+        const parts = envSchedule.trim().split(/\s+/);
+        if (parts.length === 5) {
+          console.log(`✅ Using custom reminder schedule: ${envSchedule}`);
+          return envSchedule;
+        } else {
+          console.warn(
+            `⚠️  Invalid REMINDER_CRON format: "${envSchedule}". Using default: ${defaultSchedule}`
+          );
+        }
+      } catch (error) {
+        console.warn(
+          `⚠️  Error parsing REMINDER_CRON: ${error.message}. Using default: ${defaultSchedule}`
+        );
+      }
+    }
+
+    return defaultSchedule;
   }
 
   /**
@@ -22,7 +46,7 @@ class ReminderJob extends BaseJob {
    */
   async execute() {
     const startTime = new Date();
-    console.log(`Starting reminder job at ${startTime.toISOString()}`);
+    console.log(`🔔 Starting reminder job at ${startTime.toISOString()}`);
 
     try {
       // Run both expiry and automatic reminders
@@ -35,17 +59,18 @@ class ReminderJob extends BaseJob {
       const duration = endTime - startTime;
 
       console.log(
-        `Reminder job completed in ${duration}ms. ` +
-          `Expiry reminders: ${expiryData.remindersSent}, ` +
-          `Automatic reminders: ${automaticData.remindersSent}`
+        `✅ Reminder job completed in ${duration}ms\n` +
+          `   Expiry reminders: ${expiryData.remindersSent}/${expiryData.packagesProcessed}\n` +
+          `   Automatic reminders: ${automaticData.remindersSent}/${automaticData.packagesProcessed}`
       );
 
       return {
         expiryReminders: expiryData,
         automaticReminders: automaticData,
+        duration,
       };
     } catch (error) {
-      console.error("Error in ReminderJob execution:", error);
+      console.error("❌ Error in ReminderJob execution:", error);
       throw error;
     }
   }
@@ -57,6 +82,7 @@ class ReminderJob extends BaseJob {
     const now = new Date();
     let remindersSent = 0;
     let packagesProcessed = 0;
+    const errors = [];
 
     try {
       // Find packages that need expiry reminders
@@ -66,29 +92,45 @@ class ReminderJob extends BaseJob {
         "options.reminderPeriod": { $ne: null },
         "options.expiryReminderSentAt": { $exists: false }, // Not sent yet
         status: "Sent",
-      }).populate("ownerId", "firstName lastName email");
+      }).populate("ownerId", "firstName lastName email language");
 
       console.log(
-        `Found ${packagesNeedingReminders.length} packages to check for expiry reminders`
+        `📋 Found ${packagesNeedingReminders.length} packages to check for expiry reminders`
       );
 
       for (const pkg of packagesNeedingReminders) {
         try {
           packagesProcessed++;
 
-          const timeUntilExpiry = pkg.options.expiresAt - now;
+          const timeUntilExpiry =
+            pkg.options.expiresAt.getTime() - now.getTime();
           const shouldSendReminder = this.shouldSendExpiryReminder(
             pkg.options.reminderPeriod,
             timeUntilExpiry
           );
 
           if (shouldSendReminder) {
-            await this.sendExpiryReminderNotifications(pkg, timeUntilExpiry);
+            // ✅ Use atomic update to prevent duplicate sends
+            const updated = await this.Package.findOneAndUpdate(
+              {
+                _id: pkg._id,
+                "options.expiryReminderSentAt": { $exists: false },
+              },
+              {
+                $set: { "options.expiryReminderSentAt": now },
+              },
+              { new: true }
+            ).populate("ownerId", "firstName lastName email language");
 
-            // ✅ CRITICAL FIX: Mark reminder as sent
-            pkg.options.expiryReminderSentAt = now;
-            await pkg.save();
+            // If update failed, another process already sent it
+            if (!updated) {
+              console.log(
+                `⏭️  Expiry reminder already sent for package: ${pkg.name} (ID: ${pkg._id})`
+              );
+              continue;
+            }
 
+            await this.sendExpiryReminderNotifications(updated);
             remindersSent++;
             console.log(
               `✅ Sent expiry reminder for package: ${pkg.name} (ID: ${pkg._id})`
@@ -99,47 +141,65 @@ class ReminderJob extends BaseJob {
             `❌ Error processing expiry reminder for package ${pkg._id}:`,
             error
           );
+          errors.push({
+            packageId: pkg._id,
+            type: "expiry",
+            error: error.message,
+          });
         }
       }
 
       return {
         packagesProcessed,
         remindersSent,
+        errors,
       };
     } catch (error) {
-      console.error("Error in sendExpiryReminders method:", error);
+      console.error("❌ Error in sendExpiryReminders method:", error);
       throw error;
     }
   }
 
   /**
    * Send automatic recurring reminders after package is sent
+   * ✅ THIS IS YOUR 24H REMINDER SYSTEM
    */
   async sendAutomaticReminders() {
     const now = new Date();
     let remindersSent = 0;
     let packagesProcessed = 0;
+    const errors = [];
 
     try {
       // Find packages with automatic reminders enabled
       const packagesWithAutoReminders = await this.Package.find({
         "options.sendAutomaticReminders": true,
         "options.firstReminderDays": { $exists: true, $ne: null },
-        sentAt: { $exists: true, $ne: null },
+        $or: [
+          { sentAt: { $exists: true, $ne: null } },
+          { status: "Sent", createdAt: { $exists: true } },
+        ],
         status: "Sent", // Only sent packages
-      }).populate("ownerId", "firstName lastName email");
+        $or: [
+          { "options.expiresAt": { $exists: false } }, // No expiry
+          { "options.expiresAt": null }, // No expiry
+          { "options.expiresAt": { $gt: now } }, // Not expired yet
+        ],
+      }).populate("ownerId", "firstName lastName email language");
 
       console.log(
-        `Found ${packagesWithAutoReminders.length} packages to check for automatic reminders`
+        `📋 Found ${packagesWithAutoReminders.length} packages to check for automatic reminders`
       );
 
       for (const pkg of packagesWithAutoReminders) {
         try {
           packagesProcessed++;
 
-          // Check if package has expired
-          if (pkg.options.expiresAt && now >= pkg.options.expiresAt) {
-            console.log(`⏭️  Skipping expired package: ${pkg._id}`);
+          // Check if all tasks are completed
+          if (this.areAllTasksCompleted(pkg)) {
+            console.log(
+              `⏭️  All tasks completed for package ${pkg._id}, skipping reminder`
+            );
             continue;
           }
 
@@ -147,23 +207,31 @@ class ReminderJob extends BaseJob {
           const shouldSend = this.shouldSendAutomaticReminder(pkg, now);
 
           if (shouldSend) {
-            await this.sendAutomaticReminderNotifications(pkg);
+            // ✅ Use atomic update to add reminder to history
+            const updated = await this.Package.findOneAndUpdate(
+              {
+                _id: pkg._id,
+                status: "Sent", // Ensure still active
+              },
+              {
+                $push: {
+                  "options.automaticRemindersSent": {
+                    sentAt: now,
+                    recipientCount: this.getUnsignedParticipantsCount(pkg),
+                  },
+                },
+              },
+              { new: true }
+            ).populate("ownerId", "firstName lastName email language");
 
-            // Track that reminder was sent
-            if (!pkg.options.automaticRemindersSent) {
-              pkg.options.automaticRemindersSent = [];
+            if (!updated) {
+              console.log(
+                `⏭️  Package status changed, skipping: ${pkg.name} (ID: ${pkg._id})`
+              );
+              continue;
             }
 
-            // Count unsigned participants for tracking
-            const unsignedCount = this.getUnsignedParticipantsCount(pkg);
-
-            pkg.options.automaticRemindersSent.push({
-              sentAt: now,
-              recipientCount: unsignedCount,
-            });
-
-            await pkg.save();
-
+            await this.sendAutomaticReminderNotifications(updated);
             remindersSent++;
             console.log(
               `✅ Sent automatic reminder for package: ${pkg.name} (ID: ${pkg._id})`
@@ -174,52 +242,90 @@ class ReminderJob extends BaseJob {
             `❌ Error processing automatic reminder for package ${pkg._id}:`,
             error
           );
+          errors.push({
+            packageId: pkg._id,
+            type: "automatic",
+            error: error.message,
+          });
         }
       }
 
       return {
         packagesProcessed,
         remindersSent,
+        errors,
       };
     } catch (error) {
-      console.error("Error in sendAutomaticReminders method:", error);
+      console.error("❌ Error in sendAutomaticReminders method:", error);
       throw error;
     }
   }
 
   /**
    * Check if automatic reminder should be sent
+   * ✅ THIS DETERMINES WHEN 24H REMINDERS FIRE
    */
   shouldSendAutomaticReminder(pkg, now) {
-    const sentAt = new Date(pkg.sentAt);
     const firstReminderDays = pkg.options.firstReminderDays;
     const repeatReminderDays = pkg.options.repeatReminderDays;
     const remindersSent = pkg.options.automaticRemindersSent || [];
 
-    // Calculate milliseconds
+    // Calculate days since sent
+    const sentAt = new Date(pkg.sentAt || pkg.createdAt); // ✅ Fallback
     const daysSinceSent = (now - sentAt) / (1000 * 60 * 60 * 24);
 
-    // Check if it's time for the first reminder
+    // ✅ First reminder: send if enough days have passed
     if (remindersSent.length === 0) {
-      // First reminder: send if enough days have passed
-      // Add tolerance of 6 hours (0.25 days) since cron runs every 15 minutes
-      return daysSinceSent >= firstReminderDays - 0.25;
+      // Tolerance of 6 hours (0.25 days) to catch reminders in the window
+      const shouldSend = daysSinceSent >= firstReminderDays - 0.25;
+
+      if (shouldSend) {
+        console.log(
+          `📅 Package ${pkg._id}: Sending first automatic reminder\n` +
+            `   Days since sent: ${daysSinceSent.toFixed(2)}\n` +
+            `   First reminder threshold: ${firstReminderDays}`
+        );
+      }
+
+      return shouldSend;
     }
 
-    // Check if repeat reminders are enabled
+    // ✅ Repeat reminders
     if (!repeatReminderDays || repeatReminderDays <= 0) {
       return false; // No repeat reminders configured
     }
 
-    // Get the last reminder sent time
     const lastReminder = remindersSent[remindersSent.length - 1];
     const lastReminderDate = new Date(lastReminder.sentAt);
     const daysSinceLastReminder =
       (now - lastReminderDate) / (1000 * 60 * 60 * 24);
 
-    // Send repeat reminder if enough days have passed since last one
-    // Add tolerance of 6 hours (0.25 days)
-    return daysSinceLastReminder >= repeatReminderDays - 0.25;
+    // Tolerance of 6 hours (0.25 days)
+    const shouldSend = daysSinceLastReminder >= repeatReminderDays - 0.25;
+
+    if (shouldSend) {
+      console.log(
+        `📅 Package ${pkg._id}: Sending repeat automatic reminder\n` +
+          `   Days since last reminder: ${daysSinceLastReminder.toFixed(2)}\n` +
+          `   Repeat interval: ${repeatReminderDays}`
+      );
+    }
+
+    return shouldSend;
+  }
+
+  /**
+   * Check if all tasks are completed
+   */
+  areAllTasksCompleted(pkg) {
+    for (const field of pkg.fields) {
+      for (const user of field.assignedUsers || []) {
+        if (!user.signed) {
+          return false;
+        }
+      }
+    }
+    return true;
   }
 
   /**
@@ -240,35 +346,38 @@ class ReminderJob extends BaseJob {
   }
 
   /**
-   * Check if expiry reminder should be sent based on period and time until expiry
+   * Check if expiry reminder should be sent
    */
   shouldSendExpiryReminder(reminderPeriod, timeUntilExpiry) {
-    const millisecondsInHour = 60 * 60 * 1000;
-    const millisecondsInDay = 24 * millisecondsInHour;
+    const HOUR = 60 * 60 * 1000;
+    const DAY = 24 * HOUR;
 
-    // Reduced tolerance to 15 minutes for better precision
-    const tolerance = 15 * 60 * 1000;
+    // 15-minute tolerance (matches cron frequency)
+    const TOLERANCE = 15 * 60 * 1000;
+
+    // Must be positive time remaining
+    if (timeUntilExpiry <= 0) return false;
 
     switch (reminderPeriod) {
       case "1_hour_before":
         return (
-          timeUntilExpiry <= millisecondsInHour + tolerance &&
-          timeUntilExpiry > 0
+          timeUntilExpiry <= HOUR + TOLERANCE &&
+          timeUntilExpiry > HOUR - TOLERANCE
         );
       case "2_hours_before":
         return (
-          timeUntilExpiry <= 2 * millisecondsInHour + tolerance &&
-          timeUntilExpiry > 0
+          timeUntilExpiry <= 2 * HOUR + TOLERANCE &&
+          timeUntilExpiry > 2 * HOUR - TOLERANCE
         );
       case "1_day_before":
         return (
-          timeUntilExpiry <= millisecondsInDay + tolerance &&
-          timeUntilExpiry > 0
+          timeUntilExpiry <= DAY + TOLERANCE &&
+          timeUntilExpiry > DAY - TOLERANCE
         );
       case "2_days_before":
         return (
-          timeUntilExpiry <= 2 * millisecondsInDay + tolerance &&
-          timeUntilExpiry > 0
+          timeUntilExpiry <= 2 * DAY + TOLERANCE &&
+          timeUntilExpiry > 2 * DAY - TOLERANCE
         );
       default:
         return false;
@@ -282,7 +391,6 @@ class ReminderJob extends BaseJob {
     try {
       const owner = pkg.ownerId;
       const ownerName = `${owner.firstName} ${owner.lastName}`;
-
       const allRecipients = new Map();
 
       // ✅ ONLY gather participants who have NOT completed their tasks
@@ -310,9 +418,11 @@ class ReminderJob extends BaseJob {
       const contactIds = Array.from(allRecipients.values())
         .map((r) => r.contactId)
         .filter((id) => id);
+
       const contacts = await this.Contact.find({
         _id: { $in: contactIds },
       }).select("language");
+
       const languageMap = new Map(
         contacts.map((c) => [c._id.toString(), c.language])
       );
@@ -329,14 +439,19 @@ class ReminderJob extends BaseJob {
       for (const recipient of allRecipients.values()) {
         try {
           recipient.language =
-            languageMap.get(recipient.contactId.toString()) || "en";
+            languageMap.get(recipient.contactId?.toString()) || "en";
 
           // Fetch language-specific time units
           const content = this.emailService.getEmailContent(
             "expiryReminder",
             recipient.language
           );
-          const timeUnits = content.timeUnits;
+          const timeUnits = content?.timeUnits || {
+            hour: "hour",
+            hours: "hours",
+            day: "day",
+            days: "days",
+          };
 
           // Format time string
           let timeString;
@@ -368,34 +483,32 @@ class ReminderJob extends BaseJob {
                 email: recipient.email.toLowerCase(),
               }).select("deviceTokens");
 
-              if (user && user.deviceTokens && user.deviceTokens.length > 0) {
-                const pushTitle = "Document Reminder";
-                const pushBody = `${pkg.name} expires in ${timeString}`;
+              if (user?.deviceTokens?.length > 0) {
                 await this.pushNotificationService.sendNotificationToUser(
                   user,
                   "document_reminder",
                   pkg._id.toString(),
-                  pushTitle,
-                  pushBody
+                  "Document Reminder",
+                  `${pkg.name} expires in ${timeString}`
                 );
               }
             } catch (error) {
               console.error(
-                `Error sending push notification to ${recipient.email}:`,
-                error
+                `⚠️  Push notification failed for ${recipient.email}:`,
+                error.message
               );
             }
           }
         } catch (error) {
           console.error(
-            `Error sending expiry reminder to ${recipient.email}:`,
+            `❌ Error sending expiry reminder to ${recipient.email}:`,
             error
           );
         }
       }
     } catch (error) {
       console.error(
-        `Error in sendExpiryReminderNotifications for package ${pkg._id}:`,
+        `❌ Error in sendExpiryReminderNotifications for package ${pkg._id}:`,
         error
       );
     }
@@ -403,13 +516,12 @@ class ReminderJob extends BaseJob {
 
   /**
    * Send automatic reminder notifications (only to unsigned participants)
-   * Reuses the manual reminder email template
+   * ✅ THIS SENDS THE 24H REMINDER EMAILS
    */
   async sendAutomaticReminderNotifications(pkg) {
     try {
       const owner = pkg.ownerId;
       const ownerName = `${owner.firstName} ${owner.lastName}`;
-
       const allRecipients = new Map();
 
       // ✅ ONLY gather participants who have NOT completed their tasks
@@ -437,22 +549,28 @@ class ReminderJob extends BaseJob {
       const contactIds = Array.from(allRecipients.values())
         .map((r) => r.contactId)
         .filter((id) => id);
+
       const contacts = await this.Contact.find({
         _id: { $in: contactIds },
       }).select("language");
+
       const languageMap = new Map(
         contacts.map((c) => [c._id.toString(), c.language])
+      );
+
+      console.log(
+        `📧 Sending automatic reminder to ${allRecipients.size} unsigned participants for package ${pkg._id}`
       );
 
       // Send to each unsigned participant
       for (const recipient of allRecipients.values()) {
         try {
           recipient.language =
-            languageMap.get(recipient.contactId.toString()) || "en";
+            languageMap.get(recipient.contactId?.toString()) || "en";
 
           const actionUrl = `${process.env.CLIENT_URL}/package/${pkg._id}/participant/${recipient.participantId}`;
 
-          // ✅ Reuse manual reminder method (as requested)
+          // ✅ Reuse manual reminder method
           await this.emailService.sendManualReminderNotification(
             {
               contactEmail: recipient.email,
@@ -471,34 +589,32 @@ class ReminderJob extends BaseJob {
                 email: recipient.email.toLowerCase(),
               }).select("deviceTokens");
 
-              if (user && user.deviceTokens && user.deviceTokens.length > 0) {
-                const pushTitle = "Action Required";
-                const pushBody = `Reminder: Please complete ${pkg.name}`;
+              if (user?.deviceTokens?.length > 0) {
                 await this.pushNotificationService.sendNotificationToUser(
                   user,
                   "document_reminder",
                   pkg._id.toString(),
-                  pushTitle,
-                  pushBody
+                  "Action Required",
+                  `Reminder: Please complete ${pkg.name}`
                 );
               }
             } catch (error) {
               console.error(
-                `Error sending push notification to ${recipient.email}:`,
-                error
+                `⚠️  Push notification failed for ${recipient.email}:`,
+                error.message
               );
             }
           }
         } catch (error) {
           console.error(
-            `Error sending automatic reminder to ${recipient.email}:`,
+            `❌ Error sending automatic reminder to ${recipient.email}:`,
             error
           );
         }
       }
     } catch (error) {
       console.error(
-        `Error in sendAutomaticReminderNotifications for package ${pkg._id}:`,
+        `❌ Error in sendAutomaticReminderNotifications for package ${pkg._id}:`,
         error
       );
     }
