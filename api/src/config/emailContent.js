@@ -3164,6 +3164,168 @@ const emailContent = {
       unsubscribe: "Διαγραφή",
     },
   },
+  cardVerificationReminder: {
+    en: {
+      subject_1h: "Complete Your Setup - Verify Your Card 🚀",
+      subject_24h: "Don't Miss Out - Verify Your Card Today! 🎯",
+      heading_1h: "One More Step to Get Started!",
+      heading_24h: "Your Free Trial is Waiting!",
+      greeting: "Hi {{user_name}},",
+      message_1h:
+        "You're almost ready to start signing documents electronically! To activate your <strong>14-day free trial</strong>, please verify your payment card.",
+      message_24h:
+        "We noticed you haven't verified your card yet. Verify now to unlock your <strong>14-day free trial</strong> and start signing documents electronically!",
+      benefitsHeading: "What you'll get:",
+      benefits: [
+        "14 days completely free",
+        "Unlimited document signing",
+        "Full access to all features",
+        "Cancel anytime, no questions asked",
+      ],
+      buttonText: "Verify Card Now",
+      footerNote_1h: "No charges will be made during your trial period.",
+      footerNote_24h:
+        "Your trial starts only after card verification. No charges until trial ends.",
+      helpText: "Questions? Reply to this email - we're here to help!",
+      unsubscribe: "Unsubscribe",
+      preferences: "Unsubscribe Preferences",
+    },
+    es: {
+      subject_1h: "Completa tu configuración - Verifica tu tarjeta 🚀",
+      subject_24h: "¡No te lo pierdas! - Verifica tu tarjeta hoy 🎯",
+      heading_1h: "¡Un paso más para comenzar!",
+      heading_24h: "¡Tu prueba gratuita te está esperando!",
+      greeting: "Hola {{user_name}},",
+      message_1h:
+        "¡Estás casi listo para comenzar a firmar documentos electrónicamente! Para activar tu <strong>prueba gratuita de 14 días</strong>, por favor verifica tu tarjeta de pago.",
+      message_24h:
+        "Notamos que aún no has verificado tu tarjeta. ¡Verifícala ahora para desbloquear tu <strong>prueba gratuita de 14 días</strong> y comenzar a firmar documentos electrónicamente!",
+      benefitsHeading: "Lo que obtendrás:",
+      benefits: [
+        "14 días completamente gratis",
+        "Firma ilimitada de documentos",
+        "Acceso completo a todas las funciones",
+        "Cancela cuando quieras, sin preguntas",
+      ],
+      buttonText: "Verificar tarjeta ahora",
+      footerNote_1h: "No se realizarán cargos durante tu período de prueba.",
+      footerNote_24h:
+        "Tu prueba comienza solo después de la verificación de la tarjeta. Sin cargos hasta que termine la prueba.",
+      helpText:
+        "¿Preguntas? Responde a este correo - estamos aquí para ayudar!",
+      unsubscribe: "Darse de baja",
+      preferences: "Preferencias de cancelación",
+    },
+    fr: {
+      subject_1h: "Complétez votre configuration - Vérifiez votre carte 🚀",
+      subject_24h:
+        "Ne manquez pas cette opportunité - Vérifiez votre carte aujourd'hui! 🎯",
+      heading_1h: "Plus qu'une étape pour commencer!",
+      heading_24h: "Votre essai gratuit vous attend!",
+      greeting: "Bonjour {{user_name}},",
+      message_1h:
+        "Vous êtes presque prêt à commencer à signer des documents électroniquement! Pour activer votre <strong>essai gratuit de 14 jours</strong>, veuillez vérifier votre carte de paiement.",
+      message_24h:
+        "Nous avons remarqué que vous n'avez pas encore vérifié votre carte. Vérifiez maintenant pour débloquer votre <strong>essai gratuit de 14 jours</strong> et commencer à signer des documents électroniquement!",
+      benefitsHeading: "Ce que vous obtiendrez:",
+      benefits: [
+        "14 jours entièrement gratuits",
+        "Signature illimitée de documents",
+        "Accès complet à toutes les fonctionnalités",
+        "Annulez à tout moment, sans questions",
+      ],
+      buttonText: "Vérifier la carte maintenant",
+      footerNote_1h:
+        "Aucun frais ne sera facturé pendant votre période d'essai.",
+      footerNote_24h:
+        "Votre essai commence uniquement après la vérification de la carte. Aucun frais jusqu'à la fin de l'essai.",
+      helpText:
+        "Des questions? Répondez à cet e-mail - nous sommes là pour vous aider!",
+      unsubscribe: "Se désabonner",
+      preferences: "Préférences de désabonnement",
+    },
+    de: {
+      subject_1h:
+        "Vervollständigen Sie Ihre Einrichtung - Verifizieren Sie Ihre Karte 🚀",
+      subject_24h:
+        "Verpassen Sie es nicht - Verifizieren Sie heute Ihre Karte! 🎯",
+      heading_1h: "Nur noch ein Schritt bis zum Start!",
+      heading_24h: "Ihre kostenlose Testversion wartet!",
+      greeting: "Hallo {{user_name}},",
+      message_1h:
+        "Sie sind fast bereit, Dokumente elektronisch zu signieren! Um Ihre <strong>14-tägige kostenlose Testversion</strong> zu aktivieren, verifizieren Sie bitte Ihre Zahlungskarte.",
+      message_24h:
+        "Wir haben bemerkt, dass Sie Ihre Karte noch nicht verifiziert haben. Verifizieren Sie jetzt, um Ihre <strong>14-tägige kostenlose Testversion</strong> freizuschalten und mit dem elektronischen Signieren von Dokumenten zu beginnen!",
+      benefitsHeading: "Was Sie erhalten:",
+      benefits: [
+        "14 Tage völlig kostenlos",
+        "Unbegrenzte Dokumentensignierung",
+        "Vollständiger Zugriff auf alle Funktionen",
+        "Jederzeit kündbar, ohne Fragen",
+      ],
+      buttonText: "Karte jetzt verifizieren",
+      footerNote_1h: "Während Ihrer Testphase werden keine Gebühren erhoben.",
+      footerNote_24h:
+        "Ihre Testversion beginnt erst nach der Kartenverifizierung. Keine Gebühren bis zum Ende der Testversion.",
+      helpText:
+        "Fragen? Antworten Sie auf diese E-Mail - wir helfen Ihnen gerne!",
+      unsubscribe: "Abmelden",
+      preferences: "Abmelde-Einstellungen",
+    },
+    it: {
+      subject_1h: "Completa la configurazione - Verifica la tua carta 🚀",
+      subject_24h: "Non perdere l'occasione - Verifica la tua carta oggi! 🎯",
+      heading_1h: "Solo un altro passo per iniziare!",
+      heading_24h: "La tua prova gratuita ti sta aspettando!",
+      greeting: "Ciao {{user_name}},",
+      message_1h:
+        "Sei quasi pronto per iniziare a firmare documenti elettronicamente! Per attivare la tua <strong>prova gratuita di 14 giorni</strong>, verifica la tua carta di pagamento.",
+      message_24h:
+        "Abbiamo notato che non hai ancora verificato la tua carta. Verifica ora per sbloccare la tua <strong>prova gratuita di 14 giorni</strong> e iniziare a firmare documenti elettronicamente!",
+      benefitsHeading: "Cosa otterrai:",
+      benefits: [
+        "14 giorni completamente gratuiti",
+        "Firma illimitata di documenti",
+        "Accesso completo a tutte le funzionalità",
+        "Annulla in qualsiasi momento, senza domande",
+      ],
+      buttonText: "Verifica carta ora",
+      footerNote_1h:
+        "Nessun addebito verrà effettuato durante il periodo di prova.",
+      footerNote_24h:
+        "La tua prova inizia solo dopo la verifica della carta. Nessun addebito fino alla fine della prova.",
+      helpText: "Domande? Rispondi a questa email - siamo qui per aiutarti!",
+      unsubscribe: "Annulla iscrizione",
+      preferences: "Preferenze di annullamento iscrizione",
+    },
+    el: {
+      subject_1h: "Ολοκληρώστε τη ρύθμιση - Επαληθεύστε την κάρτα σας 🚀",
+      subject_24h: "Μην το χάσετε - Επαληθεύστε την κάρτα σας σήμερα! 🎯",
+      heading_1h: "Ένα ακόμα βήμα για να ξεκινήσετε!",
+      heading_24h: "Η δωρεάν δοκιμή σας σας περιμένει!",
+      greeting: "Γεια σας {{user_name}},",
+      message_1h:
+        "Είστε σχεδόν έτοιμοι να ξεκινήσετε την ηλεκτρονική υπογραφή εγγράφων! Για να ενεργοποιήσετε τη <strong>δωρεάν δοκιμή 14 ημερών</strong>, επαληθεύστε την κάρτα πληρωμής σας.",
+      message_24h:
+        "Παρατηρήσαμε ότι δεν έχετε επαληθεύσει ακόμα την κάρτα σας. Επαληθεύστε τώρα για να ξεκλειδώσετε τη <strong>δωρεάν δοκιμή 14 ημερών</strong> και να αρχίσετε να υπογράφετε έγγραφα ηλεκτρονικά!",
+      benefitsHeading: "Τι θα αποκτήσετε:",
+      benefits: [
+        "14 ημέρες εντελώς δωρεάν",
+        "Απεριόριστη υπογραφή εγγράφων",
+        "Πλήρης πρόσβαση σε όλες τις λειτουργίες",
+        "Ακύρωση ανά πάσα στιγμή, χωρίς ερωτήσεις",
+      ],
+      buttonText: "Επαληθεύστε την κάρτα τώρα",
+      footerNote_1h:
+        "Δεν θα γίνουν χρεώσεις κατά τη διάρκεια της δοκιμαστικής περιόδου.",
+      footerNote_24h:
+        "Η δοκιμή σας ξεκινά μόνο μετά την επαλήθευση της κάρτας. Καμία χρέωση μέχρι να τελειώσει η δοκιμή.",
+      helpText:
+        "Ερωτήσεις; Απαντήστε σε αυτό το email - είμαστε εδώ για να βοηθήσουμε!",
+      unsubscribe: "Διαγραφή",
+      preferences: "Προτιμήσεις διαγραφής",
+    },
+  },
   // Add more email types here later (verification, password reset, etc.)
 };
 

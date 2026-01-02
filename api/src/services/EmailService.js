@@ -2155,6 +2155,72 @@ class EmailService {
       );
     }
   }
+
+  /**
+   * Send card verification reminder
+   * @param {Object} user - User object with firstName, lastName, email, language
+   * @param {string} timing - "1_hour" or "24_hours"
+   */
+  async sendCardVerificationReminder(user, timing) {
+    const language = user.language || "en";
+    const content = getEmailContent("cardVerificationReminder", language);
+    const userName = `${user.firstName} ${user.lastName}`;
+
+    // Determine which timing-specific content to use
+    const isOneHour = timing === "1_hour";
+    const subjectKey = isOneHour ? "subject_1h" : "subject_24h";
+    const headingKey = isOneHour ? "heading_1h" : "heading_24h";
+    const messageKey = isOneHour ? "message_1h" : "message_24h";
+    const footerNoteKey = isOneHour ? "footerNote_1h" : "footerNote_24h";
+
+    const subjectText = content[subjectKey];
+    const greetingText = this._replacePlaceholders(content.greeting, {
+      user_name: userName,
+    });
+
+    // Build benefits list HTML
+    const benefitsHtml = content.benefits
+      .map(
+        (benefit) =>
+          `<li style="margin: 0 0 8px 0; text-align: left;">${benefit}</li>`
+      )
+      .join("");
+
+    const verifyCardUrl = `${process.env.CLIENT_URL}/billing`;
+
+    const msg = {
+      to: user.email,
+      from: this.fromEmail,
+      templateId: process.env.SENDGRID_CARD_VERIFICATION_REMINDER_TEMPLATE,
+      dynamic_template_data: {
+        subject: subjectText,
+        heading: content[headingKey],
+        greeting: greetingText,
+        message: content[messageKey],
+        benefits_heading: content.benefitsHeading,
+        benefits_html: benefitsHtml,
+        action_url: verifyCardUrl,
+        button_text: content.buttonText,
+        footer_note: content[footerNoteKey],
+        help_text: content.helpText,
+        unsubscribe: content.unsubscribe,
+        preferences: content.preferences,
+      },
+    };
+
+    try {
+      await sgMail.send(msg);
+      console.log(
+        `✅ Card verification reminder (${timing}) sent to: ${user.email} in ${language}`
+      );
+    } catch (error) {
+      console.error(
+        `❌ Error sending card verification reminder to ${user.email}:`,
+        error.response?.body || error
+      );
+      throw error;
+    }
+  }
 }
 
 module.exports = EmailService;
