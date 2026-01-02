@@ -23,18 +23,10 @@ class PackageController {
   async createPackage(req, res) {
     try {
       const userId = req.user.id;
-      const user = req.userWithSubscription;
       const packageData = await this.packageService.createPackage(
         userId,
         req.body
       );
-
-      if (user.subscription.planId.documentLimit !== -1) {
-        const newCount = user.documentsCreatedThisMonth + 1;
-        await this.userService.updateUser(user.id, {
-          documentsCreatedThisMonth: newCount,
-        });
-      }
 
       successResponse(res, packageData, "Package created successfully", 201);
     } catch (error) {
