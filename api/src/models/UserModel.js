@@ -154,7 +154,6 @@ const userSchema = new Schema(
       },
     },
 
-    
     subscriptionHistory: [subscriptionHistorySchema],
     hasHadTrial: {
       type: Boolean,
@@ -169,7 +168,15 @@ const userSchema = new Schema(
     deletionScheduledAt: { type: Date, sparse: true },
     reactivationToken: { type: String, sparse: true },
     reactivationExpiresAt: { type: Date, sparse: true },
-    
+    cardVerificationReminder1hSentAt: {
+      type: Date,
+      sparse: true,
+    },
+    cardVerificationReminder24hSentAt: {
+      type: Date,
+      sparse: true,
+    },
+
     // Push notification device tokens
     deviceTokens: [
       {
