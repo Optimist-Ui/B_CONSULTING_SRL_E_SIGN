@@ -427,7 +427,7 @@ class ReminderJob extends BaseJob {
         contacts.map((c) => [c._id.toString(), c.language])
       );
 
-      // Calculate time until expiry
+      // Calculate time until expiry for display in push notifications
       const timeUntilExpiry =
         pkg.options.expiresAt.getTime() - new Date().getTime();
       const hoursUntilExpiry = Math.ceil(timeUntilExpiry / (1000 * 60 * 60));
@@ -435,40 +435,31 @@ class ReminderJob extends BaseJob {
         timeUntilExpiry / (1000 * 60 * 60 * 24)
       );
 
+      // Simple time string for push notifications only
+      const timeString =
+        hoursUntilExpiry <= 48
+          ? `${hoursUntilExpiry} hours`
+          : `${daysUntilExpiry} days`;
+
+      console.log(
+        `📧 Sending expiry reminder to ${allRecipients.size} unsigned participants for package ${pkg._id}`
+      );
+
       // Send to each unsigned participant
       for (const recipient of allRecipients.values()) {
         try {
-          recipient.language =
+          const language =
             languageMap.get(recipient.contactId?.toString()) || "en";
-
-          // Fetch language-specific time units
-          const content = this.emailService.getEmailContent(
-            "expiryReminder",
-            recipient.language
-          );
-          const timeUnits = content?.timeUnits || {
-            hour: "hour",
-            hours: "hours",
-            day: "day",
-            days: "days",
-          };
-
-          // Format time string
-          let timeString;
-          if (hoursUntilExpiry <= 48) {
-            timeString = `${hoursUntilExpiry} ${
-              hoursUntilExpiry > 1 ? timeUnits.hours : timeUnits.hour
-            }`;
-          } else {
-            timeString = `${daysUntilExpiry} ${
-              daysUntilExpiry > 1 ? timeUnits.days : timeUnits.day
-            }`;
-          }
 
           const actionUrl = `${process.env.CLIENT_URL}/package/${pkg._id}/participant/${recipient.participantId}`;
 
+          // ✅ Let emailService handle everything - just pass the required params
           await this.emailService.sendExpiryReminderNotification(
-            recipient,
+            {
+              email: recipient.email,
+              name: recipient.name,
+              language: language,
+            },
             ownerName,
             pkg.name,
             timeString,
