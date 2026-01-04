@@ -17,6 +17,7 @@ import IconMenuTables from '../Icon/Menu/IconMenuTables';
 import { toast } from 'react-toastify';
 import { logout } from '../../store/slices/authSlice';
 import IconUsersGroup from '../Icon/IconUsersGroup';
+import IconInbox from '../Icon/IconInbox';
 const Header = () => {
     const navigate = useNavigate();
     const location = useLocation();
@@ -229,6 +230,19 @@ const Header = () => {
                             </button>
                         </NavLink>
                     </li>
+                    <li className="menu nav-item relative">
+                        <NavLink to="/received-documents">
+                            <button type="button" className="nav-link">
+                                <div className="flex items-center">
+                                    <IconInbox className="shrink-0" />
+                                    <li>
+                                        <span className="px-1">{t('sidebar.nav.receivedDocuments')}</span>
+                                    </li>
+                                </div>
+                            </button>
+                        </NavLink>
+                    </li>
+
                     <li className="menu nav-item relative">
                         <NavLink to="/templates">
                             <button type="button" className="nav-link">

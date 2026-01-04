@@ -23,6 +23,7 @@ const {
   sendSmsOtpValidation,
   verifySmsOtpValidation,
   addReceiverByParticipantValidation,
+  receivedPackagesValidation,
 } = require("../validations/PackageValidations");
 const { uploadAndStorePackage } = require("../middlewares/upload");
 
@@ -417,6 +418,34 @@ module.exports = (container) => {
 
   // --- AUTHENTICATED ROUTES (FOR PACKAGE OWNERS) ---
   router.use(authenticateUser);
+
+  /**
+   * @swagger
+   * /api/packages/received:
+   *   get:
+   *     tags: [Packages]
+   *     summary: Get all received documents (paginated)
+   *     description: Retrieves documents where the authenticated user was invited as a participant (via their email as a contact)
+   *     security:
+   *       - bearerAuth: []
+   *     parameters:
+   *       - {in: query, name: status, schema: {type: string, enum: [All, Pending, Finished, Rejected, Expired, Revoked]}}
+   *       - {in: query, name: name, schema: {type: string}}
+   *       - {in: query, name: page, schema: {type: integer, default: 1}}
+   *       - {in: query, name: limit, schema: {type: integer, default: 10}}
+   *       - {in: query, name: sortKey, schema: {type: string, enum: [name, status, addedOn]}}
+   *       - {in: query, name: sortDirection, schema: {type: string, enum: [asc, desc]}}
+   *     responses:
+   *       '200':
+   *         description: A paginated list of received documents.
+   *         content: {"application/json": {schema: {type: "object", properties: { documents: { type: "array"}, total: {type: "integer"}, page: {type: "integer"}, pages: {type: "integer"}}}}}
+   */
+  router.get(
+    "/received",
+    receivedPackagesValidation, // Reuse the same validation
+    validate,
+    packageController.getReceivedPackages.bind(packageController)
+  );
 
   /**
    * @swagger

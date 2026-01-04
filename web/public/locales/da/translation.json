@@ -1119,12 +1119,34 @@
             },
             "nav": {
                 "allDocuments": "Alle Dokumenter",
+                "receivedDocuments": "Modtagne Dokumenter",
                 "templates": "Skabeloner",
                 "contacts": "Kontaktliste",
                 "addDocument": "Tilføj Dokument",
                 "subscriptions": "Abonnementer",
                 "paymentMethods": "Betalingsmetoder",
                 "profile": "Profil"
+            }
+        },
+        "receivedDocuments": {
+            "title": "Modtagne dokumenter",
+            "subtitle": "Dokumenter hvor du er blevet inviteret som deltager",
+            "loading": "Indlæser modtagne dokumenter...",
+            "headers": {
+                "myRole": "Min rolle"
+            },
+            "actions": {
+                "viewAndSign": "Se og underskriv",
+                "download": "Download",
+                "viewDetails": "Se detaljer"
+            },
+            "emptyState": {
+                "title": "Ingen modtagne dokumenter",
+                "description": "Du er endnu ikke blevet inviteret til nogen dokumenter. Når nogen sender dig et dokument, vises det her."
+            },
+            "error": {
+                "title": "Fejl ved indlæsning af dokumenter",
+                "description": "Kunne ikke indlæse modtagne dokumenter. Prøv venligst igen."
             }
         },
         "profile": {

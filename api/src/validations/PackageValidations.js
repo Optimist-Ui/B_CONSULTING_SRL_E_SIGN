@@ -548,6 +548,29 @@ const getPackagesValidation = [
     .withMessage("Sort direction must be 'asc' or 'desc'."),
 ];
 
+const receivedPackagesValidation = [
+  query("status")
+    .optional()
+    .isIn([
+      "All",
+      "Draft",
+      "Pending",
+      "Finished",
+      "Rejected",
+      "Expired",
+      "Revoked",
+    ])
+    .withMessage("Invalid status value."),
+  query("name").optional().isString().trim(),
+  query("page").optional().isInt({ min: 1 }).toInt(),
+  query("limit").optional().isInt({ min: 1, max: 100 }).toInt(),
+  // ✅ Explicitly allow 'addedOn' here
+  query("sortKey")
+    .optional()
+    .isIn(["name", "status", "addedOn", "createdAt"])
+    .withMessage("Invalid sort key."),
+  query("sortDirection").optional().isIn(["asc", "desc"]),
+];
 const revokePackageValidation = [
   param("packageId")
     .isMongoId()
@@ -595,4 +618,5 @@ module.exports = {
   revokePackageValidation,
   manualReminderValidation,
   addReceiverByParticipantValidation,
+  receivedPackagesValidation,
 };

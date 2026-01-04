@@ -276,6 +276,29 @@ userSchema.virtual("profileImageUrl").get(function () {
   return this._profileImageUrl || this.profileImage;
 });
 
+/**
+ * Check if this user's email exists in the Contact collection
+ * (indicating they were invited before registering)
+ */
+userSchema.methods.wasFormerContact = async function () {
+  const Contact = this.model("Contact");
+  const existingContact = await Contact.findOne({
+    email: this.email.toLowerCase(),
+  });
+  return !!existingContact;
+};
+
+/**
+ * Get all contacts that match this user's email
+ * (contacts created by other users before this person registered)
+ */
+userSchema.methods.getMatchingContacts = async function () {
+  const Contact = this.model("Contact");
+  return await Contact.find({
+    email: this.email.toLowerCase(),
+  }).select("ownerId firstName lastName");
+};
+
 // Ensure virtuals are included when converting to JSON
 userSchema.set("toJSON", { virtuals: true });
 userSchema.set("toObject", { virtuals: true });

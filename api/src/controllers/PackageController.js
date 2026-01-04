@@ -105,6 +105,42 @@ class PackageController {
     }
   }
 
+  /**
+   * Get all packages where the authenticated user is a participant
+   * (Documents received as a contact that registered as a user)
+   */
+  async getReceivedPackages(req, res) {
+    try {
+      const userId = req.user.id;
+      const userEmail = req.user.email; // Get the user's email
+
+      // Extract validated query parameters with defaults
+      const filters = {
+        name: req.query.name || "",
+        status: req.query.status || "All",
+      };
+      const pagination = {
+        page: req.query.page || 1,
+        limit: req.query.limit || 10,
+      };
+      const sort = {
+        sortKey: req.query.sortKey || "addedOn",
+        sortDirection: req.query.sortDirection || "desc",
+      };
+
+      const result = await this.packageService.getReceivedPackages(
+        userEmail,
+        filters,
+        pagination,
+        sort
+      );
+
+      successResponse(res, result, "Received packages fetched successfully");
+    } catch (error) {
+      errorResponse(res, error, "Failed to fetch received packages");
+    }
+  }
+
   async getPackageForParticipant(req, res) {
     try {
       const { packageId, participantId } = req.params;

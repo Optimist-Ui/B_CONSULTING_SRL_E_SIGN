@@ -12,6 +12,7 @@ import paymentMethodReducer from './slices/paymentMethodSlice';
 import subscriptionReducer from './slices/subscriptionSlice';
 import reviewReducer from './slices/reviewSlice';
 import chatbotReducer from './slices/chatbotSlice';
+import receivedDocumentsReducer from './slices/receivedDocumentsSlice';
 
 import api, { setupInterceptors } from '../utils/api';
 
@@ -23,6 +24,7 @@ const rootReducer = combineReducers({
     packages: packageReducer,
     participant: participantReducer,
     documents: documentReducer,
+    receivedDocuments: receivedDocumentsReducer,
     cookies: cookieSlice,
     plans: planReducer,
     paymentMethods: paymentMethodReducer,
@@ -43,6 +45,7 @@ const store = configureStore({
                     'packages.packages',
                     'participant.packageData.fileData',
                     'documents.expandedRows',
+                    'receivedDocuments.expandedRows',
                 ],
                 ignoredActions: [
                     'templates/uploadDocument/fulfilled',
@@ -64,6 +67,9 @@ const store = configureStore({
                     'documents/setExpandedRows',
                     'documents/toggleRowExpansion',
                     'documents/updateDocumentFromSocket',
+                    'receivedDocuments/fetchReceivedDocuments/fulfilled',
+                    'receivedDocuments/toggleRowExpansion',
+                    'receivedDocuments/updateDocumentFromSocket',
                 ],
             },
         }),

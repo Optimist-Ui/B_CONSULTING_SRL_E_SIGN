@@ -635,6 +635,117 @@ class PackageService {
     return packageForParticipant;
   }
 
+  /**
+   * Get all packages where the user is a participant (by email match)
+   * This allows contacts who registered as users to see documents they were invited to
+   */
+  async getReceivedPackages(userEmail, filters, pagination, sort) {
+    const { name, status } = filters;
+    const { page, limit } = pagination;
+    const { sortKey, sortDirection } = sort;
+
+    // 1. Build the dynamic Mongoose query
+    // Find packages where the user's email appears in assignedUsers or receivers
+    const query = {
+      $or: [
+        { "fields.assignedUsers.contactEmail": userEmail.toLowerCase() },
+        { "receivers.contactEmail": userEmail.toLowerCase() },
+      ],
+    };
+
+    // Name filter
+    if (name) {
+      query.name = { $regex: name, $options: "i" };
+    }
+
+    // Status filter
+    if (status && status !== "All") {
+      const statusMap = {
+        Pending: "Sent",
+        Finished: "Completed",
+        Draft: "Draft",
+        Rejected: "Rejected",
+        Expired: "Expired",
+        Revoked: "Revoked",
+      };
+      if (statusMap[status]) {
+        query.status = statusMap[status];
+      }
+    }
+
+    // Sort configuration
+    const sortFieldMap = {
+      name: "name",
+      status: "status",
+      addedOn: "createdAt",
+    };
+
+    const sortQuery = {};
+    if (sortKey && sortFieldMap[sortKey]) {
+      sortQuery[sortFieldMap[sortKey]] = sortDirection === "asc" ? 1 : -1;
+    } else {
+      sortQuery.createdAt = -1; // Default sort
+    }
+
+    try {
+      // 2. Fetch documents and total count in parallel
+      const [packages, totalDocuments] = await Promise.all([
+        this.Package.find(query)
+          .populate("ownerId", "firstName lastName email phone")
+          .sort(sortQuery)
+          .skip((page - 1) * limit)
+          .limit(limit)
+          .lean(),
+        this.Package.countDocuments(query),
+      ]);
+
+      // 3. Generate signed URLs for all packages
+      const packagesWithSignedUrls = await Promise.all(
+        packages.map(async (pkg) => {
+          if (pkg.s3Key) {
+            try {
+              pkg.downloadUrl = await this.s3Service.getSignedUrl(
+                pkg.s3Key,
+                3600 // 1 hour
+              );
+            } catch (error) {
+              console.error(
+                `Failed to generate signed URL for package ${pkg._id}:`,
+                error
+              );
+              pkg.downloadUrl = pkg.fileUrl; // Fallback
+            }
+          }
+          return pkg;
+        })
+      );
+
+      // 4. Transform packages for frontend
+      const transformedDocuments =
+        await this._transformReceivedPackagesForFrontend(
+          packagesWithSignedUrls,
+          userEmail
+        );
+
+      // 5. Return the complete, structured response
+      return {
+        documents: transformedDocuments,
+        pagination: {
+          currentPage: page,
+          totalPages: Math.ceil(totalDocuments / limit),
+          totalDocuments,
+          limit,
+        },
+      };
+    } catch (error) {
+      console.error(
+        "Error during getReceivedPackages service execution:",
+        error
+      );
+      throw new Error("Failed to retrieve and process received packages.");
+    }
+  }
+
   async sendOTP(packageId, participantId, fieldId, email) {
     const pkg = await this.Package.findById(packageId);
     if (!pkg || pkg.status !== "Sent") {
@@ -2883,6 +2994,296 @@ class PackageService {
         participantsSummary: Array.from(participants.values())
           .map((p) => p.contactName)
           .concat(receiverDetails.map((r) => r.user.name)),
+      };
+    });
+  }
+
+  /**
+   * Transform received packages for frontend display
+   * Similar to _transformPackagesForFrontend but with participant-centric view
+   * ✅ FIXED: Robust null checks for Owner and Contacts to prevent crashes
+   */
+  async _transformReceivedPackagesForFrontend(packages, userEmail) {
+    // Collect all unique contact IDs
+    const allContactIds = new Set();
+    packages.forEach((pkg) => {
+      // Safety check: ensure fields exist
+      if (pkg.fields) {
+        pkg.fields.forEach((f) => {
+          if (f.assignedUsers) {
+            f.assignedUsers.forEach((u) => {
+              // ✅ Check if contactId exists before accessing
+              if (u.contactId) allContactIds.add(u.contactId.toString());
+            });
+          }
+        });
+      }
+      // Safety check: ensure receivers exist
+      if (pkg.receivers) {
+        pkg.receivers.forEach((r) => {
+          if (r.contactId) allContactIds.add(r.contactId.toString());
+        });
+      }
+    });
+
+    // Fetch contacts for phone numbers
+    // ✅ Safe: If contact is missing in DB, it just won't be in the map. No error.
+    const contacts = await this.Contact.find({
+      _id: { $in: Array.from(allContactIds) },
+    })
+      .select("phone")
+      .lean();
+
+    const contactPhoneMap = new Map(
+      contacts.map((c) => [c._id.toString(), c.phone || ""])
+    );
+
+    // Helper to get participant status for a specific role
+    const getParticipantStatusForRole = (contactEmail, role, pkg) => {
+      if (!contactEmail) return "Not Sent"; // Safety check
+
+      const assignedFieldsForRole = (pkg.fields || []).filter((field) =>
+        (field.assignedUsers || []).some(
+          (user) =>
+            user.contactEmail &&
+            user.contactEmail.toLowerCase() === contactEmail.toLowerCase() &&
+            user.role === role
+        )
+      );
+
+      if (assignedFieldsForRole.length === 0) {
+        return pkg.status === "Sent" ? "In Progress" : "Not Sent";
+      }
+
+      const completedFields = assignedFieldsForRole.filter((field) => {
+        const userAssignment = field.assignedUsers.find(
+          (user) =>
+            user.contactEmail &&
+            user.contactEmail.toLowerCase() === contactEmail.toLowerCase() &&
+            user.role === role
+        );
+
+        if (!userAssignment) return false;
+
+        if (field.type === "signature") {
+          return userAssignment.signed === true;
+        }
+
+        if (field.type === "checkbox" && userAssignment.role === "Approver") {
+          return userAssignment.signed === true;
+        }
+
+        if (userAssignment.role === "FormFiller" && field.required) {
+          return userAssignment.signed === true;
+        }
+
+        if (userAssignment.role === "FormFiller" && !field.required) {
+          return (
+            field.value !== undefined &&
+            field.value !== null &&
+            field.value !== "" &&
+            field.value !== false
+          );
+        }
+
+        return (
+          field.value !== undefined &&
+          field.value !== null &&
+          field.value !== "" &&
+          field.value !== false
+        );
+      });
+
+      if (completedFields.length === assignedFieldsForRole.length) {
+        return "Completed";
+      } else if (pkg.status === "Sent") {
+        return "In Progress";
+      } else {
+        return "Not Sent";
+      }
+    };
+
+    return packages.map((pkg) => {
+      const participants = new Map();
+
+      // Group all assigned users
+      (pkg.fields || []).forEach((field) => {
+        (field.assignedUsers || []).forEach((user) => {
+          // ✅ CRITICAL SAFETY: Skip if user or contactId is missing
+          if (!user || !user.contactId) return;
+
+          if (!participants.has(user.contactId.toString())) {
+            participants.set(user.contactId.toString(), {
+              contactId: user.contactId.toString(),
+              contactName: user.contactName || "Unknown",
+              contactEmail: user.contactEmail || "",
+              roles: new Set(),
+              signed: false,
+              signedAt: null,
+            });
+          }
+          const p = participants.get(user.contactId.toString());
+          p.roles.add(user.role);
+          if (user.signed) p.signed = true;
+          if (
+            user.signedAt &&
+            (!p.signedAt || new Date(user.signedAt) > new Date(p.signedAt))
+          ) {
+            p.signedAt = user.signedAt;
+          }
+        });
+      });
+
+      // Build role details
+      const roleDetails = { formFillers: [], approvers: [], signers: [] };
+      participants.forEach((p) => {
+        // ✅ Safe phone access
+        const phone = contactPhoneMap.get(p.contactId) || "";
+
+        if (p.roles.has("FormFiller")) {
+          roleDetails.formFillers.push({
+            user: {
+              id: p.contactId,
+              name: p.contactName,
+              email: p.contactEmail,
+              phone: phone,
+            },
+            status: getParticipantStatusForRole(
+              p.contactEmail,
+              "FormFiller",
+              pkg
+            ),
+            lastUpdated: p.signedAt ? new Date(p.signedAt).toISOString() : "",
+          });
+        }
+
+        if (p.roles.has("Approver")) {
+          roleDetails.approvers.push({
+            user: {
+              id: p.contactId,
+              name: p.contactName,
+              email: p.contactEmail,
+              phone: phone,
+            },
+            status: getParticipantStatusForRole(
+              p.contactEmail,
+              "Approver",
+              pkg
+            ),
+            lastUpdated: p.signedAt ? new Date(p.signedAt).toISOString() : "",
+          });
+        }
+
+        if (p.roles.has("Signer")) {
+          roleDetails.signers.push({
+            user: {
+              id: p.contactId,
+              name: p.contactName,
+              email: p.contactEmail,
+              phone: phone,
+            },
+            status: getParticipantStatusForRole(p.contactEmail, "Signer", pkg),
+            lastUpdated: p.signedAt ? new Date(p.signedAt).toISOString() : "",
+          });
+        }
+      });
+
+      // Handle receivers
+      const receiverDetails = (pkg.receivers || []).map((rec) => {
+        const contactId = rec.contactId ? rec.contactId.toString() : "unknown";
+        return {
+          user: {
+            id: contactId,
+            name: rec.contactName || "Unknown",
+            email: rec.contactEmail || "",
+            phone: contactPhoneMap.get(contactId) || "",
+          },
+          status: "Not Sent",
+          lastUpdated: "",
+        };
+      });
+
+      // Status mapping
+      const statusMap = {
+        Sent: "Pending",
+        Completed: "Finished",
+        Draft: "Draft",
+        Rejected: "Rejected",
+        Expired: "Expired",
+        Archived: "Finished",
+        Revoked: "Revoked",
+      };
+
+      // ✅ FIX: Handle case where Owner is deleted (pkg.ownerId is null)
+      const initiator = pkg.ownerId || {
+        _id: "deleted_user",
+        firstName: "Unknown",
+        lastName: "User",
+        email: "deleted@user.com",
+        phone: "",
+      };
+
+      // 🔥 NEW: Add participant-specific metadata
+      let currentUserParticipantId = null;
+      let currentUserRoles = [];
+
+      // Safe loop for assignments
+      for (const field of pkg.fields || []) {
+        if (!field.assignedUsers) continue;
+        const assignment = field.assignedUsers.find(
+          (u) =>
+            u.contactEmail &&
+            userEmail &&
+            u.contactEmail.toLowerCase() === userEmail.toLowerCase()
+        );
+        if (assignment) {
+          currentUserParticipantId = assignment.id;
+          if (!currentUserRoles.includes(assignment.role)) {
+            currentUserRoles.push(assignment.role);
+          }
+        }
+      }
+
+      // Safe check for receivers
+      if (pkg.receivers) {
+        const receiverAssignment = pkg.receivers.find(
+          (r) =>
+            r.contactEmail &&
+            userEmail &&
+            r.contactEmail.toLowerCase() === userEmail.toLowerCase()
+        );
+        if (receiverAssignment) {
+          currentUserParticipantId = receiverAssignment.id;
+          if (!currentUserRoles.includes("Receiver")) {
+            currentUserRoles.push("Receiver");
+          }
+        }
+      }
+
+      return {
+        id: pkg._id.toString(),
+        name: pkg.name,
+        status: statusMap[pkg.status] || "Draft",
+        addedOn: new Date(pkg.createdAt).toISOString(),
+        initiator: {
+          id: initiator._id.toString(), // ✅ Now safe because initiator fallback exists
+          name: `${initiator.firstName} ${initiator.lastName}`,
+          email: initiator.email,
+          phone: initiator.phone || "",
+        },
+        formFillers: roleDetails.formFillers,
+        approvers: roleDetails.approvers,
+        signers: roleDetails.signers,
+        receivers: receiverDetails,
+        participantsSummary: Array.from(participants.values())
+          .map((p) => p.contactName)
+          .concat(receiverDetails.map((r) => r.user.name)),
+        // 🔥 NEW: Add participant-specific metadata
+        currentUserParticipantId: currentUserParticipantId,
+        currentUserRoles: currentUserRoles,
+        actionLink: currentUserParticipantId
+          ? `${process.env.CLIENT_URL}/package/${pkg._id}/participant/${currentUserParticipantId}`
+          : null,
       };
     });
   }

@@ -1120,12 +1120,34 @@
         },
         "nav": {
             "allDocuments": "Alla Dokument",
+            "receivedDocuments": "Mottagna Dokument",
             "templates": "Mallar",
             "contacts": "Kontaktlista",
             "addDocument": "Lägg till Dokument",
             "subscriptions": "Prenumerationer",
             "paymentMethods": "Betalningsmetoder",
             "profile": "Profil"
+        }
+    },
+    "receivedDocuments": {
+        "title": "Mottagna dokument",
+        "subtitle": "Dokument där du har blivit inbjuden som deltagare",
+        "loading": "Laddar mottagna dokument...",
+        "headers": {
+            "myRole": "Min roll"
+        },
+        "actions": {
+            "viewAndSign": "Visa och signera",
+            "download": "Ladda ner",
+            "viewDetails": "Visa detaljer"
+        },
+        "emptyState": {
+            "title": "Inga mottagna dokument",
+            "description": "Du har ännu inte blivit inbjuden till några dokument. När någon skickar ett dokument till dig visas det här."
+        },
+        "error": {
+            "title": "Fel vid laddning av dokument",
+            "description": "Det gick inte att ladda mottagna dokument. Försök igen."
         }
     },
     "profile": {
