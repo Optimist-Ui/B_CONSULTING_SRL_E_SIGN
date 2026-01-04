@@ -142,7 +142,7 @@ jobs:
             ECR_REGISTRY="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
 
             echo "=== Cleanup Old ==="
-            docker system prune -f
+            docker system prune -af
 
             echo "=== ECR Login & Pull ==="
             aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY
