@@ -1578,7 +1578,6 @@ class PackageService {
     allParticipants.forEach((participant) => {
       const theirRequiredFields = pkg.fields.filter(
         (f) =>
-          f.required &&
           f.assignedUsers.some(
             (u) => u.contactId.toString() === participant.contactId.toString()
           )
