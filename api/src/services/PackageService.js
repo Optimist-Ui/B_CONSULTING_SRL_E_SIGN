@@ -1145,7 +1145,8 @@ class PackageService {
 
   /**
    * List all available contacts for reassignment
-   * Returns contacts owned by the package owner, excluding current participants
+   * ✅ FIXED: Returns ONLY other participants currently in the package
+   * (Does not expose owner's full address book)
    */
   async listReassignmentContacts(packageId, participantId) {
     // 1. Find the package and validate
@@ -1157,32 +1158,44 @@ class PackageService {
       throw new Error("Reassignment is not allowed for this package.");
     }
 
-    // 2. Find the current participant
-    const participant = this._findParticipant(pkg, participantId);
-    if (!participant) {
+    // 2. Find the current participant (Requestor)
+    const requestor = this._findParticipant(pkg, participantId);
+    if (!requestor) {
       throw new Error("You are not a valid participant for this package.");
     }
 
-    // 3. Get all contacts owned by the package owner
+    // 3. Collect ALL Contact IDs currently involved in the package
+    const involvedContactIds = new Set();
+
+    // Add assigned users (Signers, Approvers, etc.)
+    pkg.fields.forEach((field) => {
+      (field.assignedUsers || []).forEach((user) => {
+        if (user.contactId) {
+          involvedContactIds.add(user.contactId.toString());
+        }
+      });
+    });
+
+    // Add receivers (CC'd people)
+    (pkg.receivers || []).forEach((receiver) => {
+      if (receiver.contactId) {
+        involvedContactIds.add(receiver.contactId.toString());
+      }
+    });
+
+    // 4. Remove the Requestor from the list (Can't reassign to self)
+    if (requestor.contactId) {
+      involvedContactIds.delete(requestor.contactId.toString());
+    }
+
+    // 5. Fetch details only for these specific contacts
+    // This ensures we return the standard Contact format expected by the frontend
     const contacts = await this.Contact.find({
-      ownerId: pkg.ownerId,
+      _id: { $in: Array.from(involvedContactIds) },
     }).select("firstName lastName email title phone");
 
-    // 4. Exclude contacts that are already participants in this package
-    const allParticipantContactIds = new Set([
-      ...pkg.fields.flatMap((f) =>
-        f.assignedUsers.map((u) => u.contactId.toString())
-      ),
-      ...pkg.receivers.map((r) => r.contactId.toString()),
-    ]);
-
-    const availableContacts = contacts.filter(
-      (contact) => !allParticipantContactIds.has(contact._id.toString())
-    );
-
-    return availableContacts;
+    return contacts;
   }
-
   /**
    * Perform the actual reassignment from one participant to another
    */
@@ -1576,11 +1589,10 @@ class PackageService {
     });
 
     allParticipants.forEach((participant) => {
-      const theirRequiredFields = pkg.fields.filter(
-        (f) =>
-          f.assignedUsers.some(
-            (u) => u.contactId.toString() === participant.contactId.toString()
-          )
+      const theirRequiredFields = pkg.fields.filter((f) =>
+        f.assignedUsers.some(
+          (u) => u.contactId.toString() === participant.contactId.toString()
+        )
       );
       if (theirRequiredFields.length === 0) return;
       const areAllTasksDone = theirRequiredFields.every((field) => {
