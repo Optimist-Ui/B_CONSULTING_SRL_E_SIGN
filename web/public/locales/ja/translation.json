@@ -1120,12 +1120,34 @@
         },
         "nav": {
             "allDocuments": "すべてのドキュメント",
+            "receivedDocuments": "受信ドキュメント",
             "templates": "テンプレート",
             "contacts": "連絡先リスト",
             "addDocument": "ドキュメントを追加",
             "subscriptions": "サブスクリプション",
             "paymentMethods": "支払い方法",
             "profile": "プロフィール"
+        }
+    },
+    "receivedDocuments": {
+        "title": "受信した書類",
+        "subtitle": "参加者として招待された書類",
+        "loading": "受信した書類を読み込み中...",
+        "headers": {
+            "myRole": "自分の役割"
+        },
+        "actions": {
+            "viewAndSign": "表示して署名",
+            "download": "ダウンロード",
+            "viewDetails": "詳細を表示"
+        },
+        "emptyState": {
+            "title": "受信した書類はありません",
+            "description": "まだ書類に招待されていません。誰かが書類を送信すると、ここに表示されます。"
+        },
+        "error": {
+            "title": "書類の読み込みエラー",
+            "description": "受信した書類の読み込みに失敗しました。もう一度お試しください。"
         }
     },
     "profile": {

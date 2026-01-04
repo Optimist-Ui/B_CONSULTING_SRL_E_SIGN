@@ -1120,12 +1120,34 @@
         },
         "nav": {
             "allDocuments": "Alle Dokumente",
+            "receivedDocuments": "Empfangene Dokumente",
             "templates": "Vorlagen",
             "contacts": "Kontaktliste",
             "addDocument": "Dokument hinzufügen",
             "subscriptions": "Abonnements",
             "paymentMethods": "Zahlungsmethoden",
             "profile": "Profil"
+        }
+    },
+    "receivedDocuments": {
+        "title": "Erhaltene Dokumente",
+        "subtitle": "Dokumente, zu denen Sie als Teilnehmer eingeladen wurden",
+        "loading": "Erhaltene Dokumente werden geladen...",
+        "headers": {
+            "myRole": "Meine Rolle"
+        },
+        "actions": {
+            "viewAndSign": "Anzeigen & signieren",
+            "download": "Herunterladen",
+            "viewDetails": "Details anzeigen"
+        },
+        "emptyState": {
+            "title": "Keine erhaltenen Dokumente",
+            "description": "Sie wurden bisher zu keinen Dokumenten eingeladen. Wenn Ihnen jemand ein Dokument sendet, erscheint es hier."
+        },
+        "error": {
+            "title": "Fehler beim Laden der Dokumente",
+            "description": "Erhaltene Dokumente konnten nicht geladen werden. Bitte versuchen Sie es erneut."
         }
     },
     "profile": {

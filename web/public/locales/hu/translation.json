@@ -1120,12 +1120,34 @@
         },
         "nav": {
             "allDocuments": "Összes Dokumentum",
+            "receivedDocuments": "Kapott Dokumentumok",
             "templates": "Sablonok",
             "contacts": "Névjegyzék",
             "addDocument": "Dokumentum Hozzáadása",
             "subscriptions": "Előfizetések",
             "paymentMethods": "Fizetési Módok",
             "profile": "Profil"
+        }
+    },
+    "receivedDocuments": {
+        "title": "Beérkezett dokumentumok",
+        "subtitle": "Dokumentumok, amelyekhez résztvevőként meghívták",
+        "loading": "Beérkezett dokumentumok betöltése...",
+        "headers": {
+            "myRole": "Szerepem"
+        },
+        "actions": {
+            "viewAndSign": "Megtekintés és aláírás",
+            "download": "Letöltés",
+            "viewDetails": "Részletek megtekintése"
+        },
+        "emptyState": {
+            "title": "Nincsenek beérkezett dokumentumok",
+            "description": "Még nem hívták meg egyetlen dokumentumhoz sem. Amikor valaki dokumentumot küld Önnek, itt fog megjelenni."
+        },
+        "error": {
+            "title": "Hiba a dokumentumok betöltésekor",
+            "description": "Nem sikerült betölteni a beérkezett dokumentumokat. Kérjük, próbálja újra."
         }
     },
     "profile": {

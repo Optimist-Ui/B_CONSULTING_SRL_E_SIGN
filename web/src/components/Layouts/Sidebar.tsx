@@ -20,6 +20,7 @@ import IconMenuElements from '../Icon/Menu/IconMenuElements';
 import IconCreditCard from '../Icon/IconCreditCard';
 import IconLockDots from '../Icon/IconLockDots';
 import IconPlus from '../Icon/IconPlus';
+import IconInbox from '../Icon/IconInbox';
 
 // --- Reusable NavItem Component ---
 const NavItem: React.FC<{
@@ -121,6 +122,7 @@ const Sidebar = () => {
                             <h2 className="py-3 px-4 text-white-dark text-xs font-extrabold uppercase dark:text-gray-500">{t('sidebar.headings.dashboard')}</h2>
 
                             <NavItem to="/dashboard" icon={IconMenuDocumentation} textKey="sidebar.nav.allDocuments" />
+                            <NavItem to="/received-documents" icon={IconInbox} textKey="sidebar.nav.receivedDocuments" />
                             <NavItem to="/templates" icon={IconMenuElements} textKey="sidebar.nav.templates" />
                             <NavItem to="/contacts" icon={IconUsersGroup} textKey="sidebar.nav.contacts" />
                             <NavItem to="/add-document" icon={IconPlus} textKey="sidebar.nav.addDocument" />

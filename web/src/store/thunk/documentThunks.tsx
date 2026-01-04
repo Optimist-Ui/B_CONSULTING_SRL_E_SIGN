@@ -197,3 +197,53 @@ export const bulkUpdateDocuments = createAsyncThunk<Document[], { documentIds: s
         }
     }
 );
+
+// 🆕 NEW: Fetch Received Documents (documents where user is a participant)
+export const fetchReceivedDocuments = createAsyncThunk<
+    { documents: Document[]; pagination: DocumentPagination },
+    { filters?: Partial<DocumentFilters>; page?: number; limit?: number; sortKey?: keyof Document; sortDirection?: 'asc' | 'desc' } | void
+>('documents/fetchReceivedDocuments', async (params = {}, { getState, rejectWithValue }) => {
+    try {
+        const state = getState() as IRootState;
+        const { filters: currentFilters, pagination: currentPagination, sortConfig } = state.receivedDocuments;
+
+        // Merge current state with provided params
+        const queryParams = new URLSearchParams();
+
+        // Apply filters
+        const filters = { ...currentFilters, ...(params && 'filters' in params ? params.filters : {}) };
+        if (filters.status && filters.status !== 'All') {
+            queryParams.append('status', filters.status);
+        }
+        if (filters.name?.trim()) {
+            queryParams.append('name', filters.name.trim());
+        }
+        if (filters.dateRange) {
+            queryParams.append('dateFrom', filters.dateRange.from);
+            queryParams.append('dateTo', filters.dateRange.to);
+        }
+
+        // Apply pagination
+        const page = params && 'page' in params ? params.page || currentPagination.currentPage : currentPagination.currentPage;
+        const limit = params && 'limit' in params ? params.limit || currentPagination.limit : currentPagination.limit;
+        queryParams.append('page', page.toString());
+        queryParams.append('limit', limit.toString());
+
+        // Apply sorting
+        const sortKey = params && 'sortKey' in params ? params.sortKey || sortConfig.key || 'addedOn' : sortConfig.key || 'addedOn';
+        const sortDirection = params && 'sortDirection' in params ? params.sortDirection || sortConfig.direction : sortConfig.direction;
+        queryParams.append('sortKey', sortKey);
+        queryParams.append('sortDirection', sortDirection);
+
+        // 🔥 IMPORTANT: Call the new /api/packages/received endpoint
+        const response = await api.get<FetchDocumentsResponse>(`/api/packages/received?${queryParams.toString()}`);
+
+        if (!response.data.success) {
+            throw new Error(response.data.message || 'Failed to fetch received documents');
+        }
+
+        return response.data.data;
+    } catch (error: any) {
+        return rejectWithValue(error.response?.data?.error || error.message || 'Failed to fetch received documents');
+    }
+});

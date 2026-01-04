@@ -1120,12 +1120,34 @@
         },
         "nav": {
             "allDocuments": "Tüm Belgeler",
+            "receivedDocuments": "Gelen Belgeler",
             "templates": "Şablonlar",
             "contacts": "Kişi Listesi",
             "addDocument": "Belge Ekle",
             "subscriptions": "Abonelikler",
             "paymentMethods": "Ödeme Yöntemleri",
             "profile": "Profil"
+        }
+    },
+    "receivedDocuments": {
+        "title": "Alınan Belgeler",
+        "subtitle": "Katılımcı olarak davet edildiğiniz belgeler",
+        "loading": "Alınan belgeler yükleniyor...",
+        "headers": {
+            "myRole": "Rolüm"
+        },
+        "actions": {
+            "viewAndSign": "Görüntüle ve İmzala",
+            "download": "İndir",
+            "viewDetails": "Detayları Görüntüle"
+        },
+        "emptyState": {
+            "title": "Alınan belge yok",
+            "description": "Henüz herhangi bir belgeye davet edilmediniz. Birisi size belge gönderdiğinde burada görünecektir."
+        },
+        "error": {
+            "title": "Belgeler yüklenirken hata oluştu",
+            "description": "Alınan belgeler yüklenemedi. Lütfen tekrar deneyin."
         }
     },
     "profile": {
@@ -2141,7 +2163,7 @@
             "userAssigned": "{{name}}, {{role}} olarak atandı",
             "userAssignmentRemoved": "Kullanıcı ataması kaldırıldı"
         },
-         "buttons": {
+        "buttons": {
             "addAssignment": "Atama Ekle"
         },
         "errors": {
