@@ -2186,7 +2186,7 @@ class EmailService {
       )
       .join("");
 
-    const verifyCardUrl = `${process.env.CLIENT_URL}/billing`;
+    const verifyCardUrl = `${process.env.CLIENT_URL}/payment-methods`;
 
     const msg = {
       to: user.email,
