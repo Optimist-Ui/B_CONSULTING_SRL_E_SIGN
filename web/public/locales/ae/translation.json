@@ -1120,12 +1120,34 @@
         },
         "nav": {
             "allDocuments": "جميع المستندات",
+            "receivedDocuments": "المستندات المستلمة",
             "templates": "القوالب",
             "contacts": "قائمة جهات الاتصال",
             "addDocument": "إضافة مستند",
             "subscriptions": "الاشتراكات",
             "paymentMethods": "طرق الدفع",
             "profile": "الملف الشخصي"
+        }
+    },
+    "receivedDocuments": {
+        "title": "المستندات المستلمة",
+        "subtitle": "المستندات التي تمت دعوتك للمشاركة فيها",
+        "loading": "جارٍ تحميل المستندات المستلمة...",
+        "headers": {
+            "myRole": "دوري"
+        },
+        "actions": {
+            "viewAndSign": "عرض والتوقيع",
+            "download": "تنزيل",
+            "viewDetails": "عرض التفاصيل"
+        },
+        "emptyState": {
+            "title": "لا توجد مستندات مستلمة",
+            "description": "لم تتم دعوتك إلى أي مستند بعد. عند إرسال مستند إليك، سيظهر هنا."
+        },
+        "error": {
+            "title": "خطأ في تحميل المستندات",
+            "description": "فشل تحميل المستندات المستلمة. يرجى المحاولة مرة أخرى."
         }
     },
     "profile": {

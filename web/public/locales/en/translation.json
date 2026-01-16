@@ -1157,12 +1157,34 @@
         },
         "nav": {
             "allDocuments": "All Documents",
+            "receivedDocuments": "Received Documents",
             "templates": "Templates",
             "contacts": "Contacts List",
             "addDocument": "Add Document",
             "subscriptions": "Subscriptions",
             "paymentMethods": "Payment Methods",
             "profile": "Profile"
+        }
+    },
+    "receivedDocuments": {
+        "title": "Received Documents",
+        "subtitle": "Documents where you've been invited as a participant",
+        "loading": "Loading received documents...",
+        "headers": {
+            "myRole": "My Role"
+        },
+        "actions": {
+            "viewAndSign": "View & Sign",
+            "download": "Download",
+            "viewDetails": "View Details"
+        },
+        "emptyState": {
+            "title": "No Received Documents",
+            "description": "You haven't been invited to any documents yet. When someone sends you a document, it will appear here."
+        },
+        "error": {
+            "title": "Error Loading Documents",
+            "description": "Failed to load received documents. Please try again."
         }
     },
     "profile": {

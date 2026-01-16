@@ -8,6 +8,7 @@ import ParticipantPage from '../pages/ParticipantPage';
 
 // ---------------- LAZY LOADED PAGE COMPONENTS ----------------
 const Index = lazy(() => import('../pages/Index'));
+const ReceivedDocuments = lazy(() => import('../pages/ReceivedDocuments'));
 const Contacts = lazy(() => import('../pages/Contacts'));
 const Profile = lazy(() => import('../pages/Profile'));
 const PaymentMethods = lazy(() => import('../pages/PaymentMethods'));
@@ -91,6 +92,15 @@ const routes = [
     },
 
     // === PROTECTED ROUTES (No Subscription Required) ===
+    {
+        path: '/received-documents',
+        element: (
+            <ProtectedRoute>
+                <ReceivedDocuments />
+            </ProtectedRoute>
+        ),
+        layout: 'default',
+    },
     {
         path: '/profile',
         element: (

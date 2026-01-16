@@ -1120,12 +1120,34 @@
         },
         "nav": {
             "allDocuments": "Tutti i Documenti",
+            "receivedDocuments": "Documenti Ricevuti",
             "templates": "Modelli",
             "contacts": "Elenco Contatti",
             "addDocument": "Aggiungi Documento",
             "subscriptions": "Abbonamenti",
             "paymentMethods": "Metodi di Pagamento",
             "profile": "Profilo"
+        }
+    },
+    "receivedDocuments": {
+        "title": "Documenti ricevuti",
+        "subtitle": "Documenti a cui sei stato invitato come partecipante",
+        "loading": "Caricamento dei documenti ricevuti...",
+        "headers": {
+            "myRole": "Il mio ruolo"
+        },
+        "actions": {
+            "viewAndSign": "Visualizza e firma",
+            "download": "Scarica",
+            "viewDetails": "Visualizza dettagli"
+        },
+        "emptyState": {
+            "title": "Nessun documento ricevuto",
+            "description": "Non sei stato ancora invitato a nessun documento. Quando qualcuno ti invierà un documento, apparirà qui."
+        },
+        "error": {
+            "title": "Errore nel caricamento dei documenti",
+            "description": "Impossibile caricare i documenti ricevuti. Riprova."
         }
     },
     "profile": {

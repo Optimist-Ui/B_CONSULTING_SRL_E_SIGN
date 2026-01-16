@@ -1153,12 +1153,34 @@
         },
         "nav": {
             "allDocuments": "Wszystkie Dokumenty",
+            "receivedDocuments": "Otrzymane Dokumenty",
             "templates": "Szablony",
             "contacts": "Lista Kontaktów",
             "addDocument": "Dodaj Dokument",
             "subscriptions": "Subskrypcje",
             "paymentMethods": "Metody Płatności",
             "profile": "Profil"
+        }
+    },
+    "receivedDocuments": {
+        "title": "Otrzymane dokumenty",
+        "subtitle": "Dokumenty, do których zostałeś zaproszony jako uczestnik",
+        "loading": "Ładowanie otrzymanych dokumentów...",
+        "headers": {
+            "myRole": "Moja rola"
+        },
+        "actions": {
+            "viewAndSign": "Wyświetl i podpisz",
+            "download": "Pobierz",
+            "viewDetails": "Zobacz szczegóły"
+        },
+        "emptyState": {
+            "title": "Brak otrzymanych dokumentów",
+            "description": "Nie zostałeś jeszcze zaproszony do żadnych dokumentów. Gdy ktoś wyśle Ci dokument, pojawi się on tutaj."
+        },
+        "error": {
+            "title": "Błąd ładowania dokumentów",
+            "description": "Nie udało się załadować otrzymanych dokumentów. Spróbuj ponownie."
         }
     },
     "profile": {

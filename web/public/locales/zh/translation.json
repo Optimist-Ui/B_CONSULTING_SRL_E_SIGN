@@ -1120,12 +1120,34 @@
         },
         "nav": {
             "allDocuments": "所有文档",
+            "receivedDocuments": "收到的文档",
             "templates": "模板",
             "contacts": "联系人列表",
             "addDocument": "添加文档",
             "subscriptions": "订阅",
             "paymentMethods": "付款方式",
             "profile": "个人资料"
+        }
+    },
+    "receivedDocuments": {
+        "title": "已接收文档",
+        "subtitle": "您被邀请作为参与者的文档",
+        "loading": "正在加载已接收的文档...",
+        "headers": {
+            "myRole": "我的角色"
+        },
+        "actions": {
+            "viewAndSign": "查看并签署",
+            "download": "下载",
+            "viewDetails": "查看详情"
+        },
+        "emptyState": {
+            "title": "暂无接收的文档",
+            "description": "您尚未被邀请参与任何文档。当有人向您发送文档时，它将显示在这里。"
+        },
+        "error": {
+            "title": "加载文档出错",
+            "description": "无法加载已接收的文档。请稍后再试。"
         }
     },
     "profile": {
